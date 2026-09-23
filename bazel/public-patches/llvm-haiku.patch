@@ -70,3 +70,57 @@ diff -ru a/utils/bazel/llvm-project-overlay/llvm/config.bzl b/utils/bazel/llvm-p
      "@platforms//os:windows": native_arch_defines("X86", "x86_64-pc-win32"),
      "//conditions:default": native_arch_defines("X86", "x86_64-unknown-linux-gnu"),
  }) + [
+diff -ru a/llvm/lib/TargetParser/Host.cpp b/llvm/lib/TargetParser/Host.cpp
+--- a/llvm/lib/TargetParser/Host.cpp	2026-09-23 22:31:46.557568884 +0100
++++ b/llvm/lib/TargetParser/Host.cpp	2026-09-23 22:31:46.585148917 +0100
+@@ -54,6 +54,9 @@
+ #if defined(__sun__) && defined(__svr4__)
+ #include <kstat.h>
+ #endif
++#if defined(__HAIKU__)
++#include <OS.h>
++#endif
+ #if defined(__GNUC__) || defined(__clang__)
+ #if (defined(__i386__) || defined(__x86_64__)) && !defined(_MSC_VER)
+ #include <cpuid.h>
+@@ -1698,6 +1701,40 @@
+   StringRef Content = P ? P->getBuffer() : "";
+   return detail::getHostCPUNameForARM(Content);
+ }
++#elif defined(__HAIKU__) && defined(__aarch64__)
++StringRef sys::getHostCPUName() {
++  // Haiku reports each core's MIDR_EL1 as its topology node's model.
++  uint32 Count = 0;
++  if (get_cpu_topology_info(nullptr, &Count) != B_OK || Count == 0)
++    return "generic";
++  std::vector<cpu_topology_node_info> Nodes(Count);
++  if (get_cpu_topology_info(Nodes.data(), &Count) != B_OK)
++    return "generic";
++
++  SmallVector<uint64_t> Values;
++  uint64_t PrimaryCpuInfo = 0;
++  for (uint32 I = 0; I < Count; ++I) {
++    if (Nodes[I].type != B_TOPOLOGY_CORE)
++      continue;
++    // The last core is the primary one, as the last "CPU part" line of
++    // /proc/cpuinfo is on Linux.
++    PrimaryCpuInfo = Nodes[I].data.core.model;
++    if (!llvm::is_contained(Values, PrimaryCpuInfo))
++      Values.push_back(PrimaryCpuInfo);
++  }
++  if (Values.empty())
++    return "generic";
++  llvm::sort(Values);
++
++  StringRef Name = detail::getHostCPUNameForARM(PrimaryCpuInfo, Values);
++
++  // Apple's hypervisor shows its guests Apple's implementer code with the
++  // part number cleared (MIDR_EL1 0x610f0000), so no table can name the
++  // processor. Every Apple processor is an M1 or later.
++  if (Name == "generic" && ((PrimaryCpuInfo >> 24) & 0xff) == 0x61)
++    return "apple-m1";
++  return Name;
++}
+ #elif defined(__linux__) && defined(__s390x__)
+ StringRef sys::getHostCPUName() {
+   std::unique_ptr<llvm::MemoryBuffer> P = getProcCpuinfoContent();
