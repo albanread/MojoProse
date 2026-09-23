@@ -86,6 +86,23 @@ struct _dirent_macos(Copyable):
     """Name of entry."""
 
 
+struct _dirent_haiku(Copyable):
+    comptime MAX_NAME_SIZE = 256
+    """B_FILE_NAME_LENGTH: the longest name, with its terminator."""
+    var d_dev: Int32
+    """Device."""
+    var d_pdev: Int32
+    """Parent device (only for queries)."""
+    var d_ino: Int64
+    """Inode number."""
+    var d_pino: Int64
+    """Parent inode (only for queries)."""
+    var d_reclen: UInt16
+    """Length of this record, not the name."""
+    var name: Array[c_char, Self.MAX_NAME_SIZE]
+    """Name of entry (offset 26; a flexible array member in C)."""
+
+
 struct _DirHandle:
     """Handle to an open directory descriptor opened via opendir."""
 
@@ -129,6 +146,8 @@ struct _DirHandle:
 
         comptime if CompilationTarget.is_linux():
             return self._list_linux()
+        elif CompilationTarget.is_haiku():
+            return self._list_haiku()
         else:
             return self._list_macos()
 
@@ -153,6 +172,40 @@ struct _DirHandle:
                     unsafe_ptr=name_ptr,
                     length=Int(
                         _unsafe_strlen(name_ptr, _dirent_linux.MAX_NAME_SIZE)
+                    ),
+                )
+            )
+            if name_str == "." or name_str == "..":
+                continue
+            res.append(String(name_str))
+
+        return res^
+
+    def _list_haiku(self) -> List[String]:
+        """Reads all the data from the handle.
+
+        Haiku's `d_name` is a flexible array member and an entry is only as
+        long as its name, so the name is read in place, never copied out at
+        the struct's full size.
+
+        Returns:
+            A string containing the output of running the command.
+        """
+        var res = List[String]()
+
+        while True:
+            var ep = external_call[
+                "readdir", OptionalPointer[_dirent_haiku, MutUntrackedOrigin]
+            ](self._handle)
+            if not ep:
+                break
+            ref name = ep.unsafe_value()[].name
+            var name_ptr = name.unsafe_ptr().unsafe_bitcast[Byte]()
+            var name_str = StringSlice(
+                unsafe_from_utf8=Span(
+                    unsafe_ptr=name_ptr,
+                    length=Int(
+                        _unsafe_strlen(name_ptr, _dirent_haiku.MAX_NAME_SIZE)
                     ),
                 )
             )

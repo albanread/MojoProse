@@ -28,6 +28,8 @@ from std.sys import CompilationTarget
 from std.sys._libc import realpath as libc_realpath
 
 from .. import PathLike as stdPathLike, getuid
+from .._haiku import _lstat as _lstat_haiku
+from .._haiku import _stat as _stat_haiku
 from .._linux_aarch64 import _lstat as _lstat_linux_arm
 from .._linux_aarch64 import _stat as _stat_linux_arm
 from .._linux_x86 import _lstat as _lstat_linux_x86
@@ -48,6 +50,8 @@ from ..os import sep
 def _get_stat_st_mode(var path: String) raises -> Int:
     comptime if CompilationTarget.is_macos():
         return Int(_stat_macos(path^).st_mode)
+    elif CompilationTarget.is_haiku():
+        return Int(_stat_haiku(path^).st_mode)
     elif CompilationTarget.has_neon():
         return Int(_stat_linux_arm(path^).st_mode)
     else:
@@ -58,6 +62,8 @@ def _get_stat_st_mode(var path: String) raises -> Int:
 def _get_lstat_st_mode(var path: String) raises -> Int:
     comptime if CompilationTarget.is_macos():
         return Int(_lstat_macos(path^).st_mode)
+    elif CompilationTarget.is_haiku():
+        return Int(_lstat_haiku(path^).st_mode)
     elif CompilationTarget.has_neon():
         return Int(_lstat_linux_arm(path^).st_mode)
     else:

@@ -18,7 +18,7 @@ user ID or username, returning structured account information including home
 directory, shell, and user/group IDs.
 
 Constraints:
-    Available on Linux and macOS only.
+    Available on Linux, macOS and Haiku only.
 """
 
 from std.sys import CompilationTarget
@@ -26,6 +26,7 @@ from std.sys import CompilationTarget
 # ===----------------------------------------------------------------------=== #
 # Passwd
 # ===----------------------------------------------------------------------=== #
+from ._haiku import _getpw_haiku
 from ._linux import _getpw_linux
 from ._macos import _getpw_macos
 
@@ -82,12 +83,14 @@ def getpwuid(uid: Int) raises -> Passwd:
         information.
 
     Constraints:
-        This function is constrained to run on Linux or macOS operating systems
-        only.
+        This function is constrained to run on Linux, macOS or Haiku
+        operating systems only.
     """
 
     comptime if CompilationTarget.is_macos():
         return _getpw_macos(UInt32(uid))
+    elif CompilationTarget.is_haiku():
+        return _getpw_haiku(UInt32(uid))
     else:
         return _getpw_linux(UInt32(uid))
 
@@ -109,11 +112,13 @@ def getpwnam(var name: String) raises -> Passwd:
         information.
 
     Constraints:
-        This function is constrained to run on Linux or macOS operating systems
-        only.
+        This function is constrained to run on Linux, macOS or Haiku
+        operating systems only.
     """
 
     comptime if CompilationTarget.is_macos():
         return _getpw_macos(name)
+    elif CompilationTarget.is_haiku():
+        return _getpw_haiku(name)
     else:
         return _getpw_linux(name)

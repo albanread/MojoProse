@@ -23,6 +23,8 @@ from std.sys import CompilationTarget
 from std.time.time import _CTimeSpec
 
 from . import PathLike as stdPathLike
+from ._haiku import _lstat as _lstat_haiku
+from ._haiku import _stat as _stat_haiku
 from ._linux_aarch64 import _lstat as _lstat_linux_arm
 from ._linux_aarch64 import _stat as _stat_linux_arm
 from ._linux_x86 import _lstat as _lstat_linux_x86
@@ -195,6 +197,8 @@ def stat[PathLike: stdPathLike](path: PathLike) raises -> stat_result:
 
     comptime if CompilationTarget.is_macos():
         return _stat_macos(fspath^)._to_stat_result()
+    elif CompilationTarget.is_haiku():
+        return _stat_haiku(fspath^)._to_stat_result()
     elif CompilationTarget.has_neon():
         return _stat_linux_arm(fspath^)._to_stat_result()
     else:
@@ -224,6 +228,8 @@ def lstat[PathLike: stdPathLike](path: PathLike) raises -> stat_result:
 
     comptime if CompilationTarget.is_macos():
         return _lstat_macos(fspath^)._to_stat_result()
+    elif CompilationTarget.is_haiku():
+        return _lstat_haiku(fspath^)._to_stat_result()
     elif CompilationTarget.has_neon():
         return _lstat_linux_arm(fspath^)._to_stat_result()
     else:
