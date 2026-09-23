@@ -183,9 +183,10 @@ def _get_environ() -> (
             "_NSGetEnviron",
             OptionalPointer[_EnvpType, ImmUntrackedOrigin],
         ]().value()[]
-    elif CompilationTarget.is_linux():
+    elif CompilationTarget.is_linux() or CompilationTarget.is_haiku():
         # On Linux, look up `environ` via dlsym(RTLD_DEFAULT, "environ").
-        # RTLD_DEFAULT is ((void *)0) on Linux.
+        # RTLD_DEFAULT is ((void *)0) on Linux, and on Haiku, whose libroot
+        # exports `environ` too.
         return dlsym[_EnvpType](
             OptionalPointer[NoneType, MutUntrackedOrigin](),
             "environ".as_c_string_span().ptr(),
@@ -304,8 +305,9 @@ def waitpid(
 
 
 struct FcntlCommands:
-    comptime F_GETFD: c_int = 1
-    comptime F_SETFD: c_int = 2
+    # Haiku's commands are bits: 1 is its F_DUPFD.
+    comptime F_GETFD: c_int = 2 if CompilationTarget.is_haiku() else 1
+    comptime F_SETFD: c_int = 4 if CompilationTarget.is_haiku() else 2
 
 
 struct FcntlFDFlags:

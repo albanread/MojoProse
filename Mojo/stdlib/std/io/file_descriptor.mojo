@@ -112,7 +112,9 @@ struct FileDescriptor(TrivialRegisterPassable, Writer):
         ), "`read_bytes()` is not yet implemented for GPUs."
 
         comptime assert (
-            CompilationTarget.is_macos() or CompilationTarget.is_linux()
+            CompilationTarget.is_macos()
+            or CompilationTarget.is_linux()
+            or CompilationTarget.is_haiku()
         ), "`read_bytes()` is not yet implemented for unknown platform."
         var read = external_call["read", c_ssize_t](
             self.value, buffer.unsafe_ptr(), len(buffer)

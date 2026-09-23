@@ -135,7 +135,7 @@ comptime MAX_PATH = _get_max_path()
 def _get_max_path() -> Int:
     comptime if CompilationTarget.is_linux():
         return 4096
-    elif CompilationTarget.is_macos():
+    elif CompilationTarget.is_macos() or CompilationTarget.is_haiku():
         return 1024
     # Default POSIX limit
     else:
@@ -146,7 +146,9 @@ def _c_long_dtype[unsigned: Bool = False]() -> DType:
     # https://en.wikipedia.org/wiki/64-bit_computing#64-bit_data_models
 
     comptime if is_64bit() and (
-        CompilationTarget.is_macos() or CompilationTarget.is_linux()
+        CompilationTarget.is_macos()
+        or CompilationTarget.is_linux()
+        or CompilationTarget.is_haiku()
     ):
         # LP64: long is 64-bit on 64-bit systems (e.g. x86_64 or aarch64)
         return DType.uint64 if unsigned else DType.int64
@@ -175,19 +177,26 @@ def _c_long_long_dtype[unsigned: Bool = False]() -> DType:
 struct RTLD:
     """Enumeration of the RTLD flags used during dynamic library loading."""
 
-    comptime LAZY = 1
+    comptime LAZY = 0 if CompilationTarget.is_haiku() else 1
     """Load library lazily (defer function resolution until needed).
     """
-    comptime NOW = 2
+    comptime NOW = 1 if CompilationTarget.is_haiku() else 2
     """Load library immediately (resolve all symbols on load)."""
-    comptime LOCAL = 0 if CompilationTarget.is_linux() else 4
+    comptime LOCAL = 0 if (
+        CompilationTarget.is_linux() or CompilationTarget.is_haiku()
+    ) else 4
     """Make symbols not available for symbol resolution of subsequently loaded
     libraries."""
-    comptime GLOBAL = 256 if CompilationTarget.is_linux() else 8
+    comptime GLOBAL = 256 if CompilationTarget.is_linux() else (
+        2 if CompilationTarget.is_haiku() else 8
+    )
     """Make symbols available for symbol resolution of subsequently loaded
     libraries."""
-    comptime NODELETE = 4096 if CompilationTarget.is_linux() else 128
-    """Do not delete the library when the process exits."""
+    comptime NODELETE = 4096 if CompilationTarget.is_linux() else (
+        0 if CompilationTarget.is_haiku() else 128
+    )
+    """Do not delete the library when the process exits. Haiku has no such
+    flag, so it asks for nothing there."""
 
 
 comptime DEFAULT_RTLD = RTLD.NOW | RTLD.GLOBAL

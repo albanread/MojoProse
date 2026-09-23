@@ -284,6 +284,18 @@ struct Process:
         in memory. The result is therefore consistent across architectures.
         """
         if pid == self.child_pid:
+            comptime if CompilationTarget.is_haiku():
+                # Haiku's <sys/wait.h> keeps the exit code in the low byte
+                # and the terminating signal in the byte above it:
+                # WIFEXITED(s) is ((s) & ~0xff) == 0, WTERMSIG(s) is
+                # ((s) >> 8) & 0xff.
+                if (status & ~0xFF) == 0:
+                    var code = status & 0xFF
+                    return ProcessStatus(exit_code=Optional(Int(code)))
+                else:
+                    var signal = (status >> 8) & 0xFF
+                    return ProcessStatus(term_signal=Optional(Int(signal)))
+
             # Process has terminated. Decode the status.
             if (status & 0x7F) == 0:
                 # Process exited normally. Extract the exit code.
@@ -388,7 +400,9 @@ struct Process:
         """
 
         comptime assert (
-            CompilationTarget.is_linux() or CompilationTarget.is_macos()
+            CompilationTarget.is_linux()
+            or CompilationTarget.is_macos()
+            or CompilationTarget.is_haiku()
         ), "Unknown platform process execution not implemented"
         var parts = path.split(sep)
         var file_name = String(parts[len(parts) - 1])
@@ -426,7 +440,9 @@ struct Process:
             _get_environ(),  # inherit parent's environment
         )
 
-        if has_error_code > 0:
+        # Not `> 0`: posix_spawnp returns an errno value, and Haiku's are
+        # negative.
+        if has_error_code != 0:
             raise Error(
                 t"Failed to execute {path}, EINT error code: {has_error_code}"
             )
