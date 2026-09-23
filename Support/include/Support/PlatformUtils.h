@@ -42,14 +42,22 @@
 #define MODULAR_LINUX 0
 #define MODULAR_MACOS 0
 #define MODULAR_WINDOWS 1
+#define MODULAR_HAIKU 0
 #elif defined(__APPLE__) || defined(__MACH__)
 #define MODULAR_LINUX 0
 #define MODULAR_MACOS 1
 #define MODULAR_WINDOWS 0
+#define MODULAR_HAIKU 0
 #elif defined(__linux__)
 #define MODULAR_LINUX 1
 #define MODULAR_MACOS 0
 #define MODULAR_WINDOWS 0
+#define MODULAR_HAIKU 0
+#elif defined(__HAIKU__)
+#define MODULAR_LINUX 0
+#define MODULAR_MACOS 0
+#define MODULAR_WINDOWS 0
+#define MODULAR_HAIKU 1
 #else
 #error "Could not determine platform"
 #endif

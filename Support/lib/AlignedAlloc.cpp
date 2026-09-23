@@ -39,7 +39,13 @@ void *M::alignedAlloc(size_t alignment, size_t size) {
   // multiple of 2.
   size = llvm::alignToPowerOf2(size, alignment);
 
+#ifdef __HAIKU__
+  // Haiku's libstdc++ was configured before libroot had aligned_alloc, so
+  // <cstdlib> does not bring it into std. libroot has it now.
+  return ::aligned_alloc(alignment, size);
+#else
   return std::aligned_alloc(alignment, size);
+#endif
 #endif // _WIN32
 }
 

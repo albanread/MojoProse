@@ -19,7 +19,10 @@
 #include <csignal>
 #include <ctime>
 #include <sstream>
+#ifndef __HAIKU__
+// Haiku declares ucontext_t in <signal.h> and has no <sys/ucontext.h>.
 #include <sys/ucontext.h>
+#endif
 #include <thread>
 #include <unistd.h>
 
