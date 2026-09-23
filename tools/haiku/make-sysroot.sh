@@ -4,7 +4,10 @@
 #
 #   tools/haiku/make-sysroot.sh [haiku tree] [destination]
 #
-# Defaults: /Volumes/HaikuSrc/haiku -> /Volumes/xc/haiku-sysroot-arm64.
+# Defaults: /Volumes/HaikuSrc/haiku -> /Volumes/HaikuSrc/mojoprose-sysroot-arm64.
+# The destination must be on a case-sensitive volume: libstdc++'s <clocale>
+# asks for <locale.h>, and a case-insensitive search finds the Locale Kit's
+# os/locale/Locale.h first. HaikuSrc is case-sensitive; xc is not.
 #
 # A real copy, not symlinks: Bazel hashes the sysroot's contents into its
 # cache keys, and a copy does not change under the build when the Haiku tree
@@ -18,7 +21,7 @@
 # libstdc++'s headers, GCC's own headers, crtbeginS.o and crtendS.o.
 set -euo pipefail
 HAIKU="${1:-/Volumes/HaikuSrc/haiku}"
-DEST="${2:-/Volumes/xc/haiku-sysroot-arm64}"
+DEST="${2:-/Volumes/HaikuSrc/mojoprose-sysroot-arm64}"
 GEN="$HAIKU/generated"
 PKGS="$GEN/objects/haiku/arm64/packaging/packages_build/regular"
 DEVEL="$PKGS/hpkg_-haiku_devel.hpkg/contents"
