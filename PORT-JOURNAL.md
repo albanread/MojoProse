@@ -362,3 +362,74 @@ it, and has no Haiku branch in `sys::getHostCPUName()` anyway, so the host
 CPU is `generic` (ARMv8.0) and Mojo, which targets the host CPU by default,
 would compile for it. Every Apple processor is an M1 or later — the floor
 Prose's own C and C++ builds already use (`-mcpu=apple-m1`). For G5.
+
+## G5 — Done: Mojo programs are built on Prose (2026-09-23)
+
+On Prose, by the Haiku-built compiler, linked by Prose's own `cc` (clang 23)
+and `ld.lld`:
+
+```
+$ mojo precompile -o $MODULAR_MOJO_MAX_IMPORT_PATH/std.mojoc std    # 14.7 s
+$ mojo build hello.mojo && ./hello
+Hello from Mojo on Prose
+$ mojo build stdlib_check.mojo && ./stdlib_check | tail -1
+SELFTEST PASS 31/31
+```
+
+The standard library is precompiled **on Prose**: a `.mojoc` holds
+non-elaborated code and is not tied to a target, so nothing target-specific
+crosses from the Mac. `tools/haiku/stage.sh` lays out what a machine needs
+through HostFS — the compiler, its three libraries, the stdlib's sources, and
+`env.sh` with the `MODULAR_MOJO_MAX_*` settings (the compiler reads
+`MODULAR_<section>_<key>` as `modular.cfg` keys).
+
+Times on Prose (8 vCPUs, M4 Max host, the compiler run from HostFS): stdlib
+precompile 14.7 s; `mojo build` of hello 2.6 s cold, 0.5 s with the compile
+cache warm; of the check program 5.0 s cold, 0.8 s warm.
+
+### Two faults at startup
+
+- `SecureRandomBytesGenerator` had no Haiku branch; its error tripped an
+  assertion in `createLocalIDs()` on every start. Haiku has POSIX
+  `getentropy()` (`c622593`).
+- That call was the telemetry context gathering a host profile — CPU,
+  memory, a machine id hashed from the network cards' addresses, a session
+  id — for resource attributes only an exporter would send. With telemetry
+  off, which it always is here, none of it is gathered now (`595b6db`).
+
+### The standard library's Haiku facts
+
+Measured against Haiku's headers with the compiler's own clang (constants
+read from a compiled probe), except errno, probed on Prose:
+
+| what | Linux | Haiku |
+|---|---|---|
+| errno | 1, 2, ... | status codes from INT_MIN: ENOENT -2147459069; 65 of 150 names absent |
+| errno location | `__errno_location()` | `_errnop()` |
+| `CLOCK_REALTIME` / `MONOTONIC` | 0 / 1 | -1 / 0 (and no `MONOTONIC_RAW`) |
+| `struct stat` | glibc's | 128 bytes, `st_mode` at 16, times at 48–96 |
+| `struct dirent` name | offset 19 | offset 26, flexible |
+| `struct passwd` | …gecos, dir, shell | …dir, shell, gecos |
+| `O_CREAT O_TRUNC O_APPEND O_CLOEXEC` | 0x40 0x200 0x400 0x80000 | 0x200 0x400 0x800 0x40 |
+| `F_GETFD F_SETFD` | 1 2 | 2 4 (1 is `F_DUPFD`) |
+| wait status | code << 8, signal low | code low, signal << 8 |
+| `RTLD_LAZY NOW GLOBAL NODELETE` | 1 2 0x100 0x1000 | 0 1 2 — |
+
+`Haiku/tests/stdlib_check.mojo` uses each of them and checks the answer
+against Haiku: 31/31, built by `mojo build` and under `mojo run` alike. The
+Linux values would have failed it quietly, not loudly — `time.time()` as the
+time since boot, exit code 3 reported as signal 3, `Pipe()` leaking a
+duplicated descriptor.
+
+### The CPU
+
+LLVM's `getHostCPUName()` now has a Haiku branch (`354cd02`): each core's
+MIDR through `get_cpu_topology_info()`, the table Windows on Arm uses, and
+under Apple's hypervisor — part number cleared — `apple-m1`. Measured on
+Prose: the compiler targets `apple-m1`, `has_neon_int8_dotprod()` is true and
+`has_neon_int8_matmul()` false, as on an M1.
+
+### G6 has begun
+
+`mojo run` works: the JIT runs hello and the check program (31/31, 2.2 s).
+Still owed for G6: the stdlib's own CPU test suite on Prose, with a count.
