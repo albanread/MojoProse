@@ -14,7 +14,16 @@
 import std.os
 import std.pwd
 
+from std.sys import CompilationTarget
 from std.testing import assert_equal, assert_raises, assert_true, TestSuite
+
+
+def _superuser_name() raises -> String:
+    # Haiku has one user, uid 0, named for its owner rather than "root".
+    comptime if CompilationTarget.is_haiku():
+        return std.pwd.getpwuid(0).pw_name
+    else:
+        return "root"
 
 
 def test_pwuid() raises:
@@ -27,7 +36,7 @@ def test_pwuid() raises:
     passwd = std.pwd.getpwuid(0)
     assert_true(passwd.pw_dir.byte_length() > 2)
     assert_equal(passwd.pw_uid, 0)
-    assert_equal(passwd.pw_name, "root")
+    assert_equal(passwd.pw_name, _superuser_name())
 
     # Ensure incorrect ID fails
     with assert_raises():
@@ -36,10 +45,10 @@ def test_pwuid() raises:
 
 def test_pwnam() raises:
     # Test root user works
-    var passwd = std.pwd.getpwnam("root")
+    var passwd = std.pwd.getpwnam(_superuser_name())
     assert_true(passwd.pw_dir.byte_length() > 2)
     assert_equal(passwd.pw_uid, 0)
-    assert_equal(passwd.pw_name, "root")
+    assert_equal(passwd.pw_name, _superuser_name())
 
     # Ensure incorrect name fails
     with assert_raises():

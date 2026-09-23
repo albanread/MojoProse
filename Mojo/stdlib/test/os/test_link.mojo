@@ -14,8 +14,9 @@
 import std.os
 from std.os import remove
 from std.pathlib import Path
+from std.sys import CompilationTarget
 from std.tempfile import gettempdir
-from std.testing import TestSuite, assert_equal
+from std.testing import TestSuite, assert_equal, assert_raises
 
 
 def test_create_hardlink() raises:
@@ -35,6 +36,14 @@ def test_create_hardlink() raises:
 
     with open(src, "w") as f:
         f.write("test_create_link")
+
+    comptime if CompilationTarget.is_haiku():
+        # Haiku's file system, BFS, has no hard links.
+        with assert_raises(contains="Operation not allowed"):
+            std.os.link(src, link)
+        remove(src)
+        return
+
     std.os.link(src, link)
     with open(link, "r") as f:
         assert_equal(f.read(), "test_create_link")
