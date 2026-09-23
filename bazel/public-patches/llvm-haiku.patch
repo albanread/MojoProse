@@ -1,0 +1,72 @@
+diff -ru a/utils/bazel/llvm-project-overlay/llvm/BUILD.bazel b/utils/bazel/llvm-project-overlay/llvm/BUILD.bazel
+--- a/utils/bazel/llvm-project-overlay/llvm/BUILD.bazel	2026-09-23 21:34:16.843806793 +0100
++++ b/utils/bazel/llvm-project-overlay/llvm/BUILD.bazel	2026-09-23 21:39:27.351105162 +0100
+@@ -504,6 +504,12 @@
+             "-ldl",
+         ],
+         "@platforms//os:emscripten": [],
++        # libroot is Haiku's libc, libm, libpthread and libdl; as LLVM's CMake
++        # does for Haiku, libbsd for wait4 and libnetwork for sockets.
++        "@platforms//os:haiku": [
++            "-lbsd",
++            "-lnetwork",
++        ],
+         "//conditions:default": [
+             "-pthread",
+             "-ldl",
+@@ -4477,6 +4483,7 @@
+     linkopts = select({
+         "@platforms//os:android": [],
+         "@platforms//os:freebsd": [],
++        "@platforms//os:haiku": [],
+         "@platforms//os:macos": [],
+         "@platforms//os:windows": [],
+         "//conditions:default": ["-lrt"],
+@@ -4569,6 +4576,7 @@
+     linkopts = select({
+         "@platforms//os:android": [],
+         "@platforms//os:freebsd": [],
++        "@platforms//os:haiku": [],
+         "@platforms//os:macos": [],
+         "@platforms//os:windows": [],
+         "//conditions:default": [
+diff -ru a/utils/bazel/llvm-project-overlay/llvm/config.bzl b/utils/bazel/llvm-project-overlay/llvm/config.bzl
+--- a/utils/bazel/llvm-project-overlay/llvm/config.bzl	2026-09-23 21:34:16.838559107 +0100
++++ b/utils/bazel/llvm-project-overlay/llvm/config.bzl	2026-09-23 21:34:16.863932825 +0100
+@@ -88,6 +88,20 @@
+     r'LLVM_PLUGIN_EXT=\".dylib\"',
+ ]
+ 
++# Haiku: what LLVM's CMake finds there. Everything below is in libroot. Haiku
++# has no getauxval, mallinfo or execinfo backtrace (which posix_defines claims
++# for every POSIX system); _GNU_SOURCE makes Haiku's gnu/pthread.h declare
++# pthread_{get,set}name_np.
++haiku_defines = [
++    define
++    for define in posix_so_defines
++    if not define.startswith("HAVE_BACKTRACE") and not define.startswith("BACKTRACE_HEADER")
++] + [
++    "_GNU_SOURCE",
++    "HAVE_SBRK=1",
++    "HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC=1",
++]
++
+ arc4random_defines = select({
+     "@platforms//os:macos": ["HAVE_DECL_ARC4RANDOM=1"],
+     "//conditions:default": ["HAVE_DECL_ARC4RANDOM=0"],
+@@ -115,6 +129,7 @@
+ os_defines = select({
+     "@platforms//os:emscripten": emscripten_defines,
+     "@platforms//os:freebsd": posix_so_defines,
++    "@platforms//os:haiku": haiku_defines,
+     "@platforms//os:macos": macos_defines,
+     "@platforms//os:windows": win32_defines,
+     "//conditions:default": linux_defines,
+@@ -148,6 +163,7 @@
+     Label("//llvm:linux_riscv64"): native_arch_defines("RISCV", "riscv64-unknown-linux-gnu"),
+     Label("//llvm:linux_s390x"): native_arch_defines("SystemZ", "systemz-unknown-linux_gnu"),
+     "@platforms//os:emscripten": native_arch_defines("WebAssembly", "wasm32-unknown-emscripten"),
++    "@platforms//os:haiku": native_arch_defines("AArch64", "aarch64-unknown-haiku"),
+     "@platforms//os:windows": native_arch_defines("X86", "x86_64-pc-win32"),
+     "//conditions:default": native_arch_defines("X86", "x86_64-unknown-linux-gnu"),
+ }) + [

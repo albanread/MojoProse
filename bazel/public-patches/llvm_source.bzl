@@ -41,6 +41,11 @@ PATCHES = [
     # glibc/macOS defines, which are correct for our builds (we do not target
     # musl). Drop this once rules_cc is bumped to 0.2.25 or newer.
     "//bazel/public-patches:llvm-config-musl-select.patch",
+    # MojoProse: Haiku (Prose) in LLVM's Bazel configuration -- the defines
+    # LLVM's CMake would find there, the native triple aarch64-unknown-haiku,
+    # and no -ldl, -lm or -lrt (libroot is all of them). After the musl patch,
+    # whose config.bzl it applies to.
+    "//bazel/public-patches:llvm-haiku.patch",
 ]
 
 def _llvm_source_impl(module_ctx):
