@@ -20,6 +20,13 @@
 #include <sys/random.h>
 #endif // __linux__
 
+#ifdef __HAIKU__
+#include <algorithm>
+#include <cerrno>
+#include <cstring>
+#include <unistd.h>
+#endif // __HAIKU__
+
 #ifdef _WIN32
 #include <windows.h>
 
@@ -65,6 +72,14 @@ SecureRandomBytesGenerator::getRandomBytes(MutableArrayRef<uint8_t> buf) {
   if (CryptGenRandom((HCRYPTPROV)ctx, buf.size(), buf.data()))
     return Error("random read failed");
   return success();
-#endif // __APPLE__ | __linux__ | _WIN32
+#elif defined(__HAIKU__)
+  // getentropy() fills at most 256 bytes a call.
+  for (size_t offset = 0; offset < buf.size(); offset += 256) {
+    size_t length = std::min<size_t>(256, buf.size() - offset);
+    if (getentropy(buf.data() + offset, length) != 0)
+      return Error("getentropy failed: " + Twine(strerror(errno)));
+  }
+  return success();
+#endif // __APPLE__ | __linux__ | _WIN32 | __HAIKU__
   return Error("unsupported platform - could not generate random data");
 }
