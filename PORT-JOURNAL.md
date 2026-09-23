@@ -433,3 +433,79 @@ Prose: the compiler targets `apple-m1`, `has_neon_int8_dotprod()` is true and
 
 `mojo run` works: the JIT runs hello and the check program (31/31, 2.2 s).
 Still owed for G6: the stdlib's own CPU test suite on Prose, with a count.
+
+## G6 — The standard library's tests on Prose (2026-09-23)
+
+`tools/haiku/stdlib-tests.py` asks Bazel for the stdlib's 251 `mojo_test`
+targets (selects taken as a Haiku build takes them), and
+`tools/haiku/run-stdlib-tests.sh` runs them on Prose the way `mojo_test`
+does: each file built by the Haiku `mojo` with its flags (`-D ASSERT=all`
+by default), run with its environment and arguments, four at a time, each
+in its own `TEST_TMPDIR`.
+
+**191 pass, 4 fail, 56 skipped** (the third run, on the image with Haiku
+patches 0133 and 0134):
+
+| | tests | why |
+|---|---|---|
+| skipped | 35 | `python/`: Prose has no Python |
+| | 10 | need numpy |
+| | 3 | need `//max:max_mojo` (MAX is out of scope) |
+| | 1 | GPU |
+| | 6 | Bazel would not run them here either: Linux- or macOS-only, or GPU codegen with a compiler built from source |
+| | 1 | its source is generated (`test_mojo_version`) |
+| failed | 2 | `testing/test_assertion`, `os/test_stat`: use Python at run time (`Python.import_module`) and abort without libpython |
+| | 2 | `collections/test_span_{bounds,uninit}_abort`: 2 of 5 cases each time out, see below; run directly, the same aborts behave |
+
+Of the 195 tests that can run on Prose, 191 pass.
+
+### What it took
+
+- **Haiku patch 0133**: `posix_spawn()` ran `argv[0]`, not its path, so
+  Mojo's `Process.run("/dir/tool", …)` — and `assert_aborts`, which re-runs
+  the test binary — failed with ENOENT. **0134**: a spawn whose exec failed
+  wrote the parent's buffered output again (Haiku's `_exit()` flushes, and its
+  `vfork()` copies). HaikuArmQemu `tools/spawntest` checks both, 7/7.
+- **Crashes must end, not wait for a person.** A Mojo abort is a trap, and
+  Haiku's debug_server holds a crashed team in an alert nobody answers on an
+  unattended machine; `test_assertion` sat for 600 s. The test machine gets
+  `~/config/settings/system/debug_server/settings` with `default_action
+  kill`: a crash is then `WIFSIGNALED`, which `assert_aborts` needs.
+- **The compile cache outgrew the guest's disk** (1 GB image, ~3 MB a
+  test): each test keeps it in its own `TEST_TMPDIR`, as under Bazel.
+- Haiku branches in four tests' own per-OS code (sys: c_types, dlhandle,
+  ffi with Haiku's `strerror()` texts measured on Prose; pwd; link, since
+  BFS has no hard links).
+
+### Open
+
+- **The debug_server does not always act.** In a burst of crashes, some
+  teams log "entered the debugger" and nothing more: not killed, no alert,
+  left suspended until something kills them (the span tests' harness, after
+  60 s; `os/test_stat`'s team was still there an hour later, deaf to
+  `kill -9`). Later crashes in the same run are killed. Not yet understood.
+- **The compiler spends most of its time in the kernel on Prose**: a cold
+  `mojo build` of the stdlib check takes 1.0 s user and 3.4 s system even
+  with `-j 1`. Not malloc (`MALLOC_OPTIONS` pools change nothing), not
+  syscalls (under 0.3 s of them), not HostFS (the same from the guest's
+  disk). First-touch faults cost 2.2 µs a page here; page faults are the
+  next suspect. `-j 1` is the fastest setting (4.4 s against 6.3 s).
+- On a machine without Python, the stdlib's libpython discovery passes an
+  unterminated empty path to `dlopen`.
+
+## G7 — The bridge: P0 runs (2026-09-23)
+
+Dots runs on Prose: see `Haiku/docs/bridge-design.md`, section 16, for
+what P0 measured — chiefly that `BRect` and `BPoint` cross C++ calls by
+hidden reference (their copy constructors are user-declared), so the C
+interface carries mirror structs, and that a Mojo function's address cannot
+name a type (a type tag does). Build on Prose:
+
+```
+c++ -O2 -Wall -Wextra -shared -fPIC -o libmojobe.so mojobe.cpp -lbe
+mojo build -I Haiku/bridge Haiku/examples/dots/dots.mojo -o dots \
+    -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
+```
+
+Owed for P0: `MouseDown`, by hand (the scripted guest delivers no mouse
+events to windows). Next: P1, the generator.
