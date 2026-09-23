@@ -263,3 +263,59 @@ must learn Haiku: today it would give a Haiku build Linux's `HAVE_GETAUXVAL`,
 the native triple of its last default, `x86_64-unknown-linux-gnu`. Haiku does
 have `sbrk`, `st_mtim`, `dladdr`, `posix_spawn` and, in its `gnu/` headers,
 `pthread_{get,set}name_np`. A patch beside upstream's musl one.
+
+---
+
+## G3 — Done: LLVM and MLIR run on Prose (2026-09-23)
+
+```
+llc --version            LLVM version 24.0.0git … Default target: aarch64-unknown-haiku
+llc hello.ll → .o, linked by Prose's clang:   hello from LLVM running on Haiku!
+mlir-opt --canonicalize: arith.addi %a, 0  →  return %arg0
+```
+
+All on Prose, built by Bazel on the Mac: all of LLVM compiled for Haiku in
+about four minutes (1,876 actions), MLIR in under six, **with no change to
+any LLVM or MLIR source file**. What LLVM's CMake discovers on Haiku by
+probing, LLVM's Bazel overlay hard-codes per OS, and Haiku fell through to
+Linux. `bazel/public-patches/llvm-haiku.patch`, beside upstream's musl patch:
+
+- `haiku_defines`: POSIX without execinfo's `HAVE_BACKTRACE`, plus
+  `_GNU_SOURCE` (Haiku declares `pthread_{get,set}name_np` in `gnu/`),
+  `HAVE_SBRK`, `HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC` — read from Haiku's headers
+  and libraries, not guessed.
+- The native triple **`aarch64-unknown-haiku`**: the overlay's last default is
+  `x86_64-unknown-linux-gnu`, which a compiler on Haiku would have targeted.
+- Libraries: none of Linux's `-pthread -ldl -lm` or `-lrt` (libroot is all
+  of them), but `-lbsd -lnetwork` for `Support`, as CMake does — `wait4` is in
+  Haiku's libbsd and sockets in libnetwork. The first link failed on `wait4`.
+
+### The finding: Haiku could not load clang's thread-locals
+
+The first `llc` was refused by Haiku's loader: "Troubles relocating: Bad data".
+It carried five `R_AARCH64_TLSDESC` relocations — TLS descriptors, which is
+all clang generates for a `thread_local` on arm64 — and Haiku's arm64
+`runtime_loader` knew only the traditional `TLS_DTPMOD64`/`TLS_DTPREL64` that
+GCC uses. lld could not relax them away, because clang's Haiku driver links
+every program `-shared`, and clang 22 rejects `-mtls-dialect` for Haiku.
+
+It was not ours alone: a six-line program using `thread_local` and
+`std::call_once`, built **on Prose by Prose's own clang 23**, failed the same
+way. Every clang-built C++ program on Prose that touched thread-local storage
+— including through libstdc++'s `call_once` — could not load.
+
+`-femulated-tls` was tried and rejected: it cannot reach libstdc++'s own
+thread-locals (`std::__once_callable`), which GCC built as native TLS.
+
+The fix is in Haiku: **patch 0132**, TLS descriptors in the arm64
+`runtime_loader`. A descriptor's second word packs the module and the offset;
+the resolver, in assembly, asks `get_tls_address()` for the calling thread's
+copy and returns its distance from `TPIDR_EL0`, saving every register a C++
+call may clobber, as the descriptor ABI requires. Its test
+(HaikuArmQemu `tools/tlstest`, built on Prose by Prose's clang) passes 6/6:
+the program's own thread-local, one across a library boundary, one in a
+library loaded by `dlopen`, `std::call_once`, and eight threads each with its
+own copies. With it, `llc` loads unchanged.
+
+**For G4:** `Host CPU: (unknown)` — LLVM has no host-CPU detection for Haiku,
+and Mojo defaults its target CPU to the host's.
