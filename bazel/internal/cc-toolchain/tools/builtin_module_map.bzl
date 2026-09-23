@@ -30,9 +30,15 @@ def _impl(ctx):
     # the execroot. This prefix is just enough ../ to transform between the two.
     prefix = "../" * len(paths.dirname(module_map_file.path).split("/"))
 
+    header_lists = ctx.files.textual_header_lists
+
     ctx.actions.run_shell(
-        inputs = depset(transitive = files),
-        arguments = [module_map_file.path, prefix] + header_paths,
+        inputs = depset(header_lists, transitive = files),
+        arguments = [
+            module_map_file.path,
+            prefix,
+            " ".join([f.path for f in header_lists]),
+        ] + header_paths,
         outputs = [module_map_file],
         command = """\
 set -euo pipefail
@@ -43,11 +49,17 @@ shift
 prefix="$1"
 shift
 
+header_lists="$1"
+shift
+
 echo 'module "crosstool" [system] {'
 for dir in "$@"; do
   find -L "${dir}" -type f 2>/dev/null | sort | uniq | while read -r header; do
     echo "  textual header \\"${prefix}${header}\\""
   done
+done
+for list in ${header_lists}; do
+  cat "${list}"
 done
 echo "}"
 """,
@@ -62,6 +74,11 @@ builtin_module_map = rule(
         "include_directories": attr.label_list(
             providers = [DirectoryInfo],
             doc = """Directories in which to search for builtin headers.""",
+        ),
+        "textual_header_lists": attr.label_list(
+            allow_files = True,
+            doc = """Files of ready-made `textual header "..."` lines, for
+            headers outside the execroot (the Haiku sysroot).""",
         ),
     },
     provides = [DefaultInfo],

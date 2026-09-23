@@ -98,8 +98,12 @@ builtin_module_map(
             "@sysroot-macos//sysroot:root",
         ],
         # The Haiku sysroot is outside the execroot (see
-        # haiku_sysroot_repository.bzl), so only clang's own headers here.
+        # haiku_sysroot_repository.bzl): its headers come as a list below.
         "//:haiku_aarch64": ["@clang-macos//:include_dir"],
     }),
     tags = ["manual"],
+    textual_header_lists = select({
+        "//:haiku_aarch64": ["@sysroot-haiku-arm64//:module_map_headers.txt"],
+        "//conditions:default": [],
+    }),
 )
