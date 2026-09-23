@@ -1,0 +1,15 @@
+# G2 of PORT-JOURNAL.md: the smallest C++ program that proves the Haiku target
+# toolchain -- libstdc++, std::thread and a Haiku call -- built by Bazel from
+# the Mac and run on Prose:
+#   ./bazelw build --platforms=//:haiku-aarch64-platform \
+#       //bazel/internal/cc-toolchain/smoke:hello_haiku
+# Plain rules_cc, not the modular_* macros, so that a failure here is the
+# toolchain's.
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+
+cc_binary(
+    name = "hello_haiku",
+    srcs = ["hello_haiku.cpp"],
+    tags = ["manual"],
+    target_compatible_with = ["@platforms//os:haiku"],
+)

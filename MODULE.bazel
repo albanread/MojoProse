@@ -19,6 +19,12 @@ macos_sysroot_repository = use_repo_rule("//bazel/internal/cc-toolchain:macos_sy
 
 macos_sysroot_repository(name = "sysroot-macos")
 
+# Haiku (Prose) arm64, cross-compiled from the Mac: the sysroot stays on a
+# case-sensitive volume, named by --repo_env=HAIKU_SYSROOT.
+haiku_sysroot_repository = use_repo_rule("//bazel/internal/cc-toolchain:haiku_sysroot_repository.bzl", "haiku_sysroot_repository")
+
+haiku_sysroot_repository(name = "sysroot-haiku-arm64")
+
 include("//bazel:mojo.MODULE.bazel")
 
 link_hack = use_repo_rule("//bazel/internal:link_hack.bzl", "link_hack")

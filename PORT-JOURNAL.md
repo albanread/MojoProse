@@ -194,3 +194,72 @@ points `--sysroot` at the absolute path on `HaikuSrc`, allowed through
 contents in the toolchain's arguments so a new sysroot re-keys the actions.
 The alternative, an output root on a case-sensitive volume, is kept for the
 case where this one fails.
+
+---
+
+## G1 — Done: upstream builds and runs on the Mac (2026-09-23)
+
+With the SDK fixed, `./bazelw build //Mojo:mojo` completed: **1,030 s**,
+7,129 actions compiled on this M4 Max, the rest from the action cache and the
+disk cache. `./bazelw run //Mojo:mojo -- run hello.mojo`:
+
+```
+hello from upstream Mojo, built from source: sum of squares 285
+```
+
+**Telemetry is out of the build.** `cquery 'deps(//Mojo/tools/mojo:mojo-full)'`
+names no crashpad, curl, protobuf, grpc or OTLP exporter (its 14 "curl" hits
+are `usr/include/curl/*.h` inside the macOS SDK copy, not a dependency). What
+remains of OpenTelemetry is its SDK behind `Support:Telemetry`'s local file
+exporters, which never run: the public telemetry headers use SDK types, so
+it stays until that is worth restructuring.
+
+**For G4**, the same query shows what the Haiku compiler must leave out:
+`//Mojo:MojoLLDB` (the debugger; LLDB has no Haiku support) and a bundled
+Python 3.13 (Python interop, out of scope).
+
+## G2 — Done: Bazel cross-builds C++ for Haiku (2026-09-23)
+
+```
+./bazelw build --platforms=//:haiku-aarch64-platform \
+    //bazel/internal/cc-toolchain/smoke:hello_haiku
+hello from clang 22 for Haiku: 4 threads joined, 4 CPUs      (on Prose)
+```
+
+What went in:
+
+- `//:haiku_aarch64` (config setting) and `//:haiku-aarch64-platform`, on
+  `@platforms//os:haiku`, which the platforms module already has.
+- `haiku_sysroot_repository.bzl`: the sysroot by absolute path from
+  `--repo_env=HAIKU_SYSROOT`, checked for the files clang needs, and stamped
+  (a hash of names and sizes) into every Haiku compile as
+  `-DMOJOPROSE_HAIKU_SYSROOT=…`, so a new sysroot re-keys them.
+- The toolchain: the Mac's clang tools for a Haiku target (it is a cross
+  build), `--sysroot` with `allowlist_absolute_include_directories`, and a
+  Haiku branch in every per-OS choice of `args/BUILD.bazel`: the triple,
+  sections, `-mcpu=apple-m1`, libstdc++'s headers, Haiku's link flags, rpath,
+  `--gc-sections`.
+
+Four things found on the way, each by failing:
+
+1. `rules_cc`'s `set_soname` is declared Linux-only; Haiku has its own copy,
+   `:haiku_set_soname`.
+2. `-stdlib=libstdc++` goes unused once the headers are named with
+   `-nostdinc++`, and upstream makes unused arguments errors. libstdc++ is
+   clang's default for Haiku, so it is not passed.
+3. **clang's Haiku driver links every program `-shared`**, as Haiku programs
+   are, and swallows `-pie`; upstream's `-Wl,-pie` for executables reaches the
+   linker directly and lld refuses both. `-pie` is now Linux and macOS only.
+4. The driver chooses `--enable-new-dtags` (`DT_RUNPATH`), which Haiku's
+   loader reads, and the Linux branch's `--disable-new-dtags` override was
+   not carried over.
+
+The Mac build is untouched by all of it: `//Mojo:mojo` afterwards is 9,165
+action-cache hits and nothing compiled.
+
+**For G3**, LLVM's own Bazel configuration (`utils/bazel/.../llvm/config.bzl`)
+must learn Haiku: today it would give a Haiku build Linux's `HAVE_GETAUXVAL`,
+`HAVE_MALLINFO` and execinfo `HAVE_BACKTRACE` — none of which Haiku has — and
+the native triple of its last default, `x86_64-unknown-linux-gnu`. Haiku does
+have `sbrk`, `st_mtim`, `dladdr`, `posix_spawn` and, in its `gnu/` headers,
+`pthread_{get,set}name_np`. A patch beside upstream's musl one.

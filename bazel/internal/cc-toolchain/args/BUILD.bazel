@@ -1,4 +1,5 @@
 load("@rules_cc//cc/toolchains:args.bzl", "cc_args")
+load("@sysroot-haiku-arm64//:defs.bzl", "HAIKU_SYSROOT")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -35,12 +36,15 @@ cc_args(
         "//:linux_aarch64": ["--target=aarch64-unknown-linux-gnu"],
         # TODO: Pull 11.0 from config set in .bazelrc
         "@platforms//os:macos": ["--target=arm64-apple-macosx11.0"],
+        "//:haiku_aarch64": ["--target=aarch64-unknown-haiku"],
     }) + select({
         "@platforms//os:linux": [
             # Compress debug info to improve binary size, not supported on macOS
             "-gz",
         ],
         "@platforms//os:macos": [],
+        # Uncompressed: Haiku's debugger reads plain DWARF.
+        "@platforms//os:haiku": [],
     }),
     env = {
         "ZERO_AR_DATE": "1",  # Required for hermetic links on macOS (default dependent)
@@ -138,12 +142,18 @@ cc_args(
             "-ffunction-sections",
         ],
         "@platforms//os:macos": [],
+        "@platforms//os:haiku": [
+            "-fdata-sections",
+            "-ffunction-sections",
+        ],
     }) + select({
         # Match the Mojo toolchain's target-cpu so AVX-512 doesn't leak
         # into auto-vectorized C++ stdlib code on AVX-512-capable hosts.
         "//:linux_x86_64": ["-march=x86-64-v3"],
         "//:linux_aarch64": ["-mcpu=neoverse-n1"],
         "@platforms//os:macos": [],
+        # Prose runs on every Apple Silicon Mac, M1 onwards.
+        "//:haiku_aarch64": ["-mcpu=apple-m1"],
     }),
 )
 
@@ -158,6 +168,18 @@ cc_args(
     ] + select({
         "@platforms//os:linux": ["-stdlib=libstdc++"],
         "@platforms//os:macos": ["-stdlib=libc++"],
+        # Haiku's C++ library is GCC's libstdc++ (clang's default there, so
+        # no -stdlib, which would go unused). Its driver finds the headers only
+        # through an installed GCC, so they are named.
+        "@platforms//os:haiku": [
+            "-nostdinc++",
+            "-isystem",
+            HAIKU_SYSROOT + "/boot/system/develop/headers/c++",
+            "-isystem",
+            HAIKU_SYSROOT + "/boot/system/develop/headers/c++/aarch64-unknown-haiku",
+            "-isystem",
+            HAIKU_SYSROOT + "/boot/system/develop/headers/c++/backward",
+        ],
     }),
 )
 
@@ -195,6 +217,20 @@ cc_args(
             "-Wl,-no_warn_duplicate_libraries",
             "-Wl,-oso_prefix,.",  # Strip absolute paths from debug info file references
         ],
+        # No -lm: libroot is Haiku's libm, as it is its libc and libpthread.
+        "@platforms//os:haiku": [
+            "-lstdc++",
+            "-Wl,--build-id=md5",
+            "-Wl,-z,relro,-z,now",
+            "-Wl,-z,nodelete",
+
+            # Haiku's runtime_loader maps 4 KB pages and a single code
+            # segment. With lld's defaults (64 KB pages, a separate code
+            # segment) it refuses the image: "Could not map image: Bad data".
+            "-Wl,-z,max-page-size=4096",
+            "-Wl,-z,common-page-size=4096",
+            "-Wl,-z,noseparate-code",
+        ],
     }) + select({
         # Sanitizers are split across multiple libraries, some of which aren't linked to shared libraries
         "//:asan_linux": ["-Wl,-z,undefs"],
@@ -202,6 +238,7 @@ cc_args(
         "//:ubsan_linux": ["-Wl,-z,undefs"],
         # Error on undefined symbols
         "@platforms//os:linux": ["-Wl,-z,defs"],
+        "@platforms//os:haiku": ["-Wl,-z,defs"],
         "//conditions:default": [],
     }) + select({
         "//:modular_config_coverage": ["-fprofile-instr-generate"],
@@ -212,13 +249,19 @@ cc_args(
 cc_args(
     name = "link_executable_args",
     actions = ["@rules_cc//cc/toolchains/actions:link_executable_actions"],
-    args = [
-        "-Wl,-pie",
-    ] + select({
+    args = select({
         "@platforms//os:macos": [
+            "-Wl,-pie",
             "-Wl,-rpath,@loader_path/../lib",
         ],
         "@platforms//os:linux": [
+            "-Wl,-pie",
+            "-Wl,-rpath,$ORIGIN/../lib",
+        ],
+        # No -pie: clang's Haiku driver links every program -shared, as
+        # Haiku programs are, and lld refuses the two together. Haiku's
+        # runtime_loader expands $ORIGIN (and its own %A).
+        "@platforms//os:haiku": [
             "-Wl,-rpath,$ORIGIN/../lib",
         ],
     }),
@@ -233,6 +276,10 @@ cc_args(
             "-Wl,-rpath,@loader_path/../lib",
         ],
         "@platforms//os:linux": [
+            "-Wl,-rpath,$ORIGIN",
+            "-Wl,-rpath,$ORIGIN/../lib",
+        ],
+        "@platforms//os:haiku": [
             "-Wl,-rpath,$ORIGIN",
             "-Wl,-rpath,$ORIGIN/../lib",
         ],
@@ -254,6 +301,7 @@ cc_args(
     args = select({
         "@platforms//os:linux": ["-Wl,--gc-sections"],
         "@platforms//os:macos": ["-Wl,-dead_strip"],
+        "@platforms//os:haiku": ["-Wl,--gc-sections"],
     }),
 )
 

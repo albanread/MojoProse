@@ -175,6 +175,24 @@ config_setting(
     ],
 )
 
+config_setting(
+    name = "haiku_aarch64",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:haiku",
+    ],
+)
+
+# Haiku (Prose) on Apple Silicon. Cross-compiled from a Mac:
+#   ./bazelw build --platforms=//:haiku-aarch64-platform <target>
+platform(
+    name = "haiku-aarch64-platform",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:haiku",
+    ],
+)
+
 alias(
     name = "lint",
     actual = "//bazel/lint",

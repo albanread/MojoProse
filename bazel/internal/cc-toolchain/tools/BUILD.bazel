@@ -61,6 +61,8 @@ declare_tools()
             "//:linux_aarch64": ":linux-aarch64-{}".format(tool),
             "//:linux_x86_64": ":linux-x86_64-{}".format(tool),
             "@platforms//os:macos": ":macos-{}".format(tool),
+            # Haiku is cross-compiled from the Mac: its clang is the Mac's.
+            "//:haiku_aarch64": ":macos-{}".format(tool),
         }),
         tags = [
             "manual",
@@ -95,6 +97,9 @@ builtin_module_map(
             "@clang-macos//:include_dir",
             "@sysroot-macos//sysroot:root",
         ],
+        # The Haiku sysroot is outside the execroot (see
+        # haiku_sysroot_repository.bzl), so only clang's own headers here.
+        "//:haiku_aarch64": ["@clang-macos//:include_dir"],
     }),
     tags = ["manual"],
 )

@@ -1,9 +1,11 @@
 load("@rules_cc//cc:cc_import.bzl", "cc_import")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc/toolchains:args.bzl", "cc_args")
 load("@rules_cc//cc/toolchains:artifacts.bzl", "cc_artifact_name_pattern")
 load("@rules_cc//cc/toolchains:make_variable.bzl", "cc_make_variable")
 load("@rules_cc//cc/toolchains:toolchain.bzl", "cc_toolchain")
 load("@rules_cc//cc/toolchains/args:sysroot.bzl", "cc_sysroot")
+load("@sysroot-haiku-arm64//:defs.bzl", "HAIKU_SYSROOT", "HAIKU_SYSROOT_STAMP")
 load("//bazel:config.bzl", "TOP_LEVEL_TAG")
 load("//bazel/internal/cc-toolchain/features:features.bzl", "MARKER_FEATURES")  # buildifier: disable=bzl-visibility
 load("//bazel/internal/cc-toolchain/tools:tools.bzl", "PLATFORMS")  # buildifier: disable=bzl-visibility
@@ -111,6 +113,37 @@ cc_sysroot(
     sysroot = "@sysroot-macos//sysroot:root",
 )
 
+# Haiku (Prose): the sysroot is passed by absolute path, not copied into the
+# execroot -- Haiku's headers need a case-sensitive filesystem; see
+# haiku_sysroot_repository.bzl. The stamp re-keys every Haiku compile when
+# the sysroot changes.
+cc_args(
+    name = "haiku_sysroot",
+    actions = [
+        "@rules_cc//cc/toolchains/actions:compile_actions",
+        "@rules_cc//cc/toolchains/actions:link_actions",
+    ],
+    allowlist_absolute_include_directories = [
+        HAIKU_SYSROOT + "/boot/system/develop/headers",
+    ],
+    args = ["--sysroot=" + HAIKU_SYSROOT],
+)
+
+# rules_cc's set_soname is the same flag but declared for Linux only.
+cc_args(
+    name = "haiku_set_soname",
+    actions = ["@rules_cc//cc/toolchains/actions:dynamic_library_link_actions"],
+    args = ["-Wl,-soname,{runtime_solib_name}"],
+    format = {"runtime_solib_name": "@rules_cc//cc/toolchains/variables:runtime_solib_name"},
+    requires_not_none = "@rules_cc//cc/toolchains/variables:runtime_solib_name",
+)
+
+cc_args(
+    name = "haiku_sysroot_stamp",
+    actions = ["@rules_cc//cc/toolchains/actions:compile_actions"],
+    args = ["-DMOJOPROSE_HAIKU_SYSROOT=" + HAIKU_SYSROOT_STAMP],
+)
+
 [
     cc_toolchain(
         name = "{}_clang_toolchain".format(platform),
@@ -120,6 +153,10 @@ cc_sysroot(
             "@platforms//os:macos": [
                 ":macos_sysroot_compile",
                 ":macos_sysroot_link",
+            ],
+            "//:haiku_aarch64": [
+                ":haiku_sysroot",
+                ":haiku_sysroot_stamp",
             ],
         }) + [
             "//bazel/internal/cc-toolchain/args:resource_dir_args",
@@ -139,6 +176,7 @@ cc_sysroot(
             "@platforms//os:linux": [
                 "@rules_cc//cc/toolchains/args/soname_flags:set_soname",
             ],
+            "@platforms//os:haiku": [":haiku_set_soname"],
             "//conditions:default": [],
         }),
         artifact_name_patterns = select({
@@ -312,6 +350,10 @@ filegroup(
             "@clang-linux-x86_64//:bin/llvm-profdata",
         ],
         "@platforms//os:macos": [
+            "@clang-macos//:bin/llvm-cov",
+            "@clang-macos//:bin/llvm-profdata",
+        ],
+        "//:haiku_aarch64": [
             "@clang-macos//:bin/llvm-cov",
             "@clang-macos//:bin/llvm-profdata",
         ],
