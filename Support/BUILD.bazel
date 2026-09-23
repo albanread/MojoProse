@@ -94,6 +94,7 @@ modular_cc_library(
     ] + select({
         "@platforms//os:macos": ["SHARED_LIBRARY_SUFFIX='\".dylib\"'"],
         "@platforms//os:linux": ["SHARED_LIBRARY_SUFFIX='\".so\"'"],
+        "@platforms//os:haiku": ["SHARED_LIBRARY_SUFFIX='\".so\"'"],
     }),
     deps = [
         ":ConcurrentAppendingVector",
@@ -1129,6 +1130,9 @@ modular_shared_library(
         ],
         "@platforms//os:macos": [
             "-Wl,-u,__ZN4mlir6detail22FallbackTypeIDResolver22registerImplicitTypeIDEN4llvm9StringRefE",
+        ],
+        "@platforms//os:haiku": [
+            "-Wl,--undefined=_ZN4mlir6detail22FallbackTypeIDResolver22registerImplicitTypeIDEN4llvm9StringRefE",
         ],
     }),
     output_name = "MSupportGlobals",

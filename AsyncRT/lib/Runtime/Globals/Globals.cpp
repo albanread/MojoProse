@@ -15,6 +15,10 @@
 // doesn't support it
 #if defined(__APPLE__)
 #include <gperftools/tcmalloc.h>
+#elif defined(__HAIKU__)
+// MojoProse: Haiku has no tcmalloc; the system allocator serves.
+#include <algorithm>
+#include <cstdlib>
 #else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wprivate-header"
@@ -51,6 +55,11 @@ MODULAR_CXX_EXPORT void *TCMallocGlobals::tc_new(size_t alignment,
                                                  size_t size) {
 #if defined(__APPLE__)
   return ::tc_memalign(alignment, size);
+#elif defined(__HAIKU__)
+  void *ptr = nullptr;
+  if (::posix_memalign(&ptr, std::max(alignment, sizeof(void *)), size) != 0)
+    return nullptr;
+  return ptr;
 #else
   return TCMallocInternalMemalign(alignment, size);
 #endif
@@ -60,6 +69,9 @@ MODULAR_CXX_EXPORT void *TCMallocGlobals::tc_new(size_t alignment, size_t size,
 #if defined(__APPLE__)
   // gperftools has no NUMA partition support; fall back to unpartitioned alloc.
   return ::tc_memalign(alignment, size);
+#elif defined(__HAIKU__)
+  (void)numaPartition;
+  return tc_new(alignment, size);
 #else
   return TCMallocInternalMemalignNumaPartition(alignment, size, numaPartition);
 #endif
@@ -67,6 +79,8 @@ MODULAR_CXX_EXPORT void *TCMallocGlobals::tc_new(size_t alignment, size_t size,
 MODULAR_CXX_EXPORT void TCMallocGlobals::tc_delete(void *ptr) {
 #if defined(__APPLE__)
   return ::tc_free(ptr);
+#elif defined(__HAIKU__)
+  ::free(ptr);
 #else
   return TCMallocInternalFree(ptr);
 #endif

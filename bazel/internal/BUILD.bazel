@@ -164,6 +164,11 @@ mojo_copts_toolchain(
         "@platforms//os:macos": [
             "--target-cpu=apple-m1",
         ],
+        # MojoProse: Haiku (Prose) on every Apple Silicon Mac.
+        "//:haiku_aarch64": [
+            "-target-triple=aarch64-unknown-haiku",
+            "--target-cpu=apple-m1",
+        ],
     }) + select({
         "//:asan": ["--sanitize=address"],
         "//:tsan": ["--sanitize=thread"],
@@ -232,6 +237,8 @@ alias(
         "@platforms//os:macos": "@gperftools-macos//:tcmalloc",
         # NOTE: This library doesn't override new/free globally, which the default library does
         "@platforms//os:linux": "@tcmalloc//tcmalloc:tcmalloc_internal_methods_only_numa_aware",
+        # MojoProse: no tcmalloc on Haiku; AsyncRT uses the system allocator.
+        "@platforms//os:haiku": ":empty_lib",
     }),
 )
 
@@ -243,6 +250,7 @@ alias(
     actual = select({
         "@platforms//os:macos": ":empty_lib",
         "@platforms//os:linux": "@tcmalloc//tcmalloc:want_numa_aware",
+        "@platforms//os:haiku": ":empty_lib",
     }),
 )
 

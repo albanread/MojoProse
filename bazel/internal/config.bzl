@@ -284,6 +284,8 @@ def env_for_available_tools(
     os_specifics = select({
         "@platforms//os:linux": {"LLDB_DEBUGSERVER_PATH": build_path(Label("@llvm-project//lldb:lldb-server"), lambda x: x)},
         "@platforms//os:macos": {"LLDB_DEBUGSERVER_PATH": build_path(Label("@llvm-project//lldb:debugserver"), lambda x: x)},
+        # No LLDB on Haiku (MojoProse): the compiler there is built without the debugger.
+        "@platforms//os:haiku": {},
     }) | select({
         # buildifier: disable=canonical-repository
         "@@//:use_prebuilt_mojo_toolchain_disabled": {},
