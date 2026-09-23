@@ -319,3 +319,46 @@ own copies. With it, `llc` loads unchanged.
 
 **For G4:** `Host CPU: (unknown)` — LLVM has no host-CPU detection for Haiku,
 and Mojo defaults its target CPU to the host's.
+
+## G4 — Done: the compiler runs on Prose (2026-09-23)
+
+`//Mojo/tools/mojo:mojo`, cross-built with `--config=haiku`, runs on Prose:
+
+```
+$ /HostFS/mojo-haiku/bin/mojo --version
+Mojo 1.2.0.dev0 (deadbeef)
+```
+
+(`deadbeef` is upstream's placeholder for an unstamped build.) The binary is
+867 MB as linked, 145 MB with `llvm-strip --strip-debug`, and needs two of the
+build's own libraries beside it in `../lib`: `libMSupportGlobals.so` and
+`libAsyncRTRuntimeGlobals.so`. Otherwise it links only Haiku's: libroot,
+libstdc++, libgcc_s, libbsd, libnetwork.
+
+### What stood between analysis and a binary
+
+The first compile (`-k`) failed 1,650 times, in five kinds:
+
+| errors | cause | fix |
+|---|---|---|
+| 1,572 | the layering check refuses headers no module map declares, and the sysroot is outside the execroot | the sysroot repository lists its headers as textual headers, by absolute path, for the builtin module map (`3b64e93`) |
+| 65 | `PlatformUtils.h`: "Could not determine platform" | `MODULAR_HAIKU` (`0117af1`) |
+| 11 | Haiku's libstdc++ defaults to the COW string ABI, which needs default-constructible allocators | `-D_GLIBCXX_USE_CXX11_ABI=1` for Haiku: its libstdc++ ships both ABIs (`9d351f7`) |
+| 1 | abseil's `GetTID()` casts `pthread_t`, a pointer on Haiku | `find_thread(NULL)`, via `single_version_override` (`5e8b2ad`) |
+| 2 | `std::aligned_alloc` absent; no `<sys/ucontext.h>` | `0117af1` |
+
+With those the second build compiled every one of the 3,734 actions without
+an error: LLVM, MLIR, lld, clang's libraries, OpenTelemetry's API and all of
+Mojo's own C++. Then Mojo's host probe, which answered "Unsupported
+platform." for CPU model, cache sizes, memory and OS version (`b194729`):
+the answers are those arm64 Linux gives where Haiku has no source.
+
+### Measured: what CPU the guest sees
+
+Under Apple's hypervisor every core's `MIDR_EL1`, as Haiku's
+`get_cpu_topology_info()` reports it, is `0x610f0000`: Apple's implementer
+code with the **part number cleared**. LLVM cannot tell an M1 from an M4 by
+it, and has no Haiku branch in `sys::getHostCPUName()` anyway, so the host
+CPU is `generic` (ARMv8.0) and Mojo, which targets the host CPU by default,
+would compile for it. Every Apple processor is an M1 or later — the floor
+Prose's own C and C++ builds already use (`-mcpu=apple-m1`). For G5.
