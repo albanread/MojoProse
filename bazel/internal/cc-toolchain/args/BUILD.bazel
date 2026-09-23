@@ -171,7 +171,12 @@ cc_args(
         # Haiku's C++ library is GCC's libstdc++ (clang's default there, so
         # no -stdlib, which would go unused). Its driver finds the headers only
         # through an installed GCC, so they are named.
+        #
+        # Haiku's GCC defaults libstdc++ to the old, copy-on-write std::string
+        # ABI but ships both; this code assumes the C++11 one (its strings
+        # take allocators that cannot be default-constructed).
         "@platforms//os:haiku": [
+            "-D_GLIBCXX_USE_CXX11_ABI=1",
             "-nostdinc++",
             "-isystem",
             HAIKU_SYSROOT + "/boot/system/develop/headers/c++",
