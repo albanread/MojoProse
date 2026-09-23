@@ -1,0 +1,29 @@
+Haiku (Prose): a thread id for GetTID().
+
+pthread_t is a pointer on Haiku, so the pthread_self() fallback does not
+compile. Haiku's thread ids are find_thread(NULL), an int32 like pid_t.
+
+--- a/absl/base/internal/sysinfo.cc
++++ b/absl/base/internal/sysinfo.cc
+@@ -47,6 +47,10 @@
+ #include <zircon/process.h>
+ #endif
+ 
++#if defined(__HAIKU__)
++#include <OS.h>
++#endif
++
+ #include <string.h>
+ 
+ #include <cassert>
+@@ -477,6 +481,10 @@
+   return static_cast<pid_t>(zx_thread_self());
+ }
+ 
++#elif defined(__HAIKU__)
++
++pid_t GetTID() { return static_cast<pid_t>(find_thread(nullptr)); }
++
+ #else
+ 
+ // Fallback implementation of `GetTID` using `pthread_self`.
