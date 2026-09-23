@@ -35,12 +35,20 @@ from std.sys._assembly import inlined_assembly
 # Utilities
 # ===-----------------------------------------------------------------------===#
 
-# Enums used in time.h 's glibc
-comptime _CLOCK_REALTIME = 0
-comptime _CLOCK_MONOTONIC = 1 if CompilationTarget.is_linux() else 6
-comptime _CLOCK_PROCESS_CPUTIME_ID = 2 if CompilationTarget.is_linux() else 12
-comptime _CLOCK_THREAD_CPUTIME_ID = 3 if CompilationTarget.is_linux() else 16
-comptime _CLOCK_MONOTONIC_RAW = 4
+# Enums used in time.h 's glibc. Haiku numbers its clocks from 0 downwards,
+# and has no raw monotonic clock: its monotonic clock is system_time(), which
+# nothing slews.
+comptime _CLOCK_REALTIME = -1 if CompilationTarget.is_haiku() else 0
+comptime _CLOCK_MONOTONIC = 1 if CompilationTarget.is_linux() else (
+    0 if CompilationTarget.is_haiku() else 6
+)
+comptime _CLOCK_PROCESS_CPUTIME_ID = 2 if CompilationTarget.is_linux() else (
+    -2 if CompilationTarget.is_haiku() else 12
+)
+comptime _CLOCK_THREAD_CPUTIME_ID = 3 if CompilationTarget.is_linux() else (
+    -3 if CompilationTarget.is_haiku() else 16
+)
+comptime _CLOCK_MONOTONIC_RAW = 0 if CompilationTarget.is_haiku() else 4
 
 # Constants
 comptime _NSEC_PER_USEC = 1000
@@ -80,7 +88,7 @@ def _clock_gettime(clockid: Int) -> _CTimeSpec:
 
 @inline(.always)
 def _gettime_as_nsec_unix(clockid: Int) -> Int:
-    comptime if CompilationTarget.is_linux():
+    comptime if CompilationTarget.is_linux() or CompilationTarget.is_haiku():
         var ts = _clock_gettime(clockid)
         return ts.as_nanoseconds()
     else:
