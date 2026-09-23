@@ -1,7 +1,8 @@
 # The Haiku bridge — design
 
-*MojoProse, 2026-09-23. A design for review; nothing here is built yet. It is
-gate G7 of `PORT-JOURNAL.md`.*
+*MojoProse, 2026-09-23. Gate G7 of `PORT-JOURNAL.md`. P0 is built and runs
+on Prose (Dots); section 16 records what building it measured, including one
+correction to section 3.*
 
 How Mojo programs on Prose use the Haiku API — open windows, draw, take the
 mouse and the keyboard, send messages, show menus and alerts — as real Haiku
@@ -107,7 +108,10 @@ Mojo's foreign-function interface speaks C, both ways:
 instantiated per type, as the standard library does for CPython type slots
 (`_tp_dealloc_wrapper[T](…) abi("C")`). Its C calling convention on arm64 is
 AAPCS64 proper for Haiku (`CABIAAPCS.cpp`, Darwin only differing for
-variadics), so a `BRect` passes by value in `s0`–`s3`, as GCC passes it.
+variadics): a C struct of four floats passes in `s0`–`s3`. **A `BRect` does
+not** — measured in P0, see section 16: Haiku's `BRect` and `BPoint` declare
+copy constructors, so C++ passes them by hidden reference, and the bridge's
+C interface carries plain mirror structs instead.
 
 So something has to make C++ look like C in both directions. That is the
 bridge.
@@ -494,3 +498,46 @@ of G1 cross-compiling) and the standard library taught Haiku (G5).
 4. **Signals and `debugger()`.** A crash in a hook should reach Haiku's debug
    server like any crash, with a useful Mojo stack. Whether Mojo's frames
    unwind cleanly there is for G6.
+
+## 16. What P0 measured (2026-09-23)
+
+Dots (section 2, plus three starting dots) runs on Prose: `libmojobe.so` built
+there by Prose's clang, Dots by the Haiku-built `mojo`. Checked by screen
+capture and pixel count: the window, its menu bar, the canvas colour and the
+three dots where the Mojo data puts them; after `'clr '` reaches the window
+(sent with `hey`), `MessageReceived` runs in Mojo, `FindView` and
+`state[Canvas]()` find the view's Mojo value, and the redrawn canvas has no
+dots; a quit request ends the loop and the program exits 0. `MouseDown` is
+built but unproved: mouse events never reach windows on the scripted guest,
+so it wants a person with a mouse.
+
+1. **`BRect` and `BPoint` go by hidden reference.** Their copy constructors
+   are user-declared (inline), which makes them non-trivial for calls in the
+   Itanium C++ ABI — GCC and clang agree, and `libbe`'s own `BWindow`
+   constructor takes its frame as a pointer. The first Dots crashed in
+   `strlen` inside `BWindow()`: the entry point read the frame's address from
+   `x0`, where Mojo had put the title, and the title from `x1`, the window
+   type — `strlen(0x1)`. The C interface now carries `mojobe_rect` and
+   `mojobe_point` (true C structs, `s0`–`s3`) in parameters, results and hook
+   signatures, and converts inside. The generator must do this for every
+   value class with a user-declared copy constructor; the ABI oracle (section
+   12) is what catches the next one. `rgb_color`, a C struct, passes as is.
+2. **A function's address does not name a type.** Mojo takes the address of
+   `_destroy[T]` through a thunk made where the address is taken
+   (`…__init__…_closure_0`), so two places get two addresses. Each hook table
+   carries a **type tag** instead — FNV-1a of `reflect[T].name
+   [qualified_builtins=True]()` — and `state[T]()` asks for the tag.
+3. **One trait per hook works** (question 2): `comptime if conforms_to(T,
+   ViewDraw)` with `downcast[T, ViewDraw]` (from `std.builtin.rebind`)
+   instantiates the right trampoline, and a hook a type lacks is a NULL slot.
+4. **Adoption by consuming arguments works**: `_adopt(deinit self)` hands
+   the pointer over without the destructor; menus into the bar, the bar and
+   the view into the window, the window to the system with `window^.Show()`;
+   quitting frees each exactly once (a clean exit, no double free).
+5. **`Ref` origins are still open** (question 1): P0's references are plain
+   trivially-copyable structs. Nothing stops a program keeping one past its
+   hook.
+6. This Mojo's spellings: `__deinit__`, not `__del__`; a `String` handed to
+   C must be owned (`var`), as `as_c_string_span()` may add the NUL;
+   `unsafe_bitcast`; `OptionalPointer` for nullable function pointers, in
+   `RegisterPassable` (not trivially) structs, as the stdlib's CPython slots.
