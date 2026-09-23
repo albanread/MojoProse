@@ -1,8 +1,8 @@
 #!/bin/bash
 # Stage the Haiku build of the compiler for a Prose machine to use through
 # HostFS: the compiler and its libraries with debug info stripped, the
-# standard library's sources to precompile there, and the settings that
-# point the compiler at all of it.
+# standard library's sources and tests, and the settings that point the
+# compiler at all of it.
 #
 #   tools/haiku/stage.sh DEST [GUEST_DIR]
 #
@@ -34,6 +34,8 @@ for lib in _solib_/_USupport/libMSupportGlobals.so \
 	"$STRIP" --strip-debug -o "$DEST/lib/$(basename "$lib")" "$(readlink -f "$BIN/$lib")"
 done
 rsync -a --delete "$ROOT/Mojo/stdlib/std/" "$DEST/stdlib/std/"
+rsync -a --delete "$ROOT/Mojo/stdlib/test/" "$DEST/stdlib/test/"
+cp "$ROOT/tools/haiku/run-stdlib-tests.sh" "$DEST/"
 
 # The compiler reads these as its modular.cfg settings (MODULAR_<section>_<key>).
 # The precompiled standard library goes on the guest's own disk.
