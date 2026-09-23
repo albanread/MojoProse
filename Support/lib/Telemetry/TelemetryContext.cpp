@@ -49,10 +49,6 @@
 #include <utility>
 #include <vector>
 
-#include "opentelemetry/exporters/otlp/otlp_http_log_record_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_http_log_record_exporter_options.h"
-#include "opentelemetry/exporters/otlp/otlp_http_metric_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_http_metric_exporter_options.h"
 #include "opentelemetry/metrics/provider.h"
 #include "opentelemetry/sdk/common/global_log_handler.h"
 #include "opentelemetry/sdk/logs/event_logger_provider_factory.h"
@@ -176,20 +172,12 @@ const M::Telemetry::LocalIDs &M::Telemetry::createLocalIDs() {
   return ids;
 }
 
-bool M::Telemetry::isTelemetryEnabled(Config &settings) {
-  return settings.getValueAsBool("telemetry.enabled",
-#ifdef MODULAR_PRODUCTION
-                                 true
-#else
-                                 false
-#endif // MODULAR_PRODUCTION
-  );
-}
+// MojoProse sends no telemetry and reports no crashes: both are for Modular,
+// not for a Haiku development tool. Nothing in the configuration turns them
+// on, and the exporters that would send anything are not built.
+bool M::Telemetry::isTelemetryEnabled(Config &) { return false; }
 
-bool M::Telemetry::isCrashReportingEnabled(Config &settings) {
-  return settings.getValueAsBool("crash_reporting.enabled",
-                                 isTelemetryEnabled(settings));
-}
+bool M::Telemetry::isCrashReportingEnabled(Config &) { return false; }
 
 static size_t getMaxProcessors(const HostMachineInfo &hostInfo) {
   auto limitsOr = CPULimits::get();
@@ -383,12 +371,7 @@ TelemetryContext::TelemetryContext(Config &settings, StringRef programName,
   provider->AddView(std::move(instrumentSelector), std::move(meterSelector),
                     std::move(view));
 
-  // Shared one-time warning flag for all HTTP exporters in this context.
-  auto exportWarned = std::make_shared<std::atomic<bool>>(false);
-
   // Get metrics exporter config.
-  auto httpEndpoint =
-      settings.getValue("telemetry.exporters.metrics.http_endpoint");
   std::filesystem::path filePath =
       settings.getValue("telemetry.exporters.metrics.file_path").str();
 
@@ -403,31 +386,6 @@ TelemetryContext::TelemetryContext(Config &settings, StringRef programName,
     provider->AddMetricReader(reader);
   }
 
-  if (enabled && !httpEndpoint.empty()) {
-#if TEST_UDS
-    std::filesystem::path udsName =
-        settings.getValue("telemetry.exporters.metrics.uds_name").str();
-    auto exporter = std::make_unique<UDSMetricExporter>(udsName);
-#else
-
-    // HTTP OTLP exporter.
-    opentelemetry::exporter::otlp::OtlpHttpMetricExporterOptions otlpOptions;
-
-    otlpOptions.url = (httpEndpoint + "/v1/metrics").str();
-    otlpOptions.timeout = kOtlpRequestTimeout;
-    auto exporter =
-        opentelemetry::exporter::otlp::OtlpHttpMetricExporterFactory::Create(
-            otlpOptions);
-#endif
-    // Wrap to detect and report export failures.
-    auto warningExporter = std::make_unique<WarningMetricExporter>(
-        std::move(exporter), httpEndpoint.str(), exportWarned);
-    auto reader = std::make_shared<
-        opentelemetry::sdk::metrics::PeriodicExportingMetricReader>(
-        std::move(warningExporter), options);
-    provider->AddMetricReader(reader);
-  }
-
   metricsProvider = std::unique_ptr<opentelemetry::metrics::MeterProvider>(
       provider.release());
   meter = metricsProvider->GetMeter("modular");
@@ -438,9 +396,6 @@ TelemetryContext::TelemetryContext(Config &settings, StringRef programName,
 
   // -------- Logs --------
   // Get logs exporter config.
-  httpEndpoint = settings.getValue("telemetry.exporters.logs.http_endpoint");
-  if (httpEndpoint.empty())
-    httpEndpoint = MODULAR_TELEMETRY_URL;
   filePath = settings.getValue("telemetry.exporters.logs.file_path").str();
 
   // Create log processors for each exporter.
@@ -453,37 +408,6 @@ TelemetryContext::TelemetryContext(Config &settings, StringRef programName,
     processors.emplace_back(
         opentelemetry::sdk::logs::SimpleLogRecordProcessorFactory::Create(
             std::move(logExporter)));
-  }
-
-  if (enabled && !httpEndpoint.empty()) {
-#if TEST_UDS
-    auto logExporter = std::make_unique<UDSLogExporter>(udsName, "/v1/logs");
-#else
-
-    // HTTP OTLP exporter.
-    opentelemetry::exporter::otlp::OtlpHttpLogRecordExporterOptions
-        otlpLogOptions;
-
-    otlpLogOptions.url = (httpEndpoint + "/v1/logs").str();
-    otlpLogOptions.timeout = kOtlpRequestTimeout;
-    auto logExporter =
-        opentelemetry::exporter::otlp::OtlpHttpLogRecordExporterFactory::Create(
-            otlpLogOptions);
-#endif
-    // Wrap to detect and report export failures.
-    auto warningExporter = std::make_unique<WarningLogRecordExporter>(
-        std::move(logExporter), httpEndpoint.str(), exportWarned);
-    // Run the HTTP export on a detached thread so emit is not blocked by
-    // the delegate's network I/O. OTel's curl HTTP exporter relies on the
-    // system's synchronous name resolver, so its 3s CURLOPT_TIMEOUT_MS does
-    // not cap DNS resolution or TCP SYN retries, and synchronous emit can
-    // stall for tens of seconds when the endpoint is unreachable — see
-    // SDLC-3618.
-    auto asyncExporter = std::make_unique<FireAndForgetLogRecordExporter>(
-        std::move(warningExporter));
-    processors.emplace_back(
-        opentelemetry::sdk::logs::SimpleLogRecordProcessorFactory::Create(
-            std::move(asyncExporter)));
   }
 
   loggerProvider = opentelemetry::sdk::logs::LoggerProviderFactory::Create(

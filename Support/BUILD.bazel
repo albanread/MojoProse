@@ -341,14 +341,10 @@ modular_cc_library(
     name = "CrashReporting",
     srcs = glob(["lib/CrashReporting/*.cpp"]),
     hdrs = glob(["include/Support/CrashReporting/*.h"]),
-    copts = [
-        "-Wno-undef",  # Silence warnings from crashpad headers
-    ],
     deps = [
         ":Base",
         ":Configuration",
         "//Config",
-        "@crashpad//:client",
         "@llvm-project//llvm:Support",
     ],
 )
@@ -728,14 +724,6 @@ modular_cc_library(
     defines = [
         "HAVE_CPP_STDLIB",
     ],
-    local_defines = select({
-        "//:production_build": [
-            'MODULAR_TELEMETRY_URL=\\"https://telemetry.modular.com:443\\"',
-        ],
-        "//conditions:default": [
-            'MODULAR_TELEMETRY_URL=\\"https://telemetry-dev.modular.com:443\\"',
-        ],
-    }),
     deps = [
         ":Base",
         ":Base64",
@@ -750,9 +738,6 @@ modular_cc_library(
         "@opentelemetry-cpp//api",
         "@opentelemetry-cpp//exporters/ostream:ostream_log_record_exporter",
         "@opentelemetry-cpp//exporters/ostream:ostream_metric_exporter",
-        "@opentelemetry-cpp//exporters/otlp:otlp_http_exporter",
-        "@opentelemetry-cpp//exporters/otlp:otlp_http_log_record_exporter",
-        "@opentelemetry-cpp//exporters/otlp:otlp_http_metric_exporter",
         "@opentelemetry-cpp//sdk:headers",
     ],
 )
