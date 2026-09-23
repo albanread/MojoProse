@@ -265,6 +265,97 @@ comptime error_message_macos: List[Tuple[ErrNo, String]] = [
     (ErrNo.EQFULL, "Interface output queue is full"),
 ]
 
+# Haiku's strerror(), measured on Prose for every name Haiku defines.
+comptime error_message_haiku: List[Tuple[ErrNo, String]] = [
+    (ErrNo.SUCCESS, "No error"),
+    (ErrNo.EPERM, "Operation not allowed"),
+    (ErrNo.ENOENT, "No such file or directory"),
+    (ErrNo.ESRCH, "No such process"),
+    (ErrNo.EINTR, "Interrupted system call"),
+    (ErrNo.EIO, "I/O error"),
+    (ErrNo.ENXIO, "Device not accessible"),
+    (ErrNo.E2BIG, "Argument too big"),
+    (ErrNo.ENOEXEC, "Not an executable"),
+    (ErrNo.EBADF, "Bad file descriptor"),
+    (ErrNo.ECHILD, "No child process"),
+    (ErrNo.EAGAIN, "Operation would block"),
+    (ErrNo.ENOMEM, "Out of memory"),
+    (ErrNo.EACCES, "Permission denied"),
+    (ErrNo.EFAULT, "Bad address"),
+    (ErrNo.EBUSY, "Device/File/Resource busy"),
+    (ErrNo.EEXIST, "File or Directory already exists"),
+    (ErrNo.EXDEV, "Cross-device link"),
+    (ErrNo.ENODEV, "No such device"),
+    (ErrNo.ENOTDIR, "Not a directory"),
+    (ErrNo.EISDIR, "Is a directory"),
+    (ErrNo.EINVAL, "Invalid Argument"),
+    (ErrNo.ENFILE, "File table overflow"),
+    (ErrNo.EMFILE, "Too many open files"),
+    (ErrNo.ENOTTY, "Not a tty"),
+    (ErrNo.ETXTBSY, "Text file busy"),
+    (ErrNo.EFBIG, "File too large"),
+    (ErrNo.ENOSPC, "No space left on device"),
+    (ErrNo.ESPIPE, "Seek not allowed on file descriptor"),
+    (ErrNo.EROFS, "Read-only file system"),
+    (ErrNo.EMLINK, "Too many links"),
+    (ErrNo.EPIPE, "Broken pipe"),
+    (ErrNo.EDOM, "Numerical argument out of range"),
+    (ErrNo.ERANGE, "Range Error"),
+    (ErrNo.EDEADLK, "Resource deadlock"),
+    (ErrNo.ENAMETOOLONG, "File name too long"),
+    (ErrNo.ENOLCK, "No record locks available"),
+    (ErrNo.ENOSYS, "Function not implemented"),
+    (ErrNo.ENOTEMPTY, "Directory not empty"),
+    (ErrNo.ELOOP, "Too many symbolic links"),
+    (ErrNo.ENOMSG, "No message of desired type"),
+    (ErrNo.EIDRM, "Identifier removed"),
+    (ErrNo.ENOSTR, "Not a STREAM"),
+    (ErrNo.ENODATA, "No message available"),
+    (ErrNo.ETIME, "STREAM ioctl() timeout"),
+    (ErrNo.ENOSR, "No STREAM resources"),
+    (ErrNo.ENOLINK, "Reserved"),
+    (ErrNo.EPROTO, "Protocol error"),
+    (ErrNo.EMULTIHOP, "Reserved"),
+    (ErrNo.EBADMSG, "Bad message"),
+    (ErrNo.EOVERFLOW, "Value too large for defined type"),
+    (ErrNo.EILSEQ, "Illegal byte sequence"),
+    (ErrNo.ENOTSOCK, "Socket operation on non-socket"),
+    (ErrNo.EDESTADDRREQ, "Destination address required"),
+    (ErrNo.EMSGSIZE, "Message too long"),
+    (ErrNo.EPROTOTYPE, "Protocol wrong type for socket"),
+    (ErrNo.ENOPROTOOPT, "Protocol option not available"),
+    (ErrNo.EPROTONOSUPPORT, "Protocol not supported"),
+    (ErrNo.ESOCKTNOSUPPORT, "Socket type not supported"),
+    (ErrNo.EOPNOTSUPP, "Operation not supported"),
+    (ErrNo.EPFNOSUPPORT, "Protocol family not supported"),
+    (ErrNo.EAFNOSUPPORT, "Address family not supported by protocol family"),
+    (ErrNo.EADDRINUSE, "Address already in use"),
+    (ErrNo.EADDRNOTAVAIL, "Can't assign requested address"),
+    (ErrNo.ENETDOWN, "Network is down"),
+    (ErrNo.ENETUNREACH, "Network is unreachable"),
+    (ErrNo.ENETRESET, "Network dropped connection on reset"),
+    (ErrNo.ECONNABORTED, "Software caused connection abort"),
+    (ErrNo.ECONNRESET, "Connection reset by peer"),
+    (ErrNo.ENOBUFS, "No buffer space available"),
+    (ErrNo.EISCONN, "Socket is already connected"),
+    (ErrNo.ENOTCONN, "Socket is not connected"),
+    (ErrNo.ESHUTDOWN, "Can't send after socket shutdown"),
+    (ErrNo.ETIMEDOUT, "Operation timed out"),
+    (ErrNo.ECONNREFUSED, "Connection refused"),
+    (ErrNo.EHOSTDOWN, "Host is down"),
+    (ErrNo.EHOSTUNREACH, "No route to host"),
+    (ErrNo.EALREADY, "Operation already in progress"),
+    (ErrNo.EINPROGRESS, "Operation now in progress"),
+    (ErrNo.ESTALE, "Stale file handle"),
+    (ErrNo.EDQUOT, "Reserved"),
+    (ErrNo.ECANCELED, "Operation canceled"),
+    (ErrNo.EOWNERDEAD, "Previous owner died"),
+    (ErrNo.ENOTRECOVERABLE, "State not recoverable"),
+    (ErrNo.ENOTSUP, "Not supported"),
+    (ErrNo.ENOATTR, "No such attribute"),
+    (ErrNo.EWOULDBLOCK, "Operation would block"),
+]
+
 
 def _test_errno_message[error_message: List[Tuple[ErrNo, String]]]() raises:
     comptime for i in range(len(error_message)):
@@ -280,6 +371,8 @@ def test_errno_message() raises:
         _test_errno_message[error_message_linux]()
     elif CompilationTarget.is_macos():
         _test_errno_message[error_message_macos]()
+    elif CompilationTarget.is_haiku():
+        _test_errno_message[error_message_haiku]()
     else:
         comptime assert False, "test not implemented for the platform"
 
@@ -304,6 +397,14 @@ def test_errno() raises:
 
 
 def test_rtld_flags() raises:
+    comptime if CompilationTarget.is_haiku():
+        assert_equal(RTLD.LAZY, 0)
+        assert_equal(RTLD.NOW, 1)
+        assert_equal(RTLD.LOCAL, 0)
+        assert_equal(RTLD.GLOBAL, 2)
+        # Haiku has no RTLD_NODELETE.
+        assert_equal(RTLD.NODELETE, 0)
+        return
     assert_equal(RTLD.LAZY, 1)
     assert_equal(RTLD.NOW, 2)
     comptime if CompilationTarget.is_linux():

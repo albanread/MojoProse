@@ -33,6 +33,8 @@ def _load_libc() raises -> OwnedDLHandle:
         return OwnedDLHandle("libc.so")  # musl / BSD
     elif CompilationTarget.is_macos():
         return OwnedDLHandle("/usr/lib/system/libsystem_c.dylib")
+    elif CompilationTarget.is_haiku():
+        return OwnedDLHandle("libroot.so")
     else:
         comptime assert False, "libc discovery not implemented for platform"
 
@@ -52,7 +54,8 @@ def _load_libm() raises -> OwnedDLHandle:
         # musl folds math into libc.
         return _load_libc()
     else:
-        # On macOS, math symbols are available through libSystem / libc.
+        # On macOS, math symbols are available through libSystem / libc, and
+        # on Haiku through libroot.
         return _load_libc()
 
 

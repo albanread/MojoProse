@@ -25,7 +25,9 @@ from std.testing import TestSuite
 
 def test_c_int_type() raises:
     if is_64bit() and (
-        CompilationTarget.is_macos() or CompilationTarget.is_linux()
+        CompilationTarget.is_macos()
+        or CompilationTarget.is_linux()
+        or CompilationTarget.is_haiku()
     ):
         # `int` is always 32 bits on the modern 64-bit OSes.
         assert_equal(c_int.dtype, DType.int32)
@@ -35,9 +37,11 @@ def test_c_int_type() raises:
 
 def test_c_long_types() raises:
     if is_64bit() and (
-        CompilationTarget.is_macos() or CompilationTarget.is_linux()
+        CompilationTarget.is_macos()
+        or CompilationTarget.is_linux()
+        or CompilationTarget.is_haiku()
     ):
-        # `long` is 64 bits on macOS and Linux.
+        # `long` is 64 bits on macOS, Linux and Haiku.
         assert_equal(c_long.dtype, DType.int64)
         assert_equal(c_ulong.dtype, DType.uint64)
     else:
@@ -46,7 +50,9 @@ def test_c_long_types() raises:
 
 def test_c_long_long_types() raises:
     if is_64bit() and (
-        CompilationTarget.is_macos() or CompilationTarget.is_linux()
+        CompilationTarget.is_macos()
+        or CompilationTarget.is_linux()
+        or CompilationTarget.is_haiku()
     ):
         assert_equal(c_long_long.dtype, DType.int64)
         assert_equal(c_ulong_long.dtype, DType.uint64)
