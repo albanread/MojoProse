@@ -148,3 +148,49 @@ effectively assumes) or an `lld` that accepts arm64e stubs.
 
 MojoCocoa builds against the same SDK rule and will hit this the next time its
 sysroot is refetched.
+
+---
+
+## G2 — Pre-check: the build's clang makes Haiku programs (2026-09-23)
+
+Before touching Bazel's toolchain, the facts it will encode, proved by hand
+with the build's own hermetic clang
+(`external/+http_archive+clang-macos/bin/clang++`, 22.1.4) on a C++ program
+using libstdc++, `std::thread` and Haiku's `get_system_info`:
+
+```
+hello from clang 22 for Haiku: 4 threads joined, 4 CPUs      (on Prose)
+```
+
+What it took — every one found by failing first:
+
+1. **A sysroot**, `tools/haiku/make-sysroot.sh`: a copy of the Haiku build's
+   `haiku_devel` and `haiku` packages, `gcc_syslibs(_devel)` for libstdc++'s
+   headers and libraries, and `crtbeginS.o`/`crtendS.o` from the cross GCC's
+   install (clang names them on every Haiku link; no package carries them).
+   The one dangling link, `develop/lib/libroot_debug.so`, points into the debug
+   package and is dropped.
+2. **A case-sensitive volume for it.** On `/Volumes/xc` (Journaled HFS+,
+   case-insensitive) libstdc++'s `<clocale>` asked for `<locale.h>`, and the
+   search found Haiku's Locale Kit `os/locale/Locale.h` first, because clang
+   searches `os/locale` before `posix`. On Haiku's BFS the lookup misses and
+   falls through to `posix/locale.h`. The sysroot therefore lives on the
+   case-sensitive `/Volumes/HaikuSrc` (`/Volumes/HaikuSrc/mojoprose-sysroot-arm64`).
+3. **libstdc++'s headers by name**: `-nostdinc++ -isystem …/c++ -isystem
+   …/c++/aarch64-unknown-haiku -isystem …/c++/backward`. clang's Haiku driver
+   finds them only through an installed GCC.
+4. **Haiku's program layout**: `-z max-page-size=4096 -z common-page-size=4096
+   -z noseparate-code`. With lld's 64 KB defaults the program exited 255
+   before `main` ("Could not map image: Bad data", as Prose's own clang 23
+   found — HaikuArmQemu memory, patch 0077).
+
+### What this means for the Bazel wiring
+
+Bazel's execroot and sandboxes are on `xc`, which is case-insensitive, and a
+sandbox symlinks each input file. A sysroot copied into an external repository
+would meet the `Locale.h` trap again inside the sandbox. So the Haiku toolchain
+points `--sysroot` at the absolute path on `HaikuSrc`, allowed through
+`allowlist_absolute_include_directories`, with a stamp of the sysroot's
+contents in the toolchain's arguments so a new sysroot re-keys the actions.
+The alternative, an output root on a case-sensitive volume, is kept for the
+case where this one fails.
