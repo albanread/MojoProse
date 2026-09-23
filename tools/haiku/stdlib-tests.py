@@ -6,9 +6,9 @@
 Asks Bazel for the standard library's mojo_test targets and writes one line
 a test, tab separated: the target's name, its source (relative to
 Mojo/stdlib/test), the compiler flags, whether assertions are on, the
-environment (K=V;K=V), the dependencies beyond std and test_utils, and
-"incompatible" when Bazel would not run it or "generated" when its source is
-a build output. Each select() is taken at its default, which is what a Haiku
+environment (K=V;K=V), the test's arguments, the dependencies beyond std and
+test_utils, and "incompatible" when Bazel would not run it or "generated"
+when its source is a build output. Each select() is taken at its default, which is what a Haiku
 build without a GPU or sanitizers gets.
 """
 
@@ -20,13 +20,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# The config_settings that hold for a Haiku build: the platform, and the
+# compiler built from source (--config=build-mojo), not a prebuilt one.
+TRUE_SETTINGS = (
+    "@platforms//os:haiku",
+    "//:haiku_aarch64",
+    "//:use_prebuilt_mojo_toolchain_disabled",
+)
+
+
 def take_defaults(expr):
-    """Replace each select({...}) with its //conditions:default value."""
+    """Replace each select({...}) with the branch of a setting that holds
+    for a Haiku build, or else its //conditions:default value."""
 
     def default(match):
-        found = re.search(r'"//conditions:default": (\[[^\]]*\]|\{[^}]*\})',
-                          match.group(1))
-        return found.group(1) if found else "[]"
+        for key in TRUE_SETTINGS + ("//conditions:default",):
+            found = re.search('"' + re.escape(key) +
+                              r'": (\[[^\]]*\]|\{[^}]*\})', match.group(1))
+            if found:
+                return found.group(1)
+        return "[]"
 
     previous = None
     while previous != expr:
@@ -81,9 +94,12 @@ def main():
         incompatible = "@platforms//:incompatible" in constraints or any(
             c.startswith("@platforms//os:") and c != "@platforms//os:haiku"
             for c in constraints)
+        args = attr("args", [])
+        assert all(" " not in a for a in args), (name, args)
         rows.append("\t".join([
             name, src, " ".join(copts), asserts,
-            ";".join(f"{k}={v}" for k, v in env.items()), ",".join(deps),
+            ";".join(f"{k}={v}" for k, v in env.items()), " ".join(args),
+            ",".join(deps),
             "incompatible" if incompatible else
             "generated" if generated else ""]))
 

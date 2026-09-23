@@ -6,8 +6,9 @@
 #
 # MANIFEST is tools/haiku/stdlib-tests.py's output: one test a line, tab
 # separated -- target name, source (relative to TESTROOT), compiler flags,
-# whether assertions are on, the environment (K=V;K=V), other dependencies,
-# and "incompatible" or "generated" for tests it cannot run. Results go to
+# whether assertions are on, the environment (K=V;K=V), the test's arguments,
+# other dependencies, and "incompatible" or "generated" for tests it cannot
+# run. Results go to
 # OUTDIR/results.tsv (RESULT, target, seconds) and each test's output to
 # OUTDIR/logs/.
 #
@@ -21,10 +22,10 @@ JOBS="${4:-4}"
 mkdir -p "$OUT/logs"
 
 run_one() {
-	local name src copts asserts env other unrunnable
+	local name src copts asserts env args other unrunnable
 	# Tab is whitespace to read, which would merge empty fields; the unit
 	# separator is not.
-	IFS=$'\x1f' read -r name src copts asserts env other unrunnable \
+	IFS=$'\x1f' read -r name src copts asserts env args other unrunnable \
 		<<< "${1//$'\t'/$'\x1f'}"
 	local id="${src%/*}_${name}"
 	id="${id//\//_}"
@@ -60,7 +61,7 @@ run_one() {
 	local envs=()
 	[ -n "$env" ] && IFS=';' read -r -a envs <<< "$env"
 	local status
-	env "${envs[@]}" timeout 600 "$work/test" >> "$log" 2>&1
+	env "${envs[@]}" timeout 600 "$work/test" $args >> "$log" 2>&1
 	status=$?
 	if [ $status -eq 0 ]; then
 		printf 'PASS\t%s\t%ds\n' "$id" $((SECONDS - start))
