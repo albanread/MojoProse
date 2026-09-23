@@ -218,6 +218,11 @@ M::ErrorOr<size_t> M::getHostCPUCacheSize(size_t cacheLevel) {
   }
 
   return 0;
+#elif defined(__HAIKU__)
+  // Haiku reports a CPU package's cache line size but not the sizes of its
+  // caches. 0 is "unknown", as on Linux when sysfs has no cache directory.
+  (void)cacheLevel;
+  return 0;
 #else
   return Error("unsupported platform");
 #endif

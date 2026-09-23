@@ -57,6 +57,13 @@
 #include <windows.h>
 #endif // _MSC_VER
 
+#ifdef __HAIKU__
+#include <OS.h>
+#include <cerrno>
+#include <cstring>
+#include <sys/utsname.h>
+#endif // __HAIKU__
+
 #define DEBUG_TYPE "host"
 
 using namespace M;
@@ -101,6 +108,11 @@ static ErrorOr<std::vector<std::string>> getAllHostCPUModelNames() {
   // to fetch Win32_Processor.Name.)  For now, return an empty vector instead
   // of returning an error.  If we return error, system-info.exe will fail even
   // if we don't care about model name.
+  return std::vector<std::string>{};
+#elif defined(__HAIKU__)
+  // Haiku has no CPU brand string on arm64. Neither has arm64 Linux, whose
+  // /proc/cpuinfo carries no "model name" lines, so this is Linux's answer
+  // on the same processors.
   return std::vector<std::string>{};
 #else
   return Error("Unsupported platform.");
@@ -427,6 +439,12 @@ M::ErrorOr<std::string> M::getHostTotalMemoryKB() {
 #elif defined(_MSC_VER)
   // TODO Windows implementation
   return "";
+#elif defined(__HAIKU__)
+  system_info info;
+  if (get_system_info(&info) != B_OK)
+    return Error("Unable to query get_system_info");
+  // In KiB, as Linux's MemTotal is.
+  return std::to_string(info.max_pages * B_PAGE_SIZE / 1024);
 #else
   return Error("Unsupported platform.");
 #endif
@@ -467,6 +485,11 @@ M::ErrorOr<std::string> M::getHostOSVersion() {
 #elif defined(_MSC_VER)
   // TODO Windows implementation
   return "";
+#elif defined(__HAIKU__)
+  struct utsname name;
+  if (uname(&name) != 0)
+    return Error("uname failed: " + llvm::Twine(strerror(errno)));
+  return std::string(name.version);
 #else
   return Error("Unsupported platform.");
 #endif
