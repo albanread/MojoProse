@@ -233,93 +233,99 @@ void TelemetryContext::flush(std::chrono::microseconds timeout) {
 TelemetryContext::TelemetryContext(Config &settings, StringRef programName,
                                    StringRef subCommand) {
   using namespace opentelemetry::sdk::resource;
+  bool enabled = isTelemetryEnabled(settings);
+
   // -------- Resources --------
+  // The host's profile -- its CPU, memory and OS, a machine id hashed from
+  // its network cards' addresses, a session id, the web user id -- describes
+  // it to Modular's telemetry. MojoProse has none, so none of it is gathered.
   // Get the map of resources for the full host info.
   ResourceAttributes attrs;
   std::string programNameStr = programName.str();
   std::string subCommandStr = subCommand.str();
-  auto hostInfoOr = getHostMachineInfo();
-  // May fail in sandboxed or containerized environments, but do not print a
-  // warning as some Telemetry data not initializing does not help the user.
-  if (!hostInfoOr.isError()) {
-    // Set the CPU and architecture.
-    attrs.SetAttribute("cpu.description", hostInfoOr->cpuModelName);
-    // WARNING: Metering & billing depends on cpu.arch. Do not remove!
-    attrs.SetAttribute("cpu.arch", hostInfoOr->cpuArch);
-    // Set the CPU features.
-    std::vector<std::string_view> featuresView;
-    for (auto &f : hostInfoOr->cpuFeatures)
-      featuresView.emplace_back(f);
-    attrs.SetAttribute("cpu.features", featuresView);
-    // Set some of the other useful features, like number of cores and operating
-    // system.
-    attrs.SetAttribute("cpu.cores", hostInfoOr->numPhysicalCores);
-    attrs.SetAttribute("cpu.max_cores", getMaxProcessors(*hostInfoOr));
-    attrs.SetAttribute("cpu.model_name", hostInfoOr->cpuModelName);
-    attrs.SetAttribute("os.type", hostInfoOr->osName);
-    attrs.SetAttribute("os.version", hostInfoOr->osVersion);
-  } else {
-    LDBG() << "getHostMachineInfo() failed: " << hostInfoOr.getError()
-           << "; falling back to getHostCPUName() for cpu.arch";
-    // WARNING: Metering & billing depends on cpu.arch. Do not remove!
-    // getHostCPUName() always succeeds, though it may return "generic"
-    // on unrecognized CPUs.
-    attrs.SetAttribute("cpu.arch", llvm::sys::getHostCPUName().str());
-  }
+  if (enabled) {
+    auto hostInfoOr = getHostMachineInfo();
+    // May fail in sandboxed or containerized environments, but do not print a
+    // warning as some Telemetry data not initializing does not help the user.
+    if (!hostInfoOr.isError()) {
+      // Set the CPU and architecture.
+      attrs.SetAttribute("cpu.description", hostInfoOr->cpuModelName);
+      // WARNING: Metering & billing depends on cpu.arch. Do not remove!
+      attrs.SetAttribute("cpu.arch", hostInfoOr->cpuArch);
+      // Set the CPU features.
+      std::vector<std::string_view> featuresView;
+      for (auto &f : hostInfoOr->cpuFeatures)
+        featuresView.emplace_back(f);
+      attrs.SetAttribute("cpu.features", featuresView);
+      // Set some of the other useful features, like number of cores and
+      // operating system.
+      attrs.SetAttribute("cpu.cores", hostInfoOr->numPhysicalCores);
+      attrs.SetAttribute("cpu.max_cores", getMaxProcessors(*hostInfoOr));
+      attrs.SetAttribute("cpu.model_name", hostInfoOr->cpuModelName);
+      attrs.SetAttribute("os.type", hostInfoOr->osName);
+      attrs.SetAttribute("os.version", hostInfoOr->osVersion);
+    } else {
+      LDBG() << "getHostMachineInfo() failed: " << hostInfoOr.getError()
+             << "; falling back to getHostCPUName() for cpu.arch";
+      // WARNING: Metering & billing depends on cpu.arch. Do not remove!
+      // getHostCPUName() always succeeds, though it may return "generic"
+      // on unrecognized CPUs.
+      attrs.SetAttribute("cpu.arch", llvm::sys::getHostCPUName().str());
+    }
 
-  // Get total memory.
-  auto memoryOr = getHostTotalMemoryKB();
-  if (!memoryOr.isError()) {
-    attrs.SetAttribute("memory", memoryOr.takeValue());
-  }
+    // Get total memory.
+    auto memoryOr = getHostTotalMemoryKB();
+    if (!memoryOr.isError()) {
+      attrs.SetAttribute("memory", memoryOr.takeValue());
+    }
 
-  // Check if we are running in a container
-  auto isInContainer = getHostIsInContainer();
-  if (!isInContainer.isError())
-    attrs.SetAttribute("system.in.container", isInContainer.takeValue());
+    // Check if we are running in a container
+    auto isInContainer = getHostIsInContainer();
+    if (!isInContainer.isError())
+      attrs.SetAttribute("system.in.container", isInContainer.takeValue());
 
-  // Set the underlying Modular version.
-  auto version = getModularVersion();
-  attrs.SetAttribute("modular.version.major", version.major);
-  attrs.SetAttribute("modular.version.minor", version.minor);
-  attrs.SetAttribute("modular.version.patch", version.patch);
-  attrs.SetAttribute("modular.version.label", version.label);
-  attrs.SetAttribute("modular.version.revision", version.revision);
-  attrs.SetAttribute("modular.version.buildtype", version.buildType);
+    // Set the underlying Modular version.
+    auto version = getModularVersion();
+    attrs.SetAttribute("modular.version.major", version.major);
+    attrs.SetAttribute("modular.version.minor", version.minor);
+    attrs.SetAttribute("modular.version.patch", version.patch);
+    attrs.SetAttribute("modular.version.label", version.label);
+    attrs.SetAttribute("modular.version.revision", version.revision);
+    attrs.SetAttribute("modular.version.buildtype", version.buildType);
 
-  // Set the local machineid.
-  const auto &localIDs = createLocalIDs();
-  // WARNING: Metering & billing depends on machineid. Do not remove!
-  attrs.SetAttribute("machineid", localIDs.machine);
-  attrs.SetAttribute("sessionid", localIDs.session);
-  machineId = localIDs.machine;
+    // Set the local machineid.
+    const auto &localIDs = createLocalIDs();
+    // WARNING: Metering & billing depends on machineid. Do not remove!
+    attrs.SetAttribute("machineid", localIDs.machine);
+    attrs.SetAttribute("sessionid", localIDs.session);
+    machineId = localIDs.machine;
 
-  auto webId = settings.getValue("web.id");
-  if (webId.empty()) {
-    auto homeDir = llvm::sys::Process::GetEnv("HOME");
-    if (homeDir) {
-      auto webIdFile =
-          std::filesystem::path(*homeDir) / ".modular" / "webUserId";
-      if (std::filesystem::exists(webIdFile)) {
-        auto mBufOr = llvm::MemoryBuffer::getFile(webIdFile.string(),
-                                                  /*IsText=*/true);
-        if (mBufOr) {
-          std::unique_ptr<llvm::MemoryBuffer> mbuf = std::move(*mBufOr);
-          auto buffer = mbuf->getBuffer();
-          size_t newlineLoc = buffer.find_first_of("\n\r\f\v");
-          webId = buffer.take_front(newlineLoc);
-          if (!webId.empty())
-            attrs.SetAttribute("web.user.id", webId);
+    auto webId = settings.getValue("web.id");
+    if (webId.empty()) {
+      auto homeDir = llvm::sys::Process::GetEnv("HOME");
+      if (homeDir) {
+        auto webIdFile =
+            std::filesystem::path(*homeDir) / ".modular" / "webUserId";
+        if (std::filesystem::exists(webIdFile)) {
+          auto mBufOr = llvm::MemoryBuffer::getFile(webIdFile.string(),
+                                                    /*IsText=*/true);
+          if (mBufOr) {
+            std::unique_ptr<llvm::MemoryBuffer> mbuf = std::move(*mBufOr);
+            auto buffer = mbuf->getBuffer();
+            size_t newlineLoc = buffer.find_first_of("\n\r\f\v");
+            webId = buffer.take_front(newlineLoc);
+            if (!webId.empty())
+              attrs.SetAttribute("web.user.id", webId);
+          }
         }
       }
+    } else {
+      attrs.SetAttribute("web.user.id", webId);
     }
-  } else {
-    attrs.SetAttribute("web.user.id", webId);
+
+    attrs.SetAttribute("modular.employee", isModularEmployee());
   }
 
-  attrs.SetAttribute("modular.employee", isModularEmployee());
-
-  bool enabled = isTelemetryEnabled(settings);
 
   // Get telemetry level.
   auto level = settings.getValue("telemetry.level");
