@@ -562,6 +562,15 @@ struct CompilationTarget[_mlir_value: _TargetType = _current_target(), //](
         """
         return Self._os() in ["darwin", "macosx"]
 
+    @staticmethod
+    def is_haiku() -> Bool:
+        """Returns True if the host operating system is Haiku.
+
+        Returns:
+            True if the host operating system is Haiku and False otherwise.
+        """
+        return Self._os() == "haiku"
+
 
 def platform_map[
     T: Copyable,
@@ -570,6 +579,7 @@ def platform_map[
     *,
     linux: Optional[T] = None,
     macos: Optional[T] = None,
+    haiku: Optional[T] = None,
 ]() -> T:
     """Helper for defining a compile time value depending
     on the current compilation target, raising a compilation
@@ -580,6 +590,7 @@ def platform_map[
         operation: Optional operation name for error messages.
         linux: The value to use on Linux platforms.
         macos: The value to use on macOS platforms.
+        haiku: The value to use on Haiku.
 
     Returns:
         The platform-specific value for the current target.
@@ -597,6 +608,8 @@ def platform_map[
         return materialize[macos.value()]()
     elif CompilationTarget.is_linux() and linux:
         return materialize[linux.value()]()
+    elif CompilationTarget.is_haiku() and haiku:
+        return materialize[haiku.value()]()
     else:
         CompilationTarget.unsupported_target_error[operation=operation]()
 
