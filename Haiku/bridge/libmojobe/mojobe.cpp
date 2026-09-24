@@ -85,6 +85,70 @@ mojobe_from_c(const mojobe_rgb_color& value)
 }
 
 
+[[maybe_unused]] mojobe_font_height
+mojobe_to_c(const font_height& value)
+{
+	mojobe_font_height result;
+	result.ascent = value.ascent;
+	result.descent = value.descent;
+	result.leading = value.leading;
+	return result;
+}
+
+
+[[maybe_unused]] font_height
+mojobe_from_c(const mojobe_font_height& value)
+{
+	font_height result;
+	result.ascent = value.ascent;
+	result.descent = value.descent;
+	result.leading = value.leading;
+	return result;
+}
+
+
+[[maybe_unused]] mojobe_clipping_rect
+mojobe_to_c(const clipping_rect& value)
+{
+	mojobe_clipping_rect result;
+	result.left = value.left;
+	result.top = value.top;
+	result.right = value.right;
+	result.bottom = value.bottom;
+	return result;
+}
+
+
+[[maybe_unused]] clipping_rect
+mojobe_from_c(const mojobe_clipping_rect& value)
+{
+	clipping_rect result;
+	result.left = value.left;
+	result.top = value.top;
+	result.right = value.right;
+	result.bottom = value.bottom;
+	return result;
+}
+
+
+[[maybe_unused]] mojobe_screen_id
+mojobe_to_c(const screen_id& value)
+{
+	mojobe_screen_id result;
+	result.id = value.id;
+	return result;
+}
+
+
+[[maybe_unused]] screen_id
+mojobe_from_c(const mojobe_screen_id& value)
+{
+	screen_id result;
+	result.id = value.id;
+	return result;
+}
+
+
 [[maybe_unused]] mojobe_pattern
 mojobe_to_c(const pattern& value)
 {
@@ -993,6 +1057,659 @@ mojobe_BMessenger_new__void(BMessenger* self)
 		return;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessenger_new__void");
+	}
+}
+
+
+
+// #pragma mark - BFont
+
+
+// bool BFont::operator==(const BFont& font) const
+bool
+mojobe_BFont_equals(const BFont* self, const BFont* other)
+{
+	try {
+		return *self == *other;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_equals");
+	}
+	return {};
+}
+
+
+// status_t BFont::SetFamilyAndStyle(const char* family, const char* style)
+status_t
+mojobe_BFont_SetFamilyAndStyle__charP_charP(BFont* self,
+	const char* a_family,
+	const char* a_style)
+{
+	try {
+		return self->SetFamilyAndStyle(a_family, a_style);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFamilyAndStyle__charP_charP");
+	}
+	return B_ERROR;
+}
+
+
+// void BFont::SetFamilyAndStyle(uint32 code)
+void
+mojobe_BFont_SetFamilyAndStyle__uint32(BFont* self, uint32 a_code)
+{
+	try {
+		self->SetFamilyAndStyle(a_code);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFamilyAndStyle__uint32");
+	}
+}
+
+
+// status_t BFont::SetFamilyAndFace(const char* family, uint16 face)
+status_t
+mojobe_BFont_SetFamilyAndFace(BFont* self, const char* a_family, uint16 a_face)
+{
+	try {
+		return self->SetFamilyAndFace(a_family, a_face);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFamilyAndFace");
+	}
+	return B_ERROR;
+}
+
+
+// void BFont::SetSize(float size)
+void
+mojobe_BFont_SetSize(BFont* self, float a_size)
+{
+	try {
+		self->SetSize(a_size);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetSize");
+	}
+}
+
+
+// void BFont::SetShear(float shear)
+void
+mojobe_BFont_SetShear(BFont* self, float a_shear)
+{
+	try {
+		self->SetShear(a_shear);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetShear");
+	}
+}
+
+
+// void BFont::SetRotation(float rotation)
+void
+mojobe_BFont_SetRotation(BFont* self, float a_rotation)
+{
+	try {
+		self->SetRotation(a_rotation);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetRotation");
+	}
+}
+
+
+// void BFont::SetFalseBoldWidth(float width)
+void
+mojobe_BFont_SetFalseBoldWidth(BFont* self, float a_width)
+{
+	try {
+		self->SetFalseBoldWidth(a_width);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFalseBoldWidth");
+	}
+}
+
+
+// void BFont::SetSpacing(uint8 spacing)
+void
+mojobe_BFont_SetSpacing(BFont* self, uint8 a_spacing)
+{
+	try {
+		self->SetSpacing(a_spacing);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetSpacing");
+	}
+}
+
+
+// void BFont::SetEncoding(uint8 encoding)
+void
+mojobe_BFont_SetEncoding(BFont* self, uint8 a_encoding)
+{
+	try {
+		self->SetEncoding(a_encoding);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetEncoding");
+	}
+}
+
+
+// void BFont::SetFace(uint16 face)
+void
+mojobe_BFont_SetFace(BFont* self, uint16 a_face)
+{
+	try {
+		self->SetFace(a_face);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFace");
+	}
+}
+
+
+// void BFont::SetFlags(uint32 flags)
+void
+mojobe_BFont_SetFlags(BFont* self, uint32 a_flags)
+{
+	try {
+		self->SetFlags(a_flags);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_SetFlags");
+	}
+}
+
+
+// uint32 BFont::FamilyAndStyle() const
+uint32
+mojobe_BFont_FamilyAndStyle(BFont* self)
+{
+	try {
+		return self->FamilyAndStyle();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_FamilyAndStyle");
+	}
+	return {};
+}
+
+
+// float BFont::Size() const
+float
+mojobe_BFont_Size(BFont* self)
+{
+	try {
+		return self->Size();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Size");
+	}
+	return {};
+}
+
+
+// float BFont::Shear() const
+float
+mojobe_BFont_Shear(BFont* self)
+{
+	try {
+		return self->Shear();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Shear");
+	}
+	return {};
+}
+
+
+// float BFont::Rotation() const
+float
+mojobe_BFont_Rotation(BFont* self)
+{
+	try {
+		return self->Rotation();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Rotation");
+	}
+	return {};
+}
+
+
+// float BFont::FalseBoldWidth() const
+float
+mojobe_BFont_FalseBoldWidth(BFont* self)
+{
+	try {
+		return self->FalseBoldWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_FalseBoldWidth");
+	}
+	return {};
+}
+
+
+// uint8 BFont::Spacing() const
+uint8
+mojobe_BFont_Spacing(BFont* self)
+{
+	try {
+		return self->Spacing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Spacing");
+	}
+	return {};
+}
+
+
+// uint8 BFont::Encoding() const
+uint8
+mojobe_BFont_Encoding(BFont* self)
+{
+	try {
+		return self->Encoding();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Encoding");
+	}
+	return {};
+}
+
+
+// uint16 BFont::Face() const
+uint16
+mojobe_BFont_Face(BFont* self)
+{
+	try {
+		return self->Face();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Face");
+	}
+	return {};
+}
+
+
+// uint32 BFont::Flags() const
+uint32
+mojobe_BFont_Flags(BFont* self)
+{
+	try {
+		return self->Flags();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Flags");
+	}
+	return {};
+}
+
+
+// font_direction BFont::Direction() const
+font_direction
+mojobe_BFont_Direction(BFont* self)
+{
+	try {
+		return self->Direction();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_Direction");
+	}
+	return {};
+}
+
+
+// bool BFont::IsFixed() const
+bool
+mojobe_BFont_IsFixed(BFont* self)
+{
+	try {
+		return self->IsFixed();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_IsFixed");
+	}
+	return {};
+}
+
+
+// bool BFont::IsFullAndHalfFixed() const
+bool
+mojobe_BFont_IsFullAndHalfFixed(BFont* self)
+{
+	try {
+		return self->IsFullAndHalfFixed();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_IsFullAndHalfFixed");
+	}
+	return {};
+}
+
+
+// BRect BFont::BoundingBox() const
+mojobe_BRect
+mojobe_BFont_BoundingBox(BFont* self)
+{
+	try {
+		return mojobe_to_c(self->BoundingBox());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_BoundingBox");
+	}
+	return {};
+}
+
+
+// bool BFont::IncludesBlock(uint32 start, uint32 end) const
+bool
+mojobe_BFont_IncludesBlock(BFont* self, uint32 a_start, uint32 a_end)
+{
+	try {
+		return self->IncludesBlock(a_start, a_end);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_IncludesBlock");
+	}
+	return {};
+}
+
+
+// font_file_format BFont::FileFormat() const
+font_file_format
+mojobe_BFont_FileFormat(BFont* self)
+{
+	try {
+		return self->FileFormat();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_FileFormat");
+	}
+	return {};
+}
+
+
+// int32 BFont::CountTuned() const
+int32
+mojobe_BFont_CountTuned(BFont* self)
+{
+	try {
+		return self->CountTuned();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_CountTuned");
+	}
+	return {};
+}
+
+
+// float BFont::StringWidth(const char* string) const
+float
+mojobe_BFont_StringWidth__charP(BFont* self, const char* a_string)
+{
+	try {
+		return self->StringWidth(a_string);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_StringWidth__charP");
+	}
+	return {};
+}
+
+
+// float BFont::StringWidth(const char* string, int32 length) const
+float
+mojobe_BFont_StringWidth__charP_int32(BFont* self,
+	const char* a_string,
+	int32 a_length)
+{
+	try {
+		return self->StringWidth(a_string, a_length);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_StringWidth__charP_int32");
+	}
+	return {};
+}
+
+
+// void BFont::GetEscapements(const char* charArray, int32 numChars, float* escapementArray) const
+void
+mojobe_BFont_GetEscapements(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	float * a_escapementArray)
+{
+	try {
+		self->GetEscapements(a_charArray, a_numChars, a_escapementArray);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_GetEscapements");
+	}
+}
+
+
+// void BFont::GetHeight(font_height* height) const
+void
+mojobe_BFont_GetHeight(BFont* self, mojobe_font_height* a_height)
+{
+	try {
+		font_height t_height;
+		self->GetHeight(&t_height);
+		if (a_height != NULL)
+		*a_height = mojobe_to_c(t_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_GetHeight");
+	}
+}
+
+
+// void BFont::GetBoundingBoxesAsGlyphs(const char* charArray, int32 numChars, font_metric_mode mode, BRect* boundingBoxArray) const
+void
+mojobe_BFont_GetBoundingBoxesAsGlyphs(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	font_metric_mode a_mode,
+	mojobe_BRect* a_boundingBoxArray)
+{
+	try {
+		BRect t_boundingBoxArray;
+		self->GetBoundingBoxesAsGlyphs(a_charArray, a_numChars, a_mode, &t_boundingBoxArray);
+		if (a_boundingBoxArray != NULL)
+		*a_boundingBoxArray = mojobe_to_c(t_boundingBoxArray);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_GetBoundingBoxesAsGlyphs");
+	}
+}
+
+
+// void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray) const
+void
+mojobe_BFont_GetHasGlyphs__charP_int32_boolP(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	bool * a_hasArray)
+{
+	try {
+		self->GetHasGlyphs(a_charArray, a_numChars, a_hasArray);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_GetHasGlyphs__charP_int32_boolP");
+	}
+}
+
+
+// void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray, bool useFallbacks) const
+void
+mojobe_BFont_GetHasGlyphs__charP_int32_boolP_bool(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	bool * a_hasArray,
+	bool a_useFallbacks)
+{
+	try {
+		self->GetHasGlyphs(a_charArray, a_numChars, a_hasArray, a_useFallbacks);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_GetHasGlyphs__charP_int32_boolP_bool");
+	}
+}
+
+
+// void BFont::PrintToStream() const
+void
+mojobe_BFont_PrintToStream(BFont* self)
+{
+	try {
+		self->PrintToStream();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_PrintToStream");
+	}
+}
+
+
+// status_t BFont::LoadFont(const char* path)
+status_t
+mojobe_BFont_LoadFont__charP(BFont* self, const char* a_path)
+{
+	try {
+		return self->LoadFont(a_path);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_LoadFont__charP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BFont::LoadFont(const char* path, uint16 index, uint16 instance)
+status_t
+mojobe_BFont_LoadFont__charP_uint16_uint16(BFont* self,
+	const char* a_path,
+	uint16 a_index,
+	uint16 a_instance)
+{
+	try {
+		return self->LoadFont(a_path, a_index, a_instance);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_LoadFont__charP_uint16_uint16");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset)
+status_t
+mojobe_BFont_LoadFont__area_id_size_t_size_t(BFont* self,
+	area_id a_fontAreaID,
+	size_t a_size,
+	size_t a_offset)
+{
+	try {
+		return self->LoadFont(a_fontAreaID, a_size, a_offset);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_LoadFont__area_id_size_t_size_t");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset, uint16 index, uint16 instance)
+status_t
+mojobe_BFont_LoadFont__area_id_size_t_size_t_uint16_uint16(BFont* self,
+	area_id a_fontAreaID,
+	size_t a_size,
+	size_t a_offset,
+	uint16 a_index,
+	uint16 a_instance)
+{
+	try {
+		return self->LoadFont(a_fontAreaID, a_size, a_offset, a_index, a_instance);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_LoadFont__area_id_size_t_size_t_uint16_uint16");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BFont::UnloadFont()
+status_t
+mojobe_BFont_UnloadFont(BFont* self)
+{
+	try {
+		return self->UnloadFont();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_UnloadFont");
+	}
+	return B_ERROR;
+}
+
+
+// BFont::BFont()
+void
+mojobe_BFont_new(BFont* self)
+{
+	try {
+		new(self) BFont();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFont_new");
 	}
 }
 
@@ -2785,6 +3502,22 @@ mojobe_BWindow_SetZoomLimits(BWindow* self, float a_maxWidth, float a_maxHeight)
 }
 
 
+// void BWindow::ScreenChanged(BRect screenSize, color_space depth)
+void
+mojobe_BWindow_ScreenChanged(BWindow* self,
+	mojobe_BRect a_screenSize,
+	color_space a_depth)
+{
+	try {
+		self->ScreenChanged(mojobe_from_c(a_screenSize), a_depth);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ScreenChanged");
+	}
+}
+
+
 // void BWindow::SetPulseRate(bigtime_t rate)
 void
 mojobe_BWindow_SetPulseRate(BWindow* self, bigtime_t a_rate)
@@ -3197,14 +3930,28 @@ mojobe_BWindow_CenterIn(BWindow* self, mojobe_BRect a_rect)
 
 // void BWindow::CenterOnScreen()
 void
-mojobe_BWindow_CenterOnScreen(BWindow* self)
+mojobe_BWindow_CenterOnScreen__void(BWindow* self)
 {
 	try {
 		self->CenterOnScreen();
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BWindow_CenterOnScreen");
+		mojobe_unexpected("mojobe_BWindow_CenterOnScreen__void");
+	}
+}
+
+
+// void BWindow::CenterOnScreen(screen_id id)
+void
+mojobe_BWindow_CenterOnScreen__screen_id(BWindow* self, mojobe_screen_id a_id)
+{
+	try {
+		self->CenterOnScreen(mojobe_from_c(a_id));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_CenterOnScreen__screen_id");
 	}
 }
 
@@ -4578,7 +5325,7 @@ mojobe_BView_GetMouse(BView* self,
 
 // void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)
 void
-mojobe_BView_DragMessage(BView* self,
+mojobe_BView_DragMessage__BMessageP_BRect_BHandlerP(BView* self,
 	BMessage* a_message,
 	mojobe_BRect a_dragRect,
 	BHandler* a_replyTo)
@@ -4588,7 +5335,44 @@ mojobe_BView_DragMessage(BView* self,
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BView_DragMessage");
+		mojobe_unexpected("mojobe_BView_DragMessage__BMessageP_BRect_BHandlerP");
+	}
+}
+
+
+// void BView::DragMessage(BMessage* message, BBitmap* bitmap, BPoint offset, BHandler* replyTo)
+void
+mojobe_BView_DragMessage__BMessageP_BBitmapP_BPoint_BHandlerP(BView* self,
+	BMessage* a_message,
+	BBitmap* a_bitmap,
+	mojobe_BPoint a_offset,
+	BHandler* a_replyTo)
+{
+	try {
+		self->DragMessage(a_message, a_bitmap, mojobe_from_c(a_offset), a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DragMessage__BMessageP_BBitmapP_BPoint_BHandlerP");
+	}
+}
+
+
+// void BView::DragMessage(BMessage* message, BBitmap* bitmap, drawing_mode dragMode, BPoint offset, BHandler* replyTo)
+void
+mojobe_BView_DragMessage__BMessageP_BBitmapP_drawing_mode_BPoint_BHandlerP(BView* self,
+	BMessage* a_message,
+	BBitmap* a_bitmap,
+	drawing_mode a_dragMode,
+	mojobe_BPoint a_offset,
+	BHandler* a_replyTo)
+{
+	try {
+		self->DragMessage(a_message, a_bitmap, a_dragMode, mojobe_from_c(a_offset), a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DragMessage__BMessageP_BBitmapP_drawing_mode_BPoint_BHandlerP");
 	}
 }
 
@@ -4785,6 +5569,34 @@ mojobe_BView_LeftTop(BView* self)
 		mojobe_unexpected("mojobe_BView_LeftTop");
 	}
 	return {};
+}
+
+
+// void BView::GetClippingRegion(BRegion* region) const
+void
+mojobe_BView_GetClippingRegion(BView* self, BRegion* a_region)
+{
+	try {
+		self->GetClippingRegion(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetClippingRegion");
+	}
+}
+
+
+// void BView::ConstrainClippingRegion(BRegion* region)
+void
+mojobe_BView_ConstrainClippingRegion(BView* self, BRegion* a_region)
+{
+	try {
+		self->ConstrainClippingRegion(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConstrainClippingRegion");
+	}
 }
 
 
@@ -5054,6 +5866,42 @@ mojobe_BView_ViewUIColor(BView* self, float * a_tint)
 }
 
 
+// void BView::SetViewBitmap(const BBitmap* bitmap, BRect srcRect, BRect dstRect, uint32 followFlags, uint32 options)
+void
+mojobe_BView_SetViewBitmap__BBitmapP_BRect_BRect_uint32_uint32(BView* self,
+	BBitmap* a_bitmap,
+	mojobe_BRect a_srcRect,
+	mojobe_BRect a_dstRect,
+	uint32 a_followFlags,
+	uint32 a_options)
+{
+	try {
+		self->SetViewBitmap(a_bitmap, mojobe_from_c(a_srcRect), mojobe_from_c(a_dstRect), a_followFlags, a_options);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewBitmap__BBitmapP_BRect_BRect_uint32_uint32");
+	}
+}
+
+
+// void BView::SetViewBitmap(const BBitmap* bitmap, uint32 followFlags, uint32 options)
+void
+mojobe_BView_SetViewBitmap__BBitmapP_uint32_uint32(BView* self,
+	BBitmap* a_bitmap,
+	uint32 a_followFlags,
+	uint32 a_options)
+{
+	try {
+		self->SetViewBitmap(a_bitmap, a_followFlags, a_options);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewBitmap__BBitmapP_uint32_uint32");
+	}
+}
+
+
 // void BView::ClearViewBitmap()
 void
 mojobe_BView_ClearViewBitmap(BView* self)
@@ -5065,6 +5913,54 @@ mojobe_BView_ClearViewBitmap(BView* self)
 	} catch (...) {
 		mojobe_unexpected("mojobe_BView_ClearViewBitmap");
 	}
+}
+
+
+// status_t BView::SetViewOverlay(const BBitmap* overlay, BRect srcRect, BRect dstRect, rgb_color* colorKey, uint32 followFlags, uint32 options)
+status_t
+mojobe_BView_SetViewOverlay__BBitmapP_BRect_BRect_rgb_colorP_uint32_uint32(BView* self,
+	BBitmap* a_overlay,
+	mojobe_BRect a_srcRect,
+	mojobe_BRect a_dstRect,
+	mojobe_rgb_color* a_colorKey,
+	uint32 a_followFlags,
+	uint32 a_options)
+{
+	try {
+		rgb_color t_colorKey;
+		status_t result = self->SetViewOverlay(a_overlay, mojobe_from_c(a_srcRect), mojobe_from_c(a_dstRect), &t_colorKey, a_followFlags, a_options);
+		if (a_colorKey != NULL)
+		*a_colorKey = mojobe_to_c(t_colorKey);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewOverlay__BBitmapP_BRect_BRect_rgb_colorP_uint32_uint32");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BView::SetViewOverlay(const BBitmap* overlay, rgb_color* colorKey, uint32 followFlags, uint32 options)
+status_t
+mojobe_BView_SetViewOverlay__BBitmapP_rgb_colorP_uint32_uint32(BView* self,
+	BBitmap* a_overlay,
+	mojobe_rgb_color* a_colorKey,
+	uint32 a_followFlags,
+	uint32 a_options)
+{
+	try {
+		rgb_color t_colorKey;
+		status_t result = self->SetViewOverlay(a_overlay, &t_colorKey, a_followFlags, a_options);
+		if (a_colorKey != NULL)
+		*a_colorKey = mojobe_to_c(t_colorKey);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewOverlay__BBitmapP_rgb_colorP_uint32_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -5679,6 +6575,22 @@ mojobe_BView_FillRect(BView* self,
 }
 
 
+// void BView::FillRegion(BRegion* rectegion, pattern pattern)
+void
+mojobe_BView_FillRegion(BView* self,
+	BRegion* a_rectegion,
+	mojobe_pattern a_pattern)
+{
+	try {
+		self->FillRegion(a_rectegion, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillRegion");
+	}
+}
+
+
 // void BView::InvertRect(BRect rect)
 void
 mojobe_BView_InvertRect(BView* self, mojobe_BRect a_rect)
@@ -5925,6 +6837,202 @@ mojobe_BView_CopyBits(BView* self, mojobe_BRect a_src, mojobe_BRect a_dst)
 }
 
 
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)
+void
+mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect_uint32(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect,
+	uint32 a_options)
+{
+	try {
+		self->DrawBitmapAsync(a_aBitmap, mojobe_from_c(a_bitmapRect), mojobe_from_c(a_viewRect), a_options);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect_uint32");
+	}
+}
+
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)
+void
+mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect)
+{
+	try {
+		self->DrawBitmapAsync(a_aBitmap, mojobe_from_c(a_bitmapRect), mojobe_from_c(a_viewRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect");
+	}
+}
+
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect viewRect)
+void
+mojobe_BView_DrawBitmapAsync__BBitmapP_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect)
+{
+	try {
+		self->DrawBitmapAsync(a_aBitmap, mojobe_from_c(a_viewRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmapAsync__BBitmapP_BRect");
+	}
+}
+
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BPoint where)
+void
+mojobe_BView_DrawBitmapAsync__BBitmapP_BPoint(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BPoint a_where)
+{
+	try {
+		self->DrawBitmapAsync(a_aBitmap, mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmapAsync__BBitmapP_BPoint");
+	}
+}
+
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap)
+void
+mojobe_BView_DrawBitmapAsync__BBitmapP(BView* self, BBitmap* a_aBitmap)
+{
+	try {
+		self->DrawBitmapAsync(a_aBitmap);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmapAsync__BBitmapP");
+	}
+}
+
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)
+void
+mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect_uint32(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect,
+	uint32 a_options)
+{
+	try {
+		self->DrawBitmap(a_aBitmap, mojobe_from_c(a_bitmapRect), mojobe_from_c(a_viewRect), a_options);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect_uint32");
+	}
+}
+
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)
+void
+mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect)
+{
+	try {
+		self->DrawBitmap(a_aBitmap, mojobe_from_c(a_bitmapRect), mojobe_from_c(a_viewRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect");
+	}
+}
+
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect viewRect)
+void
+mojobe_BView_DrawBitmap__BBitmapP_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect)
+{
+	try {
+		self->DrawBitmap(a_aBitmap, mojobe_from_c(a_viewRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmap__BBitmapP_BRect");
+	}
+}
+
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BPoint where)
+void
+mojobe_BView_DrawBitmap__BBitmapP_BPoint(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BPoint a_where)
+{
+	try {
+		self->DrawBitmap(a_aBitmap, mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmap__BBitmapP_BPoint");
+	}
+}
+
+
+// void BView::DrawBitmap(const BBitmap* aBitmap)
+void
+mojobe_BView_DrawBitmap__BBitmapP(BView* self, BBitmap* a_aBitmap)
+{
+	try {
+		self->DrawBitmap(a_aBitmap);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawBitmap__BBitmapP");
+	}
+}
+
+
+// void BView::DrawTiledBitmapAsync(const BBitmap* aBitmap, BRect viewRect, BPoint phase)
+void
+mojobe_BView_DrawTiledBitmapAsync(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect,
+	mojobe_BPoint a_phase)
+{
+	try {
+		self->DrawTiledBitmapAsync(a_aBitmap, mojobe_from_c(a_viewRect), mojobe_from_c(a_phase));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawTiledBitmapAsync");
+	}
+}
+
+
+// void BView::DrawTiledBitmap(const BBitmap* aBitmap, BRect viewRect, BPoint phase)
+void
+mojobe_BView_DrawTiledBitmap(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect,
+	mojobe_BPoint a_phase)
+{
+	try {
+		self->DrawTiledBitmap(a_aBitmap, mojobe_from_c(a_viewRect), mojobe_from_c(a_phase));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawTiledBitmap");
+	}
+}
+
+
 // void BView::DrawChar(char aChar)
 void
 mojobe_BView_DrawChar__char(BView* self, char a_aChar)
@@ -6001,6 +7109,34 @@ mojobe_BView_DrawString__charP_int32(BView* self,
 }
 
 
+// void BView::SetFont(const BFont* font, uint32 mask)
+void
+mojobe_BView_SetFont(BView* self, const BFont* a_font, uint32 a_mask)
+{
+	try {
+		self->SetFont(a_font, a_mask);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetFont");
+	}
+}
+
+
+// void BView::GetFont(BFont* font) const
+void
+mojobe_BView_GetFont(BView* self, BFont* a_font)
+{
+	try {
+		self->GetFont(a_font);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetFont");
+	}
+}
+
+
 // float BView::StringWidth(const char* string) const
 float
 mojobe_BView_StringWidth__charP(BView* self, const char* a_string)
@@ -6061,6 +7197,23 @@ mojobe_BView_ForceFontAliasing(BView* self, bool a_enable)
 }
 
 
+// void BView::GetFontHeight(font_height* height) const
+void
+mojobe_BView_GetFontHeight(BView* self, mojobe_font_height* a_height)
+{
+	try {
+		font_height t_height;
+		self->GetFontHeight(&t_height);
+		if (a_height != NULL)
+		*a_height = mojobe_to_c(t_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetFontHeight");
+	}
+}
+
+
 // void BView::Invalidate(BRect invalRect)
 void
 mojobe_BView_Invalidate__BRect(BView* self, mojobe_BRect a_invalRect)
@@ -6071,6 +7224,20 @@ mojobe_BView_Invalidate__BRect(BView* self, mojobe_BRect a_invalRect)
 		return;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BView_Invalidate__BRect");
+	}
+}
+
+
+// void BView::Invalidate(const BRegion* invalRegion)
+void
+mojobe_BView_Invalidate__BRegionP(BView* self, BRegion* a_invalRegion)
+{
+	try {
+		self->Invalidate(a_invalRegion);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Invalidate__BRegionP");
 	}
 }
 
@@ -7968,6 +9135,27 @@ mojobe_BMessage_AddMessage(BMessage* self,
 }
 
 
+// status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)
+status_t
+mojobe_BMessage_AddData(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes,
+	bool a_isFixedSize,
+	int32 a_count)
+{
+	try {
+		return self->AddData(a_name, a_type, a_data, a_numBytes, a_isFixedSize, a_count);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddData");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::Append(const BMessage& message)
 status_t
 mojobe_BMessage_Append(BMessage* self, BMessage* a_message)
@@ -9242,6 +10430,45 @@ mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP(BMessage* self,
 }
 
 
+// status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)
+status_t
+mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes)
+{
+	try {
+		return self->ReplaceData(a_name, a_type, a_data, a_numBytes);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)
+status_t
+mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	int32 a_index,
+	const void* a_data,
+	ssize_t a_numBytes)
+{
+	try {
+		return self->ReplaceData(a_name, a_type, a_index, a_data, a_numBytes);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t");
+	}
+	return B_ERROR;
+}
+
+
 // bool BMessage::HasSameData(const BMessage& other, bool ignoreFieldOrder, bool deep) const
 bool
 mojobe_BMessage_HasSameData(BMessage* self,
@@ -10361,6 +11588,27 @@ mojobe_BMessage_SetRect(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_SetRect");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)
+status_t
+mojobe_BMessage_SetData(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes,
+	bool a_fixedSize,
+	int a_count)
+{
+	try {
+		return self->SetData(a_name, a_type, a_data, a_numBytes, a_fixedSize, a_count);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetData");
 	}
 	return B_ERROR;
 }
@@ -12064,6 +13312,54 @@ mojobe_BControl_IsEnabled(BControl* self)
 		return {};
 	} catch (...) {
 		mojobe_unexpected("mojobe_BControl_IsEnabled");
+	}
+	return {};
+}
+
+
+// status_t BControl::SetIcon(const BBitmap* bitmap, uint32 flags)
+status_t
+mojobe_BControl_SetIcon(BControl* self, BBitmap* a_bitmap, uint32 a_flags)
+{
+	try {
+		return self->SetIcon(a_bitmap, a_flags);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_SetIcon");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BControl::SetIconBitmap(const BBitmap* bitmap, uint32 which, uint32 flags)
+status_t
+mojobe_BControl_SetIconBitmap(BControl* self,
+	BBitmap* a_bitmap,
+	uint32 a_which,
+	uint32 a_flags)
+{
+	try {
+		return self->SetIconBitmap(a_bitmap, a_which, a_flags);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_SetIconBitmap");
+	}
+	return B_ERROR;
+}
+
+
+// const BBitmap* BControl::IconBitmap(uint32 which) const
+const BBitmap*
+mojobe_BControl_IconBitmap(BControl* self, uint32 a_which)
+{
+	try {
+		return self->IconBitmap(a_which);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_IconBitmap");
 	}
 	return {};
 }
@@ -13905,6 +15201,20 @@ mojobe_BAlert_SetType(BAlert* self, alert_type a_type)
 }
 
 
+// void BAlert::SetIcon(BBitmap* bitmap)
+void
+mojobe_BAlert_SetIcon(BAlert* self, BBitmap* a_bitmap)
+{
+	try {
+		self->SetIcon(a_bitmap);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetIcon");
+	}
+}
+
+
 // void BAlert::SetText(const char* text)
 void
 mojobe_BAlert_SetText(BAlert* self, const char* a_text)
@@ -14162,6 +15472,1308 @@ mojobe_BAlert_destroy(BAlert* self)
 
 
 
+// #pragma mark - BRegion
+
+
+// void BRegion::Set(BRect rect)
+void
+mojobe_BRegion_Set__BRect(BRegion* self, mojobe_BRect a_rect)
+{
+	try {
+		self->Set(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Set__BRect");
+	}
+}
+
+
+// void BRegion::Set(clipping_rect clipping)
+void
+mojobe_BRegion_Set__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping)
+{
+	try {
+		self->Set(mojobe_from_c(a_clipping));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Set__clipping_rect");
+	}
+}
+
+
+// void BRegion::MoveFrom(BRegion& other)
+void
+mojobe_BRegion_MoveFrom(BRegion* self, BRegion* a_other)
+{
+	try {
+		self->MoveFrom(*a_other);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_MoveFrom");
+	}
+}
+
+
+// BRect BRegion::Frame() const
+mojobe_BRect
+mojobe_BRegion_Frame(BRegion* self)
+{
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Frame");
+	}
+	return {};
+}
+
+
+// clipping_rect BRegion::FrameInt() const
+mojobe_clipping_rect
+mojobe_BRegion_FrameInt(BRegion* self)
+{
+	try {
+		return mojobe_to_c(self->FrameInt());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_FrameInt");
+	}
+	return {};
+}
+
+
+// BRect BRegion::RectAt(int32 index)
+mojobe_BRect
+mojobe_BRegion_RectAt__int32(BRegion* self, int32 a_index)
+{
+	try {
+		return mojobe_to_c(self->RectAt(a_index));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_RectAt__int32");
+	}
+	return {};
+}
+
+
+// clipping_rect BRegion::RectAtInt(int32 index)
+mojobe_clipping_rect
+mojobe_BRegion_RectAtInt__int32(BRegion* self, int32 a_index)
+{
+	try {
+		return mojobe_to_c(self->RectAtInt(a_index));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_RectAtInt__int32");
+	}
+	return {};
+}
+
+
+// int32 BRegion::CountRects()
+int32
+mojobe_BRegion_CountRects__void(BRegion* self)
+{
+	try {
+		return self->CountRects();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_CountRects__void");
+	}
+	return {};
+}
+
+
+// bool BRegion::Intersects(BRect rect) const
+bool
+mojobe_BRegion_Intersects__BRect(BRegion* self, mojobe_BRect a_rect)
+{
+	try {
+		return self->Intersects(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Intersects__BRect");
+	}
+	return {};
+}
+
+
+// bool BRegion::Intersects(clipping_rect clipping) const
+bool
+mojobe_BRegion_Intersects__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping)
+{
+	try {
+		return self->Intersects(mojobe_from_c(a_clipping));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Intersects__clipping_rect");
+	}
+	return {};
+}
+
+
+// bool BRegion::Contains(BPoint point) const
+bool
+mojobe_BRegion_Contains__BPoint(BRegion* self, mojobe_BPoint a_point)
+{
+	try {
+		return self->Contains(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Contains__BPoint");
+	}
+	return {};
+}
+
+
+// bool BRegion::Contains(int32 x, int32 y)
+bool
+mojobe_BRegion_Contains__int32_int32(BRegion* self, int32 a_x, int32 a_y)
+{
+	try {
+		return self->Contains(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Contains__int32_int32");
+	}
+	return {};
+}
+
+
+// void BRegion::PrintToStream() const
+void
+mojobe_BRegion_PrintToStream(BRegion* self)
+{
+	try {
+		self->PrintToStream();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_PrintToStream");
+	}
+}
+
+
+// void BRegion::OffsetBy(const BPoint& point)
+void
+mojobe_BRegion_OffsetBy__BPoint(BRegion* self, mojobe_BPoint a_point)
+{
+	try {
+		self->OffsetBy(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_OffsetBy__BPoint");
+	}
+}
+
+
+// void BRegion::OffsetBy(int32 x, int32 y)
+void
+mojobe_BRegion_OffsetBy__int32_int32(BRegion* self, int32 a_x, int32 a_y)
+{
+	try {
+		self->OffsetBy(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_OffsetBy__int32_int32");
+	}
+}
+
+
+// void BRegion::ScaleBy(float x, float y)
+void
+mojobe_BRegion_ScaleBy(BRegion* self, float a_x, float a_y)
+{
+	try {
+		self->ScaleBy(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_ScaleBy");
+	}
+}
+
+
+// void BRegion::MakeEmpty()
+void
+mojobe_BRegion_MakeEmpty(BRegion* self)
+{
+	try {
+		self->MakeEmpty();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_MakeEmpty");
+	}
+}
+
+
+// void BRegion::Include(BRect rect)
+void
+mojobe_BRegion_Include__BRect(BRegion* self, mojobe_BRect a_rect)
+{
+	try {
+		self->Include(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Include__BRect");
+	}
+}
+
+
+// void BRegion::Include(clipping_rect clipping)
+void
+mojobe_BRegion_Include__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping)
+{
+	try {
+		self->Include(mojobe_from_c(a_clipping));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Include__clipping_rect");
+	}
+}
+
+
+// void BRegion::Include(const BRegion* region)
+void
+mojobe_BRegion_Include__BRegionP(BRegion* self, BRegion* a_region)
+{
+	try {
+		self->Include(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Include__BRegionP");
+	}
+}
+
+
+// void BRegion::Exclude(BRect rect)
+void
+mojobe_BRegion_Exclude__BRect(BRegion* self, mojobe_BRect a_rect)
+{
+	try {
+		self->Exclude(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Exclude__BRect");
+	}
+}
+
+
+// void BRegion::Exclude(clipping_rect clipping)
+void
+mojobe_BRegion_Exclude__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping)
+{
+	try {
+		self->Exclude(mojobe_from_c(a_clipping));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Exclude__clipping_rect");
+	}
+}
+
+
+// void BRegion::Exclude(const BRegion* region)
+void
+mojobe_BRegion_Exclude__BRegionP(BRegion* self, BRegion* a_region)
+{
+	try {
+		self->Exclude(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_Exclude__BRegionP");
+	}
+}
+
+
+// void BRegion::IntersectWith(const BRegion* region)
+void
+mojobe_BRegion_IntersectWith(BRegion* self, BRegion* a_region)
+{
+	try {
+		self->IntersectWith(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_IntersectWith");
+	}
+}
+
+
+// void BRegion::ExclusiveInclude(const BRegion* region)
+void
+mojobe_BRegion_ExclusiveInclude(BRegion* self, BRegion* a_region)
+{
+	try {
+		self->ExclusiveInclude(a_region);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_ExclusiveInclude");
+	}
+}
+
+
+// BRegion::BRegion()
+BRegion*
+mojobe_BRegion_new__void()
+{
+	try {
+		return new(std::nothrow) BRegion();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_new__void");
+	}
+	return {};
+}
+
+
+// BRegion::BRegion(const BRect rect)
+BRegion*
+mojobe_BRegion_new__BRect(mojobe_BRect a_rect)
+{
+	try {
+		return new(std::nothrow) BRegion(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_new__BRect");
+	}
+	return {};
+}
+
+
+// ~BRegion()
+void
+mojobe_BRegion_delete(BRegion* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BBitmap
+
+
+// status_t BBitmap::Archive(BMessage* data, bool deep) const
+status_t
+mojobe_BBitmap_Archive(BBitmap* self, BMessage* a_data, bool a_deep)
+{
+	try {
+		return self->Archive(a_data, a_deep);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Archive");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BBitmap::InitCheck() const
+status_t
+mojobe_BBitmap_InitCheck(BBitmap* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// bool BBitmap::IsValid() const
+bool
+mojobe_BBitmap_IsValid(BBitmap* self)
+{
+	try {
+		return self->IsValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_IsValid");
+	}
+	return {};
+}
+
+
+// status_t BBitmap::LockBits(uint32* state)
+status_t
+mojobe_BBitmap_LockBits(BBitmap* self, uint32 * a_state)
+{
+	try {
+		return self->LockBits(a_state);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_LockBits");
+	}
+	return B_ERROR;
+}
+
+
+// void BBitmap::UnlockBits()
+void
+mojobe_BBitmap_UnlockBits(BBitmap* self)
+{
+	try {
+		self->UnlockBits();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_UnlockBits");
+	}
+}
+
+
+// area_id BBitmap::Area() const
+int32
+mojobe_BBitmap_Area(BBitmap* self)
+{
+	try {
+		return self->Area();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Area");
+	}
+	return {};
+}
+
+
+// void* BBitmap::Bits() const
+void*
+mojobe_BBitmap_Bits(BBitmap* self)
+{
+	try {
+		return self->Bits();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Bits");
+	}
+	return {};
+}
+
+
+// size_t BBitmap::BitsLength() const
+uint64
+mojobe_BBitmap_BitsLength(BBitmap* self)
+{
+	try {
+		return self->BitsLength();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_BitsLength");
+	}
+	return {};
+}
+
+
+// int32 BBitmap::BytesPerRow() const
+int32
+mojobe_BBitmap_BytesPerRow(BBitmap* self)
+{
+	try {
+		return self->BytesPerRow();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_BytesPerRow");
+	}
+	return {};
+}
+
+
+// color_space BBitmap::ColorSpace() const
+color_space
+mojobe_BBitmap_ColorSpace(BBitmap* self)
+{
+	try {
+		return self->ColorSpace();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ColorSpace");
+	}
+	return {};
+}
+
+
+// BRect BBitmap::Bounds() const
+mojobe_BRect
+mojobe_BBitmap_Bounds(BBitmap* self)
+{
+	try {
+		return mojobe_to_c(self->Bounds());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Bounds");
+	}
+	return {};
+}
+
+
+// uint32 BBitmap::Flags() const
+uint32
+mojobe_BBitmap_Flags(BBitmap* self)
+{
+	try {
+		return self->Flags();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Flags");
+	}
+	return {};
+}
+
+
+// status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)
+status_t
+mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_bpr,
+	int32 a_offset,
+	color_space a_colorSpace)
+{
+	try {
+		return self->ImportBits(a_data, a_length, a_bpr, a_offset, a_colorSpace);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BBitmap::ImportBits(const BBitmap* bitmap)
+status_t
+mojobe_BBitmap_ImportBits__BBitmapP(BBitmap* self, BBitmap* a_bitmap)
+{
+	try {
+		return self->ImportBits(a_bitmap);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ImportBits__BBitmapP");
+	}
+	return B_ERROR;
+}
+
+
+// void BBitmap::AddChild(BView* view)
+void
+mojobe_BBitmap_AddChild(BBitmap* self, BView* a_view)
+{
+	try {
+		self->AddChild(a_view);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_AddChild");
+	}
+}
+
+
+// bool BBitmap::RemoveChild(BView* view)
+bool
+mojobe_BBitmap_RemoveChild(BBitmap* self, BView* a_view)
+{
+	try {
+		return self->RemoveChild(a_view);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_RemoveChild");
+	}
+	return {};
+}
+
+
+// int32 BBitmap::CountChildren() const
+int32
+mojobe_BBitmap_CountChildren(BBitmap* self)
+{
+	try {
+		return self->CountChildren();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_CountChildren");
+	}
+	return {};
+}
+
+
+// BView* BBitmap::ChildAt(int32 index) const
+BView*
+mojobe_BBitmap_ChildAt(BBitmap* self, int32 a_index)
+{
+	try {
+		return self->ChildAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ChildAt");
+	}
+	return {};
+}
+
+
+// BView* BBitmap::FindView(const char* viewName) const
+BView*
+mojobe_BBitmap_FindView__charP(BBitmap* self, const char* a_viewName)
+{
+	try {
+		return self->FindView(a_viewName);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_FindView__charP");
+	}
+	return {};
+}
+
+
+// BView* BBitmap::FindView(BPoint point) const
+BView*
+mojobe_BBitmap_FindView__BPoint(BBitmap* self, mojobe_BPoint a_point)
+{
+	try {
+		return self->FindView(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_FindView__BPoint");
+	}
+	return {};
+}
+
+
+// bool BBitmap::Lock()
+bool
+mojobe_BBitmap_Lock(BBitmap* self)
+{
+	try {
+		return self->Lock();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Lock");
+	}
+	return {};
+}
+
+
+// void BBitmap::Unlock()
+void
+mojobe_BBitmap_Unlock(BBitmap* self)
+{
+	try {
+		self->Unlock();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_Unlock");
+	}
+}
+
+
+// bool BBitmap::IsLocked() const
+bool
+mojobe_BBitmap_IsLocked(BBitmap* self)
+{
+	try {
+		return self->IsLocked();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_IsLocked");
+	}
+	return {};
+}
+
+
+// void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)
+void
+mojobe_BBitmap_SetBits(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_offset,
+	color_space a_colorSpace)
+{
+	try {
+		self->SetBits(a_data, a_length, a_offset, a_colorSpace);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_SetBits");
+	}
+}
+
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t
+mojobe_BBitmap_AllUnarchived(BBitmap* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_AllUnarchived");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t
+mojobe_BBitmap_AllArchived(BBitmap* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_AllArchived");
+	}
+	return B_ERROR;
+}
+
+
+// BBitmap::BBitmap(BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)
+BBitmap*
+mojobe_BBitmap_new__BRect_uint32_color_space_int32_screen_id(mojobe_BRect a_bounds,
+	uint32 a_flags,
+	color_space a_colorSpace,
+	int32 a_bytesPerRow,
+	mojobe_screen_id a_screenID,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BBitmap* object = new(std::nothrow) BBitmap(mojobe_from_c(a_bounds), a_flags, a_colorSpace, a_bytesPerRow, mojobe_from_c(a_screenID));
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_new__BRect_uint32_color_space_int32_screen_id");
+	}
+	return {};
+}
+
+
+// BBitmap::BBitmap(BRect bounds, color_space colorSpace, bool acceptsViews, bool needsContiguous)
+BBitmap*
+mojobe_BBitmap_new__BRect_color_space_bool_bool(mojobe_BRect a_bounds,
+	color_space a_colorSpace,
+	bool a_acceptsViews,
+	bool a_needsContiguous,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BBitmap* object = new(std::nothrow) BBitmap(mojobe_from_c(a_bounds), a_colorSpace, a_acceptsViews, a_needsContiguous);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_new__BRect_color_space_bool_bool");
+	}
+	return {};
+}
+
+
+// BBitmap::BBitmap(const BBitmap* source, bool acceptsViews, bool needsContiguous)
+BBitmap*
+mojobe_BBitmap_new__BBitmapP_bool_bool(BBitmap* a_source,
+	bool a_acceptsViews,
+	bool a_needsContiguous,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BBitmap* object = new(std::nothrow) BBitmap(a_source, a_acceptsViews, a_needsContiguous);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_new__BBitmapP_bool_bool");
+	}
+	return {};
+}
+
+
+// BBitmap::BBitmap(area_id area, ptrdiff_t areaOffset, BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)
+BBitmap*
+mojobe_BBitmap_new__area_id_ptrdiff_t_BRect_uint32_color_space_int32_screen_id(area_id a_area,
+	ptrdiff_t a_areaOffset,
+	mojobe_BRect a_bounds,
+	uint32 a_flags,
+	color_space a_colorSpace,
+	int32 a_bytesPerRow,
+	mojobe_screen_id a_screenID,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BBitmap* object = new(std::nothrow) BBitmap(a_area, a_areaOffset, mojobe_from_c(a_bounds), a_flags, a_colorSpace, a_bytesPerRow, mojobe_from_c(a_screenID));
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_new__area_id_ptrdiff_t_BRect_uint32_color_space_int32_screen_id");
+	}
+	return {};
+}
+
+
+// ~BBitmap()
+void
+mojobe_BBitmap_delete(BBitmap* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BScreen
+
+
+// bool BScreen::IsValid()
+bool
+mojobe_BScreen_IsValid(BScreen* self)
+{
+	try {
+		return self->IsValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_IsValid");
+	}
+	return {};
+}
+
+
+// status_t BScreen::SetToNext()
+status_t
+mojobe_BScreen_SetToNext(BScreen* self)
+{
+	try {
+		return self->SetToNext();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_SetToNext");
+	}
+	return B_ERROR;
+}
+
+
+// color_space BScreen::ColorSpace()
+color_space
+mojobe_BScreen_ColorSpace(BScreen* self)
+{
+	try {
+		return self->ColorSpace();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_ColorSpace");
+	}
+	return {};
+}
+
+
+// BRect BScreen::Frame()
+mojobe_BRect
+mojobe_BScreen_Frame(BScreen* self)
+{
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_Frame");
+	}
+	return {};
+}
+
+
+// screen_id BScreen::ID()
+mojobe_screen_id
+mojobe_BScreen_ID(BScreen* self)
+{
+	try {
+		return mojobe_to_c(self->ID());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_ID");
+	}
+	return {};
+}
+
+
+// status_t BScreen::WaitForRetrace()
+status_t
+mojobe_BScreen_WaitForRetrace__void(BScreen* self)
+{
+	try {
+		return self->WaitForRetrace();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_WaitForRetrace__void");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BScreen::WaitForRetrace(bigtime_t timeout)
+status_t
+mojobe_BScreen_WaitForRetrace__bigtime_t(BScreen* self, bigtime_t a_timeout)
+{
+	try {
+		return self->WaitForRetrace(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_WaitForRetrace__bigtime_t");
+	}
+	return B_ERROR;
+}
+
+
+// uint8 BScreen::IndexForColor(rgb_color color)
+uint8
+mojobe_BScreen_IndexForColor__rgb_color(BScreen* self, mojobe_rgb_color a_color)
+{
+	try {
+		return self->IndexForColor(mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_IndexForColor__rgb_color");
+	}
+	return {};
+}
+
+
+// uint8 BScreen::IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha)
+uint8
+mojobe_BScreen_IndexForColor__uint8_uint8_uint8_uint8(BScreen* self,
+	uint8 a_red,
+	uint8 a_green,
+	uint8 a_blue,
+	uint8 a_alpha)
+{
+	try {
+		return self->IndexForColor(a_red, a_green, a_blue, a_alpha);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_IndexForColor__uint8_uint8_uint8_uint8");
+	}
+	return {};
+}
+
+
+// rgb_color BScreen::ColorForIndex(uint8 index)
+mojobe_rgb_color
+mojobe_BScreen_ColorForIndex(BScreen* self, uint8 a_index)
+{
+	try {
+		return mojobe_to_c(self->ColorForIndex(a_index));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_ColorForIndex");
+	}
+	return {};
+}
+
+
+// uint8 BScreen::InvertIndex(uint8 index)
+uint8
+mojobe_BScreen_InvertIndex(BScreen* self, uint8 a_index)
+{
+	try {
+		return self->InvertIndex(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_InvertIndex");
+	}
+	return {};
+}
+
+
+// status_t BScreen::ReadBitmap(BBitmap* bitmap, bool drawCursor, BRect* frame)
+status_t
+mojobe_BScreen_ReadBitmap(BScreen* self,
+	BBitmap* a_bitmap,
+	bool a_drawCursor,
+	mojobe_BRect* a_frame)
+{
+	try {
+		BRect t_frame;
+		status_t result = self->ReadBitmap(a_bitmap, a_drawCursor, &t_frame);
+		if (a_frame != NULL)
+		*a_frame = mojobe_to_c(t_frame);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_ReadBitmap");
+	}
+	return B_ERROR;
+}
+
+
+// rgb_color BScreen::DesktopColor()
+mojobe_rgb_color
+mojobe_BScreen_DesktopColor__void(BScreen* self)
+{
+	try {
+		return mojobe_to_c(self->DesktopColor());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_DesktopColor__void");
+	}
+	return {};
+}
+
+
+// rgb_color BScreen::DesktopColor(uint32 workspace)
+mojobe_rgb_color
+mojobe_BScreen_DesktopColor__uint32(BScreen* self, uint32 a_workspace)
+{
+	try {
+		return mojobe_to_c(self->DesktopColor(a_workspace));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_DesktopColor__uint32");
+	}
+	return {};
+}
+
+
+// void BScreen::SetDesktopColor(rgb_color color, bool stick)
+void
+mojobe_BScreen_SetDesktopColor__rgb_color_bool(BScreen* self,
+	mojobe_rgb_color a_color,
+	bool a_stick)
+{
+	try {
+		self->SetDesktopColor(mojobe_from_c(a_color), a_stick);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_SetDesktopColor__rgb_color_bool");
+	}
+}
+
+
+// void BScreen::SetDesktopColor(rgb_color color, uint32 workspace, bool stick)
+void
+mojobe_BScreen_SetDesktopColor__rgb_color_uint32_bool(BScreen* self,
+	mojobe_rgb_color a_color,
+	uint32 a_workspace,
+	bool a_stick)
+{
+	try {
+		self->SetDesktopColor(mojobe_from_c(a_color), a_workspace, a_stick);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_SetDesktopColor__rgb_color_uint32_bool");
+	}
+}
+
+
+// status_t BScreen::SetDPMS(uint32 state)
+status_t
+mojobe_BScreen_SetDPMS(BScreen* self, uint32 a_state)
+{
+	try {
+		return self->SetDPMS(a_state);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_SetDPMS");
+	}
+	return B_ERROR;
+}
+
+
+// uint32 BScreen::DPMSState()
+uint32
+mojobe_BScreen_DPMSState(BScreen* self)
+{
+	try {
+		return self->DPMSState();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_DPMSState");
+	}
+	return {};
+}
+
+
+// uint32 BScreen::DPMSCapabilites()
+uint32
+mojobe_BScreen_DPMSCapabilites(BScreen* self)
+{
+	try {
+		return self->DPMSCapabilites();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_DPMSCapabilites");
+	}
+	return {};
+}
+
+
+// status_t BScreen::GetBrightness(float* brightness)
+status_t
+mojobe_BScreen_GetBrightness(BScreen* self, float * a_brightness)
+{
+	try {
+		return self->GetBrightness(a_brightness);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_GetBrightness");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BScreen::SetBrightness(float brightness)
+status_t
+mojobe_BScreen_SetBrightness(BScreen* self, float a_brightness)
+{
+	try {
+		return self->SetBrightness(a_brightness);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_SetBrightness");
+	}
+	return B_ERROR;
+}
+
+
+// BScreen::BScreen(screen_id id)
+BScreen*
+mojobe_BScreen_new__screen_id(mojobe_screen_id a_id)
+{
+	try {
+		return new(std::nothrow) BScreen(mojobe_from_c(a_id));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_new__screen_id");
+	}
+	return {};
+}
+
+
+// BScreen::BScreen(BWindow* window)
+BScreen*
+mojobe_BScreen_new__BWindowP(BWindow* a_window)
+{
+	try {
+		return new(std::nothrow) BScreen(a_window);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScreen_new__BWindowP");
+	}
+	return {};
+}
+
+
+// ~BScreen()
+void
+mojobe_BScreen_delete(BScreen* self)
+{
+	delete self;
+}
+
+
+
 // #pragma mark - BMessageRunner
 
 
@@ -14309,6 +16921,27 @@ mojobe_BMessenger_LockedTarget(const BMessenger* self, bigtime_t timeout,
 	BLooper* looper = NULL;
 	self->Target(&looper);
 	return looper;
+}
+
+
+void
+mojobe_be_plain_font(BFont* result)
+{
+	new(result) BFont(be_plain_font);
+}
+
+
+void
+mojobe_be_bold_font(BFont* result)
+{
+	new(result) BFont(be_bold_font);
+}
+
+
+void
+mojobe_be_fixed_font(BFont* result)
+{
+	new(result) BFont(be_fixed_font);
 }
 
 

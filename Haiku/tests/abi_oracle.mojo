@@ -513,6 +513,47 @@ def main() raises:
         resultrgb_color == rgb_color(3, 10, 17, 24),
     )
 
+    var givenfont_height = font_height(0.25, 1.25, 2.25)
+    var seenfont_height = givenfont_height
+    var beforefont_height = Int8(0)
+    var afterfont_height = Float64(0)
+    var resultfont_height = external_call["mojobe_oracle_echo_font_height", font_height](
+        Int8(-5), givenfont_height, Float64(2.75), Pointer(to=seenfont_height),
+        Pointer(to=beforefont_height), Pointer(to=afterfont_height))
+    checks.check("font_height by value, between an int8 and a double",
+        seenfont_height == givenfont_height and beforefont_height == -5 and afterfont_height == 2.75)
+    checks.check(
+        "font_height returned",
+        resultfont_height == font_height(1.25, 2.25, 3.25),
+    )
+
+    var givenclipping_rect = clipping_rect(2, 9, 16, 23)
+    var seenclipping_rect = givenclipping_rect
+    var beforeclipping_rect = Int8(0)
+    var afterclipping_rect = Float64(0)
+    var resultclipping_rect = external_call["mojobe_oracle_echo_clipping_rect", clipping_rect](
+        Int8(-5), givenclipping_rect, Float64(2.75), Pointer(
+            to=seenclipping_rect,
+        ),
+        Pointer(to=beforeclipping_rect), Pointer(to=afterclipping_rect))
+    checks.check("clipping_rect by value, between an int8 and a double",
+        seenclipping_rect == givenclipping_rect and beforeclipping_rect == -5 and afterclipping_rect == 2.75)
+    checks.check(
+        "clipping_rect returned",
+        resultclipping_rect == clipping_rect(3, 10, 17, 24),
+    )
+
+    var givenscreen_id = screen_id(2)
+    var seenscreen_id = givenscreen_id
+    var beforescreen_id = Int8(0)
+    var afterscreen_id = Float64(0)
+    var resultscreen_id = external_call["mojobe_oracle_echo_screen_id", screen_id](
+        Int8(-5), givenscreen_id, Float64(2.75), Pointer(to=seenscreen_id),
+        Pointer(to=beforescreen_id), Pointer(to=afterscreen_id))
+    checks.check("screen_id by value, between an int8 and a double",
+        seenscreen_id == givenscreen_id and beforescreen_id == -5 and afterscreen_id == 2.75)
+    checks.check("screen_id returned", resultscreen_id == screen_id(3))
+
     var givenpattern = pattern(2747508133085382659)
     var seenpattern = givenpattern
     var beforepattern = Int8(0)
@@ -697,6 +738,17 @@ def main() raises:
         seencap_mode == givencap_mode and beforecap_mode == -5 and aftercap_mode == 2.75)
     checks.check("cap_mode returned", resultcap_mode == cap_mode(4))
 
+    var givencolor_space = color_space(3)
+    var seencolor_space = givencolor_space
+    var beforecolor_space = Int8(0)
+    var aftercolor_space = Float64(0)
+    var resultcolor_space = external_call["mojobe_oracle_echo_color_space", color_space](
+        Int8(-5), givencolor_space, Float64(2.75), Pointer(to=seencolor_space),
+        Pointer(to=beforecolor_space), Pointer(to=aftercolor_space))
+    checks.check("color_space by value, between an int8 and a double",
+        seencolor_space == givencolor_space and beforecolor_space == -5 and aftercolor_space == 2.75)
+    checks.check("color_space returned", resultcolor_space == color_space(4))
+
     var givencolor_which = color_which(3)
     var seencolor_which = givencolor_which
     var beforecolor_which = Int8(0)
@@ -720,6 +772,22 @@ def main() raises:
     checks.check("command_code by value, between an int8 and a double",
         seencommand_code == givencommand_code and beforecommand_code == -5 and aftercommand_code == 2.75)
     checks.check("command_code returned", resultcommand_code == command_code(4))
+
+    var givencoordinate_space = coordinate_space(3)
+    var seencoordinate_space = givencoordinate_space
+    var beforecoordinate_space = Int8(0)
+    var aftercoordinate_space = Float64(0)
+    var resultcoordinate_space = external_call["mojobe_oracle_echo_coordinate_space", coordinate_space](
+        Int8(-5), givencoordinate_space, Float64(2.75), Pointer(
+            to=seencoordinate_space,
+        ),
+        Pointer(to=beforecoordinate_space), Pointer(to=aftercoordinate_space))
+    checks.check("coordinate_space by value, between an int8 and a double",
+        seencoordinate_space == givencoordinate_space and beforecoordinate_space == -5 and aftercoordinate_space == 2.75)
+    checks.check(
+        "coordinate_space returned",
+        resultcoordinate_space == coordinate_space(4),
+    )
 
     var givencpu_platform = cpu_platform(3)
     var seencpu_platform = givencpu_platform
@@ -823,6 +891,17 @@ def main() raises:
         "hash_mark_location returned",
         resulthash_mark_location == hash_mark_location(4),
     )
+
+    var givenimage_type = image_type(3)
+    var seenimage_type = givenimage_type
+    var beforeimage_type = Int8(0)
+    var afterimage_type = Float64(0)
+    var resultimage_type = external_call["mojobe_oracle_echo_image_type", image_type](
+        Int8(-5), givenimage_type, Float64(2.75), Pointer(to=seenimage_type),
+        Pointer(to=beforeimage_type), Pointer(to=afterimage_type))
+    checks.check("image_type by value, between an int8 and a double",
+        seenimage_type == givenimage_type and beforeimage_type == -5 and afterimage_type == 2.75)
+    checks.check("image_type returned", resultimage_type == image_type(4))
 
     var givenjoin_mode = join_mode(3)
     var seenjoin_mode = givenjoin_mode
@@ -964,6 +1043,30 @@ def main() raises:
     checks.check("source_alpha by value, between an int8 and a double",
         seensource_alpha == givensource_alpha and beforesource_alpha == -5 and aftersource_alpha == 2.75)
     checks.check("source_alpha returned", resultsource_alpha == source_alpha(4))
+
+    var givenswap_action = swap_action(3)
+    var seenswap_action = givenswap_action
+    var beforeswap_action = Int8(0)
+    var afterswap_action = Float64(0)
+    var resultswap_action = external_call["mojobe_oracle_echo_swap_action", swap_action](
+        Int8(-5), givenswap_action, Float64(2.75), Pointer(to=seenswap_action),
+        Pointer(to=beforeswap_action), Pointer(to=afterswap_action))
+    checks.check("swap_action by value, between an int8 and a double",
+        seenswap_action == givenswap_action and beforeswap_action == -5 and afterswap_action == 2.75)
+    checks.check("swap_action returned", resultswap_action == swap_action(4))
+
+    var giventhread_state = thread_state(3)
+    var seenthread_state = giventhread_state
+    var beforethread_state = Int8(0)
+    var afterthread_state = Float64(0)
+    var resultthread_state = external_call["mojobe_oracle_echo_thread_state", thread_state](
+        Int8(-5), giventhread_state, Float64(2.75), Pointer(
+            to=seenthread_state,
+        ),
+        Pointer(to=beforethread_state), Pointer(to=afterthread_state))
+    checks.check("thread_state by value, between an int8 and a double",
+        seenthread_state == giventhread_state and beforethread_state == -5 and afterthread_state == 2.75)
+    checks.check("thread_state returned", resultthread_state == thread_state(4))
 
     var giventhumb_style = thumb_style(3)
     var seenthumb_style = giventhumb_style

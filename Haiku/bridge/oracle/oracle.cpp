@@ -310,6 +310,47 @@ mojobe_oracle_echo_rgb_color(int8 before, mojobe_rgb_color value, double after,
 	return result;
 }
 
+mojobe_font_height
+mojobe_oracle_echo_font_height(int8 before, mojobe_font_height value, double after,
+	mojobe_font_height* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_font_height result = value;
+	result.ascent += 1;
+	result.descent += 1;
+	result.leading += 1;
+	return result;
+}
+
+mojobe_clipping_rect
+mojobe_oracle_echo_clipping_rect(int8 before, mojobe_clipping_rect value, double after,
+	mojobe_clipping_rect* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_clipping_rect result = value;
+	result.left += 1;
+	result.top += 1;
+	result.right += 1;
+	result.bottom += 1;
+	return result;
+}
+
+mojobe_screen_id
+mojobe_oracle_echo_screen_id(int8 before, mojobe_screen_id value, double after,
+	mojobe_screen_id* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_screen_id result = value;
+	result.id += 1;
+	return result;
+}
+
 mojobe_pattern
 mojobe_oracle_echo_pattern(int8 before, mojobe_pattern value, double after,
 	mojobe_pattern* seen, int8* seenBefore, double* seenAfter)
@@ -467,6 +508,18 @@ mojobe_oracle_echo_cap_mode(int8 before, cap_mode value, double after,
 	return result;
 }
 
+color_space
+mojobe_oracle_echo_color_space(int8 before, color_space value, double after,
+	color_space* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	color_space result = value;
+	result = (color_space)(result + 1);
+	return result;
+}
+
 color_which
 mojobe_oracle_echo_color_which(int8 before, color_which value, double after,
 	color_which* seen, int8* seenBefore, double* seenAfter)
@@ -488,6 +541,18 @@ mojobe_oracle_echo_command_code(int8 before, command_code value, double after,
 	*seenAfter = after;
 	command_code result = value;
 	result = (command_code)(result + 1);
+	return result;
+}
+
+coordinate_space
+mojobe_oracle_echo_coordinate_space(int8 before, coordinate_space value, double after,
+	coordinate_space* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	coordinate_space result = value;
+	result = (coordinate_space)(result + 1);
 	return result;
 }
 
@@ -572,6 +637,18 @@ mojobe_oracle_echo_hash_mark_location(int8 before, hash_mark_location value, dou
 	*seenAfter = after;
 	hash_mark_location result = value;
 	result = (hash_mark_location)(result + 1);
+	return result;
+}
+
+image_type
+mojobe_oracle_echo_image_type(int8 before, image_type value, double after,
+	image_type* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	image_type result = value;
+	result = (image_type)(result + 1);
 	return result;
 }
 
@@ -692,6 +769,30 @@ mojobe_oracle_echo_source_alpha(int8 before, source_alpha value, double after,
 	*seenAfter = after;
 	source_alpha result = value;
 	result = (source_alpha)(result + 1);
+	return result;
+}
+
+swap_action
+mojobe_oracle_echo_swap_action(int8 before, swap_action value, double after,
+	swap_action* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	swap_action result = value;
+	result = (swap_action)(result + 1);
+	return result;
+}
+
+thread_state
+mojobe_oracle_echo_thread_state(int8 before, thread_state value, double after,
+	thread_state* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	thread_state result = value;
+	result = (thread_state)(result + 1);
 	return result;
 }
 

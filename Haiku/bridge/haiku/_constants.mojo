@@ -133,6 +133,16 @@ struct cap_mode(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct color_space(Equatable, TrivialRegisterPassable):
+    """`enum color_space`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct color_which(Equatable, TrivialRegisterPassable):
     """`enum color_which`."""
 
@@ -145,6 +155,16 @@ struct color_which(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct command_code(Equatable, TrivialRegisterPassable):
     """`enum command_code`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct coordinate_space(Equatable, TrivialRegisterPassable):
+    """`enum coordinate_space`."""
 
     var value: UInt32
 
@@ -215,6 +235,16 @@ struct font_metric_mode(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct hash_mark_location(Equatable, TrivialRegisterPassable):
     """`enum hash_mark_location`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct image_type(Equatable, TrivialRegisterPassable):
+    """`enum image_type`."""
 
     var value: UInt32
 
@@ -315,6 +345,26 @@ struct set_font_mask(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct source_alpha(Equatable, TrivialRegisterPassable):
     """`enum source_alpha`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct swap_action(Equatable, TrivialRegisterPassable):
+    """`enum swap_action`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct thread_state(Equatable, TrivialRegisterPassable):
+    """`enum thread_state`."""
 
     var value: UInt32
 
@@ -432,9 +482,10 @@ comptime B_8_BIT_800x600: UInt32 = 2
 comptime B_ABOUT_REQUESTED: UInt32 = 0x5f414252
 comptime B_ABSOLUTE_REAL_TIME_TIMEOUT: UInt32 = 0x50
 comptime B_ABSOLUTE_TIMEOUT: UInt32 = 0x10
+comptime B_ACCELERANT_VERSION: Int32 = 1
 comptime B_ACQUIRE_OVERLAY_LOCK: UInt32 = 0x5f414f56
 comptime B_ACTIVE_ICON_BITMAP: UInt32 = 1
-comptime B_ADD_ON_IMAGE: UInt32 = 3
+comptime B_ADD_ON_IMAGE = image_type(3)
 comptime B_AFFINE_TRANSFORM_TYPE: UInt32 = 0x414d5458
 comptime B_ALIGNMENT_TYPE: UInt32 = 0x414c474e
 comptime B_ALIGN_BOTTOM = vertical_alignment(0x30)
@@ -474,7 +525,7 @@ comptime B_ANY_KERNEL_ADDRESS: Int32 = 4
 comptime B_ANY_TYPE: UInt32 = 0x414e5954
 comptime B_APP_ACTIVATED: UInt32 = 0x5f414354
 comptime B_APP_ERROR_BASE: Int32 = -2147475456
-comptime B_APP_IMAGE: UInt32 = 1
+comptime B_APP_IMAGE = image_type(1)
 comptime B_ARCHIVED_OBJECT = command_code(0x41524356)
 comptime B_ARGV_RECEIVED: UInt32 = 0x5f415247
 comptime B_ASCII_ACKNOWLEDGE: UInt32 = 6
@@ -524,8 +575,8 @@ comptime B_BEOS_VERSION_4_5: Int32 = 0x450
 comptime B_BEOS_VERSION_5: Int32 = 0x500
 comptime B_BEOS_VERSION_MAUI: Int32 = 0x500
 comptime B_BEVEL_JOIN = join_mode(2)
-comptime B_BIG_RGB_16_BIT: UInt32 = 0x1010
-comptime B_BIG_RGB_32_BIT: UInt32 = 0x1008
+comptime B_BIG_RGB_16_BIT = color_space(0x1010)
+comptime B_BIG_RGB_32_BIT = color_space(0x1008)
 comptime B_BITMAPS_SUPPORT_ATTACHED_VIEWS: UInt32 = 2
 comptime B_BITMAPS_SUPPORT_OVERLAY: UInt32 = 4
 comptime B_BITMAP_ACCEPTS_VIEWS: UInt32 = 2
@@ -571,13 +622,13 @@ comptime B_CLONEABLE_AREA: Int32 = 0x100
 comptime B_CLONE_ADDRESS: Int32 = 3
 comptime B_CLOSE_ON_ESCAPE: UInt32 = 0x800000
 comptime B_CLOSE_REQUESTED: UInt32 = 0x5f515251
-comptime B_CMAP8: UInt32 = 4
-comptime B_CMY24: UInt32 = 0xc001
-comptime B_CMY32: UInt32 = 0xc002
-comptime B_CMYA32: UInt32 = 0xe002
-comptime B_CMYK32: UInt32 = 0xc003
+comptime B_CMAP8 = color_space(4)
+comptime B_CMY24 = color_space(0xc001)
+comptime B_CMY32 = color_space(0xc002)
+comptime B_CMYA32 = color_space(0xe002)
+comptime B_CMYK32 = color_space(0xc003)
 comptime B_COLORS_UPDATED: UInt32 = 0x5f434c55
-comptime B_COLOR_8_BIT: UInt32 = 4
+comptime B_COLOR_8_BIT = color_space(4)
 comptime B_COLOR_8_BIT_TYPE: UInt32 = 0x434c5242
 comptime B_COMMAND_KEY: UInt32 = 2
 comptime B_CONDENSED_FACE: UInt32 = 0x80
@@ -646,7 +697,7 @@ comptime B_CREATE_FILE: Int32 = 0x200
 comptime B_CREATE_PARTIALLY_ACTIVE_ICON_BITMAP: UInt32 = 0x800
 comptime B_CREATE_PROPERTY = command_code(0x50435254)
 comptime B_CROSS_DEVICE_LINK: Int32 = -2147459061
-comptime B_CURRENT_STATE_COORDINATES: UInt32 = 0
+comptime B_CURRENT_STATE_COORDINATES = coordinate_space(0)
 comptime B_CURRENT_TEAM: Int32 = 0
 comptime B_CURRENT_WORKSPACE: Int32 = 0
 comptime B_CUT = command_code(0x43435554)
@@ -810,9 +861,9 @@ comptime B_FUNCTION_KEY: UInt32 = 0x10
 comptime B_GENERAL_ERROR_BASE: Int32 = -2147483648
 comptime B_GET_PROPERTY = command_code(0x50474554)
 comptime B_GET_SUPPORTED_SUITES = command_code(0x53554954)
-comptime B_GRAY1: UInt32 = 1
-comptime B_GRAY8: UInt32 = 2
-comptime B_GRAYSCALE_8_BIT: UInt32 = 2
+comptime B_GRAY1 = color_space(1)
+comptime B_GRAY8 = color_space(2)
+comptime B_GRAYSCALE_8_BIT = color_space(2)
 comptime B_GRAYSCALE_8_BIT_TYPE: UInt32 = 0x47525942
 comptime B_HAIKU_64_BIT: Int32 = 1
 comptime B_HAIKU_ABI: Int32 = 0x40000
@@ -862,19 +913,19 @@ comptime B_HASH_MARKS_TOP = hash_mark_location(1)
 comptime B_HAS_TUNED_FONT: UInt32 = 1
 comptime B_HEAVY_FACE: UInt32 = 0x200
 comptime B_HIGHLIGHT_BACKGROUND_TINT: Float32 = 1.2949999570846558
-comptime B_HLS24: UInt32 = 0x4044
-comptime B_HLS32: UInt32 = 0x4045
-comptime B_HLSA32: UInt32 = 0x6045
+comptime B_HLS24 = color_space(0x4044)
+comptime B_HLS32 = color_space(0x4045)
+comptime B_HLSA32 = color_space(0x6045)
 comptime B_HOME: UInt32 = 1
 comptime B_HORIZONTAL = orientation(0)
 comptime B_HOST_IS_BENDIAN: Int32 = 0
 comptime B_HOST_IS_LENDIAN: Int32 = 1
-comptime B_HSI24: UInt32 = 0x4040
-comptime B_HSI32: UInt32 = 0x4041
-comptime B_HSIA32: UInt32 = 0x6041
-comptime B_HSV24: UInt32 = 0x4042
-comptime B_HSV32: UInt32 = 0x4043
-comptime B_HSVA32: UInt32 = 0x6043
+comptime B_HSI24 = color_space(0x4040)
+comptime B_HSI32 = color_space(0x4041)
+comptime B_HSIA32 = color_space(0x6041)
+comptime B_HSV24 = color_space(0x4042)
+comptime B_HSV32 = color_space(0x4043)
+comptime B_HSVA32 = color_space(0x6043)
 comptime B_IDEA_ALERT = alert_type(2)
 comptime B_IDLE_PRIORITY: Int32 = 0
 comptime B_ID_SPECIFIER: UInt32 = 7
@@ -924,9 +975,9 @@ comptime B_KEY_DOWN: UInt32 = 0x5f4b5944
 comptime B_KEY_MAP_LOADED: UInt32 = 0x5f4b4d4c
 comptime B_KEY_UP: UInt32 = 0x5f4b5955
 comptime B_KILL_CAN_INTERRUPT: UInt32 = 0x20
-comptime B_LAB24: UInt32 = 0x4032
-comptime B_LAB32: UInt32 = 0x4033
-comptime B_LABA32: UInt32 = 0x6033
+comptime B_LAB24 = color_space(0x4032)
+comptime B_LAB32 = color_space(0x4033)
+comptime B_LABA32 = color_space(0x6033)
 comptime B_LARGE_ICON_TYPE: UInt32 = 0x49434f4e
 comptime B_LAST_BUFFER_ERROR: Int32 = -2147467257
 comptime B_LAUNCH_FAILED: Int32 = -2147475451
@@ -944,7 +995,7 @@ comptime B_LEFT_CONTROL_KEY: UInt32 = 0x1000
 comptime B_LEFT_OPTION_KEY: UInt32 = 0x4000
 comptime B_LEFT_SHIFT_KEY: UInt32 = 0x100
 comptime B_LEGACY_EXECUTABLE: Int32 = -2147478778
-comptime B_LIBRARY_IMAGE: UInt32 = 2
+comptime B_LIBRARY_IMAGE = image_type(2)
 comptime B_LIGHTEN_1_TINT: Float32 = 0.5899999737739563
 comptime B_LIGHTEN_2_TINT: Float32 = 0.38499999046325684
 comptime B_LIGHTEN_MAX_TINT: Float32 = 0.0
@@ -1039,7 +1090,7 @@ comptime B_MODAL_SUBSET_WINDOW_FEEL = window_feel(2)
 comptime B_MODAL_WINDOW = window_type(3)
 comptime B_MODAL_WINDOW_LOOK = window_look(3)
 comptime B_MODIFIERS_CHANGED: UInt32 = 0x5f4d4348
-comptime B_MONOCHROME_1_BIT: UInt32 = 1
+comptime B_MONOCHROME_1_BIT = color_space(1)
 comptime B_MONOCHROME_1_BIT_TYPE: UInt32 = 0x4d4e4f42
 comptime B_MOUSE_DOWN: UInt32 = 0x5f4d444e
 comptime B_MOUSE_ENTER_EXIT: UInt32 = 0x5f4d4558
@@ -1084,7 +1135,7 @@ comptime B_NOT_ZOOMABLE: UInt32 = 0x40
 comptime B_NO_BORDER = border_style(2)
 comptime B_NO_BORDER_WINDOW_LOOK = window_look(0x13)
 comptime B_NO_COLOR = color_which(0)
-comptime B_NO_COLOR_SPACE: UInt32 = 0
+comptime B_NO_COLOR_SPACE = color_space(0)
 comptime B_NO_COMMAND_KEY: UInt32 = 0x10000
 comptime B_NO_ERROR: Int32 = 0
 comptime B_NO_INIT: Int32 = -2147483635
@@ -1152,8 +1203,8 @@ comptime B_PAGE_SIZE: Int32 = 0x1000
 comptime B_PAGE_UP: UInt32 = 0xb
 comptime B_PANEL_BACKGROUND_COLOR = color_which(1)
 comptime B_PANEL_TEXT_COLOR = color_which(0xa)
-comptime B_PARENT_VIEW_COORDINATES: UInt32 = 4
-comptime B_PARENT_VIEW_DRAW_COORDINATES: UInt32 = 3
+comptime B_PARENT_VIEW_COORDINATES = coordinate_space(4)
+comptime B_PARENT_VIEW_DRAW_COORDINATES = coordinate_space(3)
 comptime B_PARTIALLY_ACTIVATE_ICON_BITMAP: UInt32 = 2
 comptime B_PARTIAL_READ: Int32 = -2147459056
 comptime B_PARTIAL_WRITE: Int32 = -2147459055
@@ -1173,7 +1224,7 @@ comptime B_POINT_TYPE: UInt32 = 0x42504e54
 comptime B_POSIX_ENOMEM: Int32 = -2147454976
 comptime B_POSIX_ERROR_BASE: Int32 = -2147454976
 comptime B_POSTSCRIPT_TYPE1_WINDOWS = font_file_format(1)
-comptime B_PREVIOUS_STATE_COORDINATES: UInt32 = 1
+comptime B_PREVIOUS_STATE_COORDINATES = coordinate_space(1)
 comptime B_PRIMARY_MOUSE_BUTTON: UInt32 = 1
 comptime B_PRINTER_CHANGED: UInt32 = 0x5f504348
 comptime B_PRINTF_POINTER_WIDTH: Int32 = 0x10
@@ -1215,35 +1266,35 @@ comptime B_RESULT_NOT_REPRESENTABLE: Int32 = -2147454959
 comptime B_RETURN: UInt32 = 0xa
 comptime B_REVERSE_INDEX_SPECIFIER: UInt32 = 3
 comptime B_REVERSE_RANGE_SPECIFIER: UInt32 = 5
-comptime B_RGB15: UInt32 = 0x10
-comptime B_RGB15_BIG: UInt32 = 0x1010
-comptime B_RGB15_LITTLE: UInt32 = 0x10
-comptime B_RGB16: UInt32 = 5
-comptime B_RGB16_BIG: UInt32 = 0x1005
-comptime B_RGB16_LITTLE: UInt32 = 5
-comptime B_RGB24: UInt32 = 3
-comptime B_RGB24_BIG: UInt32 = 0x1003
-comptime B_RGB24_LITTLE: UInt32 = 3
-comptime B_RGB30: UInt32 = 9
-comptime B_RGB30_BIG: UInt32 = 0x1009
-comptime B_RGB30_LITTLE: UInt32 = 9
-comptime B_RGB32: UInt32 = 8
-comptime B_RGB32_BIG: UInt32 = 0x1008
-comptime B_RGB32_LITTLE: UInt32 = 8
-comptime B_RGB48: UInt32 = 0x11
-comptime B_RGB48_BIG: UInt32 = 0x1011
-comptime B_RGB48_LITTLE: UInt32 = 0x11
-comptime B_RGBA15: UInt32 = 0x2010
-comptime B_RGBA15_BIG: UInt32 = 0x3010
-comptime B_RGBA15_LITTLE: UInt32 = 0x2010
-comptime B_RGBA32: UInt32 = 0x2008
-comptime B_RGBA32_BIG: UInt32 = 0x3008
-comptime B_RGBA32_LITTLE: UInt32 = 0x2008
-comptime B_RGBA64: UInt32 = 0x2012
-comptime B_RGBA64_BIG: UInt32 = 0x3012
-comptime B_RGBA64_LITTLE: UInt32 = 0x2012
-comptime B_RGB_16_BIT: UInt32 = 0x10
-comptime B_RGB_32_BIT: UInt32 = 8
+comptime B_RGB15 = color_space(0x10)
+comptime B_RGB15_BIG = color_space(0x1010)
+comptime B_RGB15_LITTLE = color_space(0x10)
+comptime B_RGB16 = color_space(5)
+comptime B_RGB16_BIG = color_space(0x1005)
+comptime B_RGB16_LITTLE = color_space(5)
+comptime B_RGB24 = color_space(3)
+comptime B_RGB24_BIG = color_space(0x1003)
+comptime B_RGB24_LITTLE = color_space(3)
+comptime B_RGB30 = color_space(9)
+comptime B_RGB30_BIG = color_space(0x1009)
+comptime B_RGB30_LITTLE = color_space(9)
+comptime B_RGB32 = color_space(8)
+comptime B_RGB32_BIG = color_space(0x1008)
+comptime B_RGB32_LITTLE = color_space(8)
+comptime B_RGB48 = color_space(0x11)
+comptime B_RGB48_BIG = color_space(0x1011)
+comptime B_RGB48_LITTLE = color_space(0x11)
+comptime B_RGBA15 = color_space(0x2010)
+comptime B_RGBA15_BIG = color_space(0x3010)
+comptime B_RGBA15_LITTLE = color_space(0x2010)
+comptime B_RGBA32 = color_space(0x2008)
+comptime B_RGBA32_BIG = color_space(0x3008)
+comptime B_RGBA32_LITTLE = color_space(0x2008)
+comptime B_RGBA64 = color_space(0x2012)
+comptime B_RGBA64_BIG = color_space(0x3012)
+comptime B_RGBA64_LITTLE = color_space(0x2012)
+comptime B_RGB_16_BIT = color_space(0x10)
+comptime B_RGB_32_BIT = color_space(8)
 comptime B_RGB_32_BIT_TYPE: UInt32 = 0x52474242
 comptime B_RGB_COLOR_TYPE: UInt32 = 0x52474243
 comptime B_RIGHT_ARROW: UInt32 = 0x1d
@@ -1256,7 +1307,7 @@ comptime B_ROUND_JOIN = join_mode(0)
 comptime B_SAME_POSITION_IN_ALL_WORKSPACES: UInt32 = 0x200000
 comptime B_SAVE_REQUESTED = command_code(0x53415645)
 comptime B_SCREEN_CHANGED: UInt32 = 0x5f534348
-comptime B_SCREEN_COORDINATES: UInt32 = 6
+comptime B_SCREEN_COORDINATES = coordinate_space(6)
 comptime B_SCREEN_METRIC = font_metric_mode(0)
 comptime B_SCROLL_BAR_THUMB_COLOR = color_which(0x20)
 comptime B_SCROLL_KEY: UInt32 = 0xf
@@ -1299,27 +1350,27 @@ comptime B_SUBSTITUTE: UInt32 = 0x1a
 comptime B_SUCCESS_COLOR = color_which(0x64)
 comptime B_SUPPORTS_LAYOUT: UInt32 = 0x100000
 comptime B_SUSPEND_VIEW_FOCUS: UInt32 = 2
-comptime B_SWAP_ALWAYS: UInt32 = 4
-comptime B_SWAP_BENDIAN_TO_HOST: UInt32 = 3
-comptime B_SWAP_HOST_TO_BENDIAN: UInt32 = 1
-comptime B_SWAP_HOST_TO_LENDIAN: UInt32 = 0
-comptime B_SWAP_LENDIAN_TO_HOST: UInt32 = 2
+comptime B_SWAP_ALWAYS = swap_action(4)
+comptime B_SWAP_BENDIAN_TO_HOST = swap_action(3)
+comptime B_SWAP_HOST_TO_BENDIAN = swap_action(1)
+comptime B_SWAP_HOST_TO_LENDIAN = swap_action(0)
+comptime B_SWAP_LENDIAN_TO_HOST = swap_action(2)
 comptime B_SYMBOL_TYPE_ANY: Int32 = 5
 comptime B_SYMBOL_TYPE_DATA: Int32 = 1
 comptime B_SYMBOL_TYPE_TEXT: Int32 = 2
-comptime B_SYSTEM_IMAGE: UInt32 = 4
+comptime B_SYSTEM_IMAGE = image_type(4)
 comptime B_SYSTEM_TEAM: Int32 = 1
 comptime B_SYSTEM_TIMEBASE: Int32 = 0
 comptime B_TAB: UInt32 = 9
 comptime B_TEAM_USAGE_CHILDREN: Int32 = -1
 comptime B_TEAM_USAGE_SELF: Int32 = 0
 comptime B_TERTIARY_MOUSE_BUTTON: UInt32 = 4
-comptime B_THREAD_ASLEEP: UInt32 = 4
-comptime B_THREAD_READY: UInt32 = 2
-comptime B_THREAD_RECEIVING: UInt32 = 3
-comptime B_THREAD_RUNNING: UInt32 = 1
-comptime B_THREAD_SUSPENDED: UInt32 = 5
-comptime B_THREAD_WAITING: UInt32 = 6
+comptime B_THREAD_ASLEEP = thread_state(4)
+comptime B_THREAD_READY = thread_state(2)
+comptime B_THREAD_RECEIVING = thread_state(3)
+comptime B_THREAD_RUNNING = thread_state(1)
+comptime B_THREAD_SUSPENDED = thread_state(5)
+comptime B_THREAD_WAITING = thread_state(6)
 comptime B_TILE_BITMAP = bitmap_tiling(3)
 comptime B_TILE_BITMAP_X = bitmap_tiling(1)
 comptime B_TILE_BITMAP_Y = bitmap_tiling(2)
@@ -1392,14 +1443,14 @@ comptime B_USE_SMALL_INSETS = BSpacing(-1006)
 comptime B_USE_SMALL_SPACING = BSpacing(-1006)
 comptime B_USE_WINDOW_INSETS = BSpacing(-1005)
 comptime B_USE_WINDOW_SPACING = BSpacing(-1005)
-comptime B_UVL24: UInt32 = 0x4030
-comptime B_UVL32: UInt32 = 0x4031
-comptime B_UVLA32: UInt32 = 0x6031
+comptime B_UVL24 = color_space(0x4030)
+comptime B_UVL32 = color_space(0x4031)
+comptime B_UVLA32 = color_space(0x6031)
 comptime B_VALUE_CHANGED: UInt32 = 0x5f564348
 comptime B_VECTOR_ICON_TYPE: UInt32 = 0x5649434e
 comptime B_VERTICAL = orientation(1)
 comptime B_VIEWS_SUPPORT_DRAW_BITMAP: UInt32 = 1
-comptime B_VIEW_COORDINATES: UInt32 = 2
+comptime B_VIEW_COORDINATES = coordinate_space(2)
 comptime B_VIEW_MOVED: UInt32 = 0x5f564d56
 comptime B_VIEW_RESIZED: UInt32 = 0x5f565253
 comptime B_WAIT_FOR_RETRACE = bitmap_drawing_options(0x800)
@@ -1412,7 +1463,7 @@ comptime B_WILL_ACCEPT_FIRST_CLICK: UInt32 = 0x10
 comptime B_WILL_DRAW: UInt32 = 0x20000000
 comptime B_WINDOW_ACTIVATED: UInt32 = 0x5f414354
 comptime B_WINDOW_BORDER_COLOR = color_which(0x19)
-comptime B_WINDOW_COORDINATES: UInt32 = 5
+comptime B_WINDOW_COORDINATES = coordinate_space(5)
 comptime B_WINDOW_INACTIVE_BORDER_COLOR = color_which(0x1a)
 comptime B_WINDOW_INACTIVE_TAB_COLOR = color_which(0x17)
 comptime B_WINDOW_INACTIVE_TEXT_COLOR = color_which(0x18)
@@ -1428,16 +1479,16 @@ comptime B_WOULD_BLOCK: Int32 = -2147483637
 comptime B_WRITE_AREA: Int32 = 2
 comptime B_WRITE_ONLY: Int32 = 1
 comptime B_XATTR_TYPE: UInt32 = 0x58415452
-comptime B_YCbCr411: UInt32 = 0x4001
-comptime B_YCbCr420: UInt32 = 0x4004
-comptime B_YCbCr422: UInt32 = 0x4000
-comptime B_YCbCr444: UInt32 = 0x4003
-comptime B_YUV12: UInt32 = 0x402d
-comptime B_YUV411: UInt32 = 0x4021
-comptime B_YUV420: UInt32 = 0x4024
-comptime B_YUV422: UInt32 = 0x4020
-comptime B_YUV444: UInt32 = 0x4023
-comptime B_YUV9: UInt32 = 0x402c
+comptime B_YCbCr411 = color_space(0x4001)
+comptime B_YCbCr420 = color_space(0x4004)
+comptime B_YCbCr422 = color_space(0x4000)
+comptime B_YCbCr444 = color_space(0x4003)
+comptime B_YUV12 = color_space(0x402d)
+comptime B_YUV411 = color_space(0x4021)
+comptime B_YUV420 = color_space(0x4024)
+comptime B_YUV422 = color_space(0x4020)
+comptime B_YUV444 = color_space(0x4023)
+comptime B_YUV9 = color_space(0x402c)
 comptime B_ZOOM: UInt32 = 0x5f575a4d
 
 

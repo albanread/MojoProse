@@ -10,13 +10,14 @@
 """The Haiku API for Mojo programs on Prose, through libmojobe
 (Haiku/docs/bridge-design.md). Link programs with `-lmojobe -lbe`.
 
-Generated from the Haiku headers for: BMessenger, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BAlert, BMessageRunner.
+Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BAlert, BRegion, BBitmap, BScreen, BMessageRunner.
 Haiku/bridge/MANIFEST.md lists every method, and what is left out and why."""
 
 from ._core import fourcc
-from ._values import BRect, BPoint, rgb_color, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS
+from ._values import BRect, BPoint, rgb_color, font_height, clipping_rect, screen_id, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS, B_MAIN_SCREEN_ID
 from ._api import (
     BMessenger,
+    BFont,
     BHandler,
     BHandlerRef,
     BLooper,
@@ -57,9 +58,18 @@ from ._api import (
     BScrollViewRef,
     BAlert,
     BAlertRef,
+    BRegion,
+    BRegionRef,
+    BBitmap,
+    BBitmapRef,
+    BScreen,
+    BScreenRef,
     BMessageRunner,
     BMessageRunnerRef,
     LooperLock,
+    be_plain_font,
+    be_bold_font,
+    be_fixed_font,
 )
 from ._constants import status_of
 from ._constants import (
@@ -75,8 +85,10 @@ from ._constants import (
     button_spacing,
     button_width,
     cap_mode,
+    color_space,
     color_which,
     command_code,
+    coordinate_space,
     cpu_platform,
     cpu_vendor,
     drawing_mode,
@@ -84,6 +96,7 @@ from ._constants import (
     font_file_format,
     font_metric_mode,
     hash_mark_location,
+    image_type,
     join_mode,
     menu_bar_border,
     menu_layout,
@@ -94,6 +107,8 @@ from ._constants import (
     rect_tracking_style,
     set_font_mask,
     source_alpha,
+    swap_action,
+    thread_state,
     thumb_style,
     topology_level_type,
     undo_state,
@@ -132,6 +147,7 @@ from ._constants import (
     B_ABOUT_REQUESTED,
     B_ABSOLUTE_REAL_TIME_TIMEOUT,
     B_ABSOLUTE_TIMEOUT,
+    B_ACCELERANT_VERSION,
     B_ACQUIRE_OVERLAY_LOCK,
     B_ACTIVE_ICON_BITMAP,
     B_ADD_ON_IMAGE,

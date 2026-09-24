@@ -38,6 +38,10 @@
 #include <ScrollView.h>
 #include <Alert.h>
 #include <MessageRunner.h>
+#include <Font.h>
+#include <Region.h>
+#include <Bitmap.h>
+#include <Screen.h>
 
 
 extern "C" {
@@ -70,6 +74,32 @@ struct mojobe_rgb_color {
 	uint8	green;
 	uint8	blue;
 	uint8	alpha;
+};
+
+
+/*!	`font_height` as C passes it: laid out the same, a plain C struct
+	(its member functions make `font_height` a C++ type to C). */
+struct mojobe_font_height {
+	float	ascent;
+	float	descent;
+	float	leading;
+};
+
+
+/*!	`clipping_rect` as C passes it: laid out the same, a plain C struct
+	(its member functions make `clipping_rect` a C++ type to C). */
+struct mojobe_clipping_rect {
+	int32	left;
+	int32	top;
+	int32	right;
+	int32	bottom;
+};
+
+
+/*!	`screen_id` as C passes it: laid out the same, a plain C struct
+	(its member functions make `screen_id` a C++ type to C). */
+struct mojobe_screen_id {
+	int32	id;
 };
 
 
@@ -267,6 +297,167 @@ void mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP(BMessenger* self,
 
 // BMessenger::BMessenger()
 void mojobe_BMessenger_new__void(BMessenger* self);
+
+
+// #pragma mark - BFont
+
+
+// bool BFont::operator==(const BFont& font) const
+bool mojobe_BFont_equals(const BFont* self, const BFont* other);
+
+// status_t BFont::SetFamilyAndStyle(const char* family, const char* style)
+status_t mojobe_BFont_SetFamilyAndStyle__charP_charP(BFont* self,
+	const char* a_family,
+	const char* a_style);
+
+// void BFont::SetFamilyAndStyle(uint32 code)
+void mojobe_BFont_SetFamilyAndStyle__uint32(BFont* self, uint32 a_code);
+
+// status_t BFont::SetFamilyAndFace(const char* family, uint16 face)
+status_t mojobe_BFont_SetFamilyAndFace(BFont* self,
+	const char* a_family,
+	uint16 a_face);
+
+// void BFont::SetSize(float size)
+void mojobe_BFont_SetSize(BFont* self, float a_size);
+
+// void BFont::SetShear(float shear)
+void mojobe_BFont_SetShear(BFont* self, float a_shear);
+
+// void BFont::SetRotation(float rotation)
+void mojobe_BFont_SetRotation(BFont* self, float a_rotation);
+
+// void BFont::SetFalseBoldWidth(float width)
+void mojobe_BFont_SetFalseBoldWidth(BFont* self, float a_width);
+
+// void BFont::SetSpacing(uint8 spacing)
+void mojobe_BFont_SetSpacing(BFont* self, uint8 a_spacing);
+
+// void BFont::SetEncoding(uint8 encoding)
+void mojobe_BFont_SetEncoding(BFont* self, uint8 a_encoding);
+
+// void BFont::SetFace(uint16 face)
+void mojobe_BFont_SetFace(BFont* self, uint16 a_face);
+
+// void BFont::SetFlags(uint32 flags)
+void mojobe_BFont_SetFlags(BFont* self, uint32 a_flags);
+
+// uint32 BFont::FamilyAndStyle() const
+uint32 mojobe_BFont_FamilyAndStyle(BFont* self);
+
+// float BFont::Size() const
+float mojobe_BFont_Size(BFont* self);
+
+// float BFont::Shear() const
+float mojobe_BFont_Shear(BFont* self);
+
+// float BFont::Rotation() const
+float mojobe_BFont_Rotation(BFont* self);
+
+// float BFont::FalseBoldWidth() const
+float mojobe_BFont_FalseBoldWidth(BFont* self);
+
+// uint8 BFont::Spacing() const
+uint8 mojobe_BFont_Spacing(BFont* self);
+
+// uint8 BFont::Encoding() const
+uint8 mojobe_BFont_Encoding(BFont* self);
+
+// uint16 BFont::Face() const
+uint16 mojobe_BFont_Face(BFont* self);
+
+// uint32 BFont::Flags() const
+uint32 mojobe_BFont_Flags(BFont* self);
+
+// font_direction BFont::Direction() const
+font_direction mojobe_BFont_Direction(BFont* self);
+
+// bool BFont::IsFixed() const
+bool mojobe_BFont_IsFixed(BFont* self);
+
+// bool BFont::IsFullAndHalfFixed() const
+bool mojobe_BFont_IsFullAndHalfFixed(BFont* self);
+
+// BRect BFont::BoundingBox() const
+mojobe_BRect mojobe_BFont_BoundingBox(BFont* self);
+
+// bool BFont::IncludesBlock(uint32 start, uint32 end) const
+bool mojobe_BFont_IncludesBlock(BFont* self, uint32 a_start, uint32 a_end);
+
+// font_file_format BFont::FileFormat() const
+font_file_format mojobe_BFont_FileFormat(BFont* self);
+
+// int32 BFont::CountTuned() const
+int32 mojobe_BFont_CountTuned(BFont* self);
+
+// float BFont::StringWidth(const char* string) const
+float mojobe_BFont_StringWidth__charP(BFont* self, const char* a_string);
+
+// float BFont::StringWidth(const char* string, int32 length) const
+float mojobe_BFont_StringWidth__charP_int32(BFont* self,
+	const char* a_string,
+	int32 a_length);
+
+// void BFont::GetEscapements(const char* charArray, int32 numChars, float* escapementArray) const
+void mojobe_BFont_GetEscapements(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	float * a_escapementArray);
+
+// void BFont::GetHeight(font_height* height) const
+void mojobe_BFont_GetHeight(BFont* self, mojobe_font_height* a_height);
+
+// void BFont::GetBoundingBoxesAsGlyphs(const char* charArray, int32 numChars, font_metric_mode mode, BRect* boundingBoxArray) const
+void mojobe_BFont_GetBoundingBoxesAsGlyphs(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	font_metric_mode a_mode,
+	mojobe_BRect* a_boundingBoxArray);
+
+// void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray) const
+void mojobe_BFont_GetHasGlyphs__charP_int32_boolP(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	bool * a_hasArray);
+
+// void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray, bool useFallbacks) const
+void mojobe_BFont_GetHasGlyphs__charP_int32_boolP_bool(BFont* self,
+	const char* a_charArray,
+	int32 a_numChars,
+	bool * a_hasArray,
+	bool a_useFallbacks);
+
+// void BFont::PrintToStream() const
+void mojobe_BFont_PrintToStream(BFont* self);
+
+// status_t BFont::LoadFont(const char* path)
+status_t mojobe_BFont_LoadFont__charP(BFont* self, const char* a_path);
+
+// status_t BFont::LoadFont(const char* path, uint16 index, uint16 instance)
+status_t mojobe_BFont_LoadFont__charP_uint16_uint16(BFont* self,
+	const char* a_path,
+	uint16 a_index,
+	uint16 a_instance);
+
+// status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset)
+status_t mojobe_BFont_LoadFont__area_id_size_t_size_t(BFont* self,
+	area_id a_fontAreaID,
+	size_t a_size,
+	size_t a_offset);
+
+// status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset, uint16 index, uint16 instance)
+status_t mojobe_BFont_LoadFont__area_id_size_t_size_t_uint16_uint16(BFont* self,
+	area_id a_fontAreaID,
+	size_t a_size,
+	size_t a_offset,
+	uint16 a_index,
+	uint16 a_instance);
+
+// status_t BFont::UnloadFont()
+status_t mojobe_BFont_UnloadFont(BFont* self);
+
+// BFont::BFont()
+void mojobe_BFont_new(BFont* self);
 
 
 // #pragma mark - BHandler
@@ -726,6 +917,11 @@ void mojobe_BWindow_SetZoomLimits(BWindow* self,
 	float a_maxWidth,
 	float a_maxHeight);
 
+// void BWindow::ScreenChanged(BRect screenSize, color_space depth)
+void mojobe_BWindow_ScreenChanged(BWindow* self,
+	mojobe_BRect a_screenSize,
+	color_space a_depth);
+
 // void BWindow::SetPulseRate(bigtime_t rate)
 void mojobe_BWindow_SetPulseRate(BWindow* self, bigtime_t a_rate);
 
@@ -826,7 +1022,11 @@ void mojobe_BWindow_ResizeToPreferred(BWindow* self);
 void mojobe_BWindow_CenterIn(BWindow* self, mojobe_BRect a_rect);
 
 // void BWindow::CenterOnScreen()
-void mojobe_BWindow_CenterOnScreen(BWindow* self);
+void mojobe_BWindow_CenterOnScreen__void(BWindow* self);
+
+// void BWindow::CenterOnScreen(screen_id id)
+void mojobe_BWindow_CenterOnScreen__screen_id(BWindow* self,
+	mojobe_screen_id a_id);
 
 // void BWindow::MoveOnScreen(uint32 flags)
 void mojobe_BWindow_MoveOnScreen(BWindow* self, uint32 a_flags);
@@ -1173,9 +1373,24 @@ void mojobe_BView_GetMouse(BView* self,
 	bool a_checkMessageQueue);
 
 // void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)
-void mojobe_BView_DragMessage(BView* self,
+void mojobe_BView_DragMessage__BMessageP_BRect_BHandlerP(BView* self,
 	BMessage* a_message,
 	mojobe_BRect a_dragRect,
+	BHandler* a_replyTo);
+
+// void BView::DragMessage(BMessage* message, BBitmap* bitmap, BPoint offset, BHandler* replyTo)
+void mojobe_BView_DragMessage__BMessageP_BBitmapP_BPoint_BHandlerP(BView* self,
+	BMessage* a_message,
+	BBitmap* a_bitmap,
+	mojobe_BPoint a_offset,
+	BHandler* a_replyTo);
+
+// void BView::DragMessage(BMessage* message, BBitmap* bitmap, drawing_mode dragMode, BPoint offset, BHandler* replyTo)
+void mojobe_BView_DragMessage__BMessageP_BBitmapP_drawing_mode_BPoint_BHandlerP(BView* self,
+	BMessage* a_message,
+	BBitmap* a_bitmap,
+	drawing_mode a_dragMode,
+	mojobe_BPoint a_offset,
 	BHandler* a_replyTo);
 
 // BView* BView::FindView(const char* name) const
@@ -1224,6 +1439,12 @@ mojobe_BRect mojobe_BView_ConvertFromParent__BRect(BView* self,
 
 // BPoint BView::LeftTop() const
 mojobe_BPoint mojobe_BView_LeftTop(BView* self);
+
+// void BView::GetClippingRegion(BRegion* region) const
+void mojobe_BView_GetClippingRegion(BView* self, BRegion* a_region);
+
+// void BView::ConstrainClippingRegion(BRegion* region)
+void mojobe_BView_ConstrainClippingRegion(BView* self, BRegion* a_region);
 
 // void BView::ClipToRect(BRect rect)
 void mojobe_BView_ClipToRect(BView* self, mojobe_BRect a_rect);
@@ -1290,8 +1511,38 @@ void mojobe_BView_SetViewUIColor(BView* self,
 // color_which BView::ViewUIColor(float* tint) const
 color_which mojobe_BView_ViewUIColor(BView* self, float * a_tint);
 
+// void BView::SetViewBitmap(const BBitmap* bitmap, BRect srcRect, BRect dstRect, uint32 followFlags, uint32 options)
+void mojobe_BView_SetViewBitmap__BBitmapP_BRect_BRect_uint32_uint32(BView* self,
+	BBitmap* a_bitmap,
+	mojobe_BRect a_srcRect,
+	mojobe_BRect a_dstRect,
+	uint32 a_followFlags,
+	uint32 a_options);
+
+// void BView::SetViewBitmap(const BBitmap* bitmap, uint32 followFlags, uint32 options)
+void mojobe_BView_SetViewBitmap__BBitmapP_uint32_uint32(BView* self,
+	BBitmap* a_bitmap,
+	uint32 a_followFlags,
+	uint32 a_options);
+
 // void BView::ClearViewBitmap()
 void mojobe_BView_ClearViewBitmap(BView* self);
+
+// status_t BView::SetViewOverlay(const BBitmap* overlay, BRect srcRect, BRect dstRect, rgb_color* colorKey, uint32 followFlags, uint32 options)
+status_t mojobe_BView_SetViewOverlay__BBitmapP_BRect_BRect_rgb_colorP_uint32_uint32(BView* self,
+	BBitmap* a_overlay,
+	mojobe_BRect a_srcRect,
+	mojobe_BRect a_dstRect,
+	mojobe_rgb_color* a_colorKey,
+	uint32 a_followFlags,
+	uint32 a_options);
+
+// status_t BView::SetViewOverlay(const BBitmap* overlay, rgb_color* colorKey, uint32 followFlags, uint32 options)
+status_t mojobe_BView_SetViewOverlay__BBitmapP_rgb_colorP_uint32_uint32(BView* self,
+	BBitmap* a_overlay,
+	mojobe_rgb_color* a_colorKey,
+	uint32 a_followFlags,
+	uint32 a_options);
 
 // void BView::ClearViewOverlay()
 void mojobe_BView_ClearViewOverlay(BView* self);
@@ -1457,6 +1708,11 @@ void mojobe_BView_FillRect(BView* self,
 	mojobe_BRect a_rect,
 	mojobe_pattern a_pattern);
 
+// void BView::FillRegion(BRegion* rectegion, pattern pattern)
+void mojobe_BView_FillRegion(BView* self,
+	BRegion* a_rectegion,
+	mojobe_pattern a_pattern);
+
 // void BView::InvertRect(BRect rect)
 void mojobe_BView_InvertRect(BView* self, mojobe_BRect a_rect);
 
@@ -1543,6 +1799,70 @@ void mojobe_BView_FillBezier(BView* self,
 // void BView::CopyBits(BRect src, BRect dst)
 void mojobe_BView_CopyBits(BView* self, mojobe_BRect a_src, mojobe_BRect a_dst);
 
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)
+void mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect_uint32(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect,
+	uint32 a_options);
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)
+void mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect);
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect viewRect)
+void mojobe_BView_DrawBitmapAsync__BBitmapP_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect);
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap, BPoint where)
+void mojobe_BView_DrawBitmapAsync__BBitmapP_BPoint(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BPoint a_where);
+
+// void BView::DrawBitmapAsync(const BBitmap* aBitmap)
+void mojobe_BView_DrawBitmapAsync__BBitmapP(BView* self, BBitmap* a_aBitmap);
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)
+void mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect_uint32(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect,
+	uint32 a_options);
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)
+void mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_bitmapRect,
+	mojobe_BRect a_viewRect);
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BRect viewRect)
+void mojobe_BView_DrawBitmap__BBitmapP_BRect(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect);
+
+// void BView::DrawBitmap(const BBitmap* aBitmap, BPoint where)
+void mojobe_BView_DrawBitmap__BBitmapP_BPoint(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BPoint a_where);
+
+// void BView::DrawBitmap(const BBitmap* aBitmap)
+void mojobe_BView_DrawBitmap__BBitmapP(BView* self, BBitmap* a_aBitmap);
+
+// void BView::DrawTiledBitmapAsync(const BBitmap* aBitmap, BRect viewRect, BPoint phase)
+void mojobe_BView_DrawTiledBitmapAsync(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect,
+	mojobe_BPoint a_phase);
+
+// void BView::DrawTiledBitmap(const BBitmap* aBitmap, BRect viewRect, BPoint phase)
+void mojobe_BView_DrawTiledBitmap(BView* self,
+	BBitmap* a_aBitmap,
+	mojobe_BRect a_viewRect,
+	mojobe_BPoint a_phase);
+
 // void BView::DrawChar(char aChar)
 void mojobe_BView_DrawChar__char(BView* self, char a_aChar);
 
@@ -1564,6 +1884,12 @@ void mojobe_BView_DrawString__charP_int32(BView* self,
 	const char* a_string,
 	int32 a_length);
 
+// void BView::SetFont(const BFont* font, uint32 mask)
+void mojobe_BView_SetFont(BView* self, const BFont* a_font, uint32 a_mask);
+
+// void BView::GetFont(BFont* font) const
+void mojobe_BView_GetFont(BView* self, BFont* a_font);
+
 // float BView::StringWidth(const char* string) const
 float mojobe_BView_StringWidth__charP(BView* self, const char* a_string);
 
@@ -1578,8 +1904,14 @@ void mojobe_BView_SetFontSize(BView* self, float a_size);
 // void BView::ForceFontAliasing(bool enable)
 void mojobe_BView_ForceFontAliasing(BView* self, bool a_enable);
 
+// void BView::GetFontHeight(font_height* height) const
+void mojobe_BView_GetFontHeight(BView* self, mojobe_font_height* a_height);
+
 // void BView::Invalidate(BRect invalRect)
 void mojobe_BView_Invalidate__BRect(BView* self, mojobe_BRect a_invalRect);
+
+// void BView::Invalidate(const BRegion* invalRegion)
+void mojobe_BView_Invalidate__BRegionP(BView* self, BRegion* a_invalRegion);
 
 // void BView::Invalidate()
 void mojobe_BView_Invalidate__void(BView* self);
@@ -2081,6 +2413,15 @@ status_t mojobe_BMessage_AddMessage(BMessage* self,
 	const char* a_name,
 	BMessage* a_message);
 
+// status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)
+status_t mojobe_BMessage_AddData(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes,
+	bool a_isFixedSize,
+	int32 a_count);
+
 // status_t BMessage::Append(const BMessage& message)
 status_t mojobe_BMessage_Append(BMessage* self, BMessage* a_message);
 
@@ -2469,6 +2810,21 @@ status_t mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP(BMessage* self,
 	int32 a_index,
 	BMessage* a_message);
 
+// status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)
+status_t mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes);
+
+// status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)
+status_t mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	int32 a_index,
+	const void* a_data,
+	ssize_t a_numBytes);
+
 // bool BMessage::HasSameData(const BMessage& other, bool ignoreFieldOrder, bool deep) const
 bool mojobe_BMessage_HasSameData(BMessage* self,
 	BMessage* a_other,
@@ -2790,6 +3146,15 @@ status_t mojobe_BMessage_SetPoint(BMessage* self,
 status_t mojobe_BMessage_SetRect(BMessage* self,
 	const char* a_name,
 	mojobe_BRect a_value);
+
+// status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)
+status_t mojobe_BMessage_SetData(BMessage* self,
+	const char* a_name,
+	type_code a_type,
+	const void* a_data,
+	ssize_t a_numBytes,
+	bool a_fixedSize,
+	int a_count);
 
 // BMessage::what (read)
 uint32 mojobe_BMessage_get_what(BMessage* self);
@@ -3228,6 +3593,20 @@ void mojobe_BControl_SetEnabled(BControl* self, bool a_enabled);
 
 // bool BControl::IsEnabled() const
 bool mojobe_BControl_IsEnabled(BControl* self);
+
+// status_t BControl::SetIcon(const BBitmap* bitmap, uint32 flags)
+status_t mojobe_BControl_SetIcon(BControl* self,
+	BBitmap* a_bitmap,
+	uint32 a_flags);
+
+// status_t BControl::SetIconBitmap(const BBitmap* bitmap, uint32 which, uint32 flags)
+status_t mojobe_BControl_SetIconBitmap(BControl* self,
+	BBitmap* a_bitmap,
+	uint32 a_which,
+	uint32 a_flags);
+
+// const BBitmap* BControl::IconBitmap(uint32 which) const
+const BBitmap* mojobe_BControl_IconBitmap(BControl* self, uint32 a_which);
 
 // BControl* as BView*
 BView* mojobe_BControl_as_BView(BControl* self);
@@ -3766,6 +4145,9 @@ void mojobe_BScrollView_delete(BScrollView* self);
 // void BAlert::SetType(alert_type type)
 void mojobe_BAlert_SetType(BAlert* self, alert_type a_type);
 
+// void BAlert::SetIcon(BBitmap* bitmap)
+void mojobe_BAlert_SetIcon(BAlert* self, BBitmap* a_bitmap);
+
 // void BAlert::SetText(const char* text)
 void mojobe_BAlert_SetText(BAlert* self, const char* a_text);
 
@@ -3834,6 +4216,315 @@ BAlert* mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spa
 void mojobe_BAlert_destroy(BAlert* self);
 
 
+// #pragma mark - BRegion
+
+
+// void BRegion::Set(BRect rect)
+void mojobe_BRegion_Set__BRect(BRegion* self, mojobe_BRect a_rect);
+
+// void BRegion::Set(clipping_rect clipping)
+void mojobe_BRegion_Set__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping);
+
+// void BRegion::MoveFrom(BRegion& other)
+void mojobe_BRegion_MoveFrom(BRegion* self, BRegion* a_other);
+
+// BRect BRegion::Frame() const
+mojobe_BRect mojobe_BRegion_Frame(BRegion* self);
+
+// clipping_rect BRegion::FrameInt() const
+mojobe_clipping_rect mojobe_BRegion_FrameInt(BRegion* self);
+
+// BRect BRegion::RectAt(int32 index)
+mojobe_BRect mojobe_BRegion_RectAt__int32(BRegion* self, int32 a_index);
+
+// clipping_rect BRegion::RectAtInt(int32 index)
+mojobe_clipping_rect mojobe_BRegion_RectAtInt__int32(BRegion* self,
+	int32 a_index);
+
+// int32 BRegion::CountRects()
+int32 mojobe_BRegion_CountRects__void(BRegion* self);
+
+// bool BRegion::Intersects(BRect rect) const
+bool mojobe_BRegion_Intersects__BRect(BRegion* self, mojobe_BRect a_rect);
+
+// bool BRegion::Intersects(clipping_rect clipping) const
+bool mojobe_BRegion_Intersects__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping);
+
+// bool BRegion::Contains(BPoint point) const
+bool mojobe_BRegion_Contains__BPoint(BRegion* self, mojobe_BPoint a_point);
+
+// bool BRegion::Contains(int32 x, int32 y)
+bool mojobe_BRegion_Contains__int32_int32(BRegion* self, int32 a_x, int32 a_y);
+
+// void BRegion::PrintToStream() const
+void mojobe_BRegion_PrintToStream(BRegion* self);
+
+// void BRegion::OffsetBy(const BPoint& point)
+void mojobe_BRegion_OffsetBy__BPoint(BRegion* self, mojobe_BPoint a_point);
+
+// void BRegion::OffsetBy(int32 x, int32 y)
+void mojobe_BRegion_OffsetBy__int32_int32(BRegion* self, int32 a_x, int32 a_y);
+
+// void BRegion::ScaleBy(float x, float y)
+void mojobe_BRegion_ScaleBy(BRegion* self, float a_x, float a_y);
+
+// void BRegion::MakeEmpty()
+void mojobe_BRegion_MakeEmpty(BRegion* self);
+
+// void BRegion::Include(BRect rect)
+void mojobe_BRegion_Include__BRect(BRegion* self, mojobe_BRect a_rect);
+
+// void BRegion::Include(clipping_rect clipping)
+void mojobe_BRegion_Include__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping);
+
+// void BRegion::Include(const BRegion* region)
+void mojobe_BRegion_Include__BRegionP(BRegion* self, BRegion* a_region);
+
+// void BRegion::Exclude(BRect rect)
+void mojobe_BRegion_Exclude__BRect(BRegion* self, mojobe_BRect a_rect);
+
+// void BRegion::Exclude(clipping_rect clipping)
+void mojobe_BRegion_Exclude__clipping_rect(BRegion* self,
+	mojobe_clipping_rect a_clipping);
+
+// void BRegion::Exclude(const BRegion* region)
+void mojobe_BRegion_Exclude__BRegionP(BRegion* self, BRegion* a_region);
+
+// void BRegion::IntersectWith(const BRegion* region)
+void mojobe_BRegion_IntersectWith(BRegion* self, BRegion* a_region);
+
+// void BRegion::ExclusiveInclude(const BRegion* region)
+void mojobe_BRegion_ExclusiveInclude(BRegion* self, BRegion* a_region);
+
+// BRegion::BRegion()
+BRegion* mojobe_BRegion_new__void();
+
+// BRegion::BRegion(const BRect rect)
+BRegion* mojobe_BRegion_new__BRect(mojobe_BRect a_rect);
+
+// ~BRegion()
+void mojobe_BRegion_delete(BRegion* self);
+
+
+// #pragma mark - BBitmap
+
+
+// status_t BBitmap::Archive(BMessage* data, bool deep) const
+status_t mojobe_BBitmap_Archive(BBitmap* self, BMessage* a_data, bool a_deep);
+
+// status_t BBitmap::InitCheck() const
+status_t mojobe_BBitmap_InitCheck(BBitmap* self);
+
+// bool BBitmap::IsValid() const
+bool mojobe_BBitmap_IsValid(BBitmap* self);
+
+// status_t BBitmap::LockBits(uint32* state)
+status_t mojobe_BBitmap_LockBits(BBitmap* self, uint32 * a_state);
+
+// void BBitmap::UnlockBits()
+void mojobe_BBitmap_UnlockBits(BBitmap* self);
+
+// area_id BBitmap::Area() const
+int32 mojobe_BBitmap_Area(BBitmap* self);
+
+// void* BBitmap::Bits() const
+void* mojobe_BBitmap_Bits(BBitmap* self);
+
+// size_t BBitmap::BitsLength() const
+uint64 mojobe_BBitmap_BitsLength(BBitmap* self);
+
+// int32 BBitmap::BytesPerRow() const
+int32 mojobe_BBitmap_BytesPerRow(BBitmap* self);
+
+// color_space BBitmap::ColorSpace() const
+color_space mojobe_BBitmap_ColorSpace(BBitmap* self);
+
+// BRect BBitmap::Bounds() const
+mojobe_BRect mojobe_BBitmap_Bounds(BBitmap* self);
+
+// uint32 BBitmap::Flags() const
+uint32 mojobe_BBitmap_Flags(BBitmap* self);
+
+// status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)
+status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_bpr,
+	int32 a_offset,
+	color_space a_colorSpace);
+
+// status_t BBitmap::ImportBits(const BBitmap* bitmap)
+status_t mojobe_BBitmap_ImportBits__BBitmapP(BBitmap* self, BBitmap* a_bitmap);
+
+// void BBitmap::AddChild(BView* view)
+void mojobe_BBitmap_AddChild(BBitmap* self, BView* a_view);
+
+// bool BBitmap::RemoveChild(BView* view)
+bool mojobe_BBitmap_RemoveChild(BBitmap* self, BView* a_view);
+
+// int32 BBitmap::CountChildren() const
+int32 mojobe_BBitmap_CountChildren(BBitmap* self);
+
+// BView* BBitmap::ChildAt(int32 index) const
+BView* mojobe_BBitmap_ChildAt(BBitmap* self, int32 a_index);
+
+// BView* BBitmap::FindView(const char* viewName) const
+BView* mojobe_BBitmap_FindView__charP(BBitmap* self, const char* a_viewName);
+
+// BView* BBitmap::FindView(BPoint point) const
+BView* mojobe_BBitmap_FindView__BPoint(BBitmap* self, mojobe_BPoint a_point);
+
+// bool BBitmap::Lock()
+bool mojobe_BBitmap_Lock(BBitmap* self);
+
+// void BBitmap::Unlock()
+void mojobe_BBitmap_Unlock(BBitmap* self);
+
+// bool BBitmap::IsLocked() const
+bool mojobe_BBitmap_IsLocked(BBitmap* self);
+
+// void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)
+void mojobe_BBitmap_SetBits(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_offset,
+	color_space a_colorSpace);
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t mojobe_BBitmap_AllUnarchived(BBitmap* self, BMessage* a_archive);
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t mojobe_BBitmap_AllArchived(BBitmap* self, BMessage* a_archive);
+
+// BBitmap::BBitmap(BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)
+BBitmap* mojobe_BBitmap_new__BRect_uint32_color_space_int32_screen_id(mojobe_BRect a_bounds,
+	uint32 a_flags,
+	color_space a_colorSpace,
+	int32 a_bytesPerRow,
+	mojobe_screen_id a_screenID,
+	status_t* _status);
+
+// BBitmap::BBitmap(BRect bounds, color_space colorSpace, bool acceptsViews, bool needsContiguous)
+BBitmap* mojobe_BBitmap_new__BRect_color_space_bool_bool(mojobe_BRect a_bounds,
+	color_space a_colorSpace,
+	bool a_acceptsViews,
+	bool a_needsContiguous,
+	status_t* _status);
+
+// BBitmap::BBitmap(const BBitmap* source, bool acceptsViews, bool needsContiguous)
+BBitmap* mojobe_BBitmap_new__BBitmapP_bool_bool(BBitmap* a_source,
+	bool a_acceptsViews,
+	bool a_needsContiguous,
+	status_t* _status);
+
+// BBitmap::BBitmap(area_id area, ptrdiff_t areaOffset, BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)
+BBitmap* mojobe_BBitmap_new__area_id_ptrdiff_t_BRect_uint32_color_space_int32_screen_id(area_id a_area,
+	ptrdiff_t a_areaOffset,
+	mojobe_BRect a_bounds,
+	uint32 a_flags,
+	color_space a_colorSpace,
+	int32 a_bytesPerRow,
+	mojobe_screen_id a_screenID,
+	status_t* _status);
+
+// ~BBitmap()
+void mojobe_BBitmap_delete(BBitmap* self);
+
+
+// #pragma mark - BScreen
+
+
+// bool BScreen::IsValid()
+bool mojobe_BScreen_IsValid(BScreen* self);
+
+// status_t BScreen::SetToNext()
+status_t mojobe_BScreen_SetToNext(BScreen* self);
+
+// color_space BScreen::ColorSpace()
+color_space mojobe_BScreen_ColorSpace(BScreen* self);
+
+// BRect BScreen::Frame()
+mojobe_BRect mojobe_BScreen_Frame(BScreen* self);
+
+// screen_id BScreen::ID()
+mojobe_screen_id mojobe_BScreen_ID(BScreen* self);
+
+// status_t BScreen::WaitForRetrace()
+status_t mojobe_BScreen_WaitForRetrace__void(BScreen* self);
+
+// status_t BScreen::WaitForRetrace(bigtime_t timeout)
+status_t mojobe_BScreen_WaitForRetrace__bigtime_t(BScreen* self,
+	bigtime_t a_timeout);
+
+// uint8 BScreen::IndexForColor(rgb_color color)
+uint8 mojobe_BScreen_IndexForColor__rgb_color(BScreen* self,
+	mojobe_rgb_color a_color);
+
+// uint8 BScreen::IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha)
+uint8 mojobe_BScreen_IndexForColor__uint8_uint8_uint8_uint8(BScreen* self,
+	uint8 a_red,
+	uint8 a_green,
+	uint8 a_blue,
+	uint8 a_alpha);
+
+// rgb_color BScreen::ColorForIndex(uint8 index)
+mojobe_rgb_color mojobe_BScreen_ColorForIndex(BScreen* self, uint8 a_index);
+
+// uint8 BScreen::InvertIndex(uint8 index)
+uint8 mojobe_BScreen_InvertIndex(BScreen* self, uint8 a_index);
+
+// status_t BScreen::ReadBitmap(BBitmap* bitmap, bool drawCursor, BRect* frame)
+status_t mojobe_BScreen_ReadBitmap(BScreen* self,
+	BBitmap* a_bitmap,
+	bool a_drawCursor,
+	mojobe_BRect* a_frame);
+
+// rgb_color BScreen::DesktopColor()
+mojobe_rgb_color mojobe_BScreen_DesktopColor__void(BScreen* self);
+
+// rgb_color BScreen::DesktopColor(uint32 workspace)
+mojobe_rgb_color mojobe_BScreen_DesktopColor__uint32(BScreen* self,
+	uint32 a_workspace);
+
+// void BScreen::SetDesktopColor(rgb_color color, bool stick)
+void mojobe_BScreen_SetDesktopColor__rgb_color_bool(BScreen* self,
+	mojobe_rgb_color a_color,
+	bool a_stick);
+
+// void BScreen::SetDesktopColor(rgb_color color, uint32 workspace, bool stick)
+void mojobe_BScreen_SetDesktopColor__rgb_color_uint32_bool(BScreen* self,
+	mojobe_rgb_color a_color,
+	uint32 a_workspace,
+	bool a_stick);
+
+// status_t BScreen::SetDPMS(uint32 state)
+status_t mojobe_BScreen_SetDPMS(BScreen* self, uint32 a_state);
+
+// uint32 BScreen::DPMSState()
+uint32 mojobe_BScreen_DPMSState(BScreen* self);
+
+// uint32 BScreen::DPMSCapabilites()
+uint32 mojobe_BScreen_DPMSCapabilites(BScreen* self);
+
+// status_t BScreen::GetBrightness(float* brightness)
+status_t mojobe_BScreen_GetBrightness(BScreen* self, float * a_brightness);
+
+// status_t BScreen::SetBrightness(float brightness)
+status_t mojobe_BScreen_SetBrightness(BScreen* self, float a_brightness);
+
+// BScreen::BScreen(screen_id id)
+BScreen* mojobe_BScreen_new__screen_id(mojobe_screen_id a_id);
+
+// BScreen::BScreen(BWindow* window)
+BScreen* mojobe_BScreen_new__BWindowP(BWindow* a_window);
+
+// ~BScreen()
+void mojobe_BScreen_delete(BScreen* self);
+
+
 // #pragma mark - BMessageRunner
 
 
@@ -3878,6 +4569,12 @@ void mojobe_BMessageRunner_delete(BMessageRunner* self);
 // status, when the looper has gone or the timeout passed first.
 BLooper* mojobe_BMessenger_LockedTarget(const BMessenger* self,
 	bigtime_t timeout, status_t* _status);
+
+
+// The system fonts, copied into a BFont Mojo provides.
+void mojobe_be_plain_font(BFont* result);
+void mojobe_be_bold_font(BFont* result);
+void mojobe_be_fixed_font(BFont* result);
 
 
 void* mojobe_MojoBHandler_context(BHandler* self, uint64 type);

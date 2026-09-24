@@ -37,7 +37,7 @@ from ._core import (
     _type_tag,
 )
 from ._values import _check_layouts
-from ._values import BRect, BPoint, rgb_color, pattern, B_SOLID_HIGH
+from ._values import BRect, BPoint, rgb_color, font_height, clipping_rect, screen_id, pattern, B_MAIN_SCREEN_ID, B_ORIGIN, B_SOLID_HIGH
 from ._constants import (
     BSpacing,
     alert_type,
@@ -51,8 +51,10 @@ from ._constants import (
     button_spacing,
     button_width,
     cap_mode,
+    color_space,
     color_which,
     command_code,
+    coordinate_space,
     cpu_platform,
     cpu_vendor,
     drawing_mode,
@@ -60,6 +62,7 @@ from ._constants import (
     font_file_format,
     font_metric_mode,
     hash_mark_location,
+    image_type,
     join_mode,
     menu_bar_border,
     menu_layout,
@@ -70,6 +73,8 @@ from ._constants import (
     rect_tracking_style,
     set_font_mask,
     source_alpha,
+    swap_action,
+    thread_state,
     thumb_style,
     topology_level_type,
     undo_state,
@@ -78,6 +83,7 @@ from ._constants import (
     window_feel,
     window_look,
     window_type,
+    B_ANY_BYTES_PER_ROW,
     B_BLOCK_THUMB,
     B_CONTROL_INVOKED,
     B_CURRENT_WORKSPACE,
@@ -86,6 +92,7 @@ from ._constants import (
     B_FOLLOW_LEFT_RIGHT,
     B_FOLLOW_LEFT_TOP,
     B_FOLLOW_TOP,
+    B_FONT_ALL,
     B_FRAME_EVENTS,
     B_FULL_UPDATE_ON_RESIZE,
     B_INFINITE_TIMEOUT,
@@ -96,6 +103,7 @@ from ._constants import (
     B_NAVIGABLE,
     B_NORMAL_PRIORITY,
     B_NO_TINT,
+    B_TILE_BITMAP,
     B_TRACK_WHOLE_RECT,
     B_WIDTH_AS_USUAL,
     B_WILL_DRAW,
@@ -329,6 +337,421 @@ struct BMessenger(Equatable, ImplicitlyCopyable, Movable):
             When the looper has gone, or `timeout` passed first.
         """
         return LooperLock(self, timeout)
+
+# ========================================================================== #
+# BFont
+# ========================================================================== #
+
+
+struct BFont(Equatable, ImplicitlyCopyable, Movable):
+    """A `BFont`, held in this value: C++ constructs it in these 48 bytes,
+    and it is copied as bytes and needs no destructor, as its own copy
+    constructor and destructor do."""
+
+    var _0: Int32
+    var _1: Int32
+    var _2: Int32
+    var _3: Int32
+    var _4: Int32
+    var _5: Int32
+    var _6: Int32
+    var _7: Int32
+    var _8: Int32
+    var _9: Int32
+    var _10: Int32
+    var _11: Int32
+
+    def __init__(out self, *, _zeroed: Bool):
+        """The bytes, all zero, for C++ to construct into."""
+        self._0 = 0
+        self._1 = 0
+        self._2 = 0
+        self._3 = 0
+        self._4 = 0
+        self._5 = 0
+        self._6 = 0
+        self._7 = 0
+        self._8 = 0
+        self._9 = 0
+        self._10 = 0
+        self._11 = 0
+
+    @staticmethod
+    def _zeroed() -> Self:
+        return Self(_zeroed=True)
+
+    def __init__(out self):
+        """`BFont::BFont()`."""
+        comptime assert size_of[Self]() == 48
+        comptime assert align_of[Self]() == 4
+        self = Self(_zeroed=True)
+        external_call["mojobe_BFont_new", NoneType](_address_of(self))
+
+    def SetFamilyAndStyle(
+        mut self,
+        var family: String,
+        var style: String,
+    ) raises:
+        """`status_t BFont::SetFamilyAndStyle(const char* family, const char* style)`."""
+        var _result = external_call["mojobe_BFont_SetFamilyAndStyle__charP_charP", Int32](
+            _address_of(self),
+            family.as_c_string_span(),
+            style.as_c_string_span(),
+        )
+        _ = family^
+        _ = style^
+        _check(_result, "BFont::SetFamilyAndStyle")
+
+    def SetFamilyAndStyle(mut self, code: UInt32):
+        """`void BFont::SetFamilyAndStyle(uint32 code)`."""
+        external_call["mojobe_BFont_SetFamilyAndStyle__uint32", NoneType](
+            _address_of(self),
+            code,
+        )
+
+    def SetFamilyAndFace(mut self, var family: String, face: UInt16) raises:
+        """`status_t BFont::SetFamilyAndFace(const char* family, uint16 face)`."""
+        var _result = external_call["mojobe_BFont_SetFamilyAndFace", Int32](
+            _address_of(self),
+            family.as_c_string_span(),
+            face,
+        )
+        _ = family^
+        _check(_result, "BFont::SetFamilyAndFace")
+
+    def SetSize(mut self, size: Float32):
+        """`void BFont::SetSize(float size)`."""
+        external_call["mojobe_BFont_SetSize", NoneType](_address_of(self), size)
+
+    def SetShear(mut self, shear: Float32):
+        """`void BFont::SetShear(float shear)`."""
+        external_call["mojobe_BFont_SetShear", NoneType](
+            _address_of(self),
+            shear,
+        )
+
+    def SetRotation(mut self, rotation: Float32):
+        """`void BFont::SetRotation(float rotation)`."""
+        external_call["mojobe_BFont_SetRotation", NoneType](
+            _address_of(self),
+            rotation,
+        )
+
+    def SetFalseBoldWidth(mut self, width: Float32):
+        """`void BFont::SetFalseBoldWidth(float width)`."""
+        external_call["mojobe_BFont_SetFalseBoldWidth", NoneType](
+            _address_of(self),
+            width,
+        )
+
+    def SetSpacing(mut self, spacing: UInt8):
+        """`void BFont::SetSpacing(uint8 spacing)`."""
+        external_call["mojobe_BFont_SetSpacing", NoneType](
+            _address_of(self),
+            spacing,
+        )
+
+    def SetEncoding(mut self, encoding: UInt8):
+        """`void BFont::SetEncoding(uint8 encoding)`."""
+        external_call["mojobe_BFont_SetEncoding", NoneType](
+            _address_of(self),
+            encoding,
+        )
+
+    def SetFace(mut self, face: UInt16):
+        """`void BFont::SetFace(uint16 face)`."""
+        external_call["mojobe_BFont_SetFace", NoneType](_address_of(self), face)
+
+    def SetFlags(mut self, flags: UInt32):
+        """`void BFont::SetFlags(uint32 flags)`."""
+        external_call["mojobe_BFont_SetFlags", NoneType](
+            _address_of(self),
+            flags,
+        )
+
+    def FamilyAndStyle(self) -> UInt32:
+        """`uint32 BFont::FamilyAndStyle() const`."""
+        var _result = external_call["mojobe_BFont_FamilyAndStyle", UInt32](
+            _address_of(self),
+        )
+        return _result
+
+    def Size(self) -> Float32:
+        """`float BFont::Size() const`."""
+        var _result = external_call["mojobe_BFont_Size", Float32](
+            _address_of(self),
+        )
+        return _result
+
+    def Shear(self) -> Float32:
+        """`float BFont::Shear() const`."""
+        var _result = external_call["mojobe_BFont_Shear", Float32](
+            _address_of(self),
+        )
+        return _result
+
+    def Rotation(self) -> Float32:
+        """`float BFont::Rotation() const`."""
+        var _result = external_call["mojobe_BFont_Rotation", Float32](
+            _address_of(self),
+        )
+        return _result
+
+    def FalseBoldWidth(self) -> Float32:
+        """`float BFont::FalseBoldWidth() const`."""
+        var _result = external_call["mojobe_BFont_FalseBoldWidth", Float32](
+            _address_of(self),
+        )
+        return _result
+
+    def Spacing(self) -> UInt8:
+        """`uint8 BFont::Spacing() const`."""
+        var _result = external_call["mojobe_BFont_Spacing", UInt8](
+            _address_of(self),
+        )
+        return _result
+
+    def Encoding(self) -> UInt8:
+        """`uint8 BFont::Encoding() const`."""
+        var _result = external_call["mojobe_BFont_Encoding", UInt8](
+            _address_of(self),
+        )
+        return _result
+
+    def Face(self) -> UInt16:
+        """`uint16 BFont::Face() const`."""
+        var _result = external_call["mojobe_BFont_Face", UInt16](
+            _address_of(self),
+        )
+        return _result
+
+    def Flags(self) -> UInt32:
+        """`uint32 BFont::Flags() const`."""
+        var _result = external_call["mojobe_BFont_Flags", UInt32](
+            _address_of(self),
+        )
+        return _result
+
+    def Direction(self) -> font_direction:
+        """`font_direction BFont::Direction() const`."""
+        var _result = external_call["mojobe_BFont_Direction", font_direction](
+            _address_of(self),
+        )
+        return _result
+
+    def IsFixed(self) -> Bool:
+        """`bool BFont::IsFixed() const`."""
+        var _result = external_call["mojobe_BFont_IsFixed", Bool](
+            _address_of(self),
+        )
+        return _result
+
+    def IsFullAndHalfFixed(self) -> Bool:
+        """`bool BFont::IsFullAndHalfFixed() const`."""
+        var _result = external_call["mojobe_BFont_IsFullAndHalfFixed", Bool](
+            _address_of(self),
+        )
+        return _result
+
+    def BoundingBox(self) -> BRect:
+        """`BRect BFont::BoundingBox() const`."""
+        var _result = external_call["mojobe_BFont_BoundingBox", BRect](
+            _address_of(self),
+        )
+        return _result
+
+    def IncludesBlock(self, start: UInt32, end: UInt32) -> Bool:
+        """`bool BFont::IncludesBlock(uint32 start, uint32 end) const`."""
+        var _result = external_call["mojobe_BFont_IncludesBlock", Bool](
+            _address_of(self),
+            start,
+            end,
+        )
+        return _result
+
+    def FileFormat(self) -> font_file_format:
+        """`font_file_format BFont::FileFormat() const`."""
+        var _result = external_call["mojobe_BFont_FileFormat", font_file_format](
+            _address_of(self),
+        )
+        return _result
+
+    def CountTuned(self) -> Int32:
+        """`int32 BFont::CountTuned() const`."""
+        var _result = external_call["mojobe_BFont_CountTuned", Int32](
+            _address_of(self),
+        )
+        return _result
+
+    def StringWidth(self, var string: String) -> Float32:
+        """`float BFont::StringWidth(const char* string) const`."""
+        var _result = external_call["mojobe_BFont_StringWidth__charP", Float32](
+            _address_of(self),
+            string.as_c_string_span(),
+        )
+        _ = string^
+        return _result
+
+    def StringWidth(self, var string: String, length: Int32) -> Float32:
+        """`float BFont::StringWidth(const char* string, int32 length) const`."""
+        var _result = external_call["mojobe_BFont_StringWidth__charP_int32", Float32](
+            _address_of(self),
+            string.as_c_string_span(),
+            length,
+        )
+        _ = string^
+        return _result
+
+    def GetEscapements(self, var charArray: String, numChars: Int32) -> Float32:
+        """`void BFont::GetEscapements(const char* charArray, int32 numChars, float* escapementArray) const`."""
+        var escapementArray = Float32(0)
+        external_call["mojobe_BFont_GetEscapements", NoneType](
+            _address_of(self),
+            charArray.as_c_string_span(),
+            numChars,
+            Pointer(to=escapementArray),
+        )
+        _ = charArray^
+        return escapementArray
+
+    def GetHeight(self) -> font_height:
+        """`void BFont::GetHeight(font_height* height) const`."""
+        var height = font_height(Float32(0), Float32(0), Float32(0))
+        external_call["mojobe_BFont_GetHeight", NoneType](
+            _address_of(self),
+            Pointer(to=height),
+        )
+        return height
+
+    def GetBoundingBoxesAsGlyphs(
+        self,
+        var charArray: String,
+        numChars: Int32,
+        mode: font_metric_mode,
+    ) -> BRect:
+        """`void BFont::GetBoundingBoxesAsGlyphs(const char* charArray, int32 numChars, font_metric_mode mode, BRect* boundingBoxArray) const`."""
+        var boundingBoxArray = BRect(
+            Float32(0),
+            Float32(0),
+            Float32(0),
+            Float32(0),
+        )
+        external_call["mojobe_BFont_GetBoundingBoxesAsGlyphs", NoneType](
+            _address_of(self),
+            charArray.as_c_string_span(),
+            numChars,
+            mode,
+            Pointer(to=boundingBoxArray),
+        )
+        _ = charArray^
+        return boundingBoxArray
+
+    def GetHasGlyphs(self, var charArray: String, numChars: Int32) -> Bool:
+        """`void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray) const`."""
+        var hasArray = False
+        external_call["mojobe_BFont_GetHasGlyphs__charP_int32_boolP", NoneType](
+            _address_of(self),
+            charArray.as_c_string_span(),
+            numChars,
+            Pointer(to=hasArray),
+        )
+        _ = charArray^
+        return hasArray
+
+    def GetHasGlyphs(
+        self,
+        var charArray: String,
+        numChars: Int32,
+        useFallbacks: Bool,
+    ) -> Bool:
+        """`void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray, bool useFallbacks) const`."""
+        var hasArray = False
+        external_call["mojobe_BFont_GetHasGlyphs__charP_int32_boolP_bool", NoneType](
+            _address_of(self),
+            charArray.as_c_string_span(),
+            numChars,
+            Pointer(to=hasArray),
+            useFallbacks,
+        )
+        _ = charArray^
+        return hasArray
+
+    def PrintToStream(self):
+        """`void BFont::PrintToStream() const`."""
+        external_call["mojobe_BFont_PrintToStream", NoneType](_address_of(self))
+
+    def LoadFont(mut self, var path: String) raises:
+        """`status_t BFont::LoadFont(const char* path)`."""
+        var _result = external_call["mojobe_BFont_LoadFont__charP", Int32](
+            _address_of(self),
+            path.as_c_string_span(),
+        )
+        _ = path^
+        _check(_result, "BFont::LoadFont")
+
+    def LoadFont(
+        mut self,
+        var path: String,
+        index: UInt16,
+        instance: UInt16,
+    ) raises:
+        """`status_t BFont::LoadFont(const char* path, uint16 index, uint16 instance)`."""
+        var _result = external_call["mojobe_BFont_LoadFont__charP_uint16_uint16", Int32](
+            _address_of(self),
+            path.as_c_string_span(),
+            index,
+            instance,
+        )
+        _ = path^
+        _check(_result, "BFont::LoadFont")
+
+    def LoadFont(
+        mut self,
+        fontAreaID: Int32,
+        size: UInt64 = 0,
+        offset: UInt64 = 0,
+    ) raises:
+        """`status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset)`."""
+        var _result = external_call["mojobe_BFont_LoadFont__area_id_size_t_size_t", Int32](
+            _address_of(self),
+            fontAreaID,
+            size,
+            offset,
+        )
+        _check(_result, "BFont::LoadFont")
+
+    def LoadFont(
+        mut self,
+        fontAreaID: Int32,
+        size: UInt64,
+        offset: UInt64,
+        index: UInt16,
+        instance: UInt16,
+    ) raises:
+        """`status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset, uint16 index, uint16 instance)`."""
+        var _result = external_call["mojobe_BFont_LoadFont__area_id_size_t_size_t_uint16_uint16", Int32](
+            _address_of(self),
+            fontAreaID,
+            size,
+            offset,
+            index,
+            instance,
+        )
+        _check(_result, "BFont::LoadFont")
+
+    def UnloadFont(mut self) raises:
+        """`status_t BFont::UnloadFont()`."""
+        var _result = external_call["mojobe_BFont_UnloadFont", Int32](
+            _address_of(self),
+        )
+        _check(_result, "BFont::UnloadFont")
+
+    def __eq__(self, other: Self) -> Bool:
+        """`BFont::operator==`."""
+        return external_call["mojobe_BFont_equals", Bool](
+            _address_of(self),
+            _address_of(other),
+        )
 
 # ========================================================================== #
 # BHandler
@@ -2249,6 +2672,14 @@ trait _BWindowMethods(_AsBWindow, _BLooperMethods):
             maxHeight,
         )
 
+    def ScreenChanged(self, screenSize: BRect, depth: color_space):
+        """`void BWindow::ScreenChanged(BRect screenSize, color_space depth)`."""
+        external_call["mojobe_BWindow_ScreenChanged", NoneType](
+            _nonnull(self._as_BWindow(), "BWindow::ScreenChanged"),
+            screenSize,
+            depth,
+        )
+
     def SetPulseRate(self, rate: Int64):
         """`void BWindow::SetPulseRate(bigtime_t rate)`."""
         external_call["mojobe_BWindow_SetPulseRate", NoneType](
@@ -2473,8 +2904,15 @@ trait _BWindowMethods(_AsBWindow, _BLooperMethods):
 
     def CenterOnScreen(self):
         """`void BWindow::CenterOnScreen()`."""
-        external_call["mojobe_BWindow_CenterOnScreen", NoneType](
+        external_call["mojobe_BWindow_CenterOnScreen__void", NoneType](
             _nonnull(self._as_BWindow(), "BWindow::CenterOnScreen"),
+        )
+
+    def CenterOnScreen(self, id: screen_id):
+        """`void BWindow::CenterOnScreen(screen_id id)`."""
+        external_call["mojobe_BWindow_CenterOnScreen__screen_id", NoneType](
+            _nonnull(self._as_BWindow(), "BWindow::CenterOnScreen"),
+            id,
         )
 
     def MoveOnScreen(self, flags: UInt32 = 0):
@@ -3724,10 +4162,44 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
         replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
     ):
         """`void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)`."""
-        external_call["mojobe_BView_DragMessage", NoneType](
+        external_call["mojobe_BView_DragMessage__BMessageP_BRect_BHandlerP", NoneType](
             _nonnull(self._as_BView(), "BView::DragMessage"),
             _addr(message._as_BMessage()),
             dragRect,
+            _addr(replyTo._as_BHandler()),
+        )
+
+    def DragMessage(
+        self,
+        message: Some[_AsBMessage],
+        bitmap: Some[_AsBBitmap],
+        offset: BPoint,
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ):
+        """`void BView::DragMessage(BMessage* message, BBitmap* bitmap, BPoint offset, BHandler* replyTo)`."""
+        external_call["mojobe_BView_DragMessage__BMessageP_BBitmapP_BPoint_BHandlerP", NoneType](
+            _nonnull(self._as_BView(), "BView::DragMessage"),
+            _addr(message._as_BMessage()),
+            _addr(bitmap._as_BBitmap()),
+            offset,
+            _addr(replyTo._as_BHandler()),
+        )
+
+    def DragMessage(
+        self,
+        message: Some[_AsBMessage],
+        bitmap: Some[_AsBBitmap],
+        dragMode: drawing_mode,
+        offset: BPoint,
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ):
+        """`void BView::DragMessage(BMessage* message, BBitmap* bitmap, drawing_mode dragMode, BPoint offset, BHandler* replyTo)`."""
+        external_call["mojobe_BView_DragMessage__BMessageP_BBitmapP_drawing_mode_BPoint_BHandlerP", NoneType](
+            _nonnull(self._as_BView(), "BView::DragMessage"),
+            _addr(message._as_BMessage()),
+            _addr(bitmap._as_BBitmap()),
+            dragMode,
+            offset,
             _addr(replyTo._as_BHandler()),
         )
 
@@ -3831,6 +4303,20 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             _nonnull(self._as_BView(), "BView::LeftTop"),
         )
         return _result
+
+    def GetClippingRegion(self, region: Some[_AsBRegion]):
+        """`void BView::GetClippingRegion(BRegion* region) const`."""
+        external_call["mojobe_BView_GetClippingRegion", NoneType](
+            _nonnull(self._as_BView(), "BView::GetClippingRegion"),
+            _addr(region._as_BRegion()),
+        )
+
+    def ConstrainClippingRegion(self, region: Some[_AsBRegion]):
+        """`void BView::ConstrainClippingRegion(BRegion* region)`."""
+        external_call["mojobe_BView_ConstrainClippingRegion", NoneType](
+            _nonnull(self._as_BView(), "BView::ConstrainClippingRegion"),
+            _addr(region._as_BRegion()),
+        )
 
     def ClipToRect(self, rect: BRect):
         """`void BView::ClipToRect(BRect rect)`."""
@@ -3977,11 +4463,83 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
         )
         return (_result, tint)
 
+    def SetViewBitmap(
+        self,
+        bitmap: Some[_AsBBitmap],
+        srcRect: BRect,
+        dstRect: BRect,
+        followFlags: UInt32 = B_FOLLOW_LEFT_TOP,
+        options: UInt32 = UInt32(B_TILE_BITMAP.value),
+    ):
+        """`void BView::SetViewBitmap(const BBitmap* bitmap, BRect srcRect, BRect dstRect, uint32 followFlags, uint32 options)`."""
+        external_call["mojobe_BView_SetViewBitmap__BBitmapP_BRect_BRect_uint32_uint32", NoneType](
+            _nonnull(self._as_BView(), "BView::SetViewBitmap"),
+            _addr(bitmap._as_BBitmap()),
+            srcRect,
+            dstRect,
+            followFlags,
+            options,
+        )
+
+    def SetViewBitmap(
+        self,
+        bitmap: Some[_AsBBitmap],
+        followFlags: UInt32 = B_FOLLOW_LEFT_TOP,
+        options: UInt32 = UInt32(B_TILE_BITMAP.value),
+    ):
+        """`void BView::SetViewBitmap(const BBitmap* bitmap, uint32 followFlags, uint32 options)`."""
+        external_call["mojobe_BView_SetViewBitmap__BBitmapP_uint32_uint32", NoneType](
+            _nonnull(self._as_BView(), "BView::SetViewBitmap"),
+            _addr(bitmap._as_BBitmap()),
+            followFlags,
+            options,
+        )
+
     def ClearViewBitmap(self):
         """`void BView::ClearViewBitmap()`."""
         external_call["mojobe_BView_ClearViewBitmap", NoneType](
             _nonnull(self._as_BView(), "BView::ClearViewBitmap"),
         )
+
+    def SetViewOverlay(
+        self,
+        overlay: Some[_AsBBitmap],
+        srcRect: BRect,
+        dstRect: BRect,
+        followFlags: UInt32 = B_FOLLOW_LEFT_TOP,
+        options: UInt32 = 0,
+    ) raises -> rgb_color:
+        """`status_t BView::SetViewOverlay(const BBitmap* overlay, BRect srcRect, BRect dstRect, rgb_color* colorKey, uint32 followFlags, uint32 options)`."""
+        var colorKey = rgb_color(UInt8(0), UInt8(0), UInt8(0), UInt8(0))
+        var _result = external_call["mojobe_BView_SetViewOverlay__BBitmapP_BRect_BRect_rgb_colorP_uint32_uint32", Int32](
+            _nonnull(self._as_BView(), "BView::SetViewOverlay"),
+            _addr(overlay._as_BBitmap()),
+            srcRect,
+            dstRect,
+            Pointer(to=colorKey),
+            followFlags,
+            options,
+        )
+        _check(_result, "BView::SetViewOverlay")
+        return colorKey
+
+    def SetViewOverlay(
+        self,
+        overlay: Some[_AsBBitmap],
+        followFlags: UInt32 = B_FOLLOW_LEFT_TOP,
+        options: UInt32 = 0,
+    ) raises -> rgb_color:
+        """`status_t BView::SetViewOverlay(const BBitmap* overlay, rgb_color* colorKey, uint32 followFlags, uint32 options)`."""
+        var colorKey = rgb_color(UInt8(0), UInt8(0), UInt8(0), UInt8(0))
+        var _result = external_call["mojobe_BView_SetViewOverlay__BBitmapP_rgb_colorP_uint32_uint32", Int32](
+            _nonnull(self._as_BView(), "BView::SetViewOverlay"),
+            _addr(overlay._as_BBitmap()),
+            Pointer(to=colorKey),
+            followFlags,
+            options,
+        )
+        _check(_result, "BView::SetViewOverlay")
+        return colorKey
 
     def ClearViewOverlay(self):
         """`void BView::ClearViewOverlay()`."""
@@ -4347,6 +4905,18 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             pattern,
         )
 
+    def FillRegion(
+        self,
+        rectegion: Some[_AsBRegion],
+        pattern: pattern = B_SOLID_HIGH,
+    ):
+        """`void BView::FillRegion(BRegion* rectegion, pattern pattern)`."""
+        external_call["mojobe_BView_FillRegion", NoneType](
+            _nonnull(self._as_BView(), "BView::FillRegion"),
+            _addr(rectegion._as_BRegion()),
+            pattern,
+        )
+
     def InvertRect(self, rect: BRect):
         """`void BView::InvertRect(BRect rect)`."""
         external_call["mojobe_BView_InvertRect", NoneType](
@@ -4534,6 +5104,140 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             dst,
         )
 
+    def DrawBitmapAsync(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        bitmapRect: BRect,
+        viewRect: BRect,
+        options: UInt32,
+    ):
+        """`void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)`."""
+        external_call["mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect_uint32", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+            bitmapRect,
+            viewRect,
+            options,
+        )
+
+    def DrawBitmapAsync(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        bitmapRect: BRect,
+        viewRect: BRect,
+    ):
+        """`void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)`."""
+        external_call["mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+            bitmapRect,
+            viewRect,
+        )
+
+    def DrawBitmapAsync(self, aBitmap: Some[_AsBBitmap], viewRect: BRect):
+        """`void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect viewRect)`."""
+        external_call["mojobe_BView_DrawBitmapAsync__BBitmapP_BRect", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+            viewRect,
+        )
+
+    def DrawBitmapAsync(self, aBitmap: Some[_AsBBitmap], where: BPoint):
+        """`void BView::DrawBitmapAsync(const BBitmap* aBitmap, BPoint where)`."""
+        external_call["mojobe_BView_DrawBitmapAsync__BBitmapP_BPoint", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+            where,
+        )
+
+    def DrawBitmapAsync(self, aBitmap: Some[_AsBBitmap]):
+        """`void BView::DrawBitmapAsync(const BBitmap* aBitmap)`."""
+        external_call["mojobe_BView_DrawBitmapAsync__BBitmapP", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+        )
+
+    def DrawBitmap(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        bitmapRect: BRect,
+        viewRect: BRect,
+        options: UInt32,
+    ):
+        """`void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)`."""
+        external_call["mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect_uint32", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+            bitmapRect,
+            viewRect,
+            options,
+        )
+
+    def DrawBitmap(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        bitmapRect: BRect,
+        viewRect: BRect,
+    ):
+        """`void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)`."""
+        external_call["mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+            bitmapRect,
+            viewRect,
+        )
+
+    def DrawBitmap(self, aBitmap: Some[_AsBBitmap], viewRect: BRect):
+        """`void BView::DrawBitmap(const BBitmap* aBitmap, BRect viewRect)`."""
+        external_call["mojobe_BView_DrawBitmap__BBitmapP_BRect", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+            viewRect,
+        )
+
+    def DrawBitmap(self, aBitmap: Some[_AsBBitmap], where: BPoint):
+        """`void BView::DrawBitmap(const BBitmap* aBitmap, BPoint where)`."""
+        external_call["mojobe_BView_DrawBitmap__BBitmapP_BPoint", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+            where,
+        )
+
+    def DrawBitmap(self, aBitmap: Some[_AsBBitmap]):
+        """`void BView::DrawBitmap(const BBitmap* aBitmap)`."""
+        external_call["mojobe_BView_DrawBitmap__BBitmapP", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+        )
+
+    def DrawTiledBitmapAsync(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        viewRect: BRect,
+        phase: BPoint = B_ORIGIN,
+    ):
+        """`void BView::DrawTiledBitmapAsync(const BBitmap* aBitmap, BRect viewRect, BPoint phase)`."""
+        external_call["mojobe_BView_DrawTiledBitmapAsync", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawTiledBitmapAsync"),
+            _addr(aBitmap._as_BBitmap()),
+            viewRect,
+            phase,
+        )
+
+    def DrawTiledBitmap(
+        self,
+        aBitmap: Some[_AsBBitmap],
+        viewRect: BRect,
+        phase: BPoint = B_ORIGIN,
+    ):
+        """`void BView::DrawTiledBitmap(const BBitmap* aBitmap, BRect viewRect, BPoint phase)`."""
+        external_call["mojobe_BView_DrawTiledBitmap", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawTiledBitmap"),
+            _addr(aBitmap._as_BBitmap()),
+            viewRect,
+            phase,
+        )
+
     def DrawChar(self, aChar: String):
         """`void BView::DrawChar(char aChar)`."""
         external_call["mojobe_BView_DrawChar__char", NoneType](
@@ -4575,6 +5279,23 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
         )
         _ = string^
 
+    def SetFont(self, font: BFont, mask: UInt32 = UInt32(B_FONT_ALL.value)):
+        """`void BView::SetFont(const BFont* font, uint32 mask)`."""
+        external_call["mojobe_BView_SetFont", NoneType](
+            _nonnull(self._as_BView(), "BView::SetFont"),
+            _address_of(font),
+            mask,
+        )
+
+    def GetFont(self) -> BFont:
+        """`void BView::GetFont(BFont* font) const`."""
+        var font = BFont._zeroed()
+        external_call["mojobe_BView_GetFont", NoneType](
+            _nonnull(self._as_BView(), "BView::GetFont"),
+            _address_of(font),
+        )
+        return font
+
     def StringWidth(self, var string: String) -> Float32:
         """`float BView::StringWidth(const char* string) const`."""
         var _result = external_call["mojobe_BView_StringWidth__charP", Float32](
@@ -4608,11 +5329,27 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             enable,
         )
 
+    def GetFontHeight(self) -> font_height:
+        """`void BView::GetFontHeight(font_height* height) const`."""
+        var height = font_height(Float32(0), Float32(0), Float32(0))
+        external_call["mojobe_BView_GetFontHeight", NoneType](
+            _nonnull(self._as_BView(), "BView::GetFontHeight"),
+            Pointer(to=height),
+        )
+        return height
+
     def Invalidate(self, invalRect: BRect):
         """`void BView::Invalidate(BRect invalRect)`."""
         external_call["mojobe_BView_Invalidate__BRect", NoneType](
             _nonnull(self._as_BView(), "BView::Invalidate"),
             invalRect,
+        )
+
+    def Invalidate(self, invalRegion: Some[_AsBRegion]):
+        """`void BView::Invalidate(const BRegion* invalRegion)`."""
+        external_call["mojobe_BView_Invalidate__BRegionP", NoneType](
+            _nonnull(self._as_BView(), "BView::Invalidate"),
+            _addr(invalRegion._as_BRegion()),
         )
 
     def Invalidate(self):
@@ -6443,6 +7180,27 @@ trait _BMessageMethods(_AsBMessage):
         _ = name^
         _check(_result, "BMessage::AddMessage")
 
+    def AddData(
+        self,
+        var name: String,
+        type: UInt32,
+        data: Span[UInt8, _],
+        isFixedSize: Bool = True,
+        count: Int32 = 1,
+    ) raises:
+        """`status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)`."""
+        var _result = external_call["mojobe_BMessage_AddData", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::AddData"),
+            name.as_c_string_span(),
+            type,
+            Int(data.unsafe_ptr()),
+            Int64(len(data)),
+            isFixedSize,
+            count,
+        )
+        _ = name^
+        _check(_result, "BMessage::AddData")
+
     def Append(self, message: Some[_AsBMessage]) raises:
         """`status_t BMessage::Append(const BMessage& message)`."""
         var _result = external_call["mojobe_BMessage_Append", Int32](
@@ -7320,6 +8078,42 @@ trait _BMessageMethods(_AsBMessage):
         _ = name^
         _check(_result, "BMessage::ReplaceMessage")
 
+    def ReplaceData(
+        self,
+        var name: String,
+        type: UInt32,
+        data: Span[UInt8, _],
+    ) raises:
+        """`status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceData"),
+            name.as_c_string_span(),
+            type,
+            Int(data.unsafe_ptr()),
+            Int64(len(data)),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceData")
+
+    def ReplaceData(
+        self,
+        var name: String,
+        type: UInt32,
+        index: Int32,
+        data: Span[UInt8, _],
+    ) raises:
+        """`status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceData"),
+            name.as_c_string_span(),
+            type,
+            index,
+            Int(data.unsafe_ptr()),
+            Int64(len(data)),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceData")
+
     def HasSameData(
         self,
         other: Some[_AsBMessage],
@@ -8117,6 +8911,27 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::SetRect")
+
+    def SetData(
+        self,
+        var name: String,
+        type: UInt32,
+        data: Span[UInt8, _],
+        fixedSize: Bool = True,
+        count: Int32 = 1,
+    ) raises:
+        """`status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)`."""
+        var _result = external_call["mojobe_BMessage_SetData", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::SetData"),
+            name.as_c_string_span(),
+            type,
+            Int(data.unsafe_ptr()),
+            Int64(len(data)),
+            fixedSize,
+            count,
+        )
+        _ = name^
+        _check(_result, "BMessage::SetData")
 
     def get_what(self) -> UInt32:
         """`BMessage::what`."""
@@ -9652,6 +10467,38 @@ trait _BControlMethods(_AsBControl, _BViewMethods, _BInvokerMethods):
             _nonnull(self._as_BControl(), "BControl::IsEnabled"),
         )
         return _result
+
+    def SetIcon(self, bitmap: Some[_AsBBitmap], flags: UInt32 = 0) raises:
+        """`status_t BControl::SetIcon(const BBitmap* bitmap, uint32 flags)`."""
+        var _result = external_call["mojobe_BControl_SetIcon", Int32](
+            _nonnull(self._as_BControl(), "BControl::SetIcon"),
+            _addr(bitmap._as_BBitmap()),
+            flags,
+        )
+        _check(_result, "BControl::SetIcon")
+
+    def SetIconBitmap(
+        self,
+        bitmap: Some[_AsBBitmap],
+        which: UInt32,
+        flags: UInt32 = 0,
+    ) raises:
+        """`status_t BControl::SetIconBitmap(const BBitmap* bitmap, uint32 which, uint32 flags)`."""
+        var _result = external_call["mojobe_BControl_SetIconBitmap", Int32](
+            _nonnull(self._as_BControl(), "BControl::SetIconBitmap"),
+            _addr(bitmap._as_BBitmap()),
+            which,
+            flags,
+        )
+        _check(_result, "BControl::SetIconBitmap")
+
+    def IconBitmap(ref self, which: UInt32) -> BBitmapRef[origin_of(self)]:
+        """`const BBitmap* BControl::IconBitmap(uint32 which) const`."""
+        var _result = external_call["mojobe_BControl_IconBitmap", Int](
+            _nonnull(self._as_BControl(), "BControl::IconBitmap"),
+            which,
+        )
+        return BBitmapRef[origin_of(self)](_ptr_from(_result))
 
 
 struct BControlRef[origin: ImmOrigin](
@@ -11600,6 +12447,13 @@ trait _BAlertMethods(_AsBAlert, _BWindowMethods):
             type,
         )
 
+    def SetIcon(self, bitmap: Some[_AsBBitmap]):
+        """`void BAlert::SetIcon(BBitmap* bitmap)`."""
+        external_call["mojobe_BAlert_SetIcon", NoneType](
+            _nonnull(self._as_BAlert(), "BAlert::SetIcon"),
+            _addr(bitmap._as_BBitmap()),
+        )
+
     def SetText(self, var text: String):
         """`void BAlert::SetText(const char* text)`."""
         external_call["mojobe_BAlert_SetText", NoneType](
@@ -11851,6 +12705,903 @@ struct BAlert(Movable, _BAlertMethods):
         _check(_result, "BAlert::Go")
 
 # ========================================================================== #
+# BRegion
+# ========================================================================== #
+
+
+trait _AsBRegion:
+    """Has a `BRegion*` for libmojobe."""
+
+    def _as_BRegion(self) -> _NPtr:
+        ...
+
+
+trait _BRegionMethods(_AsBRegion):
+    """`BRegion`'s methods, for its references and the values Mojo owns."""
+
+    def Set(self, rect: BRect):
+        """`void BRegion::Set(BRect rect)`."""
+        external_call["mojobe_BRegion_Set__BRect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Set"),
+            rect,
+        )
+
+    def Set(self, clipping: clipping_rect):
+        """`void BRegion::Set(clipping_rect clipping)`."""
+        external_call["mojobe_BRegion_Set__clipping_rect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Set"),
+            clipping,
+        )
+
+    def MoveFrom(self, other: Some[_AsBRegion]):
+        """`void BRegion::MoveFrom(BRegion& other)`."""
+        external_call["mojobe_BRegion_MoveFrom", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::MoveFrom"),
+            _addr(other._as_BRegion()),
+        )
+
+    def Frame(self) -> BRect:
+        """`BRect BRegion::Frame() const`."""
+        var _result = external_call["mojobe_BRegion_Frame", BRect](
+            _nonnull(self._as_BRegion(), "BRegion::Frame"),
+        )
+        return _result
+
+    def FrameInt(self) -> clipping_rect:
+        """`clipping_rect BRegion::FrameInt() const`."""
+        var _result = external_call["mojobe_BRegion_FrameInt", clipping_rect](
+            _nonnull(self._as_BRegion(), "BRegion::FrameInt"),
+        )
+        return _result
+
+    def RectAt(self, index: Int32) -> BRect:
+        """`BRect BRegion::RectAt(int32 index)`."""
+        var _result = external_call["mojobe_BRegion_RectAt__int32", BRect](
+            _nonnull(self._as_BRegion(), "BRegion::RectAt"),
+            index,
+        )
+        return _result
+
+    def RectAtInt(self, index: Int32) -> clipping_rect:
+        """`clipping_rect BRegion::RectAtInt(int32 index)`."""
+        var _result = external_call["mojobe_BRegion_RectAtInt__int32", clipping_rect](
+            _nonnull(self._as_BRegion(), "BRegion::RectAtInt"),
+            index,
+        )
+        return _result
+
+    def CountRects(self) -> Int32:
+        """`int32 BRegion::CountRects()`."""
+        var _result = external_call["mojobe_BRegion_CountRects__void", Int32](
+            _nonnull(self._as_BRegion(), "BRegion::CountRects"),
+        )
+        return _result
+
+    def Intersects(self, rect: BRect) -> Bool:
+        """`bool BRegion::Intersects(BRect rect) const`."""
+        var _result = external_call["mojobe_BRegion_Intersects__BRect", Bool](
+            _nonnull(self._as_BRegion(), "BRegion::Intersects"),
+            rect,
+        )
+        return _result
+
+    def Intersects(self, clipping: clipping_rect) -> Bool:
+        """`bool BRegion::Intersects(clipping_rect clipping) const`."""
+        var _result = external_call["mojobe_BRegion_Intersects__clipping_rect", Bool](
+            _nonnull(self._as_BRegion(), "BRegion::Intersects"),
+            clipping,
+        )
+        return _result
+
+    def Contains(self, point: BPoint) -> Bool:
+        """`bool BRegion::Contains(BPoint point) const`."""
+        var _result = external_call["mojobe_BRegion_Contains__BPoint", Bool](
+            _nonnull(self._as_BRegion(), "BRegion::Contains"),
+            point,
+        )
+        return _result
+
+    def Contains(self, x: Int32, y: Int32) -> Bool:
+        """`bool BRegion::Contains(int32 x, int32 y)`."""
+        var _result = external_call["mojobe_BRegion_Contains__int32_int32", Bool](
+            _nonnull(self._as_BRegion(), "BRegion::Contains"),
+            x,
+            y,
+        )
+        return _result
+
+    def PrintToStream(self):
+        """`void BRegion::PrintToStream() const`."""
+        external_call["mojobe_BRegion_PrintToStream", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::PrintToStream"),
+        )
+
+    def OffsetBy(self, point: BPoint):
+        """`void BRegion::OffsetBy(const BPoint& point)`."""
+        external_call["mojobe_BRegion_OffsetBy__BPoint", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::OffsetBy"),
+            point,
+        )
+
+    def OffsetBy(self, x: Int32, y: Int32):
+        """`void BRegion::OffsetBy(int32 x, int32 y)`."""
+        external_call["mojobe_BRegion_OffsetBy__int32_int32", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::OffsetBy"),
+            x,
+            y,
+        )
+
+    def ScaleBy(self, x: Float32, y: Float32):
+        """`void BRegion::ScaleBy(float x, float y)`."""
+        external_call["mojobe_BRegion_ScaleBy", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::ScaleBy"),
+            x,
+            y,
+        )
+
+    def MakeEmpty(self):
+        """`void BRegion::MakeEmpty()`."""
+        external_call["mojobe_BRegion_MakeEmpty", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::MakeEmpty"),
+        )
+
+    def Include(self, rect: BRect):
+        """`void BRegion::Include(BRect rect)`."""
+        external_call["mojobe_BRegion_Include__BRect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Include"),
+            rect,
+        )
+
+    def Include(self, clipping: clipping_rect):
+        """`void BRegion::Include(clipping_rect clipping)`."""
+        external_call["mojobe_BRegion_Include__clipping_rect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Include"),
+            clipping,
+        )
+
+    def Include(self, region: Some[_AsBRegion]):
+        """`void BRegion::Include(const BRegion* region)`."""
+        external_call["mojobe_BRegion_Include__BRegionP", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Include"),
+            _addr(region._as_BRegion()),
+        )
+
+    def Exclude(self, rect: BRect):
+        """`void BRegion::Exclude(BRect rect)`."""
+        external_call["mojobe_BRegion_Exclude__BRect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Exclude"),
+            rect,
+        )
+
+    def Exclude(self, clipping: clipping_rect):
+        """`void BRegion::Exclude(clipping_rect clipping)`."""
+        external_call["mojobe_BRegion_Exclude__clipping_rect", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Exclude"),
+            clipping,
+        )
+
+    def Exclude(self, region: Some[_AsBRegion]):
+        """`void BRegion::Exclude(const BRegion* region)`."""
+        external_call["mojobe_BRegion_Exclude__BRegionP", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::Exclude"),
+            _addr(region._as_BRegion()),
+        )
+
+    def IntersectWith(self, region: Some[_AsBRegion]):
+        """`void BRegion::IntersectWith(const BRegion* region)`."""
+        external_call["mojobe_BRegion_IntersectWith", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::IntersectWith"),
+            _addr(region._as_BRegion()),
+        )
+
+    def ExclusiveInclude(self, region: Some[_AsBRegion]):
+        """`void BRegion::ExclusiveInclude(const BRegion* region)`."""
+        external_call["mojobe_BRegion_ExclusiveInclude", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::ExclusiveInclude"),
+            _addr(region._as_BRegion()),
+        )
+
+
+struct BRegionRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BRegionMethods,
+):
+    """A `BRegion` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BRegionRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BRegionRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BRegionRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BRegion(self) -> _NPtr:
+        return self._ptr
+
+
+struct BRegion(Movable, _BRegionMethods):
+    """A `BRegion` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self) raises:
+        """`BRegion::BRegion()`."""
+        var address = external_call["mojobe_BRegion_new__void", Int]()
+        if address == 0:
+            raise Error("BRegion could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, rect: BRect) raises:
+        """`BRegion::BRegion(const BRect rect)`."""
+        var address = external_call["mojobe_BRegion_new__BRect", Int](rect)
+        if address == 0:
+            raise Error("BRegion could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BRegion_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BRegion(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BBitmap
+# ========================================================================== #
+
+
+trait _AsBBitmap:
+    """Has a `BBitmap*` for libmojobe."""
+
+    def _as_BBitmap(self) -> _NPtr:
+        ...
+
+
+trait _BBitmapMethods(_AsBBitmap):
+    """`BBitmap`'s methods, for its references and the values Mojo owns."""
+
+    def Archive(self, data: Some[_AsBMessage], deep: Bool = True) raises:
+        """`status_t BBitmap::Archive(BMessage* data, bool deep) const`."""
+        var _result = external_call["mojobe_BBitmap_Archive", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::Archive"),
+            _addr(data._as_BMessage()),
+            deep,
+        )
+        _check(_result, "BBitmap::Archive")
+
+    def InitCheck(self) raises:
+        """`status_t BBitmap::InitCheck() const`."""
+        var _result = external_call["mojobe_BBitmap_InitCheck", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::InitCheck"),
+        )
+        _check(_result, "BBitmap::InitCheck")
+
+    def IsValid(self) -> Bool:
+        """`bool BBitmap::IsValid() const`."""
+        var _result = external_call["mojobe_BBitmap_IsValid", Bool](
+            _nonnull(self._as_BBitmap(), "BBitmap::IsValid"),
+        )
+        return _result
+
+    def LockBits(self) raises -> UInt32:
+        """`status_t BBitmap::LockBits(uint32* state)`."""
+        var state = UInt32(0)
+        var _result = external_call["mojobe_BBitmap_LockBits", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::LockBits"),
+            Pointer(to=state),
+        )
+        _check(_result, "BBitmap::LockBits")
+        return state
+
+    def UnlockBits(self):
+        """`void BBitmap::UnlockBits()`."""
+        external_call["mojobe_BBitmap_UnlockBits", NoneType](
+            _nonnull(self._as_BBitmap(), "BBitmap::UnlockBits"),
+        )
+
+    def Area(self) -> Int32:
+        """`area_id BBitmap::Area() const`."""
+        var _result = external_call["mojobe_BBitmap_Area", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::Area"),
+        )
+        return _result
+
+    def Bits(ref self) -> Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]:
+        """`void* BBitmap::Bits() const`."""
+        var _result = external_call["mojobe_BBitmap_Bits", Int](
+            _nonnull(self._as_BBitmap(), "BBitmap::Bits"),
+        )
+        if _result == 0:
+            return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]()
+        return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()](
+            unsafe_ptr=Pointer[UInt8, MutUntrackedOrigin](
+                unsafe_from_address=_result
+            ).unsafe_origin_cast[origin_of(self).unsafe_mut_cast[True]()](),
+            length=Int(self.BitsLength()),
+        )
+
+    def BitsLength(self) -> UInt64:
+        """`size_t BBitmap::BitsLength() const`."""
+        var _result = external_call["mojobe_BBitmap_BitsLength", UInt64](
+            _nonnull(self._as_BBitmap(), "BBitmap::BitsLength"),
+        )
+        return _result
+
+    def BytesPerRow(self) -> Int32:
+        """`int32 BBitmap::BytesPerRow() const`."""
+        var _result = external_call["mojobe_BBitmap_BytesPerRow", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::BytesPerRow"),
+        )
+        return _result
+
+    def ColorSpace(self) -> color_space:
+        """`color_space BBitmap::ColorSpace() const`."""
+        var _result = external_call["mojobe_BBitmap_ColorSpace", color_space](
+            _nonnull(self._as_BBitmap(), "BBitmap::ColorSpace"),
+        )
+        return _result
+
+    def Bounds(self) -> BRect:
+        """`BRect BBitmap::Bounds() const`."""
+        var _result = external_call["mojobe_BBitmap_Bounds", BRect](
+            _nonnull(self._as_BBitmap(), "BBitmap::Bounds"),
+        )
+        return _result
+
+    def Flags(self) -> UInt32:
+        """`uint32 BBitmap::Flags() const`."""
+        var _result = external_call["mojobe_BBitmap_Flags", UInt32](
+            _nonnull(self._as_BBitmap(), "BBitmap::Flags"),
+        )
+        return _result
+
+    def ImportBits(
+        self,
+        data: Span[UInt8, _],
+        bpr: Int32,
+        offset: Int32,
+        colorSpace: color_space,
+    ) raises:
+        """`status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)`."""
+        var _result = external_call["mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::ImportBits"),
+            Int(data.unsafe_ptr()),
+            Int32(len(data)),
+            bpr,
+            offset,
+            colorSpace,
+        )
+        _check(_result, "BBitmap::ImportBits")
+
+    def ImportBits(self, bitmap: Some[_AsBBitmap]) raises:
+        """`status_t BBitmap::ImportBits(const BBitmap* bitmap)`."""
+        var _result = external_call["mojobe_BBitmap_ImportBits__BBitmapP", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::ImportBits"),
+            _addr(bitmap._as_BBitmap()),
+        )
+        _check(_result, "BBitmap::ImportBits")
+
+    def AddChild(self, var view: BView):
+        """`void BBitmap::AddChild(BView* view)`."""
+        external_call["mojobe_BBitmap_AddChild", NoneType](
+            _nonnull(self._as_BBitmap(), "BBitmap::AddChild"),
+            view^._adopt(),
+        )
+
+    def RemoveChild(self, view: Some[_AsBView]) -> Bool:
+        """`bool BBitmap::RemoveChild(BView* view)`."""
+        var _result = external_call["mojobe_BBitmap_RemoveChild", Bool](
+            _nonnull(self._as_BBitmap(), "BBitmap::RemoveChild"),
+            _addr(view._as_BView()),
+        )
+        return _result
+
+    def CountChildren(self) -> Int32:
+        """`int32 BBitmap::CountChildren() const`."""
+        var _result = external_call["mojobe_BBitmap_CountChildren", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::CountChildren"),
+        )
+        return _result
+
+    def ChildAt(ref self, index: Int32) -> BViewRef[origin_of(self)]:
+        """`BView* BBitmap::ChildAt(int32 index) const`."""
+        var _result = external_call["mojobe_BBitmap_ChildAt", Int](
+            _nonnull(self._as_BBitmap(), "BBitmap::ChildAt"),
+            index,
+        )
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def FindView(ref self, var viewName: String) -> BViewRef[origin_of(self)]:
+        """`BView* BBitmap::FindView(const char* viewName) const`."""
+        var _result = external_call["mojobe_BBitmap_FindView__charP", Int](
+            _nonnull(self._as_BBitmap(), "BBitmap::FindView"),
+            viewName.as_c_string_span(),
+        )
+        _ = viewName^
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def FindView(ref self, point: BPoint) -> BViewRef[origin_of(self)]:
+        """`BView* BBitmap::FindView(BPoint point) const`."""
+        var _result = external_call["mojobe_BBitmap_FindView__BPoint", Int](
+            _nonnull(self._as_BBitmap(), "BBitmap::FindView"),
+            point,
+        )
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def Lock(self) -> Bool:
+        """`bool BBitmap::Lock()`."""
+        var _result = external_call["mojobe_BBitmap_Lock", Bool](
+            _nonnull(self._as_BBitmap(), "BBitmap::Lock"),
+        )
+        return _result
+
+    def Unlock(self):
+        """`void BBitmap::Unlock()`."""
+        external_call["mojobe_BBitmap_Unlock", NoneType](
+            _nonnull(self._as_BBitmap(), "BBitmap::Unlock"),
+        )
+
+    def IsLocked(self) -> Bool:
+        """`bool BBitmap::IsLocked() const`."""
+        var _result = external_call["mojobe_BBitmap_IsLocked", Bool](
+            _nonnull(self._as_BBitmap(), "BBitmap::IsLocked"),
+        )
+        return _result
+
+    def SetBits(
+        self,
+        data: Span[UInt8, _],
+        offset: Int32,
+        colorSpace: color_space,
+    ):
+        """`void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)`."""
+        external_call["mojobe_BBitmap_SetBits", NoneType](
+            _nonnull(self._as_BBitmap(), "BBitmap::SetBits"),
+            Int(data.unsafe_ptr()),
+            Int32(len(data)),
+            offset,
+            colorSpace,
+        )
+
+    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
+        var _result = external_call["mojobe_BBitmap_AllUnarchived", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::AllUnarchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllUnarchived")
+
+    def AllArchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
+        var _result = external_call["mojobe_BBitmap_AllArchived", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::AllArchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllArchived")
+
+
+struct BBitmapRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BBitmapMethods,
+):
+    """A `BBitmap` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BBitmapRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BBitmapRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BBitmapRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BBitmap(self) -> _NPtr:
+        return self._ptr
+
+
+struct BBitmap(Movable, _BBitmapMethods):
+    """A `BBitmap` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        bounds: BRect,
+        flags: UInt32,
+        colorSpace: color_space,
+        bytesPerRow: Int32 = B_ANY_BYTES_PER_ROW,
+        screenID: screen_id = B_MAIN_SCREEN_ID,
+    ) raises:
+        """`BBitmap::BBitmap(BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BBitmap_new__BRect_uint32_color_space_int32_screen_id", Int](
+            bounds,
+            flags,
+            colorSpace,
+            bytesPerRow,
+            screenID,
+            Pointer(to=_status),
+        )
+        if address == 0:
+            _check(_status, "BBitmap")
+            raise Error("BBitmap could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        bounds: BRect,
+        colorSpace: color_space,
+        acceptsViews: Bool = False,
+        needsContiguous: Bool = False,
+    ) raises:
+        """`BBitmap::BBitmap(BRect bounds, color_space colorSpace, bool acceptsViews, bool needsContiguous)`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BBitmap_new__BRect_color_space_bool_bool", Int](
+            bounds,
+            colorSpace,
+            acceptsViews,
+            needsContiguous,
+            Pointer(to=_status),
+        )
+        if address == 0:
+            _check(_status, "BBitmap")
+            raise Error("BBitmap could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        source: Some[_AsBBitmap],
+        acceptsViews: Bool = False,
+        needsContiguous: Bool = False,
+    ) raises:
+        """`BBitmap::BBitmap(const BBitmap* source, bool acceptsViews, bool needsContiguous)`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BBitmap_new__BBitmapP_bool_bool", Int](
+            _addr(source._as_BBitmap()),
+            acceptsViews,
+            needsContiguous,
+            Pointer(to=_status),
+        )
+        if address == 0:
+            _check(_status, "BBitmap")
+            raise Error("BBitmap could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        area: Int32,
+        areaOffset: Int64,
+        bounds: BRect,
+        flags: UInt32,
+        colorSpace: color_space,
+        bytesPerRow: Int32 = B_ANY_BYTES_PER_ROW,
+        screenID: screen_id = B_MAIN_SCREEN_ID,
+    ) raises:
+        """`BBitmap::BBitmap(area_id area, ptrdiff_t areaOffset, BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BBitmap_new__area_id_ptrdiff_t_BRect_uint32_color_space_int32_screen_id", Int](
+            area,
+            areaOffset,
+            bounds,
+            flags,
+            colorSpace,
+            bytesPerRow,
+            screenID,
+            Pointer(to=_status),
+        )
+        if address == 0:
+            _check(_status, "BBitmap")
+            raise Error("BBitmap could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BBitmap_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BBitmap(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BScreen
+# ========================================================================== #
+
+
+trait _AsBScreen:
+    """Has a `BScreen*` for libmojobe."""
+
+    def _as_BScreen(self) -> _NPtr:
+        ...
+
+
+trait _BScreenMethods(_AsBScreen):
+    """`BScreen`'s methods, for its references and the values Mojo owns."""
+
+    def IsValid(self) -> Bool:
+        """`bool BScreen::IsValid()`."""
+        var _result = external_call["mojobe_BScreen_IsValid", Bool](
+            _nonnull(self._as_BScreen(), "BScreen::IsValid"),
+        )
+        return _result
+
+    def SetToNext(self) raises:
+        """`status_t BScreen::SetToNext()`."""
+        var _result = external_call["mojobe_BScreen_SetToNext", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::SetToNext"),
+        )
+        _check(_result, "BScreen::SetToNext")
+
+    def ColorSpace(self) -> color_space:
+        """`color_space BScreen::ColorSpace()`."""
+        var _result = external_call["mojobe_BScreen_ColorSpace", color_space](
+            _nonnull(self._as_BScreen(), "BScreen::ColorSpace"),
+        )
+        return _result
+
+    def Frame(self) -> BRect:
+        """`BRect BScreen::Frame()`."""
+        var _result = external_call["mojobe_BScreen_Frame", BRect](
+            _nonnull(self._as_BScreen(), "BScreen::Frame"),
+        )
+        return _result
+
+    def ID(self) -> screen_id:
+        """`screen_id BScreen::ID()`."""
+        var _result = external_call["mojobe_BScreen_ID", screen_id](
+            _nonnull(self._as_BScreen(), "BScreen::ID"),
+        )
+        return _result
+
+    def WaitForRetrace(self) raises:
+        """`status_t BScreen::WaitForRetrace()`."""
+        var _result = external_call["mojobe_BScreen_WaitForRetrace__void", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::WaitForRetrace"),
+        )
+        _check(_result, "BScreen::WaitForRetrace")
+
+    def WaitForRetrace(self, timeout: Int64) raises:
+        """`status_t BScreen::WaitForRetrace(bigtime_t timeout)`."""
+        var _result = external_call["mojobe_BScreen_WaitForRetrace__bigtime_t", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::WaitForRetrace"),
+            timeout,
+        )
+        _check(_result, "BScreen::WaitForRetrace")
+
+    def IndexForColor(self, color: rgb_color) -> UInt8:
+        """`uint8 BScreen::IndexForColor(rgb_color color)`."""
+        var _result = external_call["mojobe_BScreen_IndexForColor__rgb_color", UInt8](
+            _nonnull(self._as_BScreen(), "BScreen::IndexForColor"),
+            color,
+        )
+        return _result
+
+    def IndexForColor(
+        self,
+        red: UInt8,
+        green: UInt8,
+        blue: UInt8,
+        alpha: UInt8 = 255,
+    ) -> UInt8:
+        """`uint8 BScreen::IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha)`."""
+        var _result = external_call["mojobe_BScreen_IndexForColor__uint8_uint8_uint8_uint8", UInt8](
+            _nonnull(self._as_BScreen(), "BScreen::IndexForColor"),
+            red,
+            green,
+            blue,
+            alpha,
+        )
+        return _result
+
+    def ColorForIndex(self, index: UInt8) -> rgb_color:
+        """`rgb_color BScreen::ColorForIndex(uint8 index)`."""
+        var _result = external_call["mojobe_BScreen_ColorForIndex", rgb_color](
+            _nonnull(self._as_BScreen(), "BScreen::ColorForIndex"),
+            index,
+        )
+        return _result
+
+    def InvertIndex(self, index: UInt8) -> UInt8:
+        """`uint8 BScreen::InvertIndex(uint8 index)`."""
+        var _result = external_call["mojobe_BScreen_InvertIndex", UInt8](
+            _nonnull(self._as_BScreen(), "BScreen::InvertIndex"),
+            index,
+        )
+        return _result
+
+    def ReadBitmap(
+        self,
+        bitmap: Some[_AsBBitmap],
+        drawCursor: Bool = True,
+    ) raises -> BRect:
+        """`status_t BScreen::ReadBitmap(BBitmap* bitmap, bool drawCursor, BRect* frame)`."""
+        var frame = BRect(Float32(0), Float32(0), Float32(0), Float32(0))
+        var _result = external_call["mojobe_BScreen_ReadBitmap", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::ReadBitmap"),
+            _addr(bitmap._as_BBitmap()),
+            drawCursor,
+            Pointer(to=frame),
+        )
+        _check(_result, "BScreen::ReadBitmap")
+        return frame
+
+    def DesktopColor(self) -> rgb_color:
+        """`rgb_color BScreen::DesktopColor()`."""
+        var _result = external_call["mojobe_BScreen_DesktopColor__void", rgb_color](
+            _nonnull(self._as_BScreen(), "BScreen::DesktopColor"),
+        )
+        return _result
+
+    def DesktopColor(self, workspace: UInt32) -> rgb_color:
+        """`rgb_color BScreen::DesktopColor(uint32 workspace)`."""
+        var _result = external_call["mojobe_BScreen_DesktopColor__uint32", rgb_color](
+            _nonnull(self._as_BScreen(), "BScreen::DesktopColor"),
+            workspace,
+        )
+        return _result
+
+    def SetDesktopColor(self, color: rgb_color, stick: Bool = True):
+        """`void BScreen::SetDesktopColor(rgb_color color, bool stick)`."""
+        external_call["mojobe_BScreen_SetDesktopColor__rgb_color_bool", NoneType](
+            _nonnull(self._as_BScreen(), "BScreen::SetDesktopColor"),
+            color,
+            stick,
+        )
+
+    def SetDesktopColor(
+        self,
+        color: rgb_color,
+        workspace: UInt32,
+        stick: Bool = True,
+    ):
+        """`void BScreen::SetDesktopColor(rgb_color color, uint32 workspace, bool stick)`."""
+        external_call["mojobe_BScreen_SetDesktopColor__rgb_color_uint32_bool", NoneType](
+            _nonnull(self._as_BScreen(), "BScreen::SetDesktopColor"),
+            color,
+            workspace,
+            stick,
+        )
+
+    def SetDPMS(self, state: UInt32) raises:
+        """`status_t BScreen::SetDPMS(uint32 state)`."""
+        var _result = external_call["mojobe_BScreen_SetDPMS", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::SetDPMS"),
+            state,
+        )
+        _check(_result, "BScreen::SetDPMS")
+
+    def DPMSState(self) -> UInt32:
+        """`uint32 BScreen::DPMSState()`."""
+        var _result = external_call["mojobe_BScreen_DPMSState", UInt32](
+            _nonnull(self._as_BScreen(), "BScreen::DPMSState"),
+        )
+        return _result
+
+    def DPMSCapabilites(self) -> UInt32:
+        """`uint32 BScreen::DPMSCapabilites()`."""
+        var _result = external_call["mojobe_BScreen_DPMSCapabilites", UInt32](
+            _nonnull(self._as_BScreen(), "BScreen::DPMSCapabilites"),
+        )
+        return _result
+
+    def GetBrightness(self) raises -> Float32:
+        """`status_t BScreen::GetBrightness(float* brightness)`."""
+        var brightness = Float32(0)
+        var _result = external_call["mojobe_BScreen_GetBrightness", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::GetBrightness"),
+            Pointer(to=brightness),
+        )
+        _check(_result, "BScreen::GetBrightness")
+        return brightness
+
+    def SetBrightness(self, brightness: Float32) raises:
+        """`status_t BScreen::SetBrightness(float brightness)`."""
+        var _result = external_call["mojobe_BScreen_SetBrightness", Int32](
+            _nonnull(self._as_BScreen(), "BScreen::SetBrightness"),
+            brightness,
+        )
+        _check(_result, "BScreen::SetBrightness")
+
+
+struct BScreenRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BScreenMethods,
+):
+    """A `BScreen` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BScreenRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BScreenRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BScreenRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BScreen(self) -> _NPtr:
+        return self._ptr
+
+
+struct BScreen(Movable, _BScreenMethods):
+    """A `BScreen` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self, id: screen_id = B_MAIN_SCREEN_ID) raises:
+        """`BScreen::BScreen(screen_id id)`."""
+        var address = external_call["mojobe_BScreen_new__screen_id", Int](id)
+        if address == 0:
+            raise Error("BScreen could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, window: Some[_AsBWindow]) raises:
+        """`BScreen::BScreen(BWindow* window)`."""
+        var address = external_call["mojobe_BScreen_new__BWindowP", Int](
+            _addr(window._as_BWindow()),
+        )
+        if address == 0:
+            raise Error("BScreen could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BScreen_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BScreen(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
 # BMessageRunner
 # ========================================================================== #
 
@@ -12036,3 +13787,24 @@ struct LooperLock(Movable):
     def __deinit__(deinit self):
         if self._looper != 0:
             external_call["mojobe_BLooper_Unlock", NoneType](self._looper)
+
+
+def be_plain_font() -> BFont:
+    """`be_plain_font`: the font of most text, as the user chose it."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_plain_font", NoneType](_address_of(font))
+    return font
+
+
+def be_bold_font() -> BFont:
+    """`be_bold_font`: the font of titles and emphasis."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_bold_font", NoneType](_address_of(font))
+    return font
+
+
+def be_fixed_font() -> BFont:
+    """`be_fixed_font`: the font of code and terminals."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_fixed_font", NoneType](_address_of(font))
+    return font

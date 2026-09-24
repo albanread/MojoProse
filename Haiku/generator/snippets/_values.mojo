@@ -21,3 +21,6 @@ comptime B_SOLID_LOW = pattern(0)
 
 comptime B_MIXED_COLORS = pattern(0x55AA55AA55AA55AA)
 """`B_MIXED_COLORS`: a checkerboard of the high and low colours."""
+
+comptime B_MAIN_SCREEN_ID = screen_id(0)
+"""`B_MAIN_SCREEN_ID`: the main screen."""

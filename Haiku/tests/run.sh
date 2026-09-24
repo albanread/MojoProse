@@ -22,16 +22,18 @@ c++ -O2 -Wall -Wextra -Wpointer-arith -shared -fPIC -o libmojobe.so \
 	libmojobe/mojobe.cpp -lbe 2>&1 | head -20
 c++ -O2 -Wall -Wextra -Wpointer-arith -shared -fPIC -Ilibmojobe \
 	-o liboracle.so oracle/oracle.cpp -lbe 2>&1 | head -20
-for program in dots controls tests/bridge_check tests/threads_check; do
+for program in dots controls tests/bridge_check tests/threads_check \
+		tests/graphics_check; do
 	mojo build -I . $program.mojo -o $(basename $program) $link 2>&1 | head -30
 done
 mojo build -I . tests/abi_oracle.mojo -o abi_oracle -Xlinker -loracle $link \
 	2>&1 | head -30
-ls -l libmojobe.so liboracle.so dots controls bridge_check threads_check abi_oracle \
+ls -l libmojobe.so liboracle.so dots controls bridge_check threads_check \
+	graphics_check abi_oracle \
 	| awk '{print $5, $NF}'
 
 status=0
-for test in abi_oracle bridge_check threads_check; do
+for test in abi_oracle bridge_check threads_check graphics_check; do
 	./$test > $test.out 2>&1
 	grep -v "^PASS" $test.out
 	tail -1 $test.out | grep -q "SELFTEST PASS" || status=1
@@ -41,7 +43,7 @@ echo "controls --selftest: exit $?"
 grep -v "^PASS" controls.out
 tail -1 controls.out | grep -q "SELFTEST PASS" || status=1
 echo "--- under the guarded heap"
-for test in abi_oracle bridge_check threads_check; do
+for test in abi_oracle bridge_check threads_check graphics_check; do
 	LD_PRELOAD=/boot/system/lib/libroot_debug.so MALLOC_DEBUG=g ./$test \
 		> $test.guarded 2>&1
 	echo "$test: exit $? $(tail -1 $test.guarded)"

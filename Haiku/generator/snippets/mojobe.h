@@ -5,3 +5,9 @@
 // status, when the looper has gone or the timeout passed first.
 BLooper* mojobe_BMessenger_LockedTarget(const BMessenger* self,
 	bigtime_t timeout, status_t* _status);
+
+
+// The system fonts, copied into a BFont Mojo provides.
+void mojobe_be_plain_font(BFont* result);
+void mojobe_be_bold_font(BFont* result);
+void mojobe_be_fixed_font(BFont* result);

@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 796 included, 246 overrides reached through a base, 327 left out.
+In all: 953 included, 252 overrides reached through a base, 337 left out.
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 
@@ -31,6 +31,71 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BMessenger::BMessenger(const char* signature, team_id team, status_t* result)` | included | mojobe_BMessenger_new__charP_team_id_status_tP |
 | `BMessenger::BMessenger(const BHandler* handler, const BLooper* looper, status_t* result)` | included | mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP |
 | `BMessenger::BMessenger()` | included | mojobe_BMessenger_new__void |
+
+## BFont: 42 included, 0 overrides reached through a base, 18 left out
+
+| C++ | | |
+|---|---|---|
+| `void BFont::GetFamilyAndStyle(font_family* family, font_style* style) const` | skipped | parameter family: font_family * is not bridged |
+| `unicode_block BFont::Blocks() const` | skipped | result: unicode_block is not bridged |
+| `void BFont::GetTunedInfo(int32 index, tuned_font_info* info) const` | skipped | parameter info: tuned_font_info * is not bridged |
+| `void BFont::TruncateString(BString* inOut, uint32 mode, float width) const` | skipped | parameter inOut: BString * is not bridged |
+| `void BFont::GetTruncatedStrings(const char** stringArray, int32 numStrings, uint32 mode, float width, BString* resultArray) const` | skipped | parameter resultArray: BString * is not bridged |
+| `void BFont::GetTruncatedStrings(const char** stringArray, int32 numStrings, uint32 mode, float width, char** resultArray) const` | skipped | parameter resultArray: char ** is not bridged |
+| `void BFont::GetStringWidths(const char** stringArray, const int32* lengthArray, int32 numStrings, float* widthArray) const` | skipped | parameter lengthArray: const int32 * is not bridged |
+| `void BFont::GetEscapements(const char* charArray, int32 numChars, escapement_delta* delta, float* escapementArray) const` | skipped | parameter delta: escapement_delta * is not bridged |
+| `void BFont::GetEscapements(const char* charArray, int32 numChars, escapement_delta* delta, BPoint* escapementArray) const` | skipped | parameter delta: escapement_delta * is not bridged |
+| `void BFont::GetEscapements(const char* charArray, int32 numChars, escapement_delta* delta, BPoint* escapementArray, BPoint* offsetArray) const` | skipped | parameter delta: escapement_delta * is not bridged |
+| `void BFont::GetEdges(const char* charArray, int32 numBytes, edge_info* edgeArray) const` | skipped | parameter edgeArray: edge_info * is not bridged |
+| `void BFont::GetBoundingBoxesAsString(const char* charArray, int32 numChars, font_metric_mode mode, escapement_delta* delta, BRect* boundingBoxArray) const` | skipped | parameter delta: escapement_delta * is not bridged |
+| `void BFont::GetBoundingBoxesForStrings(const char** stringArray, int32 numStrings, font_metric_mode mode, escapement_delta* deltas, BRect* boundingBoxArray) const` | skipped | parameter deltas: escapement_delta * is not bridged |
+| `void BFont::GetGlyphShapes(const char* charArray, int32 numChars, BShape** glyphShapeArray) const` | skipped | parameter glyphShapeArray: BShape ** is not bridged |
+| `BFont& BFont::operator=(const BFont& font)` | skipped | operator |
+| `bool BFont::operator==(const BFont& font) const` | included | mojobe_BFont_equals, as __eq__ |
+| `bool BFont::operator!=(const BFont& font) const` | skipped | operator |
+| `status_t BFont::SetFamilyAndStyle(const char* family, const char* style)` | included | mojobe_BFont_SetFamilyAndStyle__charP_charP |
+| `void BFont::SetFamilyAndStyle(uint32 code)` | included | mojobe_BFont_SetFamilyAndStyle__uint32 |
+| `status_t BFont::SetFamilyAndFace(const char* family, uint16 face)` | included | mojobe_BFont_SetFamilyAndFace |
+| `void BFont::SetSize(float size)` | included | mojobe_BFont_SetSize |
+| `void BFont::SetShear(float shear)` | included | mojobe_BFont_SetShear |
+| `void BFont::SetRotation(float rotation)` | included | mojobe_BFont_SetRotation |
+| `void BFont::SetFalseBoldWidth(float width)` | included | mojobe_BFont_SetFalseBoldWidth |
+| `void BFont::SetSpacing(uint8 spacing)` | included | mojobe_BFont_SetSpacing |
+| `void BFont::SetEncoding(uint8 encoding)` | included | mojobe_BFont_SetEncoding |
+| `void BFont::SetFace(uint16 face)` | included | mojobe_BFont_SetFace |
+| `void BFont::SetFlags(uint32 flags)` | included | mojobe_BFont_SetFlags |
+| `uint32 BFont::FamilyAndStyle() const` | included | mojobe_BFont_FamilyAndStyle |
+| `float BFont::Size() const` | included | mojobe_BFont_Size |
+| `float BFont::Shear() const` | included | mojobe_BFont_Shear |
+| `float BFont::Rotation() const` | included | mojobe_BFont_Rotation |
+| `float BFont::FalseBoldWidth() const` | included | mojobe_BFont_FalseBoldWidth |
+| `uint8 BFont::Spacing() const` | included | mojobe_BFont_Spacing |
+| `uint8 BFont::Encoding() const` | included | mojobe_BFont_Encoding |
+| `uint16 BFont::Face() const` | included | mojobe_BFont_Face |
+| `uint32 BFont::Flags() const` | included | mojobe_BFont_Flags |
+| `font_direction BFont::Direction() const` | included | mojobe_BFont_Direction |
+| `bool BFont::IsFixed() const` | included | mojobe_BFont_IsFixed |
+| `bool BFont::IsFullAndHalfFixed() const` | included | mojobe_BFont_IsFullAndHalfFixed |
+| `BRect BFont::BoundingBox() const` | included | mojobe_BFont_BoundingBox |
+| `bool BFont::IncludesBlock(uint32 start, uint32 end) const` | included | mojobe_BFont_IncludesBlock |
+| `font_file_format BFont::FileFormat() const` | included | mojobe_BFont_FileFormat |
+| `int32 BFont::CountTuned() const` | included | mojobe_BFont_CountTuned |
+| `float BFont::StringWidth(const char* string) const` | included | mojobe_BFont_StringWidth__charP |
+| `float BFont::StringWidth(const char* string, int32 length) const` | included | mojobe_BFont_StringWidth__charP_int32 |
+| `void BFont::GetEscapements(const char* charArray, int32 numChars, float* escapementArray) const` | included | mojobe_BFont_GetEscapements |
+| `void BFont::GetHeight(font_height* height) const` | included | mojobe_BFont_GetHeight |
+| `void BFont::GetBoundingBoxesAsGlyphs(const char* charArray, int32 numChars, font_metric_mode mode, BRect* boundingBoxArray) const` | included | mojobe_BFont_GetBoundingBoxesAsGlyphs |
+| `void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray) const` | included | mojobe_BFont_GetHasGlyphs__charP_int32_boolP |
+| `void BFont::GetHasGlyphs(const char* charArray, int32 numChars, bool* hasArray, bool useFallbacks) const` | included | mojobe_BFont_GetHasGlyphs__charP_int32_boolP_bool |
+| `void BFont::PrintToStream() const` | included | mojobe_BFont_PrintToStream |
+| `status_t BFont::LoadFont(const char* path)` | included | mojobe_BFont_LoadFont__charP |
+| `status_t BFont::LoadFont(const char* path, uint16 index, uint16 instance)` | included | mojobe_BFont_LoadFont__charP_uint16_uint16 |
+| `status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset)` | included | mojobe_BFont_LoadFont__area_id_size_t_size_t |
+| `status_t BFont::LoadFont(const area_id fontAreaID, size_t size, size_t offset, uint16 index, uint16 instance)` | included | mojobe_BFont_LoadFont__area_id_size_t_size_t_uint16_uint16 |
+| `status_t BFont::UnloadFont()` | included | mojobe_BFont_UnloadFont |
+| `BFont::BFont(const BFont& font)` | skipped | copy constructor: Mojo copies |
+| `BFont::BFont(const BFont* font)` | skipped | copy constructor: Mojo copies |
+| `BFont::BFont()` | included | mojobe_BFont_new |
 
 ## BHandler: 26 included, 0 overrides reached through a base, 8 left out
 
@@ -169,18 +234,16 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `hook void BApplication::AboutRequested()` | included | ApplicationAboutRequested |
 | `hook void BApplication::Pulse()` | included | ApplicationPulse |
 
-## BWindow: 102 included, 6 overrides reached through a base, 14 left out
+## BWindow: 104 included, 6 overrides reached through a base, 12 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BWindow::Instantiate(BMessage* archive)` | skipped | static |
 | `void BWindow::AddChild(BLayoutItem* child)` | skipped | parameter child: BLayoutItem * is not bridged |
-| `void BWindow::ScreenChanged(BRect screenSize, color_space depth)` | skipped | parameter depth: color_space is not bridged |
 | `void BWindow::ConvertToScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertFromScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertToScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertFromScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
-| `void BWindow::CenterOnScreen(screen_id id)` | skipped | parameter id: screen_id is not bridged |
 | `BSize BWindow::Size() const` | skipped | result: BSize is not bridged |
 | `status_t BWindow::Perform(perform_code code, void* data)` | skipped | binary compatibility hook |
 | `thread_id BWindow::Run()` | skipped | Show() runs the window |
@@ -203,6 +266,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BWindow::Zoom(BPoint origin, float width, float height)` | included | mojobe_BWindow_Zoom__BPoint_float_float |
 | `void BWindow::Zoom()` | included | mojobe_BWindow_Zoom__void |
 | `void BWindow::SetZoomLimits(float maxWidth, float maxHeight)` | included | mojobe_BWindow_SetZoomLimits |
+| `void BWindow::ScreenChanged(BRect screenSize, color_space depth)` | included | mojobe_BWindow_ScreenChanged |
 | `void BWindow::SetPulseRate(bigtime_t rate)` | included | mojobe_BWindow_SetPulseRate |
 | `bigtime_t BWindow::PulseRate() const` | included | mojobe_BWindow_PulseRate |
 | `void BWindow::AddShortcut(uint32 key, uint32 modifiers, BMessage* message)` | included | mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP |
@@ -231,7 +295,8 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BWindow::ResizeTo(float width, float height)` | included | mojobe_BWindow_ResizeTo |
 | `void BWindow::ResizeToPreferred()` | included | mojobe_BWindow_ResizeToPreferred |
 | `void BWindow::CenterIn(const BRect& rect)` | included | mojobe_BWindow_CenterIn |
-| `void BWindow::CenterOnScreen()` | included | mojobe_BWindow_CenterOnScreen |
+| `void BWindow::CenterOnScreen()` | included | mojobe_BWindow_CenterOnScreen__void |
+| `void BWindow::CenterOnScreen(screen_id id)` | included | mojobe_BWindow_CenterOnScreen__screen_id |
 | `void BWindow::MoveOnScreen(uint32 flags)` | included | mojobe_BWindow_MoveOnScreen |
 | `void BWindow::Show()` | included | mojobe_BWindow_Show |
 | `void BWindow::Hide()` | included | mojobe_BWindow_Hide |
@@ -296,14 +361,12 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `hook void BWindow::Zoom(BPoint origin, float width, float height)` | included | WindowZoom |
 | `hook void BWindow::Minimize(bool minimize)` | included | WindowMinimize |
 
-## BView: 191 included, 6 overrides reached through a base, 114 left out
+## BView: 216 included, 6 overrides reached through a base, 89 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BView::Instantiate(BMessage* archive)` | skipped | static |
 | `bool BView::AddChild(BLayoutItem* child)` | skipped | parameter child: BLayoutItem * is not bridged |
-| `void BView::DragMessage(BMessage* message, BBitmap* bitmap, BPoint offset, BHandler* replyTo)` | skipped | parameter bitmap: BBitmap * is not bridged |
-| `void BView::DragMessage(BMessage* message, BBitmap* bitmap, drawing_mode dragMode, BPoint offset, BHandler* replyTo)` | skipped | parameter bitmap: BBitmap * is not bridged |
 | `void BView::ConvertToScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BView::ConvertFromScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BView::ConvertToScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
@@ -312,20 +375,14 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::ConvertFromParent(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BView::ConvertToParent(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
 | `void BView::ConvertFromParent(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
-| `void BView::GetClippingRegion(BRegion* region) const` | skipped | parameter region: BRegion * is not bridged |
-| `void BView::ConstrainClippingRegion(BRegion* region)` | skipped | parameter region: BRegion * is not bridged |
 | `void BView::ClipToPicture(BPicture* picture, BPoint where, bool sync)` | skipped | parameter picture: BPicture * is not bridged |
 | `void BView::ClipToInversePicture(BPicture* picture, BPoint where, bool sync)` | skipped | parameter picture: BPicture * is not bridged |
 | `void BView::ClipToShape(BShape* shape)` | skipped | parameter shape: BShape * is not bridged |
 | `void BView::ClipToInverseShape(BShape* shape)` | skipped | parameter shape: BShape * is not bridged |
 | `void BView::SetViewCursor(const BCursor* cursor, bool sync)` | skipped | parameter cursor: const BCursor * is not bridged |
-| `void BView::SetViewBitmap(const BBitmap* bitmap, BRect srcRect, BRect dstRect, uint32 followFlags, uint32 options)` | skipped | parameter bitmap: const BBitmap * is not bridged |
-| `void BView::SetViewBitmap(const BBitmap* bitmap, uint32 followFlags, uint32 options)` | skipped | parameter bitmap: const BBitmap * is not bridged |
-| `status_t BView::SetViewOverlay(const BBitmap* overlay, BRect srcRect, BRect dstRect, rgb_color* colorKey, uint32 followFlags, uint32 options)` | skipped | parameter overlay: const BBitmap * is not bridged |
-| `status_t BView::SetViewOverlay(const BBitmap* overlay, rgb_color* colorKey, uint32 followFlags, uint32 options)` | skipped | parameter overlay: const BBitmap * is not bridged |
 | `void BView::SetTransform(BAffineTransform transform)` | skipped | parameter transform: BAffineTransform is not bridged |
 | `BAffineTransform BView::Transform() const` | skipped | result: BAffineTransform is not bridged |
-| `BAffineTransform BView::TransformTo(coordinate_space basis) const` | skipped | parameter basis: coordinate_space is not bridged |
+| `BAffineTransform BView::TransformTo(coordinate_space basis) const` | skipped | result: BAffineTransform is not bridged |
 | `void BView::StrokeLine(BPoint toPoint, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::StrokeLine(BPoint start, BPoint end, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::StrokePolygon(const BPolygon* polygon, bool closed, pattern pattern)` | skipped | parameter polygon: const BPolygon * is not bridged |
@@ -346,8 +403,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::FillTriangle(BPoint point1, BPoint point2, BPoint point3, BRect bounds, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::StrokeRect(BRect rect, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::FillRect(BRect rect, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
-| `void BView::FillRegion(BRegion* rectegion, pattern pattern)` | skipped | parameter rectegion: BRegion * is not bridged |
-| `void BView::FillRegion(BRegion* rectegion, const BGradient& gradient)` | skipped | parameter rectegion: BRegion * is not bridged |
+| `void BView::FillRegion(BRegion* rectegion, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::StrokeRoundRect(BRect rect, float xRadius, float yRadius, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::FillRoundRect(BRect rect, float xRadius, float yRadius, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
 | `void BView::StrokeEllipse(BPoint center, float xRadius, float yRadius, const BGradient& gradient)` | skipped | parameter gradient: const BGradient & is not bridged |
@@ -364,27 +420,11 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::StrokeShape(BShape* shape, const BGradient& gradient)` | skipped | parameter shape: BShape * is not bridged |
 | `void BView::FillShape(BShape* shape, pattern pattern)` | skipped | parameter shape: BShape * is not bridged |
 | `void BView::FillShape(BShape* shape, const BGradient& gradient)` | skipped | parameter shape: BShape * is not bridged |
-| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect viewRect)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BPoint where)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmapAsync(const BBitmap* aBitmap)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect viewRect)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmap(const BBitmap* aBitmap, BPoint where)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawBitmap(const BBitmap* aBitmap)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawTiledBitmapAsync(const BBitmap* aBitmap, BRect viewRect, BPoint phase)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
-| `void BView::DrawTiledBitmap(const BBitmap* aBitmap, BRect viewRect, BPoint phase)` | skipped | parameter aBitmap: const BBitmap * is not bridged |
 | `void BView::DrawString(const char* string, int32 length, BPoint location, escapement_delta* delta)` | skipped | parameter delta: escapement_delta * is not bridged |
 | `void BView::DrawString(const char* string, const BPoint* locations, int32 locationCount)` | skipped | parameter locations: const BPoint * is not bridged |
 | `void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)` | skipped | parameter locations: const BPoint * is not bridged |
-| `void BView::SetFont(const BFont* font, uint32 mask)` | skipped | parameter font: const BFont * is not bridged |
-| `void BView::GetFont(BFont* font) const` | skipped | parameter font: BFont * is not bridged |
 | `void BView::TruncateString(BString* in_out, uint32 mode, float width) const` | skipped | parameter in_out: BString * is not bridged |
 | `void BView::GetStringWidths(char** stringArray, int32* lengthArray, int32 numStrings, float* widthArray) const` | skipped | parameter stringArray: char ** is not bridged |
-| `void BView::GetFontHeight(font_height* height) const` | skipped | parameter height: font_height * is not bridged |
-| `void BView::Invalidate(const BRegion* invalRegion)` | skipped | parameter invalRegion: const BRegion * is not bridged |
 | `void BView::BeginPicture(BPicture* a_picture)` | skipped | parameter a_picture: BPicture * is not bridged |
 | `void BView::AppendToPicture(BPicture* a_picture)` | skipped | parameter a_picture: BPicture * is not bridged |
 | `BPicture* BView::EndPicture()` | skipped | result: BPicture * is not bridged |
@@ -443,7 +483,9 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::BeginRectTracking(BRect startRect, uint32 style)` | included | mojobe_BView_BeginRectTracking |
 | `void BView::EndRectTracking()` | included | mojobe_BView_EndRectTracking |
 | `void BView::GetMouse(BPoint* location, uint32* buttons, bool checkMessageQueue)` | included | mojobe_BView_GetMouse |
-| `void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)` | included | mojobe_BView_DragMessage |
+| `void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)` | included | mojobe_BView_DragMessage__BMessageP_BRect_BHandlerP |
+| `void BView::DragMessage(BMessage* message, BBitmap* bitmap, BPoint offset, BHandler* replyTo)` | included | mojobe_BView_DragMessage__BMessageP_BBitmapP_BPoint_BHandlerP |
+| `void BView::DragMessage(BMessage* message, BBitmap* bitmap, drawing_mode dragMode, BPoint offset, BHandler* replyTo)` | included | mojobe_BView_DragMessage__BMessageP_BBitmapP_drawing_mode_BPoint_BHandlerP |
 | `BView* BView::FindView(const char* name) const` | included | mojobe_BView_FindView |
 | `BView* BView::Parent() const` | included | mojobe_BView_Parent |
 | `BRect BView::Bounds() const` | included | mojobe_BView_Bounds |
@@ -457,6 +499,8 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BPoint BView::ConvertFromParent(BPoint point) const` | included | mojobe_BView_ConvertFromParent__BPoint |
 | `BRect BView::ConvertFromParent(BRect rect) const` | included | mojobe_BView_ConvertFromParent__BRect |
 | `BPoint BView::LeftTop() const` | included | mojobe_BView_LeftTop |
+| `void BView::GetClippingRegion(BRegion* region) const` | included | mojobe_BView_GetClippingRegion |
+| `void BView::ConstrainClippingRegion(BRegion* region)` | included | mojobe_BView_ConstrainClippingRegion |
 | `void BView::ClipToRect(BRect rect)` | included | mojobe_BView_ClipToRect |
 | `void BView::ClipToInverseRect(BRect rect)` | included | mojobe_BView_ClipToInverseRect |
 | `void BView::SetDrawingMode(drawing_mode mode)` | included | mojobe_BView_SetDrawingMode |
@@ -475,7 +519,11 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `rgb_color BView::ViewColor() const` | included | mojobe_BView_ViewColor |
 | `void BView::SetViewUIColor(color_which which, float tint)` | included | mojobe_BView_SetViewUIColor |
 | `color_which BView::ViewUIColor(float* tint) const` | included | mojobe_BView_ViewUIColor |
+| `void BView::SetViewBitmap(const BBitmap* bitmap, BRect srcRect, BRect dstRect, uint32 followFlags, uint32 options)` | included | mojobe_BView_SetViewBitmap__BBitmapP_BRect_BRect_uint32_uint32 |
+| `void BView::SetViewBitmap(const BBitmap* bitmap, uint32 followFlags, uint32 options)` | included | mojobe_BView_SetViewBitmap__BBitmapP_uint32_uint32 |
 | `void BView::ClearViewBitmap()` | included | mojobe_BView_ClearViewBitmap |
+| `status_t BView::SetViewOverlay(const BBitmap* overlay, BRect srcRect, BRect dstRect, rgb_color* colorKey, uint32 followFlags, uint32 options)` | included | mojobe_BView_SetViewOverlay__BBitmapP_BRect_BRect_rgb_colorP_uint32_uint32 |
+| `status_t BView::SetViewOverlay(const BBitmap* overlay, rgb_color* colorKey, uint32 followFlags, uint32 options)` | included | mojobe_BView_SetViewOverlay__BBitmapP_rgb_colorP_uint32_uint32 |
 | `void BView::ClearViewOverlay()` | included | mojobe_BView_ClearViewOverlay |
 | `void BView::SetHighColor(rgb_color color)` | included | mojobe_BView_SetHighColor__rgb_color |
 | `void BView::SetHighColor(uchar red, uchar green, uchar blue, uchar alpha)` | included | mojobe_BView_SetHighColor__uchar_uchar_uchar_uchar |
@@ -516,6 +564,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::FillTriangle(BPoint point1, BPoint point2, BPoint point3, BRect bounds, pattern pattern)` | included | mojobe_BView_FillTriangle__BPoint_BPoint_BPoint_BRect_pattern |
 | `void BView::StrokeRect(BRect rect, pattern pattern)` | included | mojobe_BView_StrokeRect |
 | `void BView::FillRect(BRect rect, pattern pattern)` | included | mojobe_BView_FillRect |
+| `void BView::FillRegion(BRegion* rectegion, pattern pattern)` | included | mojobe_BView_FillRegion |
 | `void BView::InvertRect(BRect rect)` | included | mojobe_BView_InvertRect |
 | `void BView::StrokeRoundRect(BRect rect, float xRadius, float yRadius, pattern pattern)` | included | mojobe_BView_StrokeRoundRect |
 | `void BView::FillRoundRect(BRect rect, float xRadius, float yRadius, pattern pattern)` | included | mojobe_BView_FillRoundRect |
@@ -530,16 +579,32 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BView::StrokeBezier(BPoint* controlPoints, pattern pattern)` | included | mojobe_BView_StrokeBezier |
 | `void BView::FillBezier(BPoint* controlPoints, pattern pattern)` | included | mojobe_BView_FillBezier |
 | `void BView::CopyBits(BRect src, BRect dst)` | included | mojobe_BView_CopyBits |
+| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)` | included | mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect_uint32 |
+| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)` | included | mojobe_BView_DrawBitmapAsync__BBitmapP_BRect_BRect |
+| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BRect viewRect)` | included | mojobe_BView_DrawBitmapAsync__BBitmapP_BRect |
+| `void BView::DrawBitmapAsync(const BBitmap* aBitmap, BPoint where)` | included | mojobe_BView_DrawBitmapAsync__BBitmapP_BPoint |
+| `void BView::DrawBitmapAsync(const BBitmap* aBitmap)` | included | mojobe_BView_DrawBitmapAsync__BBitmapP |
+| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect, uint32 options)` | included | mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect_uint32 |
+| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect bitmapRect, BRect viewRect)` | included | mojobe_BView_DrawBitmap__BBitmapP_BRect_BRect |
+| `void BView::DrawBitmap(const BBitmap* aBitmap, BRect viewRect)` | included | mojobe_BView_DrawBitmap__BBitmapP_BRect |
+| `void BView::DrawBitmap(const BBitmap* aBitmap, BPoint where)` | included | mojobe_BView_DrawBitmap__BBitmapP_BPoint |
+| `void BView::DrawBitmap(const BBitmap* aBitmap)` | included | mojobe_BView_DrawBitmap__BBitmapP |
+| `void BView::DrawTiledBitmapAsync(const BBitmap* aBitmap, BRect viewRect, BPoint phase)` | included | mojobe_BView_DrawTiledBitmapAsync |
+| `void BView::DrawTiledBitmap(const BBitmap* aBitmap, BRect viewRect, BPoint phase)` | included | mojobe_BView_DrawTiledBitmap |
 | `void BView::DrawChar(char aChar)` | included | mojobe_BView_DrawChar__char |
 | `void BView::DrawChar(char aChar, BPoint location)` | included | mojobe_BView_DrawChar__char_BPoint |
 | `void BView::DrawString(const char* string, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP |
 | `void BView::DrawString(const char* string, BPoint location, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP_BPoint |
 | `void BView::DrawString(const char* string, int32 length, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP_int32 |
+| `void BView::SetFont(const BFont* font, uint32 mask)` | included | mojobe_BView_SetFont |
+| `void BView::GetFont(BFont* font) const` | included | mojobe_BView_GetFont |
 | `float BView::StringWidth(const char* string) const` | included | mojobe_BView_StringWidth__charP |
 | `float BView::StringWidth(const char* string, int32 length) const` | included | mojobe_BView_StringWidth__charP_int32 |
 | `void BView::SetFontSize(float size)` | included | mojobe_BView_SetFontSize |
 | `void BView::ForceFontAliasing(bool enable)` | included | mojobe_BView_ForceFontAliasing |
+| `void BView::GetFontHeight(font_height* height) const` | included | mojobe_BView_GetFontHeight |
 | `void BView::Invalidate(BRect invalRect)` | included | mojobe_BView_Invalidate__BRect |
+| `void BView::Invalidate(const BRegion* invalRegion)` | included | mojobe_BView_Invalidate__BRegionP |
 | `void BView::Invalidate()` | included | mojobe_BView_Invalidate__void |
 | `void BView::DelayedInvalidate(bigtime_t delay)` | included | mojobe_BView_DelayedInvalidate__bigtime_t |
 | `void BView::DelayedInvalidate(bigtime_t delay, BRect invalRect)` | included | mojobe_BView_DelayedInvalidate__bigtime_t_BRect |
@@ -612,7 +677,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `hook void BView::WindowActivated(bool active)` | included | ViewWindowActivated |
 | `hook void BView::Pulse()` | included | ViewPulse |
 
-## BMessage: 192 included, 0 overrides reached through a base, 77 left out
+## BMessage: 196 included, 0 overrides reached through a base, 73 left out
 
 | C++ | | |
 |---|---|---|
@@ -629,7 +694,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::AddNodeRef(const char* name, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, BFlattenable* object, int32 count)` | skipped | parameter object: BFlattenable * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, const BFlattenable* object, int32 count)` | skipped | parameter object: const BFlattenable * is not bridged |
-| `status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)` | skipped | parameter data: const void * is not bridged |
 | `status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const` | skipped | parameter alignment: BAlignment * is not bridged |
 | `status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const` | skipped | parameter alignment: BAlignment * is not bridged |
 | `status_t BMessage::FindSize(const char* name, BSize* size) const` | skipped | parameter size: BSize * is not bridged |
@@ -661,8 +725,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::ReplaceNodeRef(const char* name, int32 index, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::ReplaceFlat(const char* name, BFlattenable* object)` | skipped | parameter object: BFlattenable * is not bridged |
 | `status_t BMessage::ReplaceFlat(const char* name, int32 index, BFlattenable* object)` | skipped | parameter object: BFlattenable * is not bridged |
-| `status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)` | skipped | parameter data: const void * is not bridged |
-| `status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)` | skipped | parameter data: const void * is not bridged |
 | `void* BMessage::operator new(size_t size)` | skipped | operator |
 | `void* BMessage::operator new(size_t arg0, void* pointer)` | skipped | operator |
 | `void* BMessage::operator new(size_t arg0, const std::nothrow_t& noThrow)` | skipped | operator |
@@ -679,7 +741,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::SetString(const char* name, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::SetAlignment(const char* name, const BAlignment& value)` | skipped | parameter value: const BAlignment & is not bridged |
 | `status_t BMessage::SetSize(const char* name, const BSize& value)` | skipped | parameter value: const BSize & is not bridged |
-| `status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)` | skipped | parameter data: const void * is not bridged |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, int32* countFound) const` | included | mojobe_BMessage_GetInfo__charP_type_codeP_int32P |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, bool* fixedSize) const` | skipped | a call would match another overload too |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, int32* countFound, bool* fixedSize) const` | skipped | a call would match another overload too |
@@ -730,6 +791,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::AddColor(const char* name, rgb_color value)` | included | mojobe_BMessage_AddColor |
 | `status_t BMessage::AddMessenger(const char* name, BMessenger messenger)` | included | mojobe_BMessage_AddMessenger |
 | `status_t BMessage::AddMessage(const char* name, const BMessage* message)` | included | mojobe_BMessage_AddMessage |
+| `status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)` | included | mojobe_BMessage_AddData |
 | `status_t BMessage::Append(const BMessage& message)` | included | mojobe_BMessage_Append |
 | `status_t BMessage::RemoveData(const char* name, int32 index)` | included | mojobe_BMessage_RemoveData |
 | `status_t BMessage::RemoveName(const char* name)` | included | mojobe_BMessage_RemoveName |
@@ -812,6 +874,8 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::ReplaceMessenger(const char* name, int32 index, BMessenger messenger)` | included | mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger |
 | `status_t BMessage::ReplaceMessage(const char* name, const BMessage* message)` | included | mojobe_BMessage_ReplaceMessage__charP_BMessageP |
 | `status_t BMessage::ReplaceMessage(const char* name, int32 index, const BMessage* message)` | included | mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP |
+| `status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)` | included | mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t |
+| `status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)` | included | mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t |
 | `bool BMessage::HasSameData(const BMessage& other, bool ignoreFieldOrder, bool deep) const` | included | mojobe_BMessage_HasSameData |
 | `bool BMessage::HasAlignment(const char* name, int32 n) const` | included | mojobe_BMessage_HasAlignment |
 | `bool BMessage::HasRect(const char* name, int32 n) const` | included | mojobe_BMessage_HasRect |
@@ -881,6 +945,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BMessage::SetDouble(const char* name, double value)` | included | mojobe_BMessage_SetDouble |
 | `status_t BMessage::SetPoint(const char* name, const BPoint& value)` | included | mojobe_BMessage_SetPoint |
 | `status_t BMessage::SetRect(const char* name, const BRect& value)` | included | mojobe_BMessage_SetRect |
+| `status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)` | included | mojobe_BMessage_SetData |
 | `BMessage::what (field)` | included | get_what, set_what |
 | `BMessage::BMessage(const BMessage& other)` | skipped | copy constructor |
 | `BMessage::BMessage()` | included | mojobe_BMessage_new__void |
@@ -1072,15 +1137,12 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BPopUpMenu::BPopUpMenu(BMessage* data)` | skipped | archive constructor |
 | `BPopUpMenu::BPopUpMenu(const char* name, bool radioMode, bool labelFromMarked, menu_layout layout)` | included | mojobe_BPopUpMenu_new |
 
-## BControl: 8 included, 17 overrides reached through a base, 6 left out
+## BControl: 11 included, 17 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BControl::Instantiate(BMessage* data)` | skipped | static |
 | `status_t BControl::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
-| `status_t BControl::SetIcon(const BBitmap* bitmap, uint32 flags)` | skipped | parameter bitmap: const BBitmap * is not bridged |
-| `status_t BControl::SetIconBitmap(const BBitmap* bitmap, uint32 which, uint32 flags)` | skipped | parameter bitmap: const BBitmap * is not bridged |
-| `const BBitmap* BControl::IconBitmap(uint32 which) const` | skipped | result: const BBitmap * is not bridged |
 | `status_t BControl::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BControl::WindowActivated(bool active)` | skipped | reached through BView's WindowActivated |
 | `void BControl::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
@@ -1104,11 +1166,14 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BControl::Invoke(BMessage* message)` | skipped | reached through BInvoker's Invoke |
 | `BHandler* BControl::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
 | `status_t BControl::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `status_t BControl::SetIcon(const BBitmap* bitmap, uint32 flags)` | included | mojobe_BControl_SetIcon |
+| `status_t BControl::SetIconBitmap(const BBitmap* bitmap, uint32 which, uint32 flags)` | included | mojobe_BControl_SetIconBitmap |
+| `const BBitmap* BControl::IconBitmap(uint32 which) const` | included | mojobe_BControl_IconBitmap |
 | `BControl::BControl(BMessage* data)` | skipped | archive constructor |
 | `BControl::BControl(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BControl_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BControl::BControl(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BControl_new__charP_charP_BMessageP_uint32 |
 
-## BButton: 9 included, 22 overrides reached through a base, 9 left out
+## BButton: 9 included, 23 overrides reached through a base, 8 left out
 
 | C++ | | |
 |---|---|---|
@@ -1119,7 +1184,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BSize BButton::MinSize()` | skipped | result: BSize is not bridged |
 | `BSize BButton::MaxSize()` | skipped | result: BSize is not bridged |
 | `BSize BButton::PreferredSize()` | skipped | result: BSize is not bridged |
-| `status_t BButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | parameter icon: const BBitmap * is not bridged |
 | `status_t BButton::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BButton::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BButton::MouseDown(BPoint where)` | skipped | reached through BView's MouseDown |
@@ -1148,12 +1212,13 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BButton::AllDetached()` | skipped | reached through BView's AllDetached |
 | `BHandler* BButton::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
 | `status_t BButton::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `status_t BButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BButton::BButton(BMessage* data)` | skipped | archive constructor |
 | `BButton::BButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BButton_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BButton::BButton(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BButton_new__charP_charP_BMessageP_uint32 |
 | `BButton::BButton(const char* label, BMessage* message)` | included | mojobe_BButton_new__charP_BMessageP |
 
-## BCheckBox: 5 included, 21 overrides reached through a base, 8 left out
+## BCheckBox: 5 included, 22 overrides reached through a base, 7 left out
 
 | C++ | | |
 |---|---|---|
@@ -1163,7 +1228,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BSize BCheckBox::PreferredSize()` | skipped | result: BSize is not bridged |
 | `BAlignment BCheckBox::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
 | `status_t BCheckBox::Perform(perform_code code, void* data)` | skipped | parameter data: void * is not bridged |
-| `status_t BCheckBox::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | parameter icon: const BBitmap * is not bridged |
 | `status_t BCheckBox::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BCheckBox::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BCheckBox::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
@@ -1185,6 +1249,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BCheckBox::Invoke(BMessage* message)` | skipped | reached through BInvoker's Invoke |
 | `BHandler* BCheckBox::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
 | `status_t BCheckBox::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `status_t BCheckBox::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `bool BCheckBox::IsPartialStateToOff() const` | included | mojobe_BCheckBox_IsPartialStateToOff |
 | `void BCheckBox::SetPartialStateToOff(bool partialToOff)` | included | mojobe_BCheckBox_SetPartialStateToOff |
 | `BCheckBox::BCheckBox(BMessage* data)` | skipped | archive constructor |
@@ -1192,7 +1257,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BCheckBox::BCheckBox(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BCheckBox_new__charP_charP_BMessageP_uint32 |
 | `BCheckBox::BCheckBox(const char* label, BMessage* message)` | included | mojobe_BCheckBox_new__charP_BMessageP |
 
-## BRadioButton: 3 included, 21 overrides reached through a base, 6 left out
+## BRadioButton: 3 included, 22 overrides reached through a base, 5 left out
 
 | C++ | | |
 |---|---|---|
@@ -1200,7 +1265,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `status_t BRadioButton::Perform(perform_code d, void* argument)` | skipped | parameter argument: void * is not bridged |
 | `BSize BRadioButton::MaxSize()` | skipped | result: BSize is not bridged |
 | `BAlignment BRadioButton::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
-| `status_t BRadioButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | parameter icon: const BBitmap * is not bridged |
 | `status_t BRadioButton::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BRadioButton::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BRadioButton::MouseDown(BPoint where)` | skipped | reached through BView's MouseDown |
@@ -1222,6 +1286,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BRadioButton::AllAttached()` | skipped | reached through BView's AllAttached |
 | `void BRadioButton::AllDetached()` | skipped | reached through BView's AllDetached |
 | `status_t BRadioButton::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `status_t BRadioButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BRadioButton::BRadioButton(BMessage* data)` | skipped | archive constructor |
 | `BRadioButton::BRadioButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BRadioButton_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BRadioButton::BRadioButton(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BRadioButton_new__charP_charP_BMessageP_uint32 |
@@ -1276,17 +1341,15 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BTextControl::BTextControl(const char* name, const char* label, const char* initialText, BMessage* message, uint32 flags)` | included | mojobe_BTextControl_new__charP_charP_charP_BMessageP_uint32 |
 | `BTextControl::BTextControl(const char* label, const char* initialText, BMessage* message)` | included | mojobe_BTextControl_new__charP_charP_BMessageP |
 
-## BSlider: 44 included, 26 overrides reached through a base, 8 left out
+## BSlider: 44 included, 28 overrides reached through a base, 6 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BSlider::Instantiate(BMessage* archive)` | skipped | static |
 | `status_t BSlider::Perform(perform_code code, void* data)` | skipped | parameter data: void * is not bridged |
-| `void BSlider::SetFont(const BFont* font, uint32 properties)` | skipped | parameter font: const BFont * is not bridged |
 | `BSize BSlider::MinSize()` | skipped | result: BSize is not bridged |
 | `BSize BSlider::MaxSize()` | skipped | result: BSize is not bridged |
 | `BSize BSlider::PreferredSize()` | skipped | result: BSize is not bridged |
-| `status_t BSlider::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | parameter icon: const BBitmap * is not bridged |
 | `status_t BSlider::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BSlider::WindowActivated(bool state)` | skipped | reached through BView's WindowActivated |
 | `void BSlider::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
@@ -1352,14 +1415,16 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BSlider::SetOrientation(orientation arg0)` | included | mojobe_BSlider_SetOrientation |
 | `float BSlider::BarThickness() const` | included | mojobe_BSlider_BarThickness |
 | `void BSlider::SetBarThickness(float thickness)` | included | mojobe_BSlider_SetBarThickness |
+| `void BSlider::SetFont(const BFont* font, uint32 properties)` | skipped | reached through BView's SetFont |
 | `void BSlider::SetLimits(int32 minimum, int32 maximum)` | included | mojobe_BSlider_SetLimits |
 | `float BSlider::MaxUpdateTextWidth()` | included | mojobe_BSlider_MaxUpdateTextWidth |
+| `status_t BSlider::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BSlider::BSlider(BMessage* archive)` | skipped | archive constructor |
 | `BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, thumb_style thumbType, uint32 resizingMode, uint32 flags)` | included | mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_thumb_style_uint32_uint32 |
 | `BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 resizingMode, uint32 flags)` | included | mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32_uint32 |
 | `BSlider::BSlider(const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 flags)` | included | mojobe_BSlider_new__charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32 |
 
-## BStringView: 8 included, 17 overrides reached through a base, 7 left out
+## BStringView: 8 included, 18 overrides reached through a base, 6 left out
 
 | C++ | | |
 |---|---|---|
@@ -1368,7 +1433,6 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BSize BStringView::MaxSize()` | skipped | result: BSize is not bridged |
 | `BSize BStringView::PreferredSize()` | skipped | result: BSize is not bridged |
 | `BAlignment BStringView::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
-| `void BStringView::SetFont(const BFont* font, uint32 mask)` | skipped | parameter font: const BFont * is not bridged |
 | `status_t BStringView::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BStringView::SetText(const char* text)` | included | mojobe_BStringView_SetText |
 | `const char* BStringView::Text() const` | included | mojobe_BStringView_Text |
@@ -1392,6 +1456,7 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `void BStringView::MouseMoved(BPoint point, uint32 transit, const BMessage* dragMessage)` | skipped | reached through BView's MouseMoved |
 | `BHandler* BStringView::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 form, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
 | `status_t BStringView::GetSupportedSuites(BMessage* data)` | skipped | reached through BHandler's GetSupportedSuites |
+| `void BStringView::SetFont(const BFont* font, uint32 mask)` | skipped | reached through BView's SetFont |
 | `BStringView::BStringView(BMessage* archive)` | skipped | archive constructor |
 | `BStringView::BStringView(BRect frame, const char* name, const char* text, uint32 resizingMode, uint32 flags)` | included | mojobe_BStringView_new__BRect_charP_charP_uint32_uint32 |
 | `BStringView::BStringView(const char* name, const char* text, uint32 flags)` | included | mojobe_BStringView_new__charP_charP_uint32 |
@@ -1437,18 +1502,18 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 resizingMode, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style |
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style |
 
-## BAlert: 15 included, 8 overrides reached through a base, 6 left out
+## BAlert: 16 included, 8 overrides reached through a base, 5 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BAlert::Instantiate(BMessage* data)` | skipped | static |
-| `void BAlert::SetIcon(BBitmap* bitmap)` | skipped | parameter bitmap: BBitmap * is not bridged |
 | `BTextView* BAlert::TextView() const` | skipped | result: BTextView * is not bridged |
 | `status_t BAlert::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
 | `BPoint BAlert::AlertPosition(float width, float height)` | skipped | static |
 | `status_t BAlert::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `alert_type BAlert::Type() const` | skipped | reached through BWindow's Type |
 | `void BAlert::SetType(alert_type type)` | included | mojobe_BAlert_SetType |
+| `void BAlert::SetIcon(BBitmap* bitmap)` | included | mojobe_BAlert_SetIcon |
 | `void BAlert::SetText(const char* text)` | included | mojobe_BAlert_SetText |
 | `void BAlert::SetButtonSpacing(button_spacing spacing)` | included | mojobe_BAlert_SetButtonSpacing |
 | `void BAlert::SetButtonWidth(button_width width)` | included | mojobe_BAlert_SetButtonWidth |
@@ -1470,6 +1535,134 @@ In all: 796 included, 246 overrides reached through a base, 327 left out.
 | `BAlert::BAlert()` | included | mojobe_BAlert_new__void |
 | `BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, alert_type type)` | included | mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_alert_type |
 | `BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, button_spacing spacing, alert_type type)` | included | mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spacing_alert_type |
+
+## BRegion: 27 included, 0 overrides reached through a base, 10 left out
+
+| C++ | | |
+|---|---|---|
+| `BRegion& BRegion::operator=(const BRegion& other)` | skipped | operator |
+| `BRegion& BRegion::operator=(BRegion&& other)` | skipped | operator |
+| `bool BRegion::operator==(const BRegion& other) const` | skipped | operator |
+| `void BRegion::ScaleBy(BSize scale)` | skipped | parameter scale: BSize is not bridged |
+| `void BRegion::Set(BRect rect)` | included | mojobe_BRegion_Set__BRect |
+| `void BRegion::Set(clipping_rect clipping)` | included | mojobe_BRegion_Set__clipping_rect |
+| `void BRegion::MoveFrom(BRegion& other)` | included | mojobe_BRegion_MoveFrom |
+| `BRect BRegion::Frame() const` | included | mojobe_BRegion_Frame |
+| `clipping_rect BRegion::FrameInt() const` | included | mojobe_BRegion_FrameInt |
+| `BRect BRegion::RectAt(int32 index)` | included | mojobe_BRegion_RectAt__int32 |
+| `BRect BRegion::RectAt(int32 index) const` | skipped | a call would match another overload too |
+| `clipping_rect BRegion::RectAtInt(int32 index)` | included | mojobe_BRegion_RectAtInt__int32 |
+| `clipping_rect BRegion::RectAtInt(int32 index) const` | skipped | a call would match another overload too |
+| `int32 BRegion::CountRects()` | included | mojobe_BRegion_CountRects__void |
+| `int32 BRegion::CountRects() const` | skipped | a call would match another overload too |
+| `bool BRegion::Intersects(BRect rect) const` | included | mojobe_BRegion_Intersects__BRect |
+| `bool BRegion::Intersects(clipping_rect clipping) const` | included | mojobe_BRegion_Intersects__clipping_rect |
+| `bool BRegion::Contains(BPoint point) const` | included | mojobe_BRegion_Contains__BPoint |
+| `bool BRegion::Contains(int32 x, int32 y)` | included | mojobe_BRegion_Contains__int32_int32 |
+| `bool BRegion::Contains(int32 x, int32 y) const` | skipped | a call would match another overload too |
+| `void BRegion::PrintToStream() const` | included | mojobe_BRegion_PrintToStream |
+| `void BRegion::OffsetBy(const BPoint& point)` | included | mojobe_BRegion_OffsetBy__BPoint |
+| `void BRegion::OffsetBy(int32 x, int32 y)` | included | mojobe_BRegion_OffsetBy__int32_int32 |
+| `void BRegion::ScaleBy(float x, float y)` | included | mojobe_BRegion_ScaleBy |
+| `void BRegion::MakeEmpty()` | included | mojobe_BRegion_MakeEmpty |
+| `void BRegion::Include(BRect rect)` | included | mojobe_BRegion_Include__BRect |
+| `void BRegion::Include(clipping_rect clipping)` | included | mojobe_BRegion_Include__clipping_rect |
+| `void BRegion::Include(const BRegion* region)` | included | mojobe_BRegion_Include__BRegionP |
+| `void BRegion::Exclude(BRect rect)` | included | mojobe_BRegion_Exclude__BRect |
+| `void BRegion::Exclude(clipping_rect clipping)` | included | mojobe_BRegion_Exclude__clipping_rect |
+| `void BRegion::Exclude(const BRegion* region)` | included | mojobe_BRegion_Exclude__BRegionP |
+| `void BRegion::IntersectWith(const BRegion* region)` | included | mojobe_BRegion_IntersectWith |
+| `void BRegion::ExclusiveInclude(const BRegion* region)` | included | mojobe_BRegion_ExclusiveInclude |
+| `BRegion::BRegion(const BRegion& other)` | skipped | copy constructor |
+| `BRegion::BRegion(BRegion&& other)` | skipped | copy constructor |
+| `BRegion::BRegion()` | included | mojobe_BRegion_new__void |
+| `BRegion::BRegion(const BRect rect)` | included | mojobe_BRegion_new__BRect |
+
+## BBitmap: 30 included, 0 overrides reached through a base, 11 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BBitmap::Instantiate(BMessage* data)` | skipped | static |
+| `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so |
+| `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
+| `status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
+| `status_t BBitmap::GetOverlayRestrictions(overlay_restrictions* restrictions) const` | skipped | parameter restrictions: overlay_restrictions * is not bridged |
+| `BBitmap& BBitmap::operator=(const BBitmap& source)` | skipped | operator |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | static |
+| `status_t BArchivable::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
+| `status_t BBitmap::Archive(BMessage* data, bool deep) const` | included | mojobe_BBitmap_Archive |
+| `status_t BBitmap::InitCheck() const` | included | mojobe_BBitmap_InitCheck |
+| `bool BBitmap::IsValid() const` | included | mojobe_BBitmap_IsValid |
+| `status_t BBitmap::LockBits(uint32* state)` | included | mojobe_BBitmap_LockBits |
+| `void BBitmap::UnlockBits()` | included | mojobe_BBitmap_UnlockBits |
+| `area_id BBitmap::Area() const` | included | mojobe_BBitmap_Area |
+| `void* BBitmap::Bits() const` | included | mojobe_BBitmap_Bits |
+| `size_t BBitmap::BitsLength() const` | included | mojobe_BBitmap_BitsLength |
+| `int32 BBitmap::BytesPerRow() const` | included | mojobe_BBitmap_BytesPerRow |
+| `color_space BBitmap::ColorSpace() const` | included | mojobe_BBitmap_ColorSpace |
+| `BRect BBitmap::Bounds() const` | included | mojobe_BBitmap_Bounds |
+| `uint32 BBitmap::Flags() const` | included | mojobe_BBitmap_Flags |
+| `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)` | included | mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space |
+| `status_t BBitmap::ImportBits(const BBitmap* bitmap)` | included | mojobe_BBitmap_ImportBits__BBitmapP |
+| `void BBitmap::AddChild(BView* view)` | included | mojobe_BBitmap_AddChild |
+| `bool BBitmap::RemoveChild(BView* view)` | included | mojobe_BBitmap_RemoveChild |
+| `int32 BBitmap::CountChildren() const` | included | mojobe_BBitmap_CountChildren |
+| `BView* BBitmap::ChildAt(int32 index) const` | included | mojobe_BBitmap_ChildAt |
+| `BView* BBitmap::FindView(const char* viewName) const` | included | mojobe_BBitmap_FindView__charP |
+| `BView* BBitmap::FindView(BPoint point) const` | included | mojobe_BBitmap_FindView__BPoint |
+| `bool BBitmap::Lock()` | included | mojobe_BBitmap_Lock |
+| `void BBitmap::Unlock()` | included | mojobe_BBitmap_Unlock |
+| `bool BBitmap::IsLocked() const` | included | mojobe_BBitmap_IsLocked |
+| `void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)` | included | mojobe_BBitmap_SetBits |
+| `status_t BArchivable::AllUnarchived(const BMessage* archive)` | included | mojobe_BBitmap_AllUnarchived |
+| `status_t BArchivable::AllArchived(BMessage* archive) const` | included | mojobe_BBitmap_AllArchived |
+| `BBitmap::BBitmap(const BBitmap& source, uint32 flags)` | skipped | copy constructor |
+| `BBitmap::BBitmap(const BBitmap& source)` | skipped | copy constructor |
+| `BBitmap::BBitmap(BMessage* data)` | skipped | archive constructor |
+| `BBitmap::BBitmap(BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)` | included | mojobe_BBitmap_new__BRect_uint32_color_space_int32_screen_id |
+| `BBitmap::BBitmap(BRect bounds, color_space colorSpace, bool acceptsViews, bool needsContiguous)` | included | mojobe_BBitmap_new__BRect_color_space_bool_bool |
+| `BBitmap::BBitmap(const BBitmap* source, bool acceptsViews, bool needsContiguous)` | included | mojobe_BBitmap_new__BBitmapP_bool_bool |
+| `BBitmap::BBitmap(area_id area, ptrdiff_t areaOffset, BRect bounds, uint32 flags, color_space colorSpace, int32 bytesPerRow, screen_id screenID)` | included | mojobe_BBitmap_new__area_id_ptrdiff_t_BRect_uint32_color_space_int32_screen_id |
+
+## BScreen: 23 included, 0 overrides reached through a base, 12 left out
+
+| C++ | | |
+|---|---|---|
+| `const color_map* BScreen::ColorMap()` | skipped | result: const color_map * is not bridged |
+| `status_t BScreen::GetBitmap(BBitmap** _bitmap, bool drawCursor, BRect* frame)` | skipped | parameter _bitmap: BBitmap ** is not bridged |
+| `status_t BScreen::ProposeMode(display_mode* target, const display_mode* low, const display_mode* high)` | skipped | parameter target: display_mode * is not bridged |
+| `status_t BScreen::GetModeList(display_mode** _modeList, uint32* _count)` | skipped | parameter _modeList: display_mode ** is not bridged |
+| `status_t BScreen::GetMode(display_mode* mode)` | skipped | parameter mode: display_mode * is not bridged |
+| `status_t BScreen::GetMode(uint32 workspace, display_mode* mode)` | skipped | parameter mode: display_mode * is not bridged |
+| `status_t BScreen::SetMode(display_mode* mode, bool makeDefault)` | skipped | parameter mode: display_mode * is not bridged |
+| `status_t BScreen::SetMode(uint32 workspace, display_mode* mode, bool makeDefault)` | skipped | parameter mode: display_mode * is not bridged |
+| `status_t BScreen::GetDeviceInfo(accelerant_device_info* info)` | skipped | parameter info: accelerant_device_info * is not bridged |
+| `status_t BScreen::GetMonitorInfo(monitor_info* info)` | skipped | parameter info: monitor_info * is not bridged |
+| `status_t BScreen::GetPixelClockLimits(display_mode* mode, uint32* _low, uint32* _high)` | skipped | parameter mode: display_mode * is not bridged |
+| `status_t BScreen::GetTimingConstraints(display_timing_constraints* timingConstraints)` | skipped | parameter timingConstraints: display_timing_constraints * is not bridged |
+| `bool BScreen::IsValid()` | included | mojobe_BScreen_IsValid |
+| `status_t BScreen::SetToNext()` | included | mojobe_BScreen_SetToNext |
+| `color_space BScreen::ColorSpace()` | included | mojobe_BScreen_ColorSpace |
+| `BRect BScreen::Frame()` | included | mojobe_BScreen_Frame |
+| `screen_id BScreen::ID()` | included | mojobe_BScreen_ID |
+| `status_t BScreen::WaitForRetrace()` | included | mojobe_BScreen_WaitForRetrace__void |
+| `status_t BScreen::WaitForRetrace(bigtime_t timeout)` | included | mojobe_BScreen_WaitForRetrace__bigtime_t |
+| `uint8 BScreen::IndexForColor(rgb_color color)` | included | mojobe_BScreen_IndexForColor__rgb_color |
+| `uint8 BScreen::IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha)` | included | mojobe_BScreen_IndexForColor__uint8_uint8_uint8_uint8 |
+| `rgb_color BScreen::ColorForIndex(uint8 index)` | included | mojobe_BScreen_ColorForIndex |
+| `uint8 BScreen::InvertIndex(uint8 index)` | included | mojobe_BScreen_InvertIndex |
+| `status_t BScreen::ReadBitmap(BBitmap* bitmap, bool drawCursor, BRect* frame)` | included | mojobe_BScreen_ReadBitmap |
+| `rgb_color BScreen::DesktopColor()` | included | mojobe_BScreen_DesktopColor__void |
+| `rgb_color BScreen::DesktopColor(uint32 workspace)` | included | mojobe_BScreen_DesktopColor__uint32 |
+| `void BScreen::SetDesktopColor(rgb_color color, bool stick)` | included | mojobe_BScreen_SetDesktopColor__rgb_color_bool |
+| `void BScreen::SetDesktopColor(rgb_color color, uint32 workspace, bool stick)` | included | mojobe_BScreen_SetDesktopColor__rgb_color_uint32_bool |
+| `status_t BScreen::SetDPMS(uint32 state)` | included | mojobe_BScreen_SetDPMS |
+| `uint32 BScreen::DPMSState()` | included | mojobe_BScreen_DPMSState |
+| `uint32 BScreen::DPMSCapabilites()` | included | mojobe_BScreen_DPMSCapabilites |
+| `status_t BScreen::GetBrightness(float* brightness)` | included | mojobe_BScreen_GetBrightness |
+| `status_t BScreen::SetBrightness(float brightness)` | included | mojobe_BScreen_SetBrightness |
+| `BScreen::BScreen(screen_id id)` | included | mojobe_BScreen_new__screen_id |
+| `BScreen::BScreen(BWindow* window)` | included | mojobe_BScreen_new__BWindowP |
 
 ## BMessageRunner: 6 included, 0 overrides reached through a base, 4 left out
 

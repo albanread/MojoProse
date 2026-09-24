@@ -311,17 +311,47 @@ class Model:
         self.constant_files = {}  # constant name -> header
         self.integral_vars = {}  # const integral variable -> CType
         self.typedef_enums = {}  # typedef name -> enum name
+        self.anonymous = {}  # id -> an anonymous record's node, or enum's constants
+        self.header_defined = set()  # mangled names of methods defined after their class
         for node in ast.get("inner", []):
             self._top(node)
 
+    def _anonymous_in(self, node):
+        """The anonymous record or enum a typedef names, if it names one:
+        followed through elaborations only, never into a function's or a
+        pointer's parts (a typedef of a function taking a color_space is not
+        color_space)."""
+        inner = node.get("inner", [])
+        while inner:
+            child = inner[0]
+            for key in ("ownedTagDecl", "decl"):
+                target = child.get(key)
+                if isinstance(target, dict) and target.get("id") in self.anonymous:
+                    return self.anonymous[target["id"]]
+            if child.get("kind") not in ("ElaboratedType", "EnumType", "RecordType",
+                                         "ParenType"):
+                return None
+            inner = child.get("inner", [])
+        return None
+
     def _top(self, node):
         kind = node.get("kind")
+        if kind in ("CXXMethodDecl", "CXXConstructorDecl") and (
+                node.get("inline") or any(c.get("kind") == "CompoundStmt"
+                                          for c in node.get("inner", []))):
+            # defined in the header, after its class (`inline void
+            # BView::ScrollTo(float x, float y) { ... }`)
+            if node.get("mangledName"):
+                self.header_defined.add(node["mangledName"])
         if kind == "LinkageSpecDecl":
             for child in node.get("inner", []):
                 self._top(child)
         elif kind == "CXXRecordDecl" and node.get("completeDefinition"):
             if node.get("name"):
                 self.records[node["name"]] = Record(node)
+            else:
+                # `typedef struct { ... } clipping_rect;`: named by its typedef
+                self.anonymous[node["id"]] = node
         elif kind == "EnumDecl":
             name = node.get("name")
             constants = []
@@ -334,10 +364,20 @@ class Model:
                     )
             if name:
                 self.enums[name] = constants
+            else:
+                # `typedef enum { ... } color_space;`: named by its typedef
+                self.anonymous[node["id"]] = constants
         elif kind == "TypedefDecl":
             inner = node.get("inner", [])
             spelled = node.get("type", {}).get("qualType", "")
             TYPEDEFS[node["name"]] = spelled
+            found = self._anonymous_in(node)
+            if isinstance(found, list) and node["name"] not in self.enums:
+                self.enums[node["name"]] = found
+                for constant in found:
+                    self.enum_of[constant] = node["name"]
+            elif isinstance(found, dict) and node["name"] not in self.records:
+                self.records[node["name"]] = Record(dict(found, name=node["name"]))
             match = re.match(r"^enum\s+(\w+)$", spelled)
             if match:
                 self.typedef_enums[node["name"]] = match.group(1)
@@ -415,6 +455,19 @@ class Clang:
             sys.exit("mojobe_gen: clang could not parse the headers:\n"
                      + result.stderr[-4000:])
         return json.loads(result.stdout)
+
+    def symbols(self, libraries):
+        """The symbols the sysroot's libraries define."""
+        nm = Path(os.path.realpath(self.clang)).parent / "llvm-nm"
+        found = set()
+        for library in libraries:
+            path = Path(self.sysroot) / "boot/system/lib" / library
+            result = subprocess.run([str(nm), "-D", "--defined-only", str(path)],
+                                    capture_output=True, text=True)
+            # versioned: _ZNK10BMessenger7IsValidEv@@LIBBE_BASE
+            found.update(line.split()[-1].split("@")[0]
+                         for line in result.stdout.splitlines() if line.strip())
+        return found
 
     def macros(self, includes):
         source = "".join("#include <%s>\n" % h for h in includes)
@@ -548,9 +601,7 @@ class Bridge:
             name for name, members in model.enums.items()
             if name and members and all(c in constants for c in members)
         }
-        self.known_names = set(constants) | {
-            "B_ORIGIN", "B_SOLID_HIGH", "B_SOLID_LOW", "B_MIXED_COLORS",
-        }
+        self.known_names = set(constants) | set(hand_written("_values.mojo", "comptime"))
         self.used_names = set()
 
     # ---- classification ----------------------------------------------------
@@ -628,6 +679,20 @@ class Bridge:
         if len(ctype.pointers) == 2 and base == "char" and ctype.const:
             return "outcstring", None
         return "unknown", None
+
+    def defined(self, method):
+        """Whether a call can link: a virtual method is called through the
+        vtable, an inline one is in the header; anything else must be in the
+        libraries (Haiku declares a few methods it never wrote)."""
+        node = method.node
+        name = node.get("mangledName")
+        if not name or method.virtual or node.get("inline") or any(
+                c.get("kind") == "CompoundStmt" for c in node.get("inner", [])) \
+                or name in self.model.header_defined:
+            return True
+        if method.kind == "CXXConstructorDecl":
+            return name in self.symbols or name.replace("C1E", "C2E", 1) in self.symbols
+        return name in self.symbols
 
     def value_class(self, ctype):
         """The class a type names, if it is held in a Mojo value (kind
@@ -718,11 +783,29 @@ class Bridge:
             raise Unbridged(self.skips[key])
         if method.variadic:
             raise Unbridged("variadic")
+        if not self.defined(method):
+            raise Unbridged("declared in the header, but not defined in %s"
+                            % ", ".join(self.libraries))
         adopted = set(self.adopts.get(key, []))
         inout = set(self.config.get("inout", {}).get(key, []))
         init_check = self.classes.get(cls, {}).get("init_check") if is_ctor else None
         params = []
+        spans = {}  # a length parameter's index -> its buffer's name
+        for index, param in enumerate(method.params[:-1]):
+            after = method.params[index + 1]
+            if param.type.dbase == "void" and param.type.const \
+                    and len(param.type.pointers) == 1 \
+                    and self.classify(after.type)[0] == "prim" \
+                    and after.name in ("length", "numBytes", "size", "bytes"):
+                spans[index + 1] = param.name
         for index, param in enumerate(method.params):
+            if index + 1 in spans:
+                params.append({"role": "span", "p": param})
+                continue
+            if index in spans:
+                params.append({"role": "spanlen", "p": param, "span": spans[index],
+                               "detail": self.classify(param.type)[1]})
+                continue
             kind, detail = self.classify(param.type)
             if init_check and param.name == init_check and kind == "outprim":
                 params.append({"role": "initcheck", "p": param})
@@ -761,7 +844,7 @@ class Bridge:
         for index, entry in enumerate(params):
             if entry["role"] != "in":
                 entry["mojo_default"] = None
-                if entry["role"] in ("adopt",):
+                if entry["role"] in ("adopt", "span"):
                     last_bad = index
                 continue
             entry["mojo_default"] = self.default(
@@ -776,6 +859,10 @@ class Bridge:
             rkind, rdetail = self.classify(method.result)
             if rkind == "object" and method.result.reference:
                 rkind = "objectptr"
+            if rkind == "unknown" and method.result.dbase == "void" \
+                    and len(method.result.pointers) == 1 \
+                    and key in self.config.get("spans", {}):
+                rkind, rdetail = "span", self.config["spans"][key]
             if rkind in ("unknown", "object", "valueobjptr") or rkind.startswith("out"):
                 raise Unbridged("result: %s is not bridged" % method.result.qual)
             if rkind == "value" and method.result.pointers:
@@ -794,6 +881,17 @@ def hook_marker(cls):
     """The trait every hook trait of a class inherits (`ViewHooks`): what a
     Mojo type standing behind the class implements."""
     return "%sHooks" % (cls[1:] if cls.startswith("B") else cls)
+
+
+def hand_written(snippet, kind):
+    """The public names a snippet defines at its top level: `comptime` constants,
+    or `def`s and `struct`s."""
+    path = SNIPPETS / snippet
+    if not path.exists():
+        return []
+    words = ("comptime",) if kind == "comptime" else ("def", "struct")
+    return [m.group(2) for m in re.finditer(r"^(%s) ([A-Za-z]\w*)" % "|".join(words),
+                                             path.read_text(), re.M)]
 
 
 def mojo_name(name):
@@ -832,6 +930,11 @@ class Emitter:
         role = entry["role"]
         if role == "null":
             return None, "static_cast<%s>(NULL)" % p.type.qual
+        if role == "span":
+            return "const void* %s" % name, name
+        if role == "spanlen":
+            spelled = p.type.qual.replace("const ", "").strip()
+            return "%s %s" % (spelled, name), name
         if role == "initcheck":
             return "status_t* %s" % name, name
         if kind == "value":
@@ -889,6 +992,8 @@ class Emitter:
             return ("const %s*" if result[2] else "%s*") % detail
         if kind == "valueobj":
             return "void"
+        if kind == "span":
+            return "void*"
         raise AssertionError(kind)
 
     # ---- Mojo side helpers ----------------------------------------------------
@@ -902,6 +1007,10 @@ class Emitter:
         suffix = " = " + default if default is not None else ""
         if role == "null":
             return None, None, [], []
+        if role == "span":
+            return ("%s: Span[UInt8, _]" % name, "Int(%s.unsafe_ptr())" % name, [], [])
+        if role == "spanlen":
+            return None, "%s(len(%s))" % (entry["detail"], mojo_name(entry["span"])), [], []
         if role == "initcheck":
             return None, "Pointer(to=_status)", ["var _status = Int32(-1)"], []
         if role == "adopt":
@@ -978,6 +1087,11 @@ class Emitter:
         if kind == "valueobj":
             # constructed by C++ in a value Mojo provides
             return detail, "NoneType", "valueobj"
+        if kind == "span":
+            # the bytes, as long as the method `detail` says, borrowed from
+            # (and so no longer than) the object
+            return ("Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]", "Int",
+                    "span:" + detail)
         if kind == "objectptr":
             # borrowed from what it was got from, which it keeps alive
             return ("%sRef[origin_of(self)]" % detail, "Int",
@@ -1085,7 +1199,7 @@ class Emitter:
             signature_ret = " -> Tuple[%s]" % ", ".join(t for t, _ in returned)
         # a reference result borrows from `self`, so `self` must be a
         # reference too, even for a register-passable Self
-        self_decl = "ref self" if result[0] == "objectptr" else "self"
+        self_decl = "ref self" if result[0] in ("objectptr", "span") else "self"
         if held and not method.const:
             self_decl = "mut self"
         head = "def %s(%s)%s%s:" % (
@@ -1106,6 +1220,16 @@ class Emitter:
         if raises:
             lines.append('    _check(_result, "%s::%s")' % (method.owner, method.name))
         values = []
+        if convert and convert.startswith("span:"):
+            lines.append("    if _result == 0:")
+            lines.append("        return %s()" % rtype)
+            lines.append("    return %s(" % rtype)
+            lines.append("        unsafe_ptr=Pointer[UInt8, MutUntrackedOrigin](")
+            lines.append("            unsafe_from_address=_result")
+            lines.append("        ).unsafe_origin_cast[origin_of(self).unsafe_mut_cast[True]()](),")
+            lines.append("        length=Int(self.%s())," % convert[len("span:"):])
+            lines.append("    )")
+            return lines, [p for p in m_params]
         if rtype is not None:
             values.append(convert % "_result" if convert else "_result")
         values.extend(v for _, v in outs)
@@ -2582,8 +2706,7 @@ def write_api(emitter, bridge):
            "    _string_from,", "    _string_from_char,", "    _to_heap,", "    _type_tag,", ")",
            "from ._values import _check_layouts"]
     value_names = list(bridge.values) + sorted(
-        n for n in bridge.used_names if n in ("B_ORIGIN", "B_SOLID_HIGH", "B_SOLID_LOW",
-                                              "B_MIXED_COLORS"))
+        n for n in bridge.used_names if n in hand_written("_values.mojo", "comptime"))
     out.append("from ._values import %s" % ", ".join(value_names))
     consts = sorted(bridge.typed_enums) + sorted(
         n for n in bridge.used_names if n in bridge.constants)
@@ -2622,14 +2745,14 @@ def write_init(emitter, bridge, constants):
            "",
            "from ._core import fourcc",
            "from ._values import %s" % ", ".join(
-               list(bridge.values) + ["rgb", "B_ORIGIN", "B_SOLID_HIGH", "B_SOLID_LOW",
-                                      "B_MIXED_COLORS"]),
+               list(bridge.values) + hand_written("_values.mojo", "def")
+               + hand_written("_values.mojo", "comptime")),
            "from ._api import ("]
     for cls in bridge.classes:
         out.append("    %s," % cls)
         if bridge.classes[cls].get("kind") != "value":
             out.append("    %sRef," % cls)
-    out.append("    LooperLock,")
+    out.extend("    %s," % n for n in hand_written("_api.mojo", "def"))
     out.append(")")
     out.append("from ._constants import status_of")
     out.append("from ._constants import (")
@@ -3005,6 +3128,8 @@ def main():
     constants, layouts = probe(clang, includes, sorted(found), values)
 
     bridge = Bridge(model, config, constants, layouts)
+    bridge.libraries = config.get("libraries", ["libbe.so", "libroot.so"])
+    bridge.symbols = clang.symbols(bridge.libraries)
     # Errors.h defines its statuses as macros, which carry no file
     errors_h = Path(arguments.sysroot) / "boot/system/develop/headers/os/support/Errors.h"
     bridge.error_names = set(re.findall(r"#\s*define\s+(B_\w+)", errors_h.read_text()))

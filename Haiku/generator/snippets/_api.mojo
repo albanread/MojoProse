@@ -38,3 +38,24 @@ struct LooperLock(Movable):
     def __deinit__(deinit self):
         if self._looper != 0:
             external_call["mojobe_BLooper_Unlock", NoneType](self._looper)
+
+
+def be_plain_font() -> BFont:
+    """`be_plain_font`: the font of most text, as the user chose it."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_plain_font", NoneType](_address_of(font))
+    return font
+
+
+def be_bold_font() -> BFont:
+    """`be_bold_font`: the font of titles and emphasis."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_bold_font", NoneType](_address_of(font))
+    return font
+
+
+def be_fixed_font() -> BFont:
+    """`be_fixed_font`: the font of code and terminals."""
+    var font = BFont._zeroed()
+    external_call["mojobe_be_fixed_font", NoneType](_address_of(font))
+    return font

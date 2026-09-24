@@ -67,6 +67,32 @@ struct rgb_color(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct font_height(Equatable, TrivialRegisterPassable):
+    """`font_height`, 12 bytes."""
+
+    var ascent: Float32
+    var descent: Float32
+    var leading: Float32
+
+
+@fieldwise_init
+struct clipping_rect(Equatable, TrivialRegisterPassable):
+    """`clipping_rect`, 16 bytes."""
+
+    var left: Int32
+    var top: Int32
+    var right: Int32
+    var bottom: Int32
+
+
+@fieldwise_init
+struct screen_id(Equatable, TrivialRegisterPassable):
+    """`screen_id`, 4 bytes."""
+
+    var id: Int32
+
+
+@fieldwise_init
 struct pattern(Equatable, TrivialRegisterPassable):
     """`pattern`, 8 bytes."""
 
@@ -81,6 +107,12 @@ def _check_layouts():
     comptime assert align_of[BPoint]() == 4
     comptime assert size_of[rgb_color]() == 4
     comptime assert align_of[rgb_color]() == 1
+    comptime assert size_of[font_height]() == 12
+    comptime assert align_of[font_height]() == 4
+    comptime assert size_of[clipping_rect]() == 16
+    comptime assert align_of[clipping_rect]() == 4
+    comptime assert size_of[screen_id]() == 4
+    comptime assert align_of[screen_id]() == 4
     comptime assert size_of[pattern]() == 8
 
 
@@ -107,3 +139,6 @@ comptime B_SOLID_LOW = pattern(0)
 
 comptime B_MIXED_COLORS = pattern(0x55AA55AA55AA55AA)
 """`B_MIXED_COLORS`: a checkerboard of the high and low colours."""
+
+comptime B_MAIN_SCREEN_ID = screen_id(0)
+"""`B_MAIN_SCREEN_ID`: the main screen."""

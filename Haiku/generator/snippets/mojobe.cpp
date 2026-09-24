@@ -14,3 +14,24 @@ mojobe_BMessenger_LockedTarget(const BMessenger* self, bigtime_t timeout,
 	self->Target(&looper);
 	return looper;
 }
+
+
+void
+mojobe_be_plain_font(BFont* result)
+{
+	new(result) BFont(be_plain_font);
+}
+
+
+void
+mojobe_be_bold_font(BFont* result)
+{
+	new(result) BFont(be_bold_font);
+}
+
+
+void
+mojobe_be_fixed_font(BFont* result)
+{
+	new(result) BFont(be_fixed_font);
+}

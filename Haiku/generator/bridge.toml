@@ -27,6 +27,10 @@ headers = [
 	"ScrollView.h",
 	"Alert.h",
 	"MessageRunner.h",
+	"Font.h",
+	"Region.h",
+	"Bitmap.h",
+	"Screen.h",
 ]
 constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
 
@@ -36,6 +40,10 @@ constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
 [values.BRect]
 [values.BPoint]
 [values.rgb_color]
+
+[values.font_height]
+[values.clipping_rect]
+[values.screen_id]
 
 [values.pattern]
 # uint8 data[8]: one register in C, and so a UInt64 in Mojo, where an array
@@ -52,6 +60,9 @@ mojo_fields = [["data", "UInt64"]]
 kind = "value"             # held in a Mojo value: its copy constructor and
                            # destructor copy three integers and do nothing
 init_check = "result"
+
+[classes.BFont]
+kind = "value"             # its copy copies fields; it has no destructor
 
 [classes.BHandler]
 kind = "owned"             # a looper borrows its handlers: ~BHandler leaves it
@@ -145,6 +156,16 @@ kind = "self-owning"
 hands_over = ["Go"]        # runs it, and it quits (deletes itself)
 destroy = "quit"
 
+[classes.BRegion]
+kind = "owned"
+
+[classes.BBitmap]
+kind = "owned"
+init_check = "InitCheck()"
+
+[classes.BScreen]
+kind = "owned"
+
 [classes.BMessageRunner]
 kind = "owned"
 init_check = "InitCheck()" # the constructors report only through InitCheck()
@@ -167,6 +188,7 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 "BSlider::BSlider" = ["message"]
 "BSlider::SetModificationMessage" = ["message"]
 "BScrollView::BScrollView" = ["target"]
+"BBitmap::AddChild" = ["view"]     # ~BBitmap deletes its window, and its views
 
 # Methods left out, and why. Also left out without being named here: what
 # uses a type the bridge does not carry yet (the manifest says which).
@@ -192,3 +214,8 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 "BView::ConvertFromParent" = ["point", "rect"]
 "BWindow::ConvertToScreen" = ["point", "rect"]
 "BWindow::ConvertFromScreen" = ["point", "rect"]
+
+# A `void*` result that is a buffer, and the method that says how long it is:
+# a Span of its bytes, borrowed from the object.
+[spans]
+"BBitmap::Bits" = "BitsLength"
