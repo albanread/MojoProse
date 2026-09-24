@@ -46,6 +46,12 @@ def _nonnull(pointer: _NPtr, method: StaticString) -> Int:
     return Int(pointer.value())
 
 
+def _address_of[T: AnyType](ref value: T) -> Int:
+    """The address of a value that holds a C++ object (a `BMessenger`), for
+    C: the value itself, not a copy."""
+    return Int(Pointer(to=value))
+
+
 def _ptr_from(address: Int) -> _NPtr:
     """The pointer C returned as an address; `None` for NULL."""
     if address == 0:

@@ -15,6 +15,7 @@ the classes Mojo types may stand behind, the hook traits and tables.
 
 from std.builtin.rebind import downcast
 from std.ffi import c_char, external_call
+from std.sys import align_of, size_of
 
 from ._core import (
     _FnPtr,
@@ -22,6 +23,7 @@ from ._core import (
     _NPtr,
     _Ptr,
     _addr,
+    _address_of,
     _char,
     _check,
     _destroy,
@@ -86,6 +88,220 @@ from ._constants import (
     B_TRACK_WHOLE_RECT,
     B_WILL_DRAW,
 )
+
+# ========================================================================== #
+# BMessenger
+# ========================================================================== #
+
+
+struct BMessenger(Equatable, ImplicitlyCopyable, Movable):
+    """A `BMessenger`, held in this value: C++ constructs it in these 24 bytes,
+    and it is copied as bytes and needs no destructor, as its own copy
+    constructor and destructor do."""
+
+    var _0: Int32
+    var _1: Int32
+    var _2: Int32
+    var _3: Int32
+    var _4: Int32
+    var _5: Int32
+
+    def __init__(out self, *, _zeroed: Bool):
+        """The bytes, all zero, for C++ to construct into."""
+        self._0 = 0
+        self._1 = 0
+        self._2 = 0
+        self._3 = 0
+        self._4 = 0
+        self._5 = 0
+
+    @staticmethod
+    def _zeroed() -> Self:
+        return Self(_zeroed=True)
+
+    def __init__(out self, var signature: String, team: Int32 = -1) raises:
+        """`BMessenger::BMessenger(const char* signature, team_id team, status_t* result)`."""
+        comptime assert size_of[Self]() == 24
+        comptime assert align_of[Self]() == 4
+        self = Self(_zeroed=True)
+        var _status = Int32(-1)
+        external_call["mojobe_BMessenger_new__charP_team_id_status_tP", NoneType](
+            _address_of(self),
+            signature.as_c_string_span(),
+            team,
+            Pointer(to=_status),
+        )
+        _ = signature^
+        _check(_status, "BMessenger")
+
+    def __init__(
+        out self,
+        handler: Some[_AsBHandler],
+        looper: BLooperRef[_] = BLooperRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`BMessenger::BMessenger(const BHandler* handler, const BLooper* looper, status_t* result)`."""
+        comptime assert size_of[Self]() == 24
+        comptime assert align_of[Self]() == 4
+        self = Self(_zeroed=True)
+        var _status = Int32(-1)
+        external_call["mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP", NoneType](
+            _address_of(self),
+            _addr(handler._as_BHandler()),
+            _addr(looper._as_BLooper()),
+            Pointer(to=_status),
+        )
+        _check(_status, "BMessenger")
+
+    def __init__(out self):
+        """`BMessenger::BMessenger()`."""
+        comptime assert size_of[Self]() == 24
+        comptime assert align_of[Self]() == 4
+        self = Self(_zeroed=True)
+        external_call["mojobe_BMessenger_new__void", NoneType](
+            _address_of(self),
+        )
+
+    def IsTargetLocal(self) -> Bool:
+        """`bool BMessenger::IsTargetLocal() const`."""
+        var _result = external_call["mojobe_BMessenger_IsTargetLocal", Bool](
+            _address_of(self),
+        )
+        return _result
+
+    def LockTarget(self) -> Bool:
+        """`bool BMessenger::LockTarget() const`."""
+        var _result = external_call["mojobe_BMessenger_LockTarget", Bool](
+            _address_of(self),
+        )
+        return _result
+
+    def LockTargetWithTimeout(self, timeout: Int64) raises:
+        """`status_t BMessenger::LockTargetWithTimeout(bigtime_t timeout) const`."""
+        var _result = external_call["mojobe_BMessenger_LockTargetWithTimeout", Int32](
+            _address_of(self),
+            timeout,
+        )
+        _check(_result, "BMessenger::LockTargetWithTimeout")
+
+    def SendMessage(
+        self,
+        command: UInt32,
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`status_t BMessenger::SendMessage(uint32 command, BHandler* replyTo) const`."""
+        var _result = external_call["mojobe_BMessenger_SendMessage__uint32_BHandlerP", Int32](
+            _address_of(self),
+            command,
+            _addr(replyTo._as_BHandler()),
+        )
+        _check(_result, "BMessenger::SendMessage")
+
+    def SendMessage(
+        self,
+        message: Some[_AsBMessage],
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+        timeout: Int64 = B_INFINITE_TIMEOUT,
+    ) raises:
+        """`status_t BMessenger::SendMessage(BMessage* message, BHandler* replyTo, bigtime_t timeout) const`."""
+        var _result = external_call["mojobe_BMessenger_SendMessage__BMessageP_BHandlerP_bigtime_t", Int32](
+            _address_of(self),
+            _addr(message._as_BMessage()),
+            _addr(replyTo._as_BHandler()),
+            timeout,
+        )
+        _check(_result, "BMessenger::SendMessage")
+
+    def SendMessage(
+        self,
+        message: Some[_AsBMessage],
+        replyTo: BMessenger,
+        timeout: Int64 = B_INFINITE_TIMEOUT,
+    ) raises:
+        """`status_t BMessenger::SendMessage(BMessage* message, BMessenger replyTo, bigtime_t timeout) const`."""
+        var _result = external_call["mojobe_BMessenger_SendMessage__BMessageP_BMessenger_bigtime_t", Int32](
+            _address_of(self),
+            _addr(message._as_BMessage()),
+            _address_of(replyTo),
+            timeout,
+        )
+        _check(_result, "BMessenger::SendMessage")
+
+    def SendMessage(self, command: UInt32, reply: Some[_AsBMessage]) raises:
+        """`status_t BMessenger::SendMessage(uint32 command, BMessage* reply) const`."""
+        var _result = external_call["mojobe_BMessenger_SendMessage__uint32_BMessageP", Int32](
+            _address_of(self),
+            command,
+            _addr(reply._as_BMessage()),
+        )
+        _check(_result, "BMessenger::SendMessage")
+
+    def SendMessage(
+        self,
+        message: Some[_AsBMessage],
+        reply: Some[_AsBMessage],
+        deliveryTimeout: Int64 = B_INFINITE_TIMEOUT,
+        replyTimeout: Int64 = B_INFINITE_TIMEOUT,
+    ) raises:
+        """`status_t BMessenger::SendMessage(BMessage* message, BMessage* reply, bigtime_t deliveryTimeout, bigtime_t replyTimeout) const`."""
+        var _result = external_call["mojobe_BMessenger_SendMessage__BMessageP_BMessageP_bigtime_t_bigtime_t", Int32](
+            _address_of(self),
+            _addr(message._as_BMessage()),
+            _addr(reply._as_BMessage()),
+            deliveryTimeout,
+            replyTimeout,
+        )
+        _check(_result, "BMessenger::SendMessage")
+
+    def SetTo(mut self, var signature: String, team: Int32 = -1) raises:
+        """`status_t BMessenger::SetTo(const char* signature, team_id team)`."""
+        var _result = external_call["mojobe_BMessenger_SetTo__charP_team_id", Int32](
+            _address_of(self),
+            signature.as_c_string_span(),
+            team,
+        )
+        _ = signature^
+        _check(_result, "BMessenger::SetTo")
+
+    def SetTo(
+        mut self,
+        handler: Some[_AsBHandler],
+        looper: BLooperRef[_] = BLooperRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`status_t BMessenger::SetTo(const BHandler* handler, const BLooper* looper)`."""
+        var _result = external_call["mojobe_BMessenger_SetTo__BHandlerP_BLooperP", Int32](
+            _address_of(self),
+            _addr(handler._as_BHandler()),
+            _addr(looper._as_BLooper()),
+        )
+        _check(_result, "BMessenger::SetTo")
+
+    def IsValid(self) -> Bool:
+        """`bool BMessenger::IsValid() const`."""
+        var _result = external_call["mojobe_BMessenger_IsValid", Bool](
+            _address_of(self),
+        )
+        return _result
+
+    def Team(self) -> Int32:
+        """`team_id BMessenger::Team() const`."""
+        var _result = external_call["mojobe_BMessenger_Team", Int32](
+            _address_of(self),
+        )
+        return _result
+
+    def HashValue(self) -> UInt32:
+        """`uint32 BMessenger::HashValue() const`."""
+        var _result = external_call["mojobe_BMessenger_HashValue", UInt32](
+            _address_of(self),
+        )
+        return _result
+
+    def __eq__(self, other: Self) -> Bool:
+        """`BMessenger::operator==`."""
+        return external_call["mojobe_BMessenger_equals", Bool](
+            _address_of(self),
+            _address_of(other),
+        )
 
 # ========================================================================== #
 # BHandler
@@ -203,35 +419,69 @@ trait _BHandlerMethods(_AsBHandler):
         )
         _check(_result, "BHandler::GetSupportedSuites")
 
+    def StartWatching(self, target: BMessenger, what: UInt32) raises:
+        """`status_t BHandler::StartWatching(BMessenger target, uint32 what)`."""
+        var _result = external_call["mojobe_BHandler_StartWatching__BMessenger_uint32", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StartWatching"),
+            _address_of(target),
+            what,
+        )
+        _check(_result, "BHandler::StartWatching")
+
     def StartWatching(self, observer: Some[_AsBHandler], what: UInt32) raises:
         """`status_t BHandler::StartWatching(BHandler* observer, uint32 what)`."""
-        var _result = external_call["mojobe_BHandler_StartWatching", Int32](
+        var _result = external_call["mojobe_BHandler_StartWatching__BHandlerP_uint32", Int32](
             _nonnull(self._as_BHandler(), "BHandler::StartWatching"),
             _addr(observer._as_BHandler()),
             what,
         )
         _check(_result, "BHandler::StartWatching")
 
+    def StartWatchingAll(self, target: BMessenger) raises:
+        """`status_t BHandler::StartWatchingAll(BMessenger target)`."""
+        var _result = external_call["mojobe_BHandler_StartWatchingAll__BMessenger", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StartWatchingAll"),
+            _address_of(target),
+        )
+        _check(_result, "BHandler::StartWatchingAll")
+
     def StartWatchingAll(self, observer: Some[_AsBHandler]) raises:
         """`status_t BHandler::StartWatchingAll(BHandler* observer)`."""
-        var _result = external_call["mojobe_BHandler_StartWatchingAll", Int32](
+        var _result = external_call["mojobe_BHandler_StartWatchingAll__BHandlerP", Int32](
             _nonnull(self._as_BHandler(), "BHandler::StartWatchingAll"),
             _addr(observer._as_BHandler()),
         )
         _check(_result, "BHandler::StartWatchingAll")
 
+    def StopWatching(self, target: BMessenger, what: UInt32) raises:
+        """`status_t BHandler::StopWatching(BMessenger target, uint32 what)`."""
+        var _result = external_call["mojobe_BHandler_StopWatching__BMessenger_uint32", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StopWatching"),
+            _address_of(target),
+            what,
+        )
+        _check(_result, "BHandler::StopWatching")
+
     def StopWatching(self, observer: Some[_AsBHandler], what: UInt32) raises:
         """`status_t BHandler::StopWatching(BHandler* observer, uint32 what)`."""
-        var _result = external_call["mojobe_BHandler_StopWatching", Int32](
+        var _result = external_call["mojobe_BHandler_StopWatching__BHandlerP_uint32", Int32](
             _nonnull(self._as_BHandler(), "BHandler::StopWatching"),
             _addr(observer._as_BHandler()),
             what,
         )
         _check(_result, "BHandler::StopWatching")
 
+    def StopWatchingAll(self, target: BMessenger) raises:
+        """`status_t BHandler::StopWatchingAll(BMessenger target)`."""
+        var _result = external_call["mojobe_BHandler_StopWatchingAll__BMessenger", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StopWatchingAll"),
+            _address_of(target),
+        )
+        _check(_result, "BHandler::StopWatchingAll")
+
     def StopWatchingAll(self, observer: Some[_AsBHandler]) raises:
         """`status_t BHandler::StopWatchingAll(BHandler* observer)`."""
-        var _result = external_call["mojobe_BHandler_StopWatchingAll", Int32](
+        var _result = external_call["mojobe_BHandler_StopWatchingAll__BHandlerP", Int32](
             _nonnull(self._as_BHandler(), "BHandler::StopWatchingAll"),
             _addr(observer._as_BHandler()),
         )
@@ -5189,6 +5439,15 @@ trait _BMessageMethods(_AsBMessage):
         )
         return _result
 
+    def ReturnAddress(self) -> BMessenger:
+        """`BMessenger BMessage::ReturnAddress() const`."""
+        var _result = BMessenger._zeroed()
+        external_call["mojobe_BMessage_ReturnAddress", NoneType](
+            _nonnull(self._as_BMessage(), "BMessage::ReturnAddress"),
+            _address_of(_result),
+        )
+        return _result
+
     def Previous(ref self) -> BMessageRef[origin_of(self)]:
         """`const BMessage* BMessage::Previous() const`."""
         var _result = external_call["mojobe_BMessage_Previous", Int](
@@ -5236,6 +5495,21 @@ trait _BMessageMethods(_AsBMessage):
             _nonnull(self._as_BMessage(), "BMessage::SendReply"),
             _addr(reply._as_BMessage()),
             _addr(replyTo._as_BHandler()),
+            timeout,
+        )
+        _check(_result, "BMessage::SendReply")
+
+    def SendReply(
+        self,
+        reply: Some[_AsBMessage],
+        replyTo: BMessenger,
+        timeout: Int64 = B_INFINITE_TIMEOUT,
+    ) raises:
+        """`status_t BMessage::SendReply(BMessage* reply, BMessenger replyTo, bigtime_t timeout)`."""
+        var _result = external_call["mojobe_BMessage_SendReply__BMessageP_BMessenger_bigtime_t", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::SendReply"),
+            _addr(reply._as_BMessage()),
+            _address_of(replyTo),
             timeout,
         )
         _check(_result, "BMessage::SendReply")
@@ -5541,6 +5815,16 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::AddColor")
+
+    def AddMessenger(self, var name: String, messenger: BMessenger) raises:
+        """`status_t BMessage::AddMessenger(const char* name, BMessenger messenger)`."""
+        var _result = external_call["mojobe_BMessage_AddMessenger", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::AddMessenger"),
+            name.as_c_string_span(),
+            _address_of(messenger),
+        )
+        _ = name^
+        _check(_result, "BMessage::AddMessenger")
 
     def AddMessage(self, var name: String, message: Some[_AsBMessage]) raises:
         """`status_t BMessage::AddMessage(const char* name, const BMessage* message)`."""
@@ -5961,6 +6245,35 @@ trait _BMessageMethods(_AsBMessage):
         _check(_result, "BMessage::FindColor")
         return value
 
+    def FindMessenger(self, var name: String) raises -> BMessenger:
+        """`status_t BMessage::FindMessenger(const char* name, BMessenger* messenger) const`."""
+        var messenger = BMessenger._zeroed()
+        var _result = external_call["mojobe_BMessage_FindMessenger__charP_BMessengerP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindMessenger"),
+            name.as_c_string_span(),
+            _address_of(messenger),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindMessenger")
+        return messenger
+
+    def FindMessenger(
+        self,
+        var name: String,
+        index: Int32,
+    ) raises -> BMessenger:
+        """`status_t BMessage::FindMessenger(const char* name, int32 index, BMessenger* messenger) const`."""
+        var messenger = BMessenger._zeroed()
+        var _result = external_call["mojobe_BMessage_FindMessenger__charP_int32_BMessengerP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindMessenger"),
+            name.as_c_string_span(),
+            index,
+            _address_of(messenger),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindMessenger")
+        return messenger
+
     def FindMessage(self, var name: String, message: Some[_AsBMessage]) raises:
         """`status_t BMessage::FindMessage(const char* name, BMessage* message) const`."""
         var _result = external_call["mojobe_BMessage_FindMessage__charP_BMessageP", Int32](
@@ -6343,6 +6656,32 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::ReplaceColor")
+
+    def ReplaceMessenger(self, var name: String, messenger: BMessenger) raises:
+        """`status_t BMessage::ReplaceMessenger(const char* name, BMessenger messenger)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceMessenger__charP_BMessenger", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceMessenger"),
+            name.as_c_string_span(),
+            _address_of(messenger),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceMessenger")
+
+    def ReplaceMessenger(
+        self,
+        var name: String,
+        index: Int32,
+        messenger: BMessenger,
+    ) raises:
+        """`status_t BMessage::ReplaceMessenger(const char* name, int32 index, BMessenger messenger)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceMessenger"),
+            name.as_c_string_span(),
+            index,
+            _address_of(messenger),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceMessenger")
 
     def ReplaceMessage(
         self,
@@ -7431,9 +7770,17 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
 
     def SetTargetForItems(self, target: Some[_AsBHandler]) raises:
         """`status_t BMenu::SetTargetForItems(BHandler* target)`."""
-        var _result = external_call["mojobe_BMenu_SetTargetForItems", Int32](
+        var _result = external_call["mojobe_BMenu_SetTargetForItems__BHandlerP", Int32](
             _nonnull(self._as_BMenu(), "BMenu::SetTargetForItems"),
             _addr(target._as_BHandler()),
+        )
+        _check(_result, "BMenu::SetTargetForItems")
+
+    def SetTargetForItems(self, messenger: BMessenger) raises:
+        """`status_t BMenu::SetTargetForItems(BMessenger messenger)`."""
+        var _result = external_call["mojobe_BMenu_SetTargetForItems__BMessenger", Int32](
+            _nonnull(self._as_BMenu(), "BMenu::SetTargetForItems"),
+            _address_of(messenger),
         )
         _check(_result, "BMenu::SetTargetForItems")
 
@@ -8003,10 +8350,18 @@ trait _BMenuItemMethods(_AsBMenuItem):
         looper: BLooperRef[_] = BLooperRef[ImmUntrackedOrigin](),
     ) raises:
         """`status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)`."""
-        var _result = external_call["mojobe_BMenuItem_SetTarget", Int32](
+        var _result = external_call["mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP", Int32](
             _nonnull(self._as_BMenuItem(), "BMenuItem::SetTarget"),
             _addr(handler._as_BHandler()),
             _addr(looper._as_BLooper()),
+        )
+        _check(_result, "BInvoker::SetTarget")
+
+    def SetTarget(self, messenger: BMessenger) raises:
+        """`status_t BInvoker::SetTarget(BMessenger messenger)`."""
+        var _result = external_call["mojobe_BMenuItem_SetTarget__BMessenger", Int32](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::SetTarget"),
+            _address_of(messenger),
         )
         _check(_result, "BInvoker::SetTarget")
 
@@ -8023,6 +8378,15 @@ trait _BMenuItemMethods(_AsBMenuItem):
             _nonnull(self._as_BMenuItem(), "BMenuItem::Target"),
         )
         return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def Messenger(self) -> BMessenger:
+        """`BMessenger BInvoker::Messenger() const`."""
+        var _result = BMessenger._zeroed()
+        external_call["mojobe_BMenuItem_Messenger", NoneType](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::Messenger"),
+            _address_of(_result),
+        )
+        return _result
 
     def SetHandlerForReply(self, handler: Some[_AsBHandler]) raises:
         """`status_t BInvoker::SetHandlerForReply(BHandler* handler)`."""

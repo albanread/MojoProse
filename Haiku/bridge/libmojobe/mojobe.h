@@ -18,6 +18,7 @@
 
 #include <Handler.h>
 #include <Looper.h>
+#include <Messenger.h>
 #include <Application.h>
 #include <Window.h>
 #include <View.h>
@@ -176,6 +177,86 @@ struct mojobe_BView_hooks {
 
 
 
+// #pragma mark - BMessenger
+
+
+// bool BMessenger::operator==(const BMessenger& other) const
+bool mojobe_BMessenger_equals(const BMessenger* self, const BMessenger* other);
+
+// bool BMessenger::IsTargetLocal() const
+bool mojobe_BMessenger_IsTargetLocal(BMessenger* self);
+
+// bool BMessenger::LockTarget() const
+bool mojobe_BMessenger_LockTarget(BMessenger* self);
+
+// status_t BMessenger::LockTargetWithTimeout(bigtime_t timeout) const
+status_t mojobe_BMessenger_LockTargetWithTimeout(BMessenger* self,
+	bigtime_t a_timeout);
+
+// status_t BMessenger::SendMessage(uint32 command, BHandler* replyTo) const
+status_t mojobe_BMessenger_SendMessage__uint32_BHandlerP(BMessenger* self,
+	uint32 a_command,
+	BHandler* a_replyTo);
+
+// status_t BMessenger::SendMessage(BMessage* message, BHandler* replyTo, bigtime_t timeout) const
+status_t mojobe_BMessenger_SendMessage__BMessageP_BHandlerP_bigtime_t(BMessenger* self,
+	BMessage* a_message,
+	BHandler* a_replyTo,
+	bigtime_t a_timeout);
+
+// status_t BMessenger::SendMessage(BMessage* message, BMessenger replyTo, bigtime_t timeout) const
+status_t mojobe_BMessenger_SendMessage__BMessageP_BMessenger_bigtime_t(BMessenger* self,
+	BMessage* a_message,
+	const BMessenger* a_replyTo,
+	bigtime_t a_timeout);
+
+// status_t BMessenger::SendMessage(uint32 command, BMessage* reply) const
+status_t mojobe_BMessenger_SendMessage__uint32_BMessageP(BMessenger* self,
+	uint32 a_command,
+	BMessage* a_reply);
+
+// status_t BMessenger::SendMessage(BMessage* message, BMessage* reply, bigtime_t deliveryTimeout, bigtime_t replyTimeout) const
+status_t mojobe_BMessenger_SendMessage__BMessageP_BMessageP_bigtime_t_bigtime_t(BMessenger* self,
+	BMessage* a_message,
+	BMessage* a_reply,
+	bigtime_t a_deliveryTimeout,
+	bigtime_t a_replyTimeout);
+
+// status_t BMessenger::SetTo(const char* signature, team_id team)
+status_t mojobe_BMessenger_SetTo__charP_team_id(BMessenger* self,
+	const char* a_signature,
+	team_id a_team);
+
+// status_t BMessenger::SetTo(const BHandler* handler, const BLooper* looper)
+status_t mojobe_BMessenger_SetTo__BHandlerP_BLooperP(BMessenger* self,
+	BHandler* a_handler,
+	BLooper* a_looper);
+
+// bool BMessenger::IsValid() const
+bool mojobe_BMessenger_IsValid(BMessenger* self);
+
+// team_id BMessenger::Team() const
+int32 mojobe_BMessenger_Team(BMessenger* self);
+
+// uint32 BMessenger::HashValue() const
+uint32 mojobe_BMessenger_HashValue(BMessenger* self);
+
+// BMessenger::BMessenger(const char* signature, team_id team, status_t* result)
+void mojobe_BMessenger_new__charP_team_id_status_tP(BMessenger* self,
+	const char* a_signature,
+	team_id a_team,
+	status_t* a_result);
+
+// BMessenger::BMessenger(const BHandler* handler, const BLooper* looper, status_t* result)
+void mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP(BMessenger* self,
+	BHandler* a_handler,
+	BLooper* a_looper,
+	status_t* a_result);
+
+// BMessenger::BMessenger()
+void mojobe_BMessenger_new__void(BMessenger* self);
+
+
 // #pragma mark - BHandler
 
 
@@ -221,21 +302,41 @@ BHandler* mojobe_BHandler_ResolveSpecifier(BHandler* self,
 // status_t BHandler::GetSupportedSuites(BMessage* data)
 status_t mojobe_BHandler_GetSupportedSuites(BHandler* self, BMessage* a_data);
 
+// status_t BHandler::StartWatching(BMessenger target, uint32 what)
+status_t mojobe_BHandler_StartWatching__BMessenger_uint32(BHandler* self,
+	const BMessenger* a_target,
+	uint32 a_what);
+
 // status_t BHandler::StartWatching(BHandler* observer, uint32 what)
-status_t mojobe_BHandler_StartWatching(BHandler* self,
+status_t mojobe_BHandler_StartWatching__BHandlerP_uint32(BHandler* self,
 	BHandler* a_observer,
 	uint32 a_what);
+
+// status_t BHandler::StartWatchingAll(BMessenger target)
+status_t mojobe_BHandler_StartWatchingAll__BMessenger(BHandler* self,
+	const BMessenger* a_target);
 
 // status_t BHandler::StartWatchingAll(BHandler* observer)
-status_t mojobe_BHandler_StartWatchingAll(BHandler* self, BHandler* a_observer);
+status_t mojobe_BHandler_StartWatchingAll__BHandlerP(BHandler* self,
+	BHandler* a_observer);
+
+// status_t BHandler::StopWatching(BMessenger target, uint32 what)
+status_t mojobe_BHandler_StopWatching__BMessenger_uint32(BHandler* self,
+	const BMessenger* a_target,
+	uint32 a_what);
 
 // status_t BHandler::StopWatching(BHandler* observer, uint32 what)
-status_t mojobe_BHandler_StopWatching(BHandler* self,
+status_t mojobe_BHandler_StopWatching__BHandlerP_uint32(BHandler* self,
 	BHandler* a_observer,
 	uint32 a_what);
 
+// status_t BHandler::StopWatchingAll(BMessenger target)
+status_t mojobe_BHandler_StopWatchingAll__BMessenger(BHandler* self,
+	const BMessenger* a_target);
+
 // status_t BHandler::StopWatchingAll(BHandler* observer)
-status_t mojobe_BHandler_StopWatchingAll(BHandler* self, BHandler* a_observer);
+status_t mojobe_BHandler_StopWatchingAll__BHandlerP(BHandler* self,
+	BHandler* a_observer);
 
 // void BHandler::SendNotices(uint32 what, const BMessage* notice)
 void mojobe_BHandler_SendNotices(BHandler* self,
@@ -1688,6 +1789,9 @@ bool mojobe_BMessage_IsSourceWaiting(BMessage* self);
 // bool BMessage::IsSourceRemote() const
 bool mojobe_BMessage_IsSourceRemote(BMessage* self);
 
+// BMessenger BMessage::ReturnAddress() const
+void mojobe_BMessage_ReturnAddress(BMessage* self, BMessenger* a_result);
+
 // const BMessage* BMessage::Previous() const
 const BMessage* mojobe_BMessage_Previous(BMessage* self);
 
@@ -1707,6 +1811,12 @@ status_t mojobe_BMessage_SendReply__uint32_BHandlerP(BMessage* self,
 status_t mojobe_BMessage_SendReply__BMessageP_BHandlerP_bigtime_t(BMessage* self,
 	BMessage* a_reply,
 	BHandler* a_replyTo,
+	bigtime_t a_timeout);
+
+// status_t BMessage::SendReply(BMessage* reply, BMessenger replyTo, bigtime_t timeout)
+status_t mojobe_BMessage_SendReply__BMessageP_BMessenger_bigtime_t(BMessage* self,
+	BMessage* a_reply,
+	const BMessenger* a_replyTo,
 	bigtime_t a_timeout);
 
 // status_t BMessage::SendReply(uint32 command, BMessage* replyToReply)
@@ -1846,6 +1956,11 @@ status_t mojobe_BMessage_AddDouble(BMessage* self,
 status_t mojobe_BMessage_AddColor(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color a_value);
+
+// status_t BMessage::AddMessenger(const char* name, BMessenger messenger)
+status_t mojobe_BMessage_AddMessenger(BMessage* self,
+	const char* a_name,
+	const BMessenger* a_messenger);
 
 // status_t BMessage::AddMessage(const char* name, const BMessage* message)
 status_t mojobe_BMessage_AddMessage(BMessage* self,
@@ -2031,6 +2146,17 @@ status_t mojobe_BMessage_FindColor__charP_int32_rgb_colorP(BMessage* self,
 	int32 a_index,
 	mojobe_rgb_color* a_value);
 
+// status_t BMessage::FindMessenger(const char* name, BMessenger* messenger) const
+status_t mojobe_BMessage_FindMessenger__charP_BMessengerP(BMessage* self,
+	const char* a_name,
+	BMessenger* a_messenger);
+
+// status_t BMessage::FindMessenger(const char* name, int32 index, BMessenger* messenger) const
+status_t mojobe_BMessage_FindMessenger__charP_int32_BMessengerP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	BMessenger* a_messenger);
+
 // status_t BMessage::FindMessage(const char* name, BMessage* message) const
 status_t mojobe_BMessage_FindMessage__charP_BMessageP(BMessage* self,
 	const char* a_name,
@@ -2206,6 +2332,17 @@ status_t mojobe_BMessage_ReplaceColor__charP_int32_rgb_color(BMessage* self,
 	const char* a_name,
 	int32 a_index,
 	mojobe_rgb_color a_value);
+
+// status_t BMessage::ReplaceMessenger(const char* name, BMessenger messenger)
+status_t mojobe_BMessage_ReplaceMessenger__charP_BMessenger(BMessage* self,
+	const char* a_name,
+	const BMessenger* a_messenger);
+
+// status_t BMessage::ReplaceMessenger(const char* name, int32 index, BMessenger messenger)
+status_t mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	const BMessenger* a_messenger);
 
 // status_t BMessage::ReplaceMessage(const char* name, const BMessage* message)
 status_t mojobe_BMessage_ReplaceMessage__charP_BMessageP(BMessage* self,
@@ -2628,7 +2765,12 @@ BMenuItem* mojobe_BMenu_FindItem__uint32(BMenu* self, uint32 a_command);
 BMenuItem* mojobe_BMenu_FindItem__charP(BMenu* self, const char* a_name);
 
 // status_t BMenu::SetTargetForItems(BHandler* target)
-status_t mojobe_BMenu_SetTargetForItems(BMenu* self, BHandler* a_target);
+status_t mojobe_BMenu_SetTargetForItems__BHandlerP(BMenu* self,
+	BHandler* a_target);
+
+// status_t BMenu::SetTargetForItems(BMessenger messenger)
+status_t mojobe_BMenu_SetTargetForItems__BMessenger(BMenu* self,
+	const BMessenger* a_messenger);
 
 // void BMenu::SetEnabled(bool enable)
 void mojobe_BMenu_SetEnabled(BMenu* self, bool a_enable);
@@ -2808,15 +2950,22 @@ BMessage* mojobe_BMenuItem_Message(BMenuItem* self);
 uint32 mojobe_BMenuItem_Command(BMenuItem* self);
 
 // status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
-status_t mojobe_BMenuItem_SetTarget(BMenuItem* self,
+status_t mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP(BMenuItem* self,
 	BHandler* a_handler,
 	BLooper* a_looper);
+
+// status_t BInvoker::SetTarget(BMessenger messenger)
+status_t mojobe_BMenuItem_SetTarget__BMessenger(BMenuItem* self,
+	const BMessenger* a_messenger);
 
 // bool BInvoker::IsTargetLocal() const
 bool mojobe_BMenuItem_IsTargetLocal(BMenuItem* self);
 
 // BHandler* BInvoker::Target(BLooper** _looper) const
 BHandler* mojobe_BMenuItem_Target(BMenuItem* self);
+
+// BMessenger BInvoker::Messenger() const
+void mojobe_BMenuItem_Messenger(BMenuItem* self, BMessenger* a_result);
 
 // status_t BInvoker::SetHandlerForReply(BHandler* handler)
 status_t mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self,

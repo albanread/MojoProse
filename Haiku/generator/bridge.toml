@@ -7,6 +7,7 @@
 headers = [
 	"Handler.h",
 	"Looper.h",
+	"Messenger.h",
 	"Application.h",
 	"Window.h",
 	"View.h",
@@ -29,10 +30,17 @@ constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
 # of bytes would not be laid out for C.
 mojo_fields = [["data", "UInt64"]]
 
-# Classes. kind: "owned" -- Mojo deletes it unless something adopts it;
+# Classes. kind: "value" -- held in a Mojo value, C++ constructing it in
+# place, for classes whose copy and destructor do no more than copy bytes;
+# "owned" -- Mojo deletes it unless something adopts it;
 # "self-owning" -- handed to the system by one of `hands_over`, and deleted
 # otherwise by `destroy`. shadow: Mojo types may stand behind it, with these
 # hooks (the Be Book's hook functions).
+[classes.BMessenger]
+kind = "value"             # held in a Mojo value: its copy constructor and
+                           # destructor copy three integers and do nothing
+init_check = "result"
+
 [classes.BHandler]
 kind = "owned"             # a looper borrows its handlers: ~BHandler leaves it
 shadow = true

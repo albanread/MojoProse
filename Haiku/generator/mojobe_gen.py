@@ -589,6 +589,14 @@ class Bridge:
         base = ctype.dbase
         if base == "void" and not ctype.pointers:
             return "void", None
+        held = self.value_class(ctype)
+        if held:
+            # a class held in a Mojo value: crosses by address
+            if not ctype.pointers and (not ctype.reference or ctype.const):
+                return "valueobj", held
+            if len(ctype.pointers) == 1:
+                return ("valueobjptr" if ctype.const else "outvalueobj"), held
+            return "unknown", None
         if not ctype.pointers:
             if base == "char":
                 return "char", None
@@ -618,6 +626,14 @@ class Bridge:
         if len(ctype.pointers) == 2 and base == "char" and ctype.const:
             return "outcstring", None
         return "unknown", None
+
+    def value_class(self, ctype):
+        """The class a type names, if it is held in a Mojo value (kind
+        "value": its copy and destructor do nothing more than copy bytes)."""
+        for name in (ctype.base, ctype.dbase):
+            if self.classes.get(name, {}).get("kind") == "value":
+                return name
+        return None
 
     def constant_type(self, name):
         if name not in self.constants:
@@ -758,7 +774,7 @@ class Bridge:
             rkind, rdetail = self.classify(method.result)
             if rkind == "object" and method.result.reference:
                 rkind = "objectptr"
-            if rkind in ("unknown", "object") or rkind.startswith("out"):
+            if rkind in ("unknown", "object", "valueobjptr") or rkind.startswith("out"):
                 raise Unbridged("result: %s is not bridged" % method.result.qual)
             if rkind == "value" and method.result.pointers:
                 raise Unbridged("result: pointer to a value")
@@ -844,6 +860,12 @@ class Emitter:
             return "%s* %s" % (detail, name), name
         if kind == "outcstring":
             return "const char** %s" % name, name
+        if kind == "valueobj":
+            return "const %s* %s" % (detail, name), "*" + name
+        if kind == "valueobjptr":
+            return "const %s* %s" % (detail, name), name
+        if kind == "outvalueobj":
+            return "%s* %s" % (detail, name), name
         raise AssertionError(kind)
 
     def c_result(self, result):
@@ -863,6 +885,8 @@ class Emitter:
                 detail if kind == "enum" else _c_prim(detail))
         if kind == "objectptr":
             return ("const %s*" if result[2] else "%s*") % detail
+        if kind == "valueobj":
+            return "void"
         raise AssertionError(kind)
 
     # ---- Mojo side helpers ----------------------------------------------------
@@ -893,8 +917,13 @@ class Emitter:
             if kind == "outcstring":
                 return (None, "Pointer(to=%s_address)" % name,
                         ["var %s_address = 0" % name], [])
+            if kind == "outvalueobj":
+                return (None, "_address_of(%s)" % name,
+                        ["var %s = %s._zeroed()" % (name, detail)], [])
         if kind in ("prim", "enum", "value"):
             return "%s: %s%s" % (name, self.b.mojo_scalar(kind, detail), suffix), name, [], []
+        if kind in ("valueobj", "valueobjptr"):
+            return "%s: %s" % (name, detail), "_address_of(%s)" % name, [], []
         if kind == "char":
             return "%s: String%s" % (name, suffix), "_char(%s)" % name, [], []
         if kind == "cstring":
@@ -944,6 +973,9 @@ class Emitter:
             return "String", "Int", "_string_from(%s)"
         if kind == "char":
             return "String", "c_char", "_string_from_char(%s)"
+        if kind == "valueobj":
+            # constructed by C++ in a value Mojo provides
+            return detail, "NoneType", "valueobj"
         if kind == "objectptr":
             # borrowed from what it was got from, which it keeps alive
             return ("%sRef[origin_of(self)]" % detail, "Int",
@@ -952,8 +984,11 @@ class Emitter:
 
     # ---- one method -------------------------------------------------------------
 
-    def emit_method(self, info, cls, entry_name, self_expr, indent, trait=True):
-        """C prototype, C++ entry point, and the Mojo method body."""
+    def emit_method(self, info, cls, entry_name, self_expr, indent, trait=True,
+                    held=False):
+        """C prototype, C++ entry point, and the Mojo method body. `held`:
+        `cls` is held in a Mojo value, whose non-const methods take `mut
+        self`."""
         method = info["method"]
         params = info["params"]
         c_params = ["%s* self" % cls]
@@ -981,7 +1016,11 @@ class Emitter:
         body = []
         body.extend(pre_c)
         kind = result[0]
-        if kind == "void":
+        if kind == "valueobj":
+            c_params.append("%s* a_result" % result[1])
+            body.append("new(a_result) %s(%s);" % (result[1], call))
+            body.extend(post_c)
+        elif kind == "void":
             body.append(call + ";")
             body.extend(post_c)
         else:
@@ -1019,6 +1058,10 @@ class Emitter:
                     outs.append((entry["detail"], name))
         rtype, call_type, convert = self.mojo_result(result)
         raises = convert == "status"
+        if convert == "valueobj":
+            pre.insert(0, "var _result = %s._zeroed()" % rtype)
+            m_args.append("_address_of(_result)")
+            convert = None
         returned = []
         if rtype is not None:
             returned.append((rtype, None))
@@ -1032,6 +1075,8 @@ class Emitter:
         # a reference result borrows from `self`, so `self` must be a
         # reference too, even for a register-passable Self
         self_decl = "ref self" if result[0] == "objectptr" else "self"
+        if held and not method.const:
+            self_decl = "mut self"
         head = "def %s(%s)%s%s:" % (
             mojo_name(method.name),
             ", ".join([self_decl] + m_params),
@@ -1042,10 +1087,8 @@ class Emitter:
         lines.extend("    " + l for l in pre)
         call_text = 'external_call["%s", %s](%s)' % (
             entry_name, call_type, ", ".join(m_args))
-        if rtype is None and not raises:
+        if (rtype is None and not raises) or call_type == "NoneType":
             lines.append("    " + call_text)
-        elif raises:
-            lines.append("    var _result = " + call_text)
         else:
             lines.append("    var _result = " + call_text)
         lines.extend("    " + l for l in post)
@@ -1144,7 +1187,190 @@ class Emitter:
                 return True
         return False
 
+    def emit_value_class(self, cls):
+        """A class held in a Mojo value (kind "value"): C++ constructs it in
+        the value's bytes and its methods take the value's address."""
+        self.mark(cls)
+        conf = self.b.classes[cls]
+        record = self.model.records[cls]
+        manifest = self.manifest.setdefault(cls, [])
+        size, align, _ = self.b.layouts[cls]
+        field_type = {1: "UInt8", 2: "UInt16", 4: "Int32", 8: "Int64"}[align]
+        fields = ["_%d" % i for i in range(size // align)]
+        method_lines = []
+        equals = False
+        groups = {}
+        for m in record.members:
+            if m.kind != "CXXMethodDecl" or m.access != "public" \
+                    or m.implicit or m.deleted:
+                continue
+            if m.name == "operator==" and len(m.params) == 1 \
+                    and self.b.value_class(m.params[0].type) == cls:
+                entry = "mojobe_%s_equals" % cls
+                self.add_entry("bool", entry, ["const %s* self" % cls,
+                                               "const %s* other" % cls],
+                               ["return *self == *other;"], m.cxx())
+                equals = True
+                manifest.append((m.cxx(), "included", entry + ", as __eq__"))
+                continue
+            if m.name.startswith("operator"):
+                manifest.append((m.cxx(), "skipped", "operator"))
+                continue
+            if m.static:
+                manifest.append((m.cxx(), "skipped", "static"))
+                continue
+            try:
+                info = self.b.map_method(m, cls)
+            except Unbridged as why:
+                manifest.append((m.cxx(), "skipped", str(why)))
+                continue
+            groups.setdefault(m.name, []).append(info)
+        mine = {}
+        for name, infos in groups.items():
+            for info in infos:
+                m = info["method"]
+                signature = self.signature(info)
+                if any(self.ambiguous(signature, other)
+                       for other in mine.get(name, [])):
+                    manifest.append((m.cxx(), "skipped",
+                                     "a call would match another overload too"))
+                    continue
+                tag = ""
+                if len(infos) > 1:
+                    tag = "__" + type_tag([e for e in info["params"]
+                                           if e["role"] not in ("null",)])
+                entry_name = "mojobe_%s_%s%s" % (cls, name, tag)
+                try:
+                    lines, _ = self.emit_method(info, cls, entry_name,
+                                                "_address_of(self)", "    ",
+                                                held=True)
+                except Unbridged as why:
+                    manifest.append((m.cxx(), "skipped", str(why)))
+                    continue
+                mine.setdefault(name, []).append(signature)
+                method_lines.append(lines)
+                manifest.append((m.cxx(), "included", entry_name))
+        # constructors
+        ctor_infos = []
+        for m in record.members:
+            if m.kind != "CXXConstructorDecl" or m.access != "public" \
+                    or m.implicit or m.deleted:
+                continue
+            if any(self.b.value_class(p.type) == cls for p in m.params):
+                manifest.append((m.cxx(), "skipped", "copy constructor: Mojo copies"))
+                continue
+            try:
+                ctor_infos.append(self.b.map_method(m, cls, is_ctor=True))
+            except Unbridged as why:
+                manifest.append((m.cxx(), "skipped", str(why)))
+        ctor_infos.sort(key=lambda info: not any(
+            e["role"] == "initcheck" for e in info["params"]))
+        kept, ctor_lines = [], []
+        for info in ctor_infos:
+            m = info["method"]
+            signature = self.signature(info)
+            if any(self.ambiguous(signature, other) for other in kept):
+                manifest.append((m.cxx(), "skipped",
+                                 "a call would match another constructor too"))
+                continue
+            kept.append(signature)
+            ctor_lines.append(self.value_ctor(cls, info, size, align,
+                                              len(ctor_infos) > 1))
+        self.write_value_class(cls, conf, size, align, field_type, fields,
+                               ctor_lines, method_lines, equals)
+
+    def value_ctor(self, cls, info, size, align, overloaded):
+        m = info["method"]
+        check = self.b.classes[cls].get("init_check")
+        checks = any(e["role"] == "initcheck" for e in info["params"])
+        tag = ""
+        if overloaded:
+            tag = "__" + type_tag([e for e in info["params"] if e["role"] != "null"])
+        entry = "mojobe_%s_new%s" % (cls, tag)
+        c_params, c_args = ["%s* self" % cls], []
+        for e in info["params"]:
+            decl, arg = self.c_param(e)
+            if decl:
+                c_params.append(decl)
+            c_args.append("&status" if checks and arg == "a_" + str(check) else arg)
+        if checks:
+            body = ["status_t status = B_NO_MEMORY;",
+                    "new(self) %s(%s);" % (cls, ", ".join(c_args)),
+                    "if (a_%s != NULL)" % check,
+                    "\t*a_%s = status;" % check]
+        else:
+            body = ["new(self) %s(%s);" % (cls, ", ".join(c_args))]
+        self.add_entry("void", entry, c_params, body, m.cxx())
+        self.manifest[cls].append((m.cxx(), "included", entry))
+        params, args, pre, post = [], ["_address_of(self)"], [], []
+        for e in info["params"]:
+            decl, arg, before, after = self.mojo_param(e)
+            if decl:
+                params.append(decl)
+            if arg is not None:
+                args.append(arg)
+            pre.extend(before)
+            post.extend(after)
+        lines = ["def __init__(%s)%s:" % (", ".join(["out self"] + params),
+                                         " raises" if checks else ""),
+                 '    """`%s`."""' % m.cxx().replace("`", "'"),
+                 "    comptime assert size_of[Self]() == %d" % size,
+                 "    comptime assert align_of[Self]() == %d" % align,
+                 "    self = Self(_zeroed=True)"]
+        lines.extend("    " + l for l in pre)
+        lines.append('    external_call["%s", NoneType](%s)' % (entry, ", ".join(args)))
+        lines.extend("    " + l for l in post)
+        if checks:
+            lines.append('    _check(_status, "%s")' % cls)
+        return lines
+
+    def write_value_class(self, cls, conf, size, align, field_type, fields,
+                          ctor_lines, method_lines, equals):
+        out = self.mojo
+        out.append("")
+        out.append("# " + "=" * 74 + " #")
+        out.append("# %s" % cls)
+        out.append("# " + "=" * 74 + " #")
+        out.append("")
+        out.append("")
+        traits = ["ImplicitlyCopyable", "Movable"]
+        if equals:
+            traits.insert(0, "Equatable")
+        out.append("struct %s(%s):" % (cls, ", ".join(traits)))
+        out.append('    """A `%s`, held in this value: C++ constructs it in these %d bytes,'
+                   % (cls, size))
+        out.append("    and it is copied as bytes and needs no destructor, as its own copy")
+        out.append('    constructor and destructor do."""')
+        out.append("")
+        for field in fields:
+            out.append("    var %s: %s" % (field, field_type))
+        out.append("")
+        out.append("    def __init__(out self, *, _zeroed: Bool):")
+        out.append('        """The bytes, all zero, for C++ to construct into."""')
+        for field in fields:
+            out.append("        self.%s = 0" % field)
+        out.append("")
+        out.append("    @staticmethod")
+        out.append("    def _zeroed() -> Self:")
+        out.append("        return Self(_zeroed=True)")
+        for lines in ctor_lines + method_lines:
+            out.append("")
+            out.extend("    " + l for l in lines)
+        if equals:
+            out.append("")
+            out.append("    def __eq__(self, other: Self) -> Bool:")
+            out.append('        """`%s::operator==`."""' % cls)
+            out.append('        return external_call["mojobe_%s_equals", Bool]('
+                       "_address_of(self), _address_of(other))" % cls)
+        snippet = SNIPPETS / ("%s.mojo" % cls)
+        if snippet.exists():
+            out.append("")
+            out.extend(("    " + l if l.strip() else "")
+                       for l in snippet.read_text().rstrip("\n").split("\n"))
+
     def emit_class(self, cls):
+        if self.b.classes[cls].get("kind") == "value":
+            return self.emit_value_class(cls)
         self.mark(cls)
         conf = self.b.classes[cls]
         record = self.model.records[cls]
@@ -2212,9 +2438,11 @@ def write_api(emitter, bridge):
            "the classes Mojo types may stand behind, the hook traits and tables.",
            '"""', "",
            "from std.builtin.rebind import downcast",
-           "from std.ffi import c_char, external_call", "",
+           "from std.ffi import c_char, external_call",
+           "from std.sys import align_of, size_of", "",
            "from ._core import (",
-           "    _FnPtr,", "    _HookCall,", "    _NPtr,", "    _Ptr,", "    _addr,", "    _char,", "    _check,",
+           "    _FnPtr,", "    _HookCall,", "    _NPtr,", "    _Ptr,", "    _addr,",
+           "    _address_of,", "    _char,", "    _check,",
            "    _destroy,", "    _fn_ptr,", "    _nonnull,", "    _ptr_from,", "    _state_at,",
            "    _string_from,", "    _string_from_char,", "    _to_heap,", "    _type_tag,", ")",
            "from ._values import _check_layouts"]
@@ -2259,7 +2487,8 @@ def write_init(emitter, bridge, constants):
            "from ._api import ("]
     for cls in bridge.classes:
         out.append("    %s," % cls)
-        out.append("    %sRef," % cls)
+        if bridge.classes[cls].get("kind") != "value":
+            out.append("    %sRef," % cls)
     out.append(")")
     out.append("from ._constants import (")
     out.extend("    %s," % n for n in constants)
@@ -2326,6 +2555,8 @@ def main():
             macro_names.append(match.group(1))
     found = probe_each(clang, includes, names + sorted(macro_names))
     values = [(v, [f[0] for f in model.records[v].fields]) for v in config.get("values", {})]
+    values += [(c, []) for c, conf in config.get("classes", {}).items()
+               if conf.get("kind") == "value"]
     constants, layouts = probe(clang, includes, sorted(found), values)
 
     bridge = Bridge(model, config, constants, layouts)

@@ -10,12 +10,13 @@
 """The Haiku API for Mojo programs on Prose, through libmojobe
 (Haiku/docs/bridge-design.md). Link programs with `-lmojobe -lbe`.
 
-Generated from the Haiku headers for: BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem.
+Generated from the Haiku headers for: BMessenger, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem.
 Haiku/bridge/MANIFEST.md lists every method, and what is left out and why."""
 
 from ._core import fourcc
 from ._values import BRect, BPoint, rgb_color, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS
 from ._api import (
+    BMessenger,
     BHandler,
     BHandlerRef,
     BLooper,
