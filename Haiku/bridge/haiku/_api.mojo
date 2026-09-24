@@ -14845,11 +14845,11 @@ struct BAlertRef[origin: ImmOrigin](
         )
         return _result
 
-    def Go(self, invoker: Some[_AsBInvoker]) raises:
+    def Go(self, var invoker: BInvoker) raises:
         """`status_t BAlert::Go(BInvoker* invoker)`."""
         var _result = external_call["mojobe_BAlert_Go__BInvokerP", Int32](
             _nonnull(self._as_BAlert(), "BAlert::Go"),
-            _addr(invoker._as_BInvoker()),
+            invoker^._adopt(),
         )
         _check(_result, "BAlert::Go")
 
@@ -14977,11 +14977,11 @@ struct BAlert(Movable, _BAlertMethods):
         )
         return _result
 
-    def Go(deinit self, invoker: Some[_AsBInvoker]) raises:
+    def Go(deinit self, var invoker: BInvoker) raises:
         """`status_t BAlert::Go(BInvoker* invoker)`."""
         var _result = external_call["mojobe_BAlert_Go__BInvokerP", Int32](
             _nonnull(self._ptr, "BAlert::Go"),
-            _addr(invoker._as_BInvoker()),
+            invoker^._adopt(),
         )
         _check(_result, "BAlert::Go")
 

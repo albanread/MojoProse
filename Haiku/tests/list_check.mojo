@@ -16,7 +16,8 @@ Build on Prose, as Dots is built:
         -o list_check -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
 """
 
-from haiku import BApplication, BListView, BListViewRef, BRect, BStringItem
+from haiku import BApplication, BListView, BListViewRef, BRect, BScrollView
+from haiku import BStringItem
 from haiku.hooks import ListViewSelectionChanged
 
 
@@ -70,6 +71,11 @@ def main() raises:
                  not list.AddItem(BStringItem("lost"), 9))
     _ = removed^  # Mojo deletes the item it was given back
     _ = list^     # the list deletes the two items left
+
+    var scroll = BScrollView("scroll", BListView("inner"), 0, False, True)
+    checks.check("a BScrollView adopts its target",
+                 scroll.Target().Name() == "inner")
+    _ = scroll^
 
     var picker = BListView(BRect(0, 0, 99, 99), "picker", Picker())
     for label in ["red", "green", "blue"]:

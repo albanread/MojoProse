@@ -20,6 +20,7 @@ from std.ffi import external_call
 from std.time import sleep
 
 from haiku import BLooper, BLooperRef, BMessage, BMessageRef, BMessenger
+from haiku import BMessageRunner
 from haiku import B_BAD_PORT_ID, B_BAD_VALUE, B_INFINITE_TIMEOUT
 from haiku import B_QUIT_REQUESTED
 from haiku import fourcc, status_of
@@ -122,6 +123,15 @@ def main() raises:
     messenger.SendMessage(BMessage(MSG_ASK), again, B_INFINITE_TIMEOUT, 2000000)
     checks.check("the block's end unlocks the looper",
                  again.FindInt32("ticks") == 5)
+
+    # A message runner: three ticks, 10 ms apart, sent by the system.
+    var runner = BMessageRunner(messenger, BMessage(MSG_TICK), 10000, 3)
+    sleep(0.3)
+    var later = BMessage()
+    messenger.SendMessage(BMessage(MSG_ASK), later)
+    checks.check("a BMessageRunner's three ticks arrived",
+                 later.FindInt32("ticks") == 8, String(later.FindInt32("ticks")))
+    _ = runner^
 
     # Quitting deletes the looper and, with it, the Counter.
     messenger.SendMessage(B_QUIT_REQUESTED)

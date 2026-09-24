@@ -16,8 +16,10 @@ check, then `SELFTEST PASS n/n` or `SELFTEST FAIL`, and exits 1 on failure.
 """
 
 from std.sys import argv, exit
+from std.time import sleep
 
-from haiku import BApplication, BApplicationRef, BButton, BCheckBox, BMessage
+from haiku import BAlert, BApplication, BApplicationRef, BButton, BCheckBox
+from haiku import BInvoker, BMessage, BRadioButton
 from haiku import BMessageRef, BMessenger, BRect, BSlider, BStringView
 from haiku import BTextControl, BView, BWindow, BWindowRef, fourcc
 from haiku import B_FOLLOW_ALL, B_PANEL_BACKGROUND_COLOR, B_QUIT_ON_WINDOW_CLOSE
@@ -29,6 +31,9 @@ comptime MSG_LOUD = fourcc("loud")
 comptime MSG_NAME = fourcc("name")
 comptime MSG_LEVEL = fourcc("levl")
 comptime MSG_PING = fourcc("ping")
+comptime MSG_SLOW = fourcc("slow")
+comptime MSG_FAST = fourcc("fast")
+comptime MSG_ANSWER = fourcc("answ")
 
 
 struct Panel(Movable, WindowMessageReceived):
@@ -38,12 +43,16 @@ struct Panel(Movable, WindowMessageReceived):
     var loud: Bool
     var name: String
     var level: Int32
+    var fast: Bool
+    var answer: Int32
 
     def __init__(out self):
         self.clicks = 0
         self.loud = False
         self.name = ""
         self.level = 0
+        self.fast = False
+        self.answer = -1
 
     def MessageReceived(
         mut self, window: BWindowRef[_], message: BMessageRef[_]
@@ -57,6 +66,10 @@ struct Panel(Movable, WindowMessageReceived):
                 self.name = window.FindView("name").as_BTextControl().Text()
             elif message.what == MSG_LEVEL:
                 self.level = message.FindInt32("be:value")
+            elif message.what == MSG_SLOW or message.what == MSG_FAST:
+                self.fast = message.what == MSG_FAST
+            elif message.what == MSG_ANSWER:
+                self.answer = message.FindInt32("which")  # the button pressed
             elif message.what == MSG_PING:
                 message.SendReply(MSG_PING)  # everything before is done
                 return
@@ -131,6 +144,21 @@ struct SelfTest(ApplicationReadyToRun, Movable):
             var level = window.FindView("level").as_BSlider()
             level.SetValue(7)
             level.Invoke()
+            var fast = window.FindView("fast").as_BRadioButton()
+            fast.SetValue(1)
+            fast.Invoke()
+        # An alert, answered by its second button, as a click would.
+        var alert = BAlert("Controls", "Go faster?", "No", "Yes")
+        var alert_messenger = BMessenger(alert)
+        alert^.Go(BInvoker(BMessage(MSG_ANSWER), self.window))
+        with alert_messenger.Locked() as looper:
+            looper.as_BAlert().ButtonAt(1).Invoke()
+        # The alert answers on its own thread, then quits: once it has gone,
+        # its answer is in the window's queue, ahead of the ping below.
+        for _ in range(200):
+            if not alert_messenger.IsValid():
+                break
+            sleep(0.01)
         # The window handles its messages in order: once it answers this,
         # it has handled the four before.
         var reply = BMessage()
@@ -146,6 +174,9 @@ struct SelfTest(ApplicationReadyToRun, Movable):
                               panel.name)
             self.checks.check("the slider's value came with its message",
                               panel.level == 7, String(panel.level))
+            self.checks.check("the radio button's message", panel.fast)
+            self.checks.check("the alert's answer, through its invoker",
+                              panel.answer == 1, String(panel.answer))
             var status = window.FindView("status").as_BStringView().Text()
             self.checks.check(
                 "the string view says so",
@@ -160,7 +191,7 @@ def main() raises:
         "application/x-vnd.Prose-controls", SelfTest(BMessenger(), selftest)
     )
     var window = BWindow(
-        BRect(120, 120, 480, 330),
+        BRect(120, 120, 480, 340),
         "Controls",
         B_TITLED_WINDOW,
         B_QUIT_ON_WINDOW_CLOSE,
@@ -189,6 +220,12 @@ def main() raises:
             0,
             10,
         )
+    )
+    panel.AddChild(
+        BRadioButton(BRect(20, 185, 120, 205), "slow", "Slow", BMessage(MSG_SLOW))
+    )
+    panel.AddChild(
+        BRadioButton(BRect(130, 185, 240, 205), "fast", "Fast", BMessage(MSG_FAST))
     )
     panel.AddChild(
         BStringView(BRect(20, 160, 340, 180), "status", "Nothing yet")
