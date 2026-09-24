@@ -15,7 +15,7 @@ from std.sys import size_of, align_of
 
 
 @fieldwise_init
-struct BRect(TrivialRegisterPassable, Writable):
+struct BRect(Equatable, TrivialRegisterPassable, Writable):
     """`BRect`, 16 bytes."""
 
     var left: Float32
@@ -46,7 +46,7 @@ struct BRect(TrivialRegisterPassable, Writable):
 
 
 @fieldwise_init
-struct BPoint(TrivialRegisterPassable, Writable):
+struct BPoint(Equatable, TrivialRegisterPassable, Writable):
     """`BPoint`, 8 bytes."""
 
     var x: Float32
@@ -57,7 +57,7 @@ struct BPoint(TrivialRegisterPassable, Writable):
 
 
 @fieldwise_init
-struct rgb_color(TrivialRegisterPassable):
+struct rgb_color(Equatable, TrivialRegisterPassable):
     """`rgb_color`, 4 bytes."""
 
     var red: UInt8
@@ -67,7 +67,7 @@ struct rgb_color(TrivialRegisterPassable):
 
 
 @fieldwise_init
-struct pattern(TrivialRegisterPassable):
+struct pattern(Equatable, TrivialRegisterPassable):
     """`pattern`, 8 bytes."""
 
     var data: UInt64
