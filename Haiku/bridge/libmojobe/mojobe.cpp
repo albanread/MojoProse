@@ -990,6 +990,819 @@ mojobe_MojoBGamePane_context(BGamePane* self, uint64 type)
 
 
 
+// #pragma mark - BRect
+
+
+// BRect::BRect()
+mojobe_BRect
+mojobe_BRect_new__void()
+{
+	try {
+		return mojobe_to_c(BRect());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_new__void");
+	}
+	return {};
+}
+
+
+// BRect::BRect(BPoint leftTop, BPoint rightBottom)
+mojobe_BRect
+mojobe_BRect_new__BPoint_BPoint(mojobe_BPoint a_leftTop,
+	mojobe_BPoint a_rightBottom)
+{
+	try {
+		return mojobe_to_c(BRect(mojobe_from_c(a_leftTop), mojobe_from_c(a_rightBottom)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_new__BPoint_BPoint");
+	}
+	return {};
+}
+
+
+// BRect::BRect(BPoint leftTop, BSize size)
+mojobe_BRect
+mojobe_BRect_new__BPoint_BSize(mojobe_BPoint a_leftTop, mojobe_BSize a_size)
+{
+	try {
+		return mojobe_to_c(BRect(mojobe_from_c(a_leftTop), mojobe_from_c(a_size)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_new__BPoint_BSize");
+	}
+	return {};
+}
+
+
+// BRect::BRect(float side)
+mojobe_BRect
+mojobe_BRect_new__float(float a_side)
+{
+	try {
+		return mojobe_to_c(BRect(a_side));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_new__float");
+	}
+	return {};
+}
+
+
+// BRect::BRect(float width, float height)
+mojobe_BRect
+mojobe_BRect_new__float_float(float a_width, float a_height)
+{
+	try {
+		return mojobe_to_c(BRect(a_width, a_height));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_new__float_float");
+	}
+	return {};
+}
+
+
+// void BRect::Set(float left, float top, float right, float bottom)
+void
+mojobe_BRect_Set(mojobe_BRect* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.Set(a_left, a_top, a_right, a_bottom);
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Set");
+	}
+}
+
+
+// void BRect::PrintToStream() const
+void
+mojobe_BRect_PrintToStream(mojobe_BRect self)
+{
+	try {
+		mojobe_from_c(self).PrintToStream();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_PrintToStream");
+	}
+}
+
+
+// BPoint BRect::LeftTop() const
+mojobe_BPoint
+mojobe_BRect_LeftTop(mojobe_BRect self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).LeftTop());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_LeftTop");
+	}
+	return {};
+}
+
+
+// BPoint BRect::RightBottom() const
+mojobe_BPoint
+mojobe_BRect_RightBottom(mojobe_BRect self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).RightBottom());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_RightBottom");
+	}
+	return {};
+}
+
+
+// BPoint BRect::LeftBottom() const
+mojobe_BPoint
+mojobe_BRect_LeftBottom(mojobe_BRect self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).LeftBottom());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_LeftBottom");
+	}
+	return {};
+}
+
+
+// BPoint BRect::RightTop() const
+mojobe_BPoint
+mojobe_BRect_RightTop(mojobe_BRect self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).RightTop());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_RightTop");
+	}
+	return {};
+}
+
+
+// void BRect::SetLeftTop(const BPoint point)
+void
+mojobe_BRect_SetLeftTop(mojobe_BRect* self, mojobe_BPoint a_point)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.SetLeftTop(mojobe_from_c(a_point));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_SetLeftTop");
+	}
+}
+
+
+// void BRect::SetRightBottom(const BPoint point)
+void
+mojobe_BRect_SetRightBottom(mojobe_BRect* self, mojobe_BPoint a_point)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.SetRightBottom(mojobe_from_c(a_point));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_SetRightBottom");
+	}
+}
+
+
+// void BRect::SetLeftBottom(const BPoint point)
+void
+mojobe_BRect_SetLeftBottom(mojobe_BRect* self, mojobe_BPoint a_point)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.SetLeftBottom(mojobe_from_c(a_point));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_SetLeftBottom");
+	}
+}
+
+
+// void BRect::SetRightTop(const BPoint point)
+void
+mojobe_BRect_SetRightTop(mojobe_BRect* self, mojobe_BPoint a_point)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.SetRightTop(mojobe_from_c(a_point));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_SetRightTop");
+	}
+}
+
+
+// void BRect::InsetBy(BPoint inset)
+void
+mojobe_BRect_InsetBy__BPoint(mojobe_BRect* self, mojobe_BPoint a_inset)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.InsetBy(mojobe_from_c(a_inset));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetBy__BPoint");
+	}
+}
+
+
+// void BRect::InsetBy(float dx, float dy)
+void
+mojobe_BRect_InsetBy__float_float(mojobe_BRect* self, float a_dx, float a_dy)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.InsetBy(a_dx, a_dy);
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetBy__float_float");
+	}
+}
+
+
+// void BRect::OffsetBy(BPoint delta)
+void
+mojobe_BRect_OffsetBy__BPoint(mojobe_BRect* self, mojobe_BPoint a_delta)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.OffsetBy(mojobe_from_c(a_delta));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetBy__BPoint");
+	}
+}
+
+
+// void BRect::OffsetBy(float dx, float dy)
+void
+mojobe_BRect_OffsetBy__float_float(mojobe_BRect* self, float a_dx, float a_dy)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.OffsetBy(a_dx, a_dy);
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetBy__float_float");
+	}
+}
+
+
+// void BRect::OffsetTo(BPoint offset)
+void
+mojobe_BRect_OffsetTo__BPoint(mojobe_BRect* self, mojobe_BPoint a_offset)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.OffsetTo(mojobe_from_c(a_offset));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetTo__BPoint");
+	}
+}
+
+
+// void BRect::OffsetTo(float x, float y)
+void
+mojobe_BRect_OffsetTo__float_float(mojobe_BRect* self, float a_x, float a_y)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		value.OffsetTo(a_x, a_y);
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetTo__float_float");
+	}
+}
+
+
+// BRect& BRect::InsetBySelf(BPoint inset)
+mojobe_BRect
+mojobe_BRect_InsetBySelf__BPoint(mojobe_BRect* self, mojobe_BPoint a_inset)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.InsetBySelf(mojobe_from_c(a_inset)));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetBySelf__BPoint");
+	}
+	return {};
+}
+
+
+// BRect& BRect::InsetBySelf(float dx, float dy)
+mojobe_BRect
+mojobe_BRect_InsetBySelf__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.InsetBySelf(a_dx, a_dy));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetBySelf__float_float");
+	}
+	return {};
+}
+
+
+// BRect BRect::InsetByCopy(BPoint inset) const
+mojobe_BRect
+mojobe_BRect_InsetByCopy__BPoint(mojobe_BRect self, mojobe_BPoint a_inset)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).InsetByCopy(mojobe_from_c(a_inset)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetByCopy__BPoint");
+	}
+	return {};
+}
+
+
+// BRect BRect::InsetByCopy(float dx, float dy) const
+mojobe_BRect
+mojobe_BRect_InsetByCopy__float_float(mojobe_BRect self, float a_dx, float a_dy)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).InsetByCopy(a_dx, a_dy));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_InsetByCopy__float_float");
+	}
+	return {};
+}
+
+
+// BRect& BRect::OffsetBySelf(BPoint offset)
+mojobe_BRect
+mojobe_BRect_OffsetBySelf__BPoint(mojobe_BRect* self, mojobe_BPoint a_offset)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.OffsetBySelf(mojobe_from_c(a_offset)));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetBySelf__BPoint");
+	}
+	return {};
+}
+
+
+// BRect& BRect::OffsetBySelf(float dx, float dy)
+mojobe_BRect
+mojobe_BRect_OffsetBySelf__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.OffsetBySelf(a_dx, a_dy));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetBySelf__float_float");
+	}
+	return {};
+}
+
+
+// BRect BRect::OffsetByCopy(BPoint offset) const
+mojobe_BRect
+mojobe_BRect_OffsetByCopy__BPoint(mojobe_BRect self, mojobe_BPoint a_offset)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).OffsetByCopy(mojobe_from_c(a_offset)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetByCopy__BPoint");
+	}
+	return {};
+}
+
+
+// BRect BRect::OffsetByCopy(float dx, float dy) const
+mojobe_BRect
+mojobe_BRect_OffsetByCopy__float_float(mojobe_BRect self,
+	float a_dx,
+	float a_dy)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).OffsetByCopy(a_dx, a_dy));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetByCopy__float_float");
+	}
+	return {};
+}
+
+
+// BRect& BRect::OffsetToSelf(BPoint offset)
+mojobe_BRect
+mojobe_BRect_OffsetToSelf__BPoint(mojobe_BRect* self, mojobe_BPoint a_offset)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.OffsetToSelf(mojobe_from_c(a_offset)));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetToSelf__BPoint");
+	}
+	return {};
+}
+
+
+// BRect& BRect::OffsetToSelf(float x, float y)
+mojobe_BRect
+mojobe_BRect_OffsetToSelf__float_float(mojobe_BRect* self, float a_x, float a_y)
+{
+	try {
+		BRect value = mojobe_from_c(*self);
+		mojobe_BRect result = mojobe_to_c(value.OffsetToSelf(a_x, a_y));
+		*self = mojobe_to_c(value);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetToSelf__float_float");
+	}
+	return {};
+}
+
+
+// BRect BRect::OffsetToCopy(BPoint offset) const
+mojobe_BRect
+mojobe_BRect_OffsetToCopy__BPoint(mojobe_BRect self, mojobe_BPoint a_offset)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).OffsetToCopy(mojobe_from_c(a_offset)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetToCopy__BPoint");
+	}
+	return {};
+}
+
+
+// BRect BRect::OffsetToCopy(float x, float y) const
+mojobe_BRect
+mojobe_BRect_OffsetToCopy__float_float(mojobe_BRect self, float a_x, float a_y)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).OffsetToCopy(a_x, a_y));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_OffsetToCopy__float_float");
+	}
+	return {};
+}
+
+
+// BRect BRect::operator&(BRect other) const
+mojobe_BRect
+mojobe_BRect_and(mojobe_BRect self, mojobe_BRect a_other)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).operator&(mojobe_from_c(a_other)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_and");
+	}
+	return {};
+}
+
+
+// BRect BRect::operator|(BRect other) const
+mojobe_BRect
+mojobe_BRect_or(mojobe_BRect self, mojobe_BRect a_other)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).operator|(mojobe_from_c(a_other)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_or");
+	}
+	return {};
+}
+
+
+// bool BRect::IsValid() const
+bool
+mojobe_BRect_IsValid(mojobe_BRect self)
+{
+	try {
+		return mojobe_from_c(self).IsValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_IsValid");
+	}
+	return {};
+}
+
+
+// float BRect::Width() const
+float
+mojobe_BRect_Width(mojobe_BRect self)
+{
+	try {
+		return mojobe_from_c(self).Width();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Width");
+	}
+	return {};
+}
+
+
+// int32 BRect::IntegerWidth() const
+int32
+mojobe_BRect_IntegerWidth(mojobe_BRect self)
+{
+	try {
+		return mojobe_from_c(self).IntegerWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_IntegerWidth");
+	}
+	return {};
+}
+
+
+// float BRect::Height() const
+float
+mojobe_BRect_Height(mojobe_BRect self)
+{
+	try {
+		return mojobe_from_c(self).Height();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Height");
+	}
+	return {};
+}
+
+
+// int32 BRect::IntegerHeight() const
+int32
+mojobe_BRect_IntegerHeight(mojobe_BRect self)
+{
+	try {
+		return mojobe_from_c(self).IntegerHeight();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_IntegerHeight");
+	}
+	return {};
+}
+
+
+// BSize BRect::Size() const
+mojobe_BSize
+mojobe_BRect_Size(mojobe_BRect self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).Size());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Size");
+	}
+	return {};
+}
+
+
+// bool BRect::Intersects(BRect rect) const
+bool
+mojobe_BRect_Intersects(mojobe_BRect self, mojobe_BRect a_rect)
+{
+	try {
+		return mojobe_from_c(self).Intersects(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Intersects");
+	}
+	return {};
+}
+
+
+// bool BRect::Contains(BPoint point) const
+bool
+mojobe_BRect_Contains__BPoint(mojobe_BRect self, mojobe_BPoint a_point)
+{
+	try {
+		return mojobe_from_c(self).Contains(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Contains__BPoint");
+	}
+	return {};
+}
+
+
+// bool BRect::Contains(BRect rect) const
+bool
+mojobe_BRect_Contains__BRect(mojobe_BRect self, mojobe_BRect a_rect)
+{
+	try {
+		return mojobe_from_c(self).Contains(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRect_Contains__BRect");
+	}
+	return {};
+}
+
+
+
+// #pragma mark - BPoint
+
+
+// BPoint::BPoint()
+mojobe_BPoint
+mojobe_BPoint_new()
+{
+	try {
+		return mojobe_to_c(BPoint());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_new");
+	}
+	return {};
+}
+
+
+// void BPoint::Set(float x, float y)
+void
+mojobe_BPoint_Set(mojobe_BPoint* self, float a_x, float a_y)
+{
+	try {
+		BPoint value = mojobe_from_c(*self);
+		value.Set(a_x, a_y);
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_Set");
+	}
+}
+
+
+// void BPoint::ConstrainTo(BRect rect)
+void
+mojobe_BPoint_ConstrainTo(mojobe_BPoint* self, mojobe_BRect a_rect)
+{
+	try {
+		BPoint value = mojobe_from_c(*self);
+		value.ConstrainTo(mojobe_from_c(a_rect));
+		*self = mojobe_to_c(value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_ConstrainTo");
+	}
+}
+
+
+// void BPoint::PrintToStream() const
+void
+mojobe_BPoint_PrintToStream(mojobe_BPoint self)
+{
+	try {
+		mojobe_from_c(self).PrintToStream();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_PrintToStream");
+	}
+}
+
+
+// BPoint BPoint::operator-() const
+mojobe_BPoint
+mojobe_BPoint_neg__void(mojobe_BPoint self)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).operator-());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_neg__void");
+	}
+	return {};
+}
+
+
+// BPoint BPoint::operator-(const BPoint& other) const
+mojobe_BPoint
+mojobe_BPoint_sub__BPoint(mojobe_BPoint self, mojobe_BPoint a_other)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).operator-(mojobe_from_c(a_other)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_sub__BPoint");
+	}
+	return {};
+}
+
+
+// BPoint BPoint::operator+(const BPoint& other) const
+mojobe_BPoint
+mojobe_BPoint_add(mojobe_BPoint self, mojobe_BPoint a_other)
+{
+	try {
+		return mojobe_to_c(mojobe_from_c(self).operator+(mojobe_from_c(a_other)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPoint_add");
+	}
+	return {};
+}
+
+
+
 // #pragma mark - BMessenger
 
 

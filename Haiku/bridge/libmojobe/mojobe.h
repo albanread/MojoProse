@@ -279,6 +279,198 @@ struct mojobe_BGamePane_hooks {
 
 
 
+// #pragma mark - BRect
+
+
+// BRect::BRect()
+mojobe_BRect mojobe_BRect_new__void();
+
+// BRect::BRect(BPoint leftTop, BPoint rightBottom)
+mojobe_BRect mojobe_BRect_new__BPoint_BPoint(mojobe_BPoint a_leftTop,
+	mojobe_BPoint a_rightBottom);
+
+// BRect::BRect(BPoint leftTop, BSize size)
+mojobe_BRect mojobe_BRect_new__BPoint_BSize(mojobe_BPoint a_leftTop,
+	mojobe_BSize a_size);
+
+// BRect::BRect(float side)
+mojobe_BRect mojobe_BRect_new__float(float a_side);
+
+// BRect::BRect(float width, float height)
+mojobe_BRect mojobe_BRect_new__float_float(float a_width, float a_height);
+
+// void BRect::Set(float left, float top, float right, float bottom)
+void mojobe_BRect_Set(mojobe_BRect* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom);
+
+// void BRect::PrintToStream() const
+void mojobe_BRect_PrintToStream(mojobe_BRect self);
+
+// BPoint BRect::LeftTop() const
+mojobe_BPoint mojobe_BRect_LeftTop(mojobe_BRect self);
+
+// BPoint BRect::RightBottom() const
+mojobe_BPoint mojobe_BRect_RightBottom(mojobe_BRect self);
+
+// BPoint BRect::LeftBottom() const
+mojobe_BPoint mojobe_BRect_LeftBottom(mojobe_BRect self);
+
+// BPoint BRect::RightTop() const
+mojobe_BPoint mojobe_BRect_RightTop(mojobe_BRect self);
+
+// void BRect::SetLeftTop(const BPoint point)
+void mojobe_BRect_SetLeftTop(mojobe_BRect* self, mojobe_BPoint a_point);
+
+// void BRect::SetRightBottom(const BPoint point)
+void mojobe_BRect_SetRightBottom(mojobe_BRect* self, mojobe_BPoint a_point);
+
+// void BRect::SetLeftBottom(const BPoint point)
+void mojobe_BRect_SetLeftBottom(mojobe_BRect* self, mojobe_BPoint a_point);
+
+// void BRect::SetRightTop(const BPoint point)
+void mojobe_BRect_SetRightTop(mojobe_BRect* self, mojobe_BPoint a_point);
+
+// void BRect::InsetBy(BPoint inset)
+void mojobe_BRect_InsetBy__BPoint(mojobe_BRect* self, mojobe_BPoint a_inset);
+
+// void BRect::InsetBy(float dx, float dy)
+void mojobe_BRect_InsetBy__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy);
+
+// void BRect::OffsetBy(BPoint delta)
+void mojobe_BRect_OffsetBy__BPoint(mojobe_BRect* self, mojobe_BPoint a_delta);
+
+// void BRect::OffsetBy(float dx, float dy)
+void mojobe_BRect_OffsetBy__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy);
+
+// void BRect::OffsetTo(BPoint offset)
+void mojobe_BRect_OffsetTo__BPoint(mojobe_BRect* self, mojobe_BPoint a_offset);
+
+// void BRect::OffsetTo(float x, float y)
+void mojobe_BRect_OffsetTo__float_float(mojobe_BRect* self,
+	float a_x,
+	float a_y);
+
+// BRect& BRect::InsetBySelf(BPoint inset)
+mojobe_BRect mojobe_BRect_InsetBySelf__BPoint(mojobe_BRect* self,
+	mojobe_BPoint a_inset);
+
+// BRect& BRect::InsetBySelf(float dx, float dy)
+mojobe_BRect mojobe_BRect_InsetBySelf__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy);
+
+// BRect BRect::InsetByCopy(BPoint inset) const
+mojobe_BRect mojobe_BRect_InsetByCopy__BPoint(mojobe_BRect self,
+	mojobe_BPoint a_inset);
+
+// BRect BRect::InsetByCopy(float dx, float dy) const
+mojobe_BRect mojobe_BRect_InsetByCopy__float_float(mojobe_BRect self,
+	float a_dx,
+	float a_dy);
+
+// BRect& BRect::OffsetBySelf(BPoint offset)
+mojobe_BRect mojobe_BRect_OffsetBySelf__BPoint(mojobe_BRect* self,
+	mojobe_BPoint a_offset);
+
+// BRect& BRect::OffsetBySelf(float dx, float dy)
+mojobe_BRect mojobe_BRect_OffsetBySelf__float_float(mojobe_BRect* self,
+	float a_dx,
+	float a_dy);
+
+// BRect BRect::OffsetByCopy(BPoint offset) const
+mojobe_BRect mojobe_BRect_OffsetByCopy__BPoint(mojobe_BRect self,
+	mojobe_BPoint a_offset);
+
+// BRect BRect::OffsetByCopy(float dx, float dy) const
+mojobe_BRect mojobe_BRect_OffsetByCopy__float_float(mojobe_BRect self,
+	float a_dx,
+	float a_dy);
+
+// BRect& BRect::OffsetToSelf(BPoint offset)
+mojobe_BRect mojobe_BRect_OffsetToSelf__BPoint(mojobe_BRect* self,
+	mojobe_BPoint a_offset);
+
+// BRect& BRect::OffsetToSelf(float x, float y)
+mojobe_BRect mojobe_BRect_OffsetToSelf__float_float(mojobe_BRect* self,
+	float a_x,
+	float a_y);
+
+// BRect BRect::OffsetToCopy(BPoint offset) const
+mojobe_BRect mojobe_BRect_OffsetToCopy__BPoint(mojobe_BRect self,
+	mojobe_BPoint a_offset);
+
+// BRect BRect::OffsetToCopy(float x, float y) const
+mojobe_BRect mojobe_BRect_OffsetToCopy__float_float(mojobe_BRect self,
+	float a_x,
+	float a_y);
+
+// BRect BRect::operator&(BRect other) const
+mojobe_BRect mojobe_BRect_and(mojobe_BRect self, mojobe_BRect a_other);
+
+// BRect BRect::operator|(BRect other) const
+mojobe_BRect mojobe_BRect_or(mojobe_BRect self, mojobe_BRect a_other);
+
+// bool BRect::IsValid() const
+bool mojobe_BRect_IsValid(mojobe_BRect self);
+
+// float BRect::Width() const
+float mojobe_BRect_Width(mojobe_BRect self);
+
+// int32 BRect::IntegerWidth() const
+int32 mojobe_BRect_IntegerWidth(mojobe_BRect self);
+
+// float BRect::Height() const
+float mojobe_BRect_Height(mojobe_BRect self);
+
+// int32 BRect::IntegerHeight() const
+int32 mojobe_BRect_IntegerHeight(mojobe_BRect self);
+
+// BSize BRect::Size() const
+mojobe_BSize mojobe_BRect_Size(mojobe_BRect self);
+
+// bool BRect::Intersects(BRect rect) const
+bool mojobe_BRect_Intersects(mojobe_BRect self, mojobe_BRect a_rect);
+
+// bool BRect::Contains(BPoint point) const
+bool mojobe_BRect_Contains__BPoint(mojobe_BRect self, mojobe_BPoint a_point);
+
+// bool BRect::Contains(BRect rect) const
+bool mojobe_BRect_Contains__BRect(mojobe_BRect self, mojobe_BRect a_rect);
+
+
+// #pragma mark - BPoint
+
+
+// BPoint::BPoint()
+mojobe_BPoint mojobe_BPoint_new();
+
+// void BPoint::Set(float x, float y)
+void mojobe_BPoint_Set(mojobe_BPoint* self, float a_x, float a_y);
+
+// void BPoint::ConstrainTo(BRect rect)
+void mojobe_BPoint_ConstrainTo(mojobe_BPoint* self, mojobe_BRect a_rect);
+
+// void BPoint::PrintToStream() const
+void mojobe_BPoint_PrintToStream(mojobe_BPoint self);
+
+// BPoint BPoint::operator-() const
+mojobe_BPoint mojobe_BPoint_neg__void(mojobe_BPoint self);
+
+// BPoint BPoint::operator-(const BPoint& other) const
+mojobe_BPoint mojobe_BPoint_sub__BPoint(mojobe_BPoint self,
+	mojobe_BPoint a_other);
+
+// BPoint BPoint::operator+(const BPoint& other) const
+mojobe_BPoint mojobe_BPoint_add(mojobe_BPoint self, mojobe_BPoint a_other);
+
+
 // #pragma mark - BMessenger
 
 

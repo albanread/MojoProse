@@ -5,7 +5,80 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 1307 included, 384 overrides reached through a base, 339 left out.
+In all: 1358 included, 384 overrides reached through a base, 351 left out.
+
+## BRect: 44 included, 0 overrides reached through a base, 5 left out
+
+| C++ | | |
+|---|---|---|
+| `BRect::BRect(const BRect& other)` | skipped | copy constructor: Mojo copies |
+| `BRect::BRect(float left, float top, float right, float bottom)` | skipped | the fields' own constructor |
+| `BRect& BRect::operator=(const BRect& other)` | skipped | operator |
+| `bool BRect::operator==(BRect other) const` | skipped | operator (== is Equatable's) |
+| `bool BRect::operator!=(BRect other) const` | skipped | operator (== is Equatable's) |
+| `BRect::BRect()` | included | mojobe_BRect_new__void |
+| `BRect::BRect(BPoint leftTop, BPoint rightBottom)` | included | mojobe_BRect_new__BPoint_BPoint |
+| `BRect::BRect(BPoint leftTop, BSize size)` | included | mojobe_BRect_new__BPoint_BSize |
+| `BRect::BRect(float side)` | included | mojobe_BRect_new__float |
+| `BRect::BRect(float width, float height)` | included | mojobe_BRect_new__float_float |
+| `void BRect::Set(float left, float top, float right, float bottom)` | included | mojobe_BRect_Set |
+| `void BRect::PrintToStream() const` | included | mojobe_BRect_PrintToStream |
+| `BPoint BRect::LeftTop() const` | included | mojobe_BRect_LeftTop |
+| `BPoint BRect::RightBottom() const` | included | mojobe_BRect_RightBottom |
+| `BPoint BRect::LeftBottom() const` | included | mojobe_BRect_LeftBottom |
+| `BPoint BRect::RightTop() const` | included | mojobe_BRect_RightTop |
+| `void BRect::SetLeftTop(const BPoint point)` | included | mojobe_BRect_SetLeftTop |
+| `void BRect::SetRightBottom(const BPoint point)` | included | mojobe_BRect_SetRightBottom |
+| `void BRect::SetLeftBottom(const BPoint point)` | included | mojobe_BRect_SetLeftBottom |
+| `void BRect::SetRightTop(const BPoint point)` | included | mojobe_BRect_SetRightTop |
+| `void BRect::InsetBy(BPoint inset)` | included | mojobe_BRect_InsetBy__BPoint |
+| `void BRect::InsetBy(float dx, float dy)` | included | mojobe_BRect_InsetBy__float_float |
+| `void BRect::OffsetBy(BPoint delta)` | included | mojobe_BRect_OffsetBy__BPoint |
+| `void BRect::OffsetBy(float dx, float dy)` | included | mojobe_BRect_OffsetBy__float_float |
+| `void BRect::OffsetTo(BPoint offset)` | included | mojobe_BRect_OffsetTo__BPoint |
+| `void BRect::OffsetTo(float x, float y)` | included | mojobe_BRect_OffsetTo__float_float |
+| `BRect& BRect::InsetBySelf(BPoint inset)` | included | mojobe_BRect_InsetBySelf__BPoint |
+| `BRect& BRect::InsetBySelf(float dx, float dy)` | included | mojobe_BRect_InsetBySelf__float_float |
+| `BRect BRect::InsetByCopy(BPoint inset) const` | included | mojobe_BRect_InsetByCopy__BPoint |
+| `BRect BRect::InsetByCopy(float dx, float dy) const` | included | mojobe_BRect_InsetByCopy__float_float |
+| `BRect& BRect::OffsetBySelf(BPoint offset)` | included | mojobe_BRect_OffsetBySelf__BPoint |
+| `BRect& BRect::OffsetBySelf(float dx, float dy)` | included | mojobe_BRect_OffsetBySelf__float_float |
+| `BRect BRect::OffsetByCopy(BPoint offset) const` | included | mojobe_BRect_OffsetByCopy__BPoint |
+| `BRect BRect::OffsetByCopy(float dx, float dy) const` | included | mojobe_BRect_OffsetByCopy__float_float |
+| `BRect& BRect::OffsetToSelf(BPoint offset)` | included | mojobe_BRect_OffsetToSelf__BPoint |
+| `BRect& BRect::OffsetToSelf(float x, float y)` | included | mojobe_BRect_OffsetToSelf__float_float |
+| `BRect BRect::OffsetToCopy(BPoint offset) const` | included | mojobe_BRect_OffsetToCopy__BPoint |
+| `BRect BRect::OffsetToCopy(float x, float y) const` | included | mojobe_BRect_OffsetToCopy__float_float |
+| `BRect BRect::operator&(BRect other) const` | included | mojobe_BRect_and |
+| `BRect BRect::operator\|(BRect other) const` | included | mojobe_BRect_or |
+| `bool BRect::IsValid() const` | included | mojobe_BRect_IsValid |
+| `float BRect::Width() const` | included | mojobe_BRect_Width |
+| `int32 BRect::IntegerWidth() const` | included | mojobe_BRect_IntegerWidth |
+| `float BRect::Height() const` | included | mojobe_BRect_Height |
+| `int32 BRect::IntegerHeight() const` | included | mojobe_BRect_IntegerHeight |
+| `BSize BRect::Size() const` | included | mojobe_BRect_Size |
+| `bool BRect::Intersects(BRect rect) const` | included | mojobe_BRect_Intersects |
+| `bool BRect::Contains(BPoint point) const` | included | mojobe_BRect_Contains__BPoint |
+| `bool BRect::Contains(BRect rect) const` | included | mojobe_BRect_Contains__BRect |
+
+## BPoint: 7 included, 0 overrides reached through a base, 7 left out
+
+| C++ | | |
+|---|---|---|
+| `BPoint::BPoint(float x, float y)` | skipped | the fields' own constructor |
+| `BPoint::BPoint(const BPoint& p)` | skipped | copy constructor: Mojo copies |
+| `BPoint& BPoint::operator=(const BPoint& other)` | skipped | operator |
+| `BPoint& BPoint::operator+=(const BPoint& other)` | skipped | operator |
+| `BPoint& BPoint::operator-=(const BPoint& other)` | skipped | operator |
+| `bool BPoint::operator!=(const BPoint& other) const` | skipped | operator (== is Equatable's) |
+| `bool BPoint::operator==(const BPoint& other) const` | skipped | operator (== is Equatable's) |
+| `BPoint::BPoint()` | included | mojobe_BPoint_new |
+| `void BPoint::Set(float x, float y)` | included | mojobe_BPoint_Set |
+| `void BPoint::ConstrainTo(BRect rect)` | included | mojobe_BPoint_ConstrainTo |
+| `void BPoint::PrintToStream() const` | included | mojobe_BPoint_PrintToStream |
+| `BPoint BPoint::operator-() const` | included | mojobe_BPoint_neg__void |
+| `BPoint BPoint::operator-(const BPoint& other) const` | included | mojobe_BPoint_sub__BPoint |
+| `BPoint BPoint::operator+(const BPoint& other) const` | included | mojobe_BPoint_add |
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 

@@ -72,7 +72,9 @@ libraries = ["libbe.so", "libroot.so", "libtracker.so", "libgame.so"]
 # pass in registers (a user-declared copy constructor makes BRect and BPoint
 # so) crosses the C interface as a plain C struct of the same fields.
 [values.BRect]
+methods = true             # its inline methods, compiled in: C++'s own
 [values.BPoint]
+methods = true
 [values.rgb_color]
 
 [values.BSize]

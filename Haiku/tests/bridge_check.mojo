@@ -91,6 +91,29 @@ def main() raises:
     var frame = BRect(10, 20, 110, 70)
     checks.check("BRect.Width()", frame.Width() == 100)
 
+    # Value types' methods: C++'s inline ones, compiled into libmojobe.
+    var inset = BRect(10, 20, 110, 70)
+    inset.InsetBy(5, 5)
+    checks.check("BRect.InsetBy changes the value", inset == BRect(15, 25, 105, 65),
+                 String(inset))
+    checks.check("BRect.Contains", inset.Contains(BPoint(20, 30))
+                 and not inset.Contains(BPoint(0, 0)))
+    checks.check("BRect & and |: intersection and union",
+                 (BRect(0, 0, 9, 9) & BRect(5, 5, 19, 19)) == BRect(5, 5, 9, 9)
+                 and (BRect(0, 0, 9, 9) | BRect(5, 5, 19, 19)) == BRect(0, 0, 19, 19))
+    checks.check("BRect from two points",
+                 BRect(BPoint(1, 2), BPoint(3, 4)) == BRect(1, 2, 3, 4))
+    checks.check("BRect() is not valid", not BRect().IsValid())
+    checks.check("BRect.OffsetByCopy leaves the value",
+                 inset.OffsetByCopy(1, 1) == BRect(16, 26, 106, 66)
+                 and inset == BRect(15, 25, 105, 65))
+    checks.check("BPoint + and unary -",
+                 BPoint(1, 2) + BPoint(3, 4) == BPoint(4, 6)
+                 and -BPoint(1, 2) == BPoint(-1, -2))
+    var constrained = BPoint(50, -50)
+    constrained.ConstrainTo(BRect(0, 0, 9, 9))
+    checks.check("BPoint.ConstrainTo", constrained == BPoint(9, 0), String(constrained))
+
     var message = BMessage(fourcc("test"))
     checks.check("BMessage(what): what", message.get_what() == fourcc("test"))
     checks.check("a new message is empty", message.IsEmpty())

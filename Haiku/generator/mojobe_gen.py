@@ -1181,7 +1181,7 @@ class Emitter:
     # ---- one method -------------------------------------------------------------
 
     def emit_method(self, info, cls, entry_name, self_expr, indent, trait=True,
-                    held=False, static=False):
+                    held=False, static=False, mirror=False, mojo_def=None):
         """C prototype, C++ entry point, and the Mojo method body. `held`:
         `cls` is held in a Mojo value, whose non-const methods take `mut
         self`."""
@@ -1190,6 +1190,12 @@ class Emitter:
         self.current_method = ("%s::%s" % (method.owner, method.name) if method.owner
                                else method.name)
         c_params = ["%s* self" % cls] if cls and not static else []
+        if mirror:
+            # a value type: its methods run on a C++ copy of the mirror,
+            # written back when they change it. A const one takes the value:
+            # a register-passable `self` is a copy, and its address would
+            # be a temporary's.
+            c_params = ["mojobe_%s%s self" % (cls, "" if method.const else "*")]
         c_args = []
         pre_c = []
         post_c = []
@@ -1205,7 +1211,13 @@ class Emitter:
                               % (entry["p"].name, entry["p"].name, entry["p"].name))
         result = info["result"]
         c_ret = self.c_result(result)
-        if cls is None:
+        if mirror and method.const:
+            call = "mojobe_from_c(self).%s(%s)" % (method.name, ", ".join(c_args))
+        elif mirror:
+            pre_c.insert(0, "%s value = mojobe_from_c(*self);" % cls)
+            post_c.append("*self = mojobe_to_c(value);")
+            call = "value.%s(%s)" % (method.name, ", ".join(c_args))
+        elif cls is None:
             call = "::%s(%s)" % (method.name, ", ".join(c_args))
         elif static:
             call = "%s::%s(%s)" % (method.owner, method.name, ", ".join(c_args))
@@ -1255,6 +1267,8 @@ class Emitter:
         # Mojo
         m_params = []
         m_args = [self_expr] if cls and not static else []
+        if mirror and method.const:
+            m_args = ["self"]
         pre = []
         post = []
         outs = []
@@ -1302,7 +1316,7 @@ class Emitter:
         if held and not method.const:
             self_decl = "mut self"
         head = "def %s(%s)%s%s:" % (
-            mojo_name(method.name),
+            mojo_def or mojo_name(method.name),
             ", ".join(([self_decl] if cls and not static else []) + m_params),
             " raises" if raises else "",
             signature_ret,
@@ -1454,6 +1468,111 @@ class Emitter:
             if types[:count] == other_types[:count]:
                 return True
         return False
+
+    OPERATORS = {
+        ("operator+", 1): ("__add__", "add"),
+        ("operator-", 1): ("__sub__", "sub"),
+        ("operator-", 0): ("__neg__", "neg"),
+        ("operator&", 1): ("__and__", "and"),
+        ("operator|", 1): ("__or__", "or"),
+    }
+
+    def emit_value_methods(self, value):
+        """A value type's methods (bridge.toml `methods = true`): the C++
+        inline ones, compiled into libmojobe, so they are C++'s own."""
+        self.mark(value)
+        record = self.model.records[value]
+        manifest = self.manifest.setdefault(value, [])
+        fields = [f[1] for f in self.value_fields(value)]
+        lines_all = []
+        groups = {}
+        for m in record.members:
+            if m.access != "public" or m.implicit or m.deleted or m.static:
+                continue
+            if m.kind == "CXXConstructorDecl":
+                try:
+                    info = self.b.map_method(m, value, is_ctor=True)
+                except Unbridged as why:
+                    manifest.append((m.cxx(), "skipped", str(why)))
+                    continue
+                kinds = [(e.get("kind"), e.get("detail")) for e in info["params"]]
+                if any(k == "value" and d == value for k, d in kinds):
+                    manifest.append((m.cxx(), "skipped", "copy constructor: Mojo copies"))
+                    continue
+                if [self.b.mojo_scalar(k, d) if k in ("prim", "enum", "value") else None
+                        for k, d in kinds] == fields:
+                    manifest.append((m.cxx(), "skipped", "the fields' own constructor"))
+                    continue
+                groups.setdefault("__init__", []).append(info)
+                continue
+            if m.kind != "CXXMethodDecl":
+                continue
+            if m.name.startswith("operator"):
+                if (m.name, len(m.params)) not in self.OPERATORS:
+                    manifest.append((m.cxx(), "skipped", "operator (== is Equatable's)"
+                                     if m.name in ("operator==", "operator!=") else "operator"))
+                    continue
+            try:
+                info = self.b.map_method(m, value)
+            except Unbridged as why:
+                manifest.append((m.cxx(), "skipped", str(why)))
+                continue
+            groups.setdefault(m.name, []).append(info)
+        for name, infos in groups.items():
+            kept = []
+            for info in infos:
+                m = info["method"]
+                signature = self.signature(info)
+                if any(self.ambiguous(signature, other) for other in kept):
+                    manifest.append((m.cxx(), "skipped", "a call would match another overload too"))
+                    continue
+                kept.append(signature)
+                tag = ""
+                if len(infos) > 1:
+                    tag = "__" + type_tag([e for e in info["params"] if e["role"] != "null"])
+                if name == "__init__":
+                    lines_all.append(self.value_type_ctor(value, info, tag))
+                    continue
+                mojo_def, c_word = self.OPERATORS.get((name, len(m.params)), (None, name))
+                entry = "mojobe_%s_%s%s" % (value, c_word, tag)
+                try:
+                    lines, _ = self.emit_method(info, value, entry, "_address_of(self)", "",
+                                                held=True, mirror=True, mojo_def=mojo_def)
+                except Unbridged as why:
+                    manifest.append((m.cxx(), "skipped", str(why)))
+                    continue
+                lines_all.append(lines)
+                manifest.append((m.cxx(), "included", entry))
+        self.value_methods[value] = lines_all
+
+    def value_type_ctor(self, value, info, tag):
+        m = info["method"]
+        entry = "mojobe_%s_new%s" % (value, tag)
+        c_params, c_args = [], []
+        for e in info["params"]:
+            decl, arg = self.c_param(e)
+            if decl:
+                c_params.append(decl)
+            c_args.append(arg)
+        self.add_entry("mojobe_%s" % value, entry, c_params,
+                       ["return mojobe_to_c(%s(%s));" % (value, ", ".join(
+                           a for a in c_args if a is not None))], m.cxx())
+        self.manifest[value].append((m.cxx(), "included", entry))
+        params, args, pre, post = [], [], [], []
+        for e in info["params"]:
+            decl, arg, before, after = self.mojo_param(e)
+            if decl:
+                params.append(decl)
+            if arg is not None:
+                args.append(arg)
+            pre.extend(before)
+            post.extend(after)
+        lines = ["def __init__(%s):" % ", ".join(["out self"] + params),
+                 '    """`%s`."""' % m.cxx().replace("`", "'")]
+        lines.extend("    " + l for l in pre)
+        lines.append('    self = external_call["%s", Self](%s)' % (entry, ", ".join(args)))
+        lines.extend("    " + l for l in post)
+        return lines
 
     def emit_functions(self):
         """The free functions bridge.toml names (find_directory)."""
@@ -2765,7 +2884,9 @@ def write_values(emitter, bridge):
            '"""The Be API\'s value types, laid out as the Haiku headers lay them out',
            "(checked at compile time against clang's layout for the Haiku target),",
            'and the constant values of those types."""', "",
-           "from std.sys import size_of, align_of", ""]
+           "from std.ffi import external_call",
+           "from std.sys import size_of, align_of", "",
+           "from ._core import _address_of", ""]
     enums = sorted({t for v in bridge.values for _, t in emitter.value_fields(v)
                     if t in bridge.typed_enums})
     if enums:
@@ -2785,6 +2906,9 @@ def write_values(emitter, bridge):
         out.append("")
         for name, t in fields:
             out.append("    var %s: %s" % (name, t))
+        for lines in emitter.value_methods.get(value, []):
+            out.append("")
+            out.extend("    " + l for l in lines)
         if extra:
             out.append("")
             out.extend(("    " + l if l.strip() else "") for l in extra.rstrip("\n").split("\n"))
@@ -2805,7 +2929,7 @@ def write_values(emitter, bridge):
         out.append("")
         out.append("")
         out.append(extra.read_text().rstrip("\n"))
-    (BRIDGE / "haiku" / "_values.mojo").write_text("\n".join(out) + "\n")
+    (BRIDGE / "haiku" / "_values.mojo").write_text("\n".join(wrap_all(out)) + "\n")
 
 
 def mojo_int(value, kind):
@@ -3369,6 +3493,10 @@ def main():
     for cls in bridge.classes:
         visit(cls)
     emitter.functions = []
+    emitter.value_methods = {}
+    for value, conf in config.get("values", {}).items():
+        if conf.get("methods"):
+            emitter.emit_value_methods(value)
     for cls in order:
         emitter.emit_class(cls)
     emitter.emit_functions()

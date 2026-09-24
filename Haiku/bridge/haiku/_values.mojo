@@ -11,7 +11,10 @@
 (checked at compile time against clang's layout for the Haiku target),
 and the constant values of those types."""
 
+from std.ffi import external_call
 from std.sys import size_of, align_of
+
+from ._core import _address_of
 
 from ._constants import alignment, vertical_alignment
 
@@ -25,13 +28,310 @@ struct BRect(Equatable, TrivialRegisterPassable, Writable):
     var right: Float32
     var bottom: Float32
 
+    def __init__(out self):
+        """`BRect::BRect()`."""
+        self = external_call["mojobe_BRect_new__void", Self]()
+
+    def __init__(out self, leftTop: BPoint, rightBottom: BPoint):
+        """`BRect::BRect(BPoint leftTop, BPoint rightBottom)`."""
+        self = external_call["mojobe_BRect_new__BPoint_BPoint", Self](
+            leftTop,
+            rightBottom,
+        )
+
+    def __init__(out self, leftTop: BPoint, size: BSize):
+        """`BRect::BRect(BPoint leftTop, BSize size)`."""
+        self = external_call["mojobe_BRect_new__BPoint_BSize", Self](
+            leftTop,
+            size,
+        )
+
+    def __init__(out self, side: Float32):
+        """`BRect::BRect(float side)`."""
+        self = external_call["mojobe_BRect_new__float", Self](side)
+
+    def __init__(out self, width: Float32, height: Float32):
+        """`BRect::BRect(float width, float height)`."""
+        self = external_call["mojobe_BRect_new__float_float", Self](
+            width,
+            height,
+        )
+
+    def Set(
+        mut self,
+        left: Float32,
+        top: Float32,
+        right: Float32,
+        bottom: Float32,
+    ):
+        """`void BRect::Set(float left, float top, float right, float bottom)`."""
+        external_call["mojobe_BRect_Set", NoneType](
+            _address_of(self),
+            left,
+            top,
+            right,
+            bottom,
+        )
+
+    def PrintToStream(self):
+        """`void BRect::PrintToStream() const`."""
+        external_call["mojobe_BRect_PrintToStream", NoneType](self)
+
+    def LeftTop(self) -> BPoint:
+        """`BPoint BRect::LeftTop() const`."""
+        var _result = external_call["mojobe_BRect_LeftTop", BPoint](self)
+        return _result
+
+    def RightBottom(self) -> BPoint:
+        """`BPoint BRect::RightBottom() const`."""
+        var _result = external_call["mojobe_BRect_RightBottom", BPoint](self)
+        return _result
+
+    def LeftBottom(self) -> BPoint:
+        """`BPoint BRect::LeftBottom() const`."""
+        var _result = external_call["mojobe_BRect_LeftBottom", BPoint](self)
+        return _result
+
+    def RightTop(self) -> BPoint:
+        """`BPoint BRect::RightTop() const`."""
+        var _result = external_call["mojobe_BRect_RightTop", BPoint](self)
+        return _result
+
+    def SetLeftTop(mut self, point: BPoint):
+        """`void BRect::SetLeftTop(const BPoint point)`."""
+        external_call["mojobe_BRect_SetLeftTop", NoneType](
+            _address_of(self),
+            point,
+        )
+
+    def SetRightBottom(mut self, point: BPoint):
+        """`void BRect::SetRightBottom(const BPoint point)`."""
+        external_call["mojobe_BRect_SetRightBottom", NoneType](
+            _address_of(self),
+            point,
+        )
+
+    def SetLeftBottom(mut self, point: BPoint):
+        """`void BRect::SetLeftBottom(const BPoint point)`."""
+        external_call["mojobe_BRect_SetLeftBottom", NoneType](
+            _address_of(self),
+            point,
+        )
+
+    def SetRightTop(mut self, point: BPoint):
+        """`void BRect::SetRightTop(const BPoint point)`."""
+        external_call["mojobe_BRect_SetRightTop", NoneType](
+            _address_of(self),
+            point,
+        )
+
+    def InsetBy(mut self, inset: BPoint):
+        """`void BRect::InsetBy(BPoint inset)`."""
+        external_call["mojobe_BRect_InsetBy__BPoint", NoneType](
+            _address_of(self),
+            inset,
+        )
+
+    def InsetBy(mut self, dx: Float32, dy: Float32):
+        """`void BRect::InsetBy(float dx, float dy)`."""
+        external_call["mojobe_BRect_InsetBy__float_float", NoneType](
+            _address_of(self),
+            dx,
+            dy,
+        )
+
+    def OffsetBy(mut self, delta: BPoint):
+        """`void BRect::OffsetBy(BPoint delta)`."""
+        external_call["mojobe_BRect_OffsetBy__BPoint", NoneType](
+            _address_of(self),
+            delta,
+        )
+
+    def OffsetBy(mut self, dx: Float32, dy: Float32):
+        """`void BRect::OffsetBy(float dx, float dy)`."""
+        external_call["mojobe_BRect_OffsetBy__float_float", NoneType](
+            _address_of(self),
+            dx,
+            dy,
+        )
+
+    def OffsetTo(mut self, offset: BPoint):
+        """`void BRect::OffsetTo(BPoint offset)`."""
+        external_call["mojobe_BRect_OffsetTo__BPoint", NoneType](
+            _address_of(self),
+            offset,
+        )
+
+    def OffsetTo(mut self, x: Float32, y: Float32):
+        """`void BRect::OffsetTo(float x, float y)`."""
+        external_call["mojobe_BRect_OffsetTo__float_float", NoneType](
+            _address_of(self),
+            x,
+            y,
+        )
+
+    def InsetBySelf(mut self, inset: BPoint) -> BRect:
+        """`BRect& BRect::InsetBySelf(BPoint inset)`."""
+        var _result = external_call["mojobe_BRect_InsetBySelf__BPoint", BRect](
+            _address_of(self),
+            inset,
+        )
+        return _result
+
+    def InsetBySelf(mut self, dx: Float32, dy: Float32) -> BRect:
+        """`BRect& BRect::InsetBySelf(float dx, float dy)`."""
+        var _result = external_call["mojobe_BRect_InsetBySelf__float_float", BRect](
+            _address_of(self),
+            dx,
+            dy,
+        )
+        return _result
+
+    def InsetByCopy(self, inset: BPoint) -> BRect:
+        """`BRect BRect::InsetByCopy(BPoint inset) const`."""
+        var _result = external_call["mojobe_BRect_InsetByCopy__BPoint", BRect](
+            self,
+            inset,
+        )
+        return _result
+
+    def InsetByCopy(self, dx: Float32, dy: Float32) -> BRect:
+        """`BRect BRect::InsetByCopy(float dx, float dy) const`."""
+        var _result = external_call["mojobe_BRect_InsetByCopy__float_float", BRect](
+            self,
+            dx,
+            dy,
+        )
+        return _result
+
+    def OffsetBySelf(mut self, offset: BPoint) -> BRect:
+        """`BRect& BRect::OffsetBySelf(BPoint offset)`."""
+        var _result = external_call["mojobe_BRect_OffsetBySelf__BPoint", BRect](
+            _address_of(self),
+            offset,
+        )
+        return _result
+
+    def OffsetBySelf(mut self, dx: Float32, dy: Float32) -> BRect:
+        """`BRect& BRect::OffsetBySelf(float dx, float dy)`."""
+        var _result = external_call["mojobe_BRect_OffsetBySelf__float_float", BRect](
+            _address_of(self),
+            dx,
+            dy,
+        )
+        return _result
+
+    def OffsetByCopy(self, offset: BPoint) -> BRect:
+        """`BRect BRect::OffsetByCopy(BPoint offset) const`."""
+        var _result = external_call["mojobe_BRect_OffsetByCopy__BPoint", BRect](
+            self,
+            offset,
+        )
+        return _result
+
+    def OffsetByCopy(self, dx: Float32, dy: Float32) -> BRect:
+        """`BRect BRect::OffsetByCopy(float dx, float dy) const`."""
+        var _result = external_call["mojobe_BRect_OffsetByCopy__float_float", BRect](
+            self,
+            dx,
+            dy,
+        )
+        return _result
+
+    def OffsetToSelf(mut self, offset: BPoint) -> BRect:
+        """`BRect& BRect::OffsetToSelf(BPoint offset)`."""
+        var _result = external_call["mojobe_BRect_OffsetToSelf__BPoint", BRect](
+            _address_of(self),
+            offset,
+        )
+        return _result
+
+    def OffsetToSelf(mut self, x: Float32, y: Float32) -> BRect:
+        """`BRect& BRect::OffsetToSelf(float x, float y)`."""
+        var _result = external_call["mojobe_BRect_OffsetToSelf__float_float", BRect](
+            _address_of(self),
+            x,
+            y,
+        )
+        return _result
+
+    def OffsetToCopy(self, offset: BPoint) -> BRect:
+        """`BRect BRect::OffsetToCopy(BPoint offset) const`."""
+        var _result = external_call["mojobe_BRect_OffsetToCopy__BPoint", BRect](
+            self,
+            offset,
+        )
+        return _result
+
+    def OffsetToCopy(self, x: Float32, y: Float32) -> BRect:
+        """`BRect BRect::OffsetToCopy(float x, float y) const`."""
+        var _result = external_call["mojobe_BRect_OffsetToCopy__float_float", BRect](
+            self,
+            x,
+            y,
+        )
+        return _result
+
+    def __and__(self, other: BRect) -> BRect:
+        """`BRect BRect::operator&(BRect other) const`."""
+        var _result = external_call["mojobe_BRect_and", BRect](self, other)
+        return _result
+
+    def __or__(self, other: BRect) -> BRect:
+        """`BRect BRect::operator|(BRect other) const`."""
+        var _result = external_call["mojobe_BRect_or", BRect](self, other)
+        return _result
+
+    def IsValid(self) -> Bool:
+        """`bool BRect::IsValid() const`."""
+        var _result = external_call["mojobe_BRect_IsValid", Bool](self)
+        return _result
+
     def Width(self) -> Float32:
-        """The width, as `BRect::Width()` has it (right - left)."""
-        return self.right - self.left
+        """`float BRect::Width() const`."""
+        var _result = external_call["mojobe_BRect_Width", Float32](self)
+        return _result
+
+    def IntegerWidth(self) -> Int32:
+        """`int32 BRect::IntegerWidth() const`."""
+        var _result = external_call["mojobe_BRect_IntegerWidth", Int32](self)
+        return _result
 
     def Height(self) -> Float32:
-        """The height, as `BRect::Height()` has it (bottom - top)."""
-        return self.bottom - self.top
+        """`float BRect::Height() const`."""
+        var _result = external_call["mojobe_BRect_Height", Float32](self)
+        return _result
+
+    def IntegerHeight(self) -> Int32:
+        """`int32 BRect::IntegerHeight() const`."""
+        var _result = external_call["mojobe_BRect_IntegerHeight", Int32](self)
+        return _result
+
+    def Size(self) -> BSize:
+        """`BSize BRect::Size() const`."""
+        var _result = external_call["mojobe_BRect_Size", BSize](self)
+        return _result
+
+    def Intersects(self, rect: BRect) -> Bool:
+        """`bool BRect::Intersects(BRect rect) const`."""
+        var _result = external_call["mojobe_BRect_Intersects", Bool](self, rect)
+        return _result
+
+    def Contains(self, point: BPoint) -> Bool:
+        """`bool BRect::Contains(BPoint point) const`."""
+        var _result = external_call["mojobe_BRect_Contains__BPoint", Bool](
+            self,
+            point,
+        )
+        return _result
+
+    def Contains(self, rect: BRect) -> Bool:
+        """`bool BRect::Contains(BRect rect) const`."""
+        var _result = external_call["mojobe_BRect_Contains__BRect", Bool](
+            self,
+            rect,
+        )
+        return _result
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write(
@@ -53,6 +353,43 @@ struct BPoint(Equatable, TrivialRegisterPassable, Writable):
 
     var x: Float32
     var y: Float32
+
+    def __init__(out self):
+        """`BPoint::BPoint()`."""
+        self = external_call["mojobe_BPoint_new", Self]()
+
+    def Set(mut self, x: Float32, y: Float32):
+        """`void BPoint::Set(float x, float y)`."""
+        external_call["mojobe_BPoint_Set", NoneType](_address_of(self), x, y)
+
+    def ConstrainTo(mut self, rect: BRect):
+        """`void BPoint::ConstrainTo(BRect rect)`."""
+        external_call["mojobe_BPoint_ConstrainTo", NoneType](
+            _address_of(self),
+            rect,
+        )
+
+    def PrintToStream(self):
+        """`void BPoint::PrintToStream() const`."""
+        external_call["mojobe_BPoint_PrintToStream", NoneType](self)
+
+    def __neg__(self) -> BPoint:
+        """`BPoint BPoint::operator-() const`."""
+        var _result = external_call["mojobe_BPoint_neg__void", BPoint](self)
+        return _result
+
+    def __sub__(self, other: BPoint) -> BPoint:
+        """`BPoint BPoint::operator-(const BPoint& other) const`."""
+        var _result = external_call["mojobe_BPoint_sub__BPoint", BPoint](
+            self,
+            other,
+        )
+        return _result
+
+    def __add__(self, other: BPoint) -> BPoint:
+        """`BPoint BPoint::operator+(const BPoint& other) const`."""
+        var _result = external_call["mojobe_BPoint_add", BPoint](self, other)
+        return _result
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write("BPoint(", self.x, ", ", self.y, ")")
