@@ -16,7 +16,7 @@ Build on Prose, as Dots is built:
 
 from haiku import BHandler, BLooper, BLooperRef, BMessage, BMessageRef
 from haiku import BPoint, BRect
-from haiku import BView, fourcc, rgb
+from haiku import BApplication, BMenu, BMenuItem, BView, fourcc, rgb
 from haiku import B_ANY_TYPE, B_DOCUMENT_WINDOW, B_INT32_TYPE
 from haiku import B_TITLED_WINDOW, B_WILL_DRAW
 from haiku import B_ERROR, B_NAME_NOT_FOUND, status_of, window_type
@@ -202,6 +202,23 @@ def main() raises:
         checks.check("state of the wrong type raises", False)
     except e:
         checks.check("state of the wrong type raises", True)
+
+    # An adopting method that fails: BMenu::AddItem at an index out of
+    # range returns false and does not take the item; the bridge deletes
+    # it, as Mojo gave it up (a leak before; the guarded-heap run catches a
+    # double delete).
+    # (Menus need the app_server, so a BApplication; Mojo ends it at its
+    # last use, so that comes after them.)
+    var app = BApplication("application/x-vnd.Prose-bridge-check")
+    var menu = BMenu("menu")
+    var added = menu.AddItem(BMenuItem("one", BMessage(fourcc("one "))))
+    var refused = menu.AddItem(BMenuItem("two", BMessage(fourcc("two "))), 5)
+    checks.check(
+        "AddItem out of range: false, and the menu unchanged",
+        added and not refused and menu.CountItems() == 1,
+    )
+    _ = menu^
+    _ = app^
 
     var total = checks.passed + checks.failed
     if checks.failed:

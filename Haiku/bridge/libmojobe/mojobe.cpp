@@ -103,6 +103,20 @@ mojobe_from_c(const mojobe_pattern& value)
 }
 
 
+/*!	A C++ exception other than bad_alloc reached an entry point: a bridge
+	bug. It must not unwind into Mojo's frames, so it stops here.
+*/
+void
+mojobe_unexpected(const char* entry)
+{
+	char text[256];
+	snprintf(text, sizeof(text),
+		"mojobe: %s: a C++ exception reached the bridge", entry);
+	debugger(text);
+}
+
+
+
 /*!	Counts the hooks of one object that are running, so that a hook entered
 	again on the same object -- AddChild() calling AttachedToWindow(), say --
 	goes to the base class instead of into Mojo a second time: two live
@@ -705,7 +719,14 @@ mojobe_MojoBView_context(BView* self, uint64 type)
 bool
 mojobe_BMessenger_equals(const BMessenger* self, const BMessenger* other)
 {
-	return *self == *other;
+	try {
+		return *self == *other;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_equals");
+	}
+	return {};
 }
 
 
@@ -713,7 +734,14 @@ mojobe_BMessenger_equals(const BMessenger* self, const BMessenger* other)
 bool
 mojobe_BMessenger_IsTargetLocal(BMessenger* self)
 {
-	return self->IsTargetLocal();
+	try {
+		return self->IsTargetLocal();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_IsTargetLocal");
+	}
+	return {};
 }
 
 
@@ -721,7 +749,14 @@ mojobe_BMessenger_IsTargetLocal(BMessenger* self)
 bool
 mojobe_BMessenger_LockTarget(BMessenger* self)
 {
-	return self->LockTarget();
+	try {
+		return self->LockTarget();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_LockTarget");
+	}
+	return {};
 }
 
 
@@ -729,7 +764,14 @@ mojobe_BMessenger_LockTarget(BMessenger* self)
 status_t
 mojobe_BMessenger_LockTargetWithTimeout(BMessenger* self, bigtime_t a_timeout)
 {
-	return self->LockTargetWithTimeout(a_timeout);
+	try {
+		return self->LockTargetWithTimeout(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_LockTargetWithTimeout");
+	}
+	return B_ERROR;
 }
 
 
@@ -739,7 +781,14 @@ mojobe_BMessenger_SendMessage__uint32_BHandlerP(BMessenger* self,
 	uint32 a_command,
 	BHandler* a_replyTo)
 {
-	return self->SendMessage(a_command, a_replyTo);
+	try {
+		return self->SendMessage(a_command, a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SendMessage__uint32_BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -750,7 +799,14 @@ mojobe_BMessenger_SendMessage__BMessageP_BHandlerP_bigtime_t(BMessenger* self,
 	BHandler* a_replyTo,
 	bigtime_t a_timeout)
 {
-	return self->SendMessage(a_message, a_replyTo, a_timeout);
+	try {
+		return self->SendMessage(a_message, a_replyTo, a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SendMessage__BMessageP_BHandlerP_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -761,7 +817,14 @@ mojobe_BMessenger_SendMessage__BMessageP_BMessenger_bigtime_t(BMessenger* self,
 	const BMessenger* a_replyTo,
 	bigtime_t a_timeout)
 {
-	return self->SendMessage(a_message, *a_replyTo, a_timeout);
+	try {
+		return self->SendMessage(a_message, *a_replyTo, a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SendMessage__BMessageP_BMessenger_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -771,7 +834,14 @@ mojobe_BMessenger_SendMessage__uint32_BMessageP(BMessenger* self,
 	uint32 a_command,
 	BMessage* a_reply)
 {
-	return self->SendMessage(a_command, a_reply);
+	try {
+		return self->SendMessage(a_command, a_reply);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SendMessage__uint32_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -783,7 +853,14 @@ mojobe_BMessenger_SendMessage__BMessageP_BMessageP_bigtime_t_bigtime_t(BMessenge
 	bigtime_t a_deliveryTimeout,
 	bigtime_t a_replyTimeout)
 {
-	return self->SendMessage(a_message, a_reply, a_deliveryTimeout, a_replyTimeout);
+	try {
+		return self->SendMessage(a_message, a_reply, a_deliveryTimeout, a_replyTimeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SendMessage__BMessageP_BMessageP_bigtime_t_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -793,7 +870,14 @@ mojobe_BMessenger_SetTo__charP_team_id(BMessenger* self,
 	const char* a_signature,
 	team_id a_team)
 {
-	return self->SetTo(a_signature, a_team);
+	try {
+		return self->SetTo(a_signature, a_team);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SetTo__charP_team_id");
+	}
+	return B_ERROR;
 }
 
 
@@ -803,7 +887,14 @@ mojobe_BMessenger_SetTo__BHandlerP_BLooperP(BMessenger* self,
 	BHandler* a_handler,
 	BLooper* a_looper)
 {
-	return self->SetTo(a_handler, a_looper);
+	try {
+		return self->SetTo(a_handler, a_looper);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_SetTo__BHandlerP_BLooperP");
+	}
+	return B_ERROR;
 }
 
 
@@ -811,7 +902,14 @@ mojobe_BMessenger_SetTo__BHandlerP_BLooperP(BMessenger* self,
 bool
 mojobe_BMessenger_IsValid(BMessenger* self)
 {
-	return self->IsValid();
+	try {
+		return self->IsValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_IsValid");
+	}
+	return {};
 }
 
 
@@ -819,7 +917,14 @@ mojobe_BMessenger_IsValid(BMessenger* self)
 int32
 mojobe_BMessenger_Team(BMessenger* self)
 {
-	return self->Team();
+	try {
+		return self->Team();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_Team");
+	}
+	return {};
 }
 
 
@@ -827,7 +932,14 @@ mojobe_BMessenger_Team(BMessenger* self)
 uint32
 mojobe_BMessenger_HashValue(BMessenger* self)
 {
-	return self->HashValue();
+	try {
+		return self->HashValue();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_HashValue");
+	}
+	return {};
 }
 
 
@@ -838,10 +950,16 @@ mojobe_BMessenger_new__charP_team_id_status_tP(BMessenger* self,
 	team_id a_team,
 	status_t* a_result)
 {
-	status_t status = B_NO_MEMORY;
-	new(self) BMessenger(a_signature, a_team, &status);
-	if (a_result != NULL)
-		*a_result = status;
+	try {
+		status_t status = B_NO_MEMORY;
+		new(self) BMessenger(a_signature, a_team, &status);
+		if (a_result != NULL)
+			*a_result = status;
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_new__charP_team_id_status_tP");
+	}
 }
 
 
@@ -852,10 +970,16 @@ mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP(BMessenger* self,
 	BLooper* a_looper,
 	status_t* a_result)
 {
-	status_t status = B_NO_MEMORY;
-	new(self) BMessenger(a_handler, a_looper, &status);
-	if (a_result != NULL)
-		*a_result = status;
+	try {
+		status_t status = B_NO_MEMORY;
+		new(self) BMessenger(a_handler, a_looper, &status);
+		if (a_result != NULL)
+			*a_result = status;
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP");
+	}
 }
 
 
@@ -863,7 +987,13 @@ mojobe_BMessenger_new__BHandlerP_BLooperP_status_tP(BMessenger* self,
 void
 mojobe_BMessenger_new__void(BMessenger* self)
 {
-	new(self) BMessenger();
+	try {
+		new(self) BMessenger();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessenger_new__void");
+	}
 }
 
 
@@ -875,7 +1005,14 @@ mojobe_BMessenger_new__void(BMessenger* self)
 status_t
 mojobe_BHandler_Archive(BHandler* self, BMessage* a_data, bool a_deep)
 {
-	return self->Archive(a_data, a_deep);
+	try {
+		return self->Archive(a_data, a_deep);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_Archive");
+	}
+	return B_ERROR;
 }
 
 
@@ -883,7 +1020,13 @@ mojobe_BHandler_Archive(BHandler* self, BMessage* a_data, bool a_deep)
 void
 mojobe_BHandler_MessageReceived(BHandler* self, BMessage* a_message)
 {
-	self->MessageReceived(a_message);
+	try {
+		self->MessageReceived(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_MessageReceived");
+	}
 }
 
 
@@ -891,7 +1034,14 @@ mojobe_BHandler_MessageReceived(BHandler* self, BMessage* a_message)
 BLooper*
 mojobe_BHandler_Looper(BHandler* self)
 {
-	return self->Looper();
+	try {
+		return self->Looper();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_Looper");
+	}
+	return {};
 }
 
 
@@ -899,7 +1049,13 @@ mojobe_BHandler_Looper(BHandler* self)
 void
 mojobe_BHandler_SetName(BHandler* self, const char* a_name)
 {
-	self->SetName(a_name);
+	try {
+		self->SetName(a_name);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_SetName");
+	}
 }
 
 
@@ -907,7 +1063,14 @@ mojobe_BHandler_SetName(BHandler* self, const char* a_name)
 const char*
 mojobe_BHandler_Name(BHandler* self)
 {
-	return self->Name();
+	try {
+		return self->Name();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_Name");
+	}
+	return {};
 }
 
 
@@ -915,7 +1078,13 @@ mojobe_BHandler_Name(BHandler* self)
 void
 mojobe_BHandler_SetNextHandler(BHandler* self, BHandler* a_handler)
 {
-	self->SetNextHandler(a_handler);
+	try {
+		self->SetNextHandler(a_handler);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_SetNextHandler");
+	}
 }
 
 
@@ -923,7 +1092,14 @@ mojobe_BHandler_SetNextHandler(BHandler* self, BHandler* a_handler)
 BHandler*
 mojobe_BHandler_NextHandler(BHandler* self)
 {
-	return self->NextHandler();
+	try {
+		return self->NextHandler();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_NextHandler");
+	}
+	return {};
 }
 
 
@@ -931,7 +1107,14 @@ mojobe_BHandler_NextHandler(BHandler* self)
 bool
 mojobe_BHandler_LockLooper(BHandler* self)
 {
-	return self->LockLooper();
+	try {
+		return self->LockLooper();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_LockLooper");
+	}
+	return {};
 }
 
 
@@ -939,7 +1122,14 @@ mojobe_BHandler_LockLooper(BHandler* self)
 status_t
 mojobe_BHandler_LockLooperWithTimeout(BHandler* self, bigtime_t a_timeout)
 {
-	return self->LockLooperWithTimeout(a_timeout);
+	try {
+		return self->LockLooperWithTimeout(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_LockLooperWithTimeout");
+	}
+	return B_ERROR;
 }
 
 
@@ -947,7 +1137,13 @@ mojobe_BHandler_LockLooperWithTimeout(BHandler* self, bigtime_t a_timeout)
 void
 mojobe_BHandler_UnlockLooper(BHandler* self)
 {
-	self->UnlockLooper();
+	try {
+		self->UnlockLooper();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_UnlockLooper");
+	}
 }
 
 
@@ -960,7 +1156,14 @@ mojobe_BHandler_ResolveSpecifier(BHandler* self,
 	int32 a_what,
 	const char* a_property)
 {
-	return self->ResolveSpecifier(a_message, a_index, a_specifier, a_what, a_property);
+	try {
+		return self->ResolveSpecifier(a_message, a_index, a_specifier, a_what, a_property);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_ResolveSpecifier");
+	}
+	return {};
 }
 
 
@@ -968,7 +1171,14 @@ mojobe_BHandler_ResolveSpecifier(BHandler* self,
 status_t
 mojobe_BHandler_GetSupportedSuites(BHandler* self, BMessage* a_data)
 {
-	return self->GetSupportedSuites(a_data);
+	try {
+		return self->GetSupportedSuites(a_data);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_GetSupportedSuites");
+	}
+	return B_ERROR;
 }
 
 
@@ -978,7 +1188,14 @@ mojobe_BHandler_StartWatching__BMessenger_uint32(BHandler* self,
 	const BMessenger* a_target,
 	uint32 a_what)
 {
-	return self->StartWatching(*a_target, a_what);
+	try {
+		return self->StartWatching(*a_target, a_what);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StartWatching__BMessenger_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -988,7 +1205,14 @@ mojobe_BHandler_StartWatching__BHandlerP_uint32(BHandler* self,
 	BHandler* a_observer,
 	uint32 a_what)
 {
-	return self->StartWatching(a_observer, a_what);
+	try {
+		return self->StartWatching(a_observer, a_what);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StartWatching__BHandlerP_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -997,7 +1221,14 @@ status_t
 mojobe_BHandler_StartWatchingAll__BMessenger(BHandler* self,
 	const BMessenger* a_target)
 {
-	return self->StartWatchingAll(*a_target);
+	try {
+		return self->StartWatchingAll(*a_target);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StartWatchingAll__BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -1006,7 +1237,14 @@ status_t
 mojobe_BHandler_StartWatchingAll__BHandlerP(BHandler* self,
 	BHandler* a_observer)
 {
-	return self->StartWatchingAll(a_observer);
+	try {
+		return self->StartWatchingAll(a_observer);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StartWatchingAll__BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -1016,7 +1254,14 @@ mojobe_BHandler_StopWatching__BMessenger_uint32(BHandler* self,
 	const BMessenger* a_target,
 	uint32 a_what)
 {
-	return self->StopWatching(*a_target, a_what);
+	try {
+		return self->StopWatching(*a_target, a_what);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StopWatching__BMessenger_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -1026,7 +1271,14 @@ mojobe_BHandler_StopWatching__BHandlerP_uint32(BHandler* self,
 	BHandler* a_observer,
 	uint32 a_what)
 {
-	return self->StopWatching(a_observer, a_what);
+	try {
+		return self->StopWatching(a_observer, a_what);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StopWatching__BHandlerP_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -1035,7 +1287,14 @@ status_t
 mojobe_BHandler_StopWatchingAll__BMessenger(BHandler* self,
 	const BMessenger* a_target)
 {
-	return self->StopWatchingAll(*a_target);
+	try {
+		return self->StopWatchingAll(*a_target);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StopWatchingAll__BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -1043,7 +1302,14 @@ mojobe_BHandler_StopWatchingAll__BMessenger(BHandler* self,
 status_t
 mojobe_BHandler_StopWatchingAll__BHandlerP(BHandler* self, BHandler* a_observer)
 {
-	return self->StopWatchingAll(a_observer);
+	try {
+		return self->StopWatchingAll(a_observer);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_StopWatchingAll__BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -1051,7 +1317,13 @@ mojobe_BHandler_StopWatchingAll__BHandlerP(BHandler* self, BHandler* a_observer)
 void
 mojobe_BHandler_SendNotices(BHandler* self, uint32 a_what, BMessage* a_notice)
 {
-	self->SendNotices(a_what, a_notice);
+	try {
+		self->SendNotices(a_what, a_notice);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_SendNotices");
+	}
 }
 
 
@@ -1059,7 +1331,14 @@ mojobe_BHandler_SendNotices(BHandler* self, uint32 a_what, BMessage* a_notice)
 bool
 mojobe_BHandler_IsWatched(BHandler* self)
 {
-	return self->IsWatched();
+	try {
+		return self->IsWatched();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_IsWatched");
+	}
+	return {};
 }
 
 
@@ -1067,7 +1346,14 @@ mojobe_BHandler_IsWatched(BHandler* self)
 status_t
 mojobe_BHandler_AllUnarchived(BHandler* self, BMessage* a_archive)
 {
-	return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	try {
+		return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_AllUnarchived");
+	}
+	return B_ERROR;
 }
 
 
@@ -1075,7 +1361,14 @@ mojobe_BHandler_AllUnarchived(BHandler* self, BMessage* a_archive)
 status_t
 mojobe_BHandler_AllArchived(BHandler* self, BMessage* a_archive)
 {
-	return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	try {
+		return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_AllArchived");
+	}
+	return B_ERROR;
 }
 
 
@@ -1131,7 +1424,14 @@ mojobe_BHandler_to_BMenuBar(BHandler* self)
 BHandler*
 mojobe_BHandler_new(const char* a_name)
 {
-	return new(std::nothrow) BHandler(a_name);
+	try {
+		return new(std::nothrow) BHandler(a_name);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_new");
+	}
+	return {};
 }
 
 
@@ -1141,7 +1441,14 @@ mojobe_MojoBHandler_new(const char* a_name,
 	const mojobe_BHandler_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBHandler(a_name, hooks, context);
+	try {
+		return new(std::nothrow) MojoBHandler(a_name, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBHandler_new");
+	}
+	return {};
 }
 
 
@@ -1157,7 +1464,13 @@ mojobe_BHandler_delete(BHandler* self)
 void
 mojobe_BHandler_base_MessageReceived(BHandler* self, BMessage* message)
 {
-	self->BHandler::MessageReceived(message);
+	try {
+		self->BHandler::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BHandler_base_MessageReceived");
+	}
 }
 
 
@@ -1169,7 +1482,14 @@ mojobe_BHandler_base_MessageReceived(BHandler* self, BMessage* message)
 status_t
 mojobe_BLooper_PostMessage__uint32(BLooper* self, uint32 a_command)
 {
-	return self->PostMessage(a_command);
+	try {
+		return self->PostMessage(a_command);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_PostMessage__uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -1177,7 +1497,14 @@ mojobe_BLooper_PostMessage__uint32(BLooper* self, uint32 a_command)
 status_t
 mojobe_BLooper_PostMessage__BMessageP(BLooper* self, BMessage* a_message)
 {
-	return self->PostMessage(a_message);
+	try {
+		return self->PostMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_PostMessage__BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -1188,7 +1515,14 @@ mojobe_BLooper_PostMessage__uint32_BHandlerP_BHandlerP(BLooper* self,
 	BHandler* a_handler,
 	BHandler* a_replyTo)
 {
-	return self->PostMessage(a_command, a_handler, a_replyTo);
+	try {
+		return self->PostMessage(a_command, a_handler, a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_PostMessage__uint32_BHandlerP_BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -1199,7 +1533,14 @@ mojobe_BLooper_PostMessage__BMessageP_BHandlerP_BHandlerP(BLooper* self,
 	BHandler* a_handler,
 	BHandler* a_replyTo)
 {
-	return self->PostMessage(a_message, a_handler, a_replyTo);
+	try {
+		return self->PostMessage(a_message, a_handler, a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_PostMessage__BMessageP_BHandlerP_BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -1209,7 +1550,13 @@ mojobe_BLooper_DispatchMessage(BLooper* self,
 	BMessage* a_message,
 	BHandler* a_handler)
 {
-	self->DispatchMessage(a_message, a_handler);
+	try {
+		self->DispatchMessage(a_message, a_handler);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_DispatchMessage");
+	}
 }
 
 
@@ -1217,7 +1564,14 @@ mojobe_BLooper_DispatchMessage(BLooper* self,
 BMessage*
 mojobe_BLooper_CurrentMessage(BLooper* self)
 {
-	return self->CurrentMessage();
+	try {
+		return self->CurrentMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_CurrentMessage");
+	}
+	return {};
 }
 
 
@@ -1225,7 +1579,14 @@ mojobe_BLooper_CurrentMessage(BLooper* self)
 BMessage*
 mojobe_BLooper_DetachCurrentMessage(BLooper* self)
 {
-	return self->DetachCurrentMessage();
+	try {
+		return self->DetachCurrentMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_DetachCurrentMessage");
+	}
+	return {};
 }
 
 
@@ -1236,7 +1597,13 @@ mojobe_BLooper_DispatchExternalMessage(BLooper* self,
 	BHandler* a_handler,
 	bool a__detached)
 {
-	self->DispatchExternalMessage(a_message, a_handler, a__detached);
+	try {
+		self->DispatchExternalMessage(a_message, a_handler, a__detached);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_DispatchExternalMessage");
+	}
 }
 
 
@@ -1244,7 +1611,14 @@ mojobe_BLooper_DispatchExternalMessage(BLooper* self,
 bool
 mojobe_BLooper_IsMessageWaiting(BLooper* self)
 {
-	return self->IsMessageWaiting();
+	try {
+		return self->IsMessageWaiting();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_IsMessageWaiting");
+	}
+	return {};
 }
 
 
@@ -1252,7 +1626,13 @@ mojobe_BLooper_IsMessageWaiting(BLooper* self)
 void
 mojobe_BLooper_AddHandler(BLooper* self, BHandler* a_handler)
 {
-	self->AddHandler(a_handler);
+	try {
+		self->AddHandler(a_handler);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_AddHandler");
+	}
 }
 
 
@@ -1260,7 +1640,14 @@ mojobe_BLooper_AddHandler(BLooper* self, BHandler* a_handler)
 bool
 mojobe_BLooper_RemoveHandler(BLooper* self, BHandler* a_handler)
 {
-	return self->RemoveHandler(a_handler);
+	try {
+		return self->RemoveHandler(a_handler);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_RemoveHandler");
+	}
+	return {};
 }
 
 
@@ -1268,7 +1655,14 @@ mojobe_BLooper_RemoveHandler(BLooper* self, BHandler* a_handler)
 int32
 mojobe_BLooper_CountHandlers(BLooper* self)
 {
-	return self->CountHandlers();
+	try {
+		return self->CountHandlers();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_CountHandlers");
+	}
+	return {};
 }
 
 
@@ -1276,7 +1670,14 @@ mojobe_BLooper_CountHandlers(BLooper* self)
 BHandler*
 mojobe_BLooper_HandlerAt(BLooper* self, int32 a_index)
 {
-	return self->HandlerAt(a_index);
+	try {
+		return self->HandlerAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_HandlerAt");
+	}
+	return {};
 }
 
 
@@ -1284,7 +1685,14 @@ mojobe_BLooper_HandlerAt(BLooper* self, int32 a_index)
 int32
 mojobe_BLooper_IndexOf(BLooper* self, BHandler* a_handler)
 {
-	return self->IndexOf(a_handler);
+	try {
+		return self->IndexOf(a_handler);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_IndexOf");
+	}
+	return {};
 }
 
 
@@ -1292,7 +1700,14 @@ mojobe_BLooper_IndexOf(BLooper* self, BHandler* a_handler)
 BHandler*
 mojobe_BLooper_PreferredHandler(BLooper* self)
 {
-	return self->PreferredHandler();
+	try {
+		return self->PreferredHandler();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_PreferredHandler");
+	}
+	return {};
 }
 
 
@@ -1300,7 +1715,13 @@ mojobe_BLooper_PreferredHandler(BLooper* self)
 void
 mojobe_BLooper_SetPreferredHandler(BLooper* self, BHandler* a_handler)
 {
-	self->SetPreferredHandler(a_handler);
+	try {
+		self->SetPreferredHandler(a_handler);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_SetPreferredHandler");
+	}
 }
 
 
@@ -1308,7 +1729,14 @@ mojobe_BLooper_SetPreferredHandler(BLooper* self, BHandler* a_handler)
 int32
 mojobe_BLooper_Run(BLooper* self)
 {
-	return self->Run();
+	try {
+		return self->Run();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Run");
+	}
+	return {};
 }
 
 
@@ -1316,7 +1744,13 @@ mojobe_BLooper_Run(BLooper* self)
 void
 mojobe_BLooper_Loop(BLooper* self)
 {
-	self->Loop();
+	try {
+		self->Loop();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Loop");
+	}
 }
 
 
@@ -1324,7 +1758,13 @@ mojobe_BLooper_Loop(BLooper* self)
 void
 mojobe_BLooper_Quit(BLooper* self)
 {
-	self->Quit();
+	try {
+		self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Quit");
+	}
 }
 
 
@@ -1332,7 +1772,14 @@ mojobe_BLooper_Quit(BLooper* self)
 bool
 mojobe_BLooper_QuitRequested(BLooper* self)
 {
-	return self->QuitRequested();
+	try {
+		return self->QuitRequested();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_QuitRequested");
+	}
+	return {};
 }
 
 
@@ -1340,7 +1787,14 @@ mojobe_BLooper_QuitRequested(BLooper* self)
 bool
 mojobe_BLooper_Lock(BLooper* self)
 {
-	return self->Lock();
+	try {
+		return self->Lock();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Lock");
+	}
+	return {};
 }
 
 
@@ -1348,7 +1802,13 @@ mojobe_BLooper_Lock(BLooper* self)
 void
 mojobe_BLooper_Unlock(BLooper* self)
 {
-	self->Unlock();
+	try {
+		self->Unlock();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Unlock");
+	}
 }
 
 
@@ -1356,7 +1816,14 @@ mojobe_BLooper_Unlock(BLooper* self)
 bool
 mojobe_BLooper_IsLocked(BLooper* self)
 {
-	return self->IsLocked();
+	try {
+		return self->IsLocked();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_IsLocked");
+	}
+	return {};
 }
 
 
@@ -1364,7 +1831,14 @@ mojobe_BLooper_IsLocked(BLooper* self)
 status_t
 mojobe_BLooper_LockWithTimeout(BLooper* self, bigtime_t a_timeout)
 {
-	return self->LockWithTimeout(a_timeout);
+	try {
+		return self->LockWithTimeout(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_LockWithTimeout");
+	}
+	return B_ERROR;
 }
 
 
@@ -1372,7 +1846,14 @@ mojobe_BLooper_LockWithTimeout(BLooper* self, bigtime_t a_timeout)
 int32
 mojobe_BLooper_Thread(BLooper* self)
 {
-	return self->Thread();
+	try {
+		return self->Thread();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Thread");
+	}
+	return {};
 }
 
 
@@ -1380,7 +1861,14 @@ mojobe_BLooper_Thread(BLooper* self)
 int32
 mojobe_BLooper_Team(BLooper* self)
 {
-	return self->Team();
+	try {
+		return self->Team();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Team");
+	}
+	return {};
 }
 
 
@@ -1388,7 +1876,14 @@ mojobe_BLooper_Team(BLooper* self)
 int32
 mojobe_BLooper_LockingThread(BLooper* self)
 {
-	return self->LockingThread();
+	try {
+		return self->LockingThread();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_LockingThread");
+	}
+	return {};
 }
 
 
@@ -1396,7 +1891,14 @@ mojobe_BLooper_LockingThread(BLooper* self)
 int32
 mojobe_BLooper_CountLocks(BLooper* self)
 {
-	return self->CountLocks();
+	try {
+		return self->CountLocks();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_CountLocks");
+	}
+	return {};
 }
 
 
@@ -1404,7 +1906,14 @@ mojobe_BLooper_CountLocks(BLooper* self)
 int32
 mojobe_BLooper_CountLockRequests(BLooper* self)
 {
-	return self->CountLockRequests();
+	try {
+		return self->CountLockRequests();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_CountLockRequests");
+	}
+	return {};
 }
 
 
@@ -1412,7 +1921,14 @@ mojobe_BLooper_CountLockRequests(BLooper* self)
 int32
 mojobe_BLooper_Sem(BLooper* self)
 {
-	return self->Sem();
+	try {
+		return self->Sem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_Sem");
+	}
+	return {};
 }
 
 
@@ -1444,7 +1960,14 @@ mojobe_BLooper_to_BWindow(BLooper* self)
 BLooper*
 mojobe_BLooper_new(const char* a_name, int32 a_priority, int32 a_portCapacity)
 {
-	return new(std::nothrow) BLooper(a_name, a_priority, a_portCapacity);
+	try {
+		return new(std::nothrow) BLooper(a_name, a_priority, a_portCapacity);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_new");
+	}
+	return {};
 }
 
 
@@ -1456,7 +1979,14 @@ mojobe_MojoBLooper_new(const char* a_name,
 	const mojobe_BLooper_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBLooper(a_name, a_priority, a_portCapacity, hooks, context);
+	try {
+		return new(std::nothrow) MojoBLooper(a_name, a_priority, a_portCapacity, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBLooper_new");
+	}
+	return {};
 }
 
 
@@ -1464,8 +1994,14 @@ mojobe_MojoBLooper_new(const char* a_name,
 void
 mojobe_BLooper_destroy(BLooper* self)
 {
-	if (self->Lock())
-		self->Quit();
+	try {
+		if (self->Lock())
+			self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_destroy");
+	}
 }
 
 
@@ -1473,7 +2009,13 @@ mojobe_BLooper_destroy(BLooper* self)
 void
 mojobe_BLooper_base_MessageReceived(BLooper* self, BMessage* message)
 {
-	self->BLooper::MessageReceived(message);
+	try {
+		self->BLooper::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_base_MessageReceived");
+	}
 }
 
 
@@ -1481,7 +2023,14 @@ mojobe_BLooper_base_MessageReceived(BLooper* self, BMessage* message)
 bool
 mojobe_BLooper_base_QuitRequested(BLooper* self)
 {
-	return self->BLooper::QuitRequested();
+	try {
+		return self->BLooper::QuitRequested();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_base_QuitRequested");
+	}
+	return {};
 }
 
 
@@ -1493,7 +2042,14 @@ mojobe_BLooper_base_QuitRequested(BLooper* self)
 status_t
 mojobe_BApplication_InitCheck(BApplication* self)
 {
-	return self->InitCheck();
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_InitCheck");
+	}
+	return B_ERROR;
 }
 
 
@@ -1501,7 +2057,14 @@ mojobe_BApplication_InitCheck(BApplication* self)
 int32
 mojobe_BApplication_Run(BApplication* self)
 {
-	return self->Run();
+	try {
+		return self->Run();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_Run");
+	}
+	return {};
 }
 
 
@@ -1509,7 +2072,13 @@ mojobe_BApplication_Run(BApplication* self)
 void
 mojobe_BApplication_Quit(BApplication* self)
 {
-	self->Quit();
+	try {
+		self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_Quit");
+	}
 }
 
 
@@ -1517,7 +2086,13 @@ mojobe_BApplication_Quit(BApplication* self)
 void
 mojobe_BApplication_Pulse(BApplication* self)
 {
-	self->Pulse();
+	try {
+		self->Pulse();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_Pulse");
+	}
 }
 
 
@@ -1525,7 +2100,13 @@ mojobe_BApplication_Pulse(BApplication* self)
 void
 mojobe_BApplication_ReadyToRun(BApplication* self)
 {
-	self->ReadyToRun();
+	try {
+		self->ReadyToRun();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_ReadyToRun");
+	}
 }
 
 
@@ -1533,7 +2114,13 @@ mojobe_BApplication_ReadyToRun(BApplication* self)
 void
 mojobe_BApplication_AppActivated(BApplication* self, bool a_active)
 {
-	self->AppActivated(a_active);
+	try {
+		self->AppActivated(a_active);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_AppActivated");
+	}
 }
 
 
@@ -1541,7 +2128,13 @@ mojobe_BApplication_AppActivated(BApplication* self, bool a_active)
 void
 mojobe_BApplication_RefsReceived(BApplication* self, BMessage* a_message)
 {
-	self->RefsReceived(a_message);
+	try {
+		self->RefsReceived(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_RefsReceived");
+	}
 }
 
 
@@ -1549,7 +2142,13 @@ mojobe_BApplication_RefsReceived(BApplication* self, BMessage* a_message)
 void
 mojobe_BApplication_AboutRequested(BApplication* self)
 {
-	self->AboutRequested();
+	try {
+		self->AboutRequested();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_AboutRequested");
+	}
 }
 
 
@@ -1557,7 +2156,13 @@ mojobe_BApplication_AboutRequested(BApplication* self)
 void
 mojobe_BApplication_ShowCursor(BApplication* self)
 {
-	self->ShowCursor();
+	try {
+		self->ShowCursor();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_ShowCursor");
+	}
 }
 
 
@@ -1565,7 +2170,13 @@ mojobe_BApplication_ShowCursor(BApplication* self)
 void
 mojobe_BApplication_HideCursor(BApplication* self)
 {
-	self->HideCursor();
+	try {
+		self->HideCursor();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_HideCursor");
+	}
 }
 
 
@@ -1573,7 +2184,13 @@ mojobe_BApplication_HideCursor(BApplication* self)
 void
 mojobe_BApplication_ObscureCursor(BApplication* self)
 {
-	self->ObscureCursor();
+	try {
+		self->ObscureCursor();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_ObscureCursor");
+	}
 }
 
 
@@ -1581,7 +2198,14 @@ mojobe_BApplication_ObscureCursor(BApplication* self)
 bool
 mojobe_BApplication_IsCursorHidden(BApplication* self)
 {
-	return self->IsCursorHidden();
+	try {
+		return self->IsCursorHidden();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_IsCursorHidden");
+	}
+	return {};
 }
 
 
@@ -1589,7 +2213,14 @@ mojobe_BApplication_IsCursorHidden(BApplication* self)
 int32
 mojobe_BApplication_CountWindows(BApplication* self)
 {
-	return self->CountWindows();
+	try {
+		return self->CountWindows();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_CountWindows");
+	}
+	return {};
 }
 
 
@@ -1597,7 +2228,14 @@ mojobe_BApplication_CountWindows(BApplication* self)
 BWindow*
 mojobe_BApplication_WindowAt(BApplication* self, int32 a_index)
 {
-	return self->WindowAt(a_index);
+	try {
+		return self->WindowAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_WindowAt");
+	}
+	return {};
 }
 
 
@@ -1605,7 +2243,14 @@ mojobe_BApplication_WindowAt(BApplication* self, int32 a_index)
 int32
 mojobe_BApplication_CountLoopers(BApplication* self)
 {
-	return self->CountLoopers();
+	try {
+		return self->CountLoopers();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_CountLoopers");
+	}
+	return {};
 }
 
 
@@ -1613,7 +2258,14 @@ mojobe_BApplication_CountLoopers(BApplication* self)
 BLooper*
 mojobe_BApplication_LooperAt(BApplication* self, int32 a_index)
 {
-	return self->LooperAt(a_index);
+	try {
+		return self->LooperAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_LooperAt");
+	}
+	return {};
 }
 
 
@@ -1621,7 +2273,14 @@ mojobe_BApplication_LooperAt(BApplication* self, int32 a_index)
 bool
 mojobe_BApplication_IsLaunching(BApplication* self)
 {
-	return self->IsLaunching();
+	try {
+		return self->IsLaunching();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_IsLaunching");
+	}
+	return {};
 }
 
 
@@ -1629,7 +2288,14 @@ mojobe_BApplication_IsLaunching(BApplication* self)
 const char*
 mojobe_BApplication_Signature(BApplication* self)
 {
-	return self->Signature();
+	try {
+		return self->Signature();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_Signature");
+	}
+	return {};
 }
 
 
@@ -1637,7 +2303,13 @@ mojobe_BApplication_Signature(BApplication* self)
 void
 mojobe_BApplication_SetPulseRate(BApplication* self, bigtime_t a_rate)
 {
-	self->SetPulseRate(a_rate);
+	try {
+		self->SetPulseRate(a_rate);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_SetPulseRate");
+	}
 }
 
 
@@ -1645,7 +2317,14 @@ mojobe_BApplication_SetPulseRate(BApplication* self, bigtime_t a_rate)
 status_t
 mojobe_BApplication_RegisterLooper(BApplication* self, BLooper* a_looper)
 {
-	return self->RegisterLooper(a_looper);
+	try {
+		return self->RegisterLooper(a_looper);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_RegisterLooper");
+	}
+	return B_ERROR;
 }
 
 
@@ -1653,7 +2332,14 @@ mojobe_BApplication_RegisterLooper(BApplication* self, BLooper* a_looper)
 status_t
 mojobe_BApplication_UnregisterLooper(BApplication* self, BLooper* a_looper)
 {
-	return self->UnregisterLooper(a_looper);
+	try {
+		return self->UnregisterLooper(a_looper);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_UnregisterLooper");
+	}
+	return B_ERROR;
 }
 
 
@@ -1677,15 +2363,22 @@ mojobe_BApplication_as_BHandler(BApplication* self)
 BApplication*
 mojobe_BApplication_new(const char* a_signature, status_t* a_error)
 {
-	status_t status = B_NO_MEMORY;
-	BApplication* object = new(std::nothrow) BApplication(a_signature, &status);
-	if (object != NULL && status != B_OK) {
-		delete object;
-		object = NULL;
+	try {
+		status_t status = B_NO_MEMORY;
+		BApplication* object = new(std::nothrow) BApplication(a_signature, &status);
+		if (object != NULL && status != B_OK) {
+			delete object;
+			object = NULL;
+		}
+		if (a_error != NULL)
+			*a_error = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_new");
 	}
-	if (a_error != NULL)
-		*a_error = status;
-	return object;
+	return {};
 }
 
 
@@ -1696,15 +2389,22 @@ mojobe_MojoBApplication_new(const char* a_signature,
 	const mojobe_BApplication_hooks* hooks,
 	void* context)
 {
-	status_t status = B_NO_MEMORY;
-	BApplication* object = new(std::nothrow) MojoBApplication(a_signature, &status, hooks, context);
-	if (object != NULL && status != B_OK) {
-		delete object;
-		object = NULL;
+	try {
+		status_t status = B_NO_MEMORY;
+		BApplication* object = new(std::nothrow) MojoBApplication(a_signature, &status, hooks, context);
+		if (object != NULL && status != B_OK) {
+			delete object;
+			object = NULL;
+		}
+		if (a_error != NULL)
+			*a_error = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBApplication_new");
 	}
-	if (a_error != NULL)
-		*a_error = status;
-	return object;
+	return {};
 }
 
 
@@ -1720,7 +2420,13 @@ mojobe_BApplication_delete(BApplication* self)
 void
 mojobe_BApplication_base_ReadyToRun(BApplication* self)
 {
-	self->BApplication::ReadyToRun();
+	try {
+		self->BApplication::ReadyToRun();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_ReadyToRun");
+	}
 }
 
 
@@ -1728,7 +2434,13 @@ mojobe_BApplication_base_ReadyToRun(BApplication* self)
 void
 mojobe_BApplication_base_MessageReceived(BApplication* self, BMessage* message)
 {
-	self->BApplication::MessageReceived(message);
+	try {
+		self->BApplication::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_MessageReceived");
+	}
 }
 
 
@@ -1736,7 +2448,14 @@ mojobe_BApplication_base_MessageReceived(BApplication* self, BMessage* message)
 bool
 mojobe_BApplication_base_QuitRequested(BApplication* self)
 {
-	return self->BApplication::QuitRequested();
+	try {
+		return self->BApplication::QuitRequested();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_QuitRequested");
+	}
+	return {};
 }
 
 
@@ -1744,7 +2463,13 @@ mojobe_BApplication_base_QuitRequested(BApplication* self)
 void
 mojobe_BApplication_base_AboutRequested(BApplication* self)
 {
-	self->BApplication::AboutRequested();
+	try {
+		self->BApplication::AboutRequested();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_AboutRequested");
+	}
 }
 
 
@@ -1752,7 +2477,13 @@ mojobe_BApplication_base_AboutRequested(BApplication* self)
 void
 mojobe_BApplication_base_Pulse(BApplication* self)
 {
-	self->BApplication::Pulse();
+	try {
+		self->BApplication::Pulse();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_Pulse");
+	}
 }
 
 
@@ -1764,7 +2495,13 @@ mojobe_BApplication_base_Pulse(BApplication* self)
 void
 mojobe_BWindow_Quit(BWindow* self)
 {
-	self->Quit();
+	try {
+		self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Quit");
+	}
 }
 
 
@@ -1772,7 +2509,13 @@ mojobe_BWindow_Quit(BWindow* self)
 void
 mojobe_BWindow_Close(BWindow* self)
 {
-	self->Close();
+	try {
+		self->Close();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Close");
+	}
 }
 
 
@@ -1780,7 +2523,13 @@ mojobe_BWindow_Close(BWindow* self)
 void
 mojobe_BWindow_AddChild(BWindow* self, BView* a_child, BView* a_before)
 {
-	self->AddChild(a_child, a_before);
+	try {
+		self->AddChild(a_child, a_before);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_AddChild");
+	}
 }
 
 
@@ -1788,7 +2537,14 @@ mojobe_BWindow_AddChild(BWindow* self, BView* a_child, BView* a_before)
 bool
 mojobe_BWindow_RemoveChild(BWindow* self, BView* a_child)
 {
-	return self->RemoveChild(a_child);
+	try {
+		return self->RemoveChild(a_child);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_RemoveChild");
+	}
+	return {};
 }
 
 
@@ -1796,7 +2552,14 @@ mojobe_BWindow_RemoveChild(BWindow* self, BView* a_child)
 int32
 mojobe_BWindow_CountChildren(BWindow* self)
 {
-	return self->CountChildren();
+	try {
+		return self->CountChildren();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_CountChildren");
+	}
+	return {};
 }
 
 
@@ -1804,7 +2567,14 @@ mojobe_BWindow_CountChildren(BWindow* self)
 BView*
 mojobe_BWindow_ChildAt(BWindow* self, int32 a_index)
 {
-	return self->ChildAt(a_index);
+	try {
+		return self->ChildAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ChildAt");
+	}
+	return {};
 }
 
 
@@ -1812,7 +2582,13 @@ mojobe_BWindow_ChildAt(BWindow* self, int32 a_index)
 void
 mojobe_BWindow_FrameMoved(BWindow* self, mojobe_BPoint a_newPosition)
 {
-	self->FrameMoved(mojobe_from_c(a_newPosition));
+	try {
+		self->FrameMoved(mojobe_from_c(a_newPosition));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_FrameMoved");
+	}
 }
 
 
@@ -1822,7 +2598,13 @@ mojobe_BWindow_WorkspacesChanged(BWindow* self,
 	uint32 a_oldWorkspaces,
 	uint32 a_newWorkspaces)
 {
-	self->WorkspacesChanged(a_oldWorkspaces, a_newWorkspaces);
+	try {
+		self->WorkspacesChanged(a_oldWorkspaces, a_newWorkspaces);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_WorkspacesChanged");
+	}
 }
 
 
@@ -1832,7 +2614,13 @@ mojobe_BWindow_WorkspaceActivated(BWindow* self,
 	int32 a_workspace,
 	bool a_state)
 {
-	self->WorkspaceActivated(a_workspace, a_state);
+	try {
+		self->WorkspaceActivated(a_workspace, a_state);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_WorkspaceActivated");
+	}
 }
 
 
@@ -1840,7 +2628,13 @@ mojobe_BWindow_WorkspaceActivated(BWindow* self,
 void
 mojobe_BWindow_FrameResized(BWindow* self, float a_newWidth, float a_newHeight)
 {
-	self->FrameResized(a_newWidth, a_newHeight);
+	try {
+		self->FrameResized(a_newWidth, a_newHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_FrameResized");
+	}
 }
 
 
@@ -1848,7 +2642,13 @@ mojobe_BWindow_FrameResized(BWindow* self, float a_newWidth, float a_newHeight)
 void
 mojobe_BWindow_Minimize(BWindow* self, bool a_minimize)
 {
-	self->Minimize(a_minimize);
+	try {
+		self->Minimize(a_minimize);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Minimize");
+	}
 }
 
 
@@ -1859,7 +2659,13 @@ mojobe_BWindow_Zoom__BPoint_float_float(BWindow* self,
 	float a_width,
 	float a_height)
 {
-	self->Zoom(mojobe_from_c(a_origin), a_width, a_height);
+	try {
+		self->Zoom(mojobe_from_c(a_origin), a_width, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Zoom__BPoint_float_float");
+	}
 }
 
 
@@ -1867,7 +2673,13 @@ mojobe_BWindow_Zoom__BPoint_float_float(BWindow* self,
 void
 mojobe_BWindow_Zoom__void(BWindow* self)
 {
-	self->Zoom();
+	try {
+		self->Zoom();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Zoom__void");
+	}
 }
 
 
@@ -1875,7 +2687,13 @@ mojobe_BWindow_Zoom__void(BWindow* self)
 void
 mojobe_BWindow_SetZoomLimits(BWindow* self, float a_maxWidth, float a_maxHeight)
 {
-	self->SetZoomLimits(a_maxWidth, a_maxHeight);
+	try {
+		self->SetZoomLimits(a_maxWidth, a_maxHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetZoomLimits");
+	}
 }
 
 
@@ -1883,7 +2701,13 @@ mojobe_BWindow_SetZoomLimits(BWindow* self, float a_maxWidth, float a_maxHeight)
 void
 mojobe_BWindow_SetPulseRate(BWindow* self, bigtime_t a_rate)
 {
-	self->SetPulseRate(a_rate);
+	try {
+		self->SetPulseRate(a_rate);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetPulseRate");
+	}
 }
 
 
@@ -1891,7 +2715,14 @@ mojobe_BWindow_SetPulseRate(BWindow* self, bigtime_t a_rate)
 int64
 mojobe_BWindow_PulseRate(BWindow* self)
 {
-	return self->PulseRate();
+	try {
+		return self->PulseRate();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_PulseRate");
+	}
+	return {};
 }
 
 
@@ -1902,7 +2733,13 @@ mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP(BWindow* self,
 	uint32 a_modifiers,
 	BMessage* a_message)
 {
-	self->AddShortcut(a_key, a_modifiers, a_message);
+	try {
+		self->AddShortcut(a_key, a_modifiers, a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP");
+	}
 }
 
 
@@ -1914,7 +2751,13 @@ mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP_BHandlerP(BWindow* self,
 	BMessage* a_message,
 	BHandler* a_target)
 {
-	self->AddShortcut(a_key, a_modifiers, a_message, a_target);
+	try {
+		self->AddShortcut(a_key, a_modifiers, a_message, a_target);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP_BHandlerP");
+	}
 }
 
 
@@ -1922,7 +2765,14 @@ mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP_BHandlerP(BWindow* self,
 bool
 mojobe_BWindow_HasShortcut(BWindow* self, uint32 a_key, uint32 a_modifiers)
 {
-	return self->HasShortcut(a_key, a_modifiers);
+	try {
+		return self->HasShortcut(a_key, a_modifiers);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_HasShortcut");
+	}
+	return {};
 }
 
 
@@ -1930,7 +2780,13 @@ mojobe_BWindow_HasShortcut(BWindow* self, uint32 a_key, uint32 a_modifiers)
 void
 mojobe_BWindow_RemoveShortcut(BWindow* self, uint32 a_key, uint32 a_modifiers)
 {
-	self->RemoveShortcut(a_key, a_modifiers);
+	try {
+		self->RemoveShortcut(a_key, a_modifiers);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_RemoveShortcut");
+	}
 }
 
 
@@ -1938,7 +2794,13 @@ mojobe_BWindow_RemoveShortcut(BWindow* self, uint32 a_key, uint32 a_modifiers)
 void
 mojobe_BWindow_MenusBeginning(BWindow* self)
 {
-	self->MenusBeginning();
+	try {
+		self->MenusBeginning();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MenusBeginning");
+	}
 }
 
 
@@ -1946,7 +2808,13 @@ mojobe_BWindow_MenusBeginning(BWindow* self)
 void
 mojobe_BWindow_MenusEnded(BWindow* self)
 {
-	self->MenusEnded();
+	try {
+		self->MenusEnded();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MenusEnded");
+	}
 }
 
 
@@ -1954,7 +2822,14 @@ mojobe_BWindow_MenusEnded(BWindow* self)
 bool
 mojobe_BWindow_NeedsUpdate(BWindow* self)
 {
-	return self->NeedsUpdate();
+	try {
+		return self->NeedsUpdate();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_NeedsUpdate");
+	}
+	return {};
 }
 
 
@@ -1962,7 +2837,13 @@ mojobe_BWindow_NeedsUpdate(BWindow* self)
 void
 mojobe_BWindow_UpdateIfNeeded(BWindow* self)
 {
-	self->UpdateIfNeeded();
+	try {
+		self->UpdateIfNeeded();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_UpdateIfNeeded");
+	}
 }
 
 
@@ -1970,7 +2851,14 @@ mojobe_BWindow_UpdateIfNeeded(BWindow* self)
 BView*
 mojobe_BWindow_FindView__charP(BWindow* self, const char* a_viewName)
 {
-	return self->FindView(a_viewName);
+	try {
+		return self->FindView(a_viewName);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_FindView__charP");
+	}
+	return {};
 }
 
 
@@ -1978,7 +2866,14 @@ mojobe_BWindow_FindView__charP(BWindow* self, const char* a_viewName)
 BView*
 mojobe_BWindow_FindView__BPoint(BWindow* self, mojobe_BPoint a_arg0)
 {
-	return self->FindView(mojobe_from_c(a_arg0));
+	try {
+		return self->FindView(mojobe_from_c(a_arg0));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_FindView__BPoint");
+	}
+	return {};
 }
 
 
@@ -1986,7 +2881,14 @@ mojobe_BWindow_FindView__BPoint(BWindow* self, mojobe_BPoint a_arg0)
 BView*
 mojobe_BWindow_CurrentFocus(BWindow* self)
 {
-	return self->CurrentFocus();
+	try {
+		return self->CurrentFocus();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_CurrentFocus");
+	}
+	return {};
 }
 
 
@@ -1994,7 +2896,13 @@ mojobe_BWindow_CurrentFocus(BWindow* self)
 void
 mojobe_BWindow_Activate(BWindow* self, bool a_arg0)
 {
-	self->Activate(a_arg0);
+	try {
+		self->Activate(a_arg0);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Activate");
+	}
 }
 
 
@@ -2002,7 +2910,13 @@ mojobe_BWindow_Activate(BWindow* self, bool a_arg0)
 void
 mojobe_BWindow_WindowActivated(BWindow* self, bool a_focus)
 {
-	self->WindowActivated(a_focus);
+	try {
+		self->WindowActivated(a_focus);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_WindowActivated");
+	}
 }
 
 
@@ -2010,7 +2924,14 @@ mojobe_BWindow_WindowActivated(BWindow* self, bool a_focus)
 mojobe_BPoint
 mojobe_BWindow_ConvertToScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ConvertToScreen__BPoint");
+	}
+	return {};
 }
 
 
@@ -2018,7 +2939,14 @@ mojobe_BWindow_ConvertToScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BWindow_ConvertToScreen__BRect(BWindow* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ConvertToScreen__BRect");
+	}
+	return {};
 }
 
 
@@ -2026,7 +2954,14 @@ mojobe_BWindow_ConvertToScreen__BRect(BWindow* self, mojobe_BRect a_rect)
 mojobe_BPoint
 mojobe_BWindow_ConvertFromScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ConvertFromScreen__BPoint");
+	}
+	return {};
 }
 
 
@@ -2034,7 +2969,14 @@ mojobe_BWindow_ConvertFromScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BWindow_ConvertFromScreen__BRect(BWindow* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ConvertFromScreen__BRect");
+	}
+	return {};
 }
 
 
@@ -2042,7 +2984,13 @@ mojobe_BWindow_ConvertFromScreen__BRect(BWindow* self, mojobe_BRect a_rect)
 void
 mojobe_BWindow_MoveBy(BWindow* self, float a_dx, float a_dy)
 {
-	self->MoveBy(a_dx, a_dy);
+	try {
+		self->MoveBy(a_dx, a_dy);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MoveBy");
+	}
 }
 
 
@@ -2050,7 +2998,13 @@ mojobe_BWindow_MoveBy(BWindow* self, float a_dx, float a_dy)
 void
 mojobe_BWindow_MoveTo__BPoint(BWindow* self, mojobe_BPoint a_arg0)
 {
-	self->MoveTo(mojobe_from_c(a_arg0));
+	try {
+		self->MoveTo(mojobe_from_c(a_arg0));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MoveTo__BPoint");
+	}
 }
 
 
@@ -2058,7 +3012,13 @@ mojobe_BWindow_MoveTo__BPoint(BWindow* self, mojobe_BPoint a_arg0)
 void
 mojobe_BWindow_MoveTo__float_float(BWindow* self, float a_x, float a_y)
 {
-	self->MoveTo(a_x, a_y);
+	try {
+		self->MoveTo(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MoveTo__float_float");
+	}
 }
 
 
@@ -2066,7 +3026,13 @@ mojobe_BWindow_MoveTo__float_float(BWindow* self, float a_x, float a_y)
 void
 mojobe_BWindow_ResizeBy(BWindow* self, float a_dx, float a_dy)
 {
-	self->ResizeBy(a_dx, a_dy);
+	try {
+		self->ResizeBy(a_dx, a_dy);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ResizeBy");
+	}
 }
 
 
@@ -2074,7 +3040,13 @@ mojobe_BWindow_ResizeBy(BWindow* self, float a_dx, float a_dy)
 void
 mojobe_BWindow_ResizeTo(BWindow* self, float a_width, float a_height)
 {
-	self->ResizeTo(a_width, a_height);
+	try {
+		self->ResizeTo(a_width, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ResizeTo");
+	}
 }
 
 
@@ -2082,7 +3054,13 @@ mojobe_BWindow_ResizeTo(BWindow* self, float a_width, float a_height)
 void
 mojobe_BWindow_ResizeToPreferred(BWindow* self)
 {
-	self->ResizeToPreferred();
+	try {
+		self->ResizeToPreferred();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_ResizeToPreferred");
+	}
 }
 
 
@@ -2090,7 +3068,13 @@ mojobe_BWindow_ResizeToPreferred(BWindow* self)
 void
 mojobe_BWindow_CenterIn(BWindow* self, mojobe_BRect a_rect)
 {
-	self->CenterIn(mojobe_from_c(a_rect));
+	try {
+		self->CenterIn(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_CenterIn");
+	}
 }
 
 
@@ -2098,7 +3082,13 @@ mojobe_BWindow_CenterIn(BWindow* self, mojobe_BRect a_rect)
 void
 mojobe_BWindow_CenterOnScreen(BWindow* self)
 {
-	self->CenterOnScreen();
+	try {
+		self->CenterOnScreen();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_CenterOnScreen");
+	}
 }
 
 
@@ -2106,7 +3096,13 @@ mojobe_BWindow_CenterOnScreen(BWindow* self)
 void
 mojobe_BWindow_MoveOnScreen(BWindow* self, uint32 a_flags)
 {
-	self->MoveOnScreen(a_flags);
+	try {
+		self->MoveOnScreen(a_flags);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_MoveOnScreen");
+	}
 }
 
 
@@ -2114,7 +3110,13 @@ mojobe_BWindow_MoveOnScreen(BWindow* self, uint32 a_flags)
 void
 mojobe_BWindow_Show(BWindow* self)
 {
-	self->Show();
+	try {
+		self->Show();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Show");
+	}
 }
 
 
@@ -2122,7 +3124,13 @@ mojobe_BWindow_Show(BWindow* self)
 void
 mojobe_BWindow_Hide(BWindow* self)
 {
-	self->Hide();
+	try {
+		self->Hide();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Hide");
+	}
 }
 
 
@@ -2130,7 +3138,14 @@ mojobe_BWindow_Hide(BWindow* self)
 bool
 mojobe_BWindow_IsHidden(BWindow* self)
 {
-	return self->IsHidden();
+	try {
+		return self->IsHidden();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsHidden");
+	}
+	return {};
 }
 
 
@@ -2138,7 +3153,14 @@ mojobe_BWindow_IsHidden(BWindow* self)
 bool
 mojobe_BWindow_IsMinimized(BWindow* self)
 {
-	return self->IsMinimized();
+	try {
+		return self->IsMinimized();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsMinimized");
+	}
+	return {};
 }
 
 
@@ -2146,7 +3168,13 @@ mojobe_BWindow_IsMinimized(BWindow* self)
 void
 mojobe_BWindow_Flush(BWindow* self)
 {
-	self->Flush();
+	try {
+		self->Flush();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Flush");
+	}
 }
 
 
@@ -2154,7 +3182,13 @@ mojobe_BWindow_Flush(BWindow* self)
 void
 mojobe_BWindow_Sync(BWindow* self)
 {
-	self->Sync();
+	try {
+		self->Sync();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Sync");
+	}
 }
 
 
@@ -2162,7 +3196,14 @@ mojobe_BWindow_Sync(BWindow* self)
 status_t
 mojobe_BWindow_SendBehind(BWindow* self, BWindow* a_window)
 {
-	return self->SendBehind(a_window);
+	try {
+		return self->SendBehind(a_window);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SendBehind");
+	}
+	return B_ERROR;
 }
 
 
@@ -2170,7 +3211,13 @@ mojobe_BWindow_SendBehind(BWindow* self, BWindow* a_window)
 void
 mojobe_BWindow_DisableUpdates(BWindow* self)
 {
-	self->DisableUpdates();
+	try {
+		self->DisableUpdates();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_DisableUpdates");
+	}
 }
 
 
@@ -2178,7 +3225,13 @@ mojobe_BWindow_DisableUpdates(BWindow* self)
 void
 mojobe_BWindow_EnableUpdates(BWindow* self)
 {
-	self->EnableUpdates();
+	try {
+		self->EnableUpdates();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_EnableUpdates");
+	}
 }
 
 
@@ -2186,7 +3239,13 @@ mojobe_BWindow_EnableUpdates(BWindow* self)
 void
 mojobe_BWindow_BeginViewTransaction(BWindow* self)
 {
-	self->BeginViewTransaction();
+	try {
+		self->BeginViewTransaction();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_BeginViewTransaction");
+	}
 }
 
 
@@ -2194,7 +3253,13 @@ mojobe_BWindow_BeginViewTransaction(BWindow* self)
 void
 mojobe_BWindow_EndViewTransaction(BWindow* self)
 {
-	self->EndViewTransaction();
+	try {
+		self->EndViewTransaction();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_EndViewTransaction");
+	}
 }
 
 
@@ -2202,7 +3267,14 @@ mojobe_BWindow_EndViewTransaction(BWindow* self)
 bool
 mojobe_BWindow_InViewTransaction(BWindow* self)
 {
-	return self->InViewTransaction();
+	try {
+		return self->InViewTransaction();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_InViewTransaction");
+	}
+	return {};
 }
 
 
@@ -2210,7 +3282,14 @@ mojobe_BWindow_InViewTransaction(BWindow* self)
 mojobe_BRect
 mojobe_BWindow_Bounds(BWindow* self)
 {
-	return mojobe_to_c(self->Bounds());
+	try {
+		return mojobe_to_c(self->Bounds());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Bounds");
+	}
+	return {};
 }
 
 
@@ -2218,7 +3297,14 @@ mojobe_BWindow_Bounds(BWindow* self)
 mojobe_BRect
 mojobe_BWindow_Frame(BWindow* self)
 {
-	return mojobe_to_c(self->Frame());
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Frame");
+	}
+	return {};
 }
 
 
@@ -2226,7 +3312,14 @@ mojobe_BWindow_Frame(BWindow* self)
 mojobe_BRect
 mojobe_BWindow_DecoratorFrame(BWindow* self)
 {
-	return mojobe_to_c(self->DecoratorFrame());
+	try {
+		return mojobe_to_c(self->DecoratorFrame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_DecoratorFrame");
+	}
+	return {};
 }
 
 
@@ -2234,7 +3327,14 @@ mojobe_BWindow_DecoratorFrame(BWindow* self)
 const char*
 mojobe_BWindow_Title(BWindow* self)
 {
-	return self->Title();
+	try {
+		return self->Title();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Title");
+	}
+	return {};
 }
 
 
@@ -2242,7 +3342,13 @@ mojobe_BWindow_Title(BWindow* self)
 void
 mojobe_BWindow_SetTitle(BWindow* self, const char* a_title)
 {
-	self->SetTitle(a_title);
+	try {
+		self->SetTitle(a_title);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetTitle");
+	}
 }
 
 
@@ -2250,7 +3356,14 @@ mojobe_BWindow_SetTitle(BWindow* self, const char* a_title)
 bool
 mojobe_BWindow_IsFront(BWindow* self)
 {
-	return self->IsFront();
+	try {
+		return self->IsFront();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsFront");
+	}
+	return {};
 }
 
 
@@ -2258,7 +3371,14 @@ mojobe_BWindow_IsFront(BWindow* self)
 bool
 mojobe_BWindow_IsActive(BWindow* self)
 {
-	return self->IsActive();
+	try {
+		return self->IsActive();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsActive");
+	}
+	return {};
 }
 
 
@@ -2266,7 +3386,13 @@ mojobe_BWindow_IsActive(BWindow* self)
 void
 mojobe_BWindow_SetKeyMenuBar(BWindow* self, BMenuBar* a_bar)
 {
-	self->SetKeyMenuBar(a_bar);
+	try {
+		self->SetKeyMenuBar(a_bar);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetKeyMenuBar");
+	}
 }
 
 
@@ -2274,7 +3400,14 @@ mojobe_BWindow_SetKeyMenuBar(BWindow* self, BMenuBar* a_bar)
 BMenuBar*
 mojobe_BWindow_KeyMenuBar(BWindow* self)
 {
-	return self->KeyMenuBar();
+	try {
+		return self->KeyMenuBar();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_KeyMenuBar");
+	}
+	return {};
 }
 
 
@@ -2286,7 +3419,13 @@ mojobe_BWindow_SetSizeLimits(BWindow* self,
 	float a_minHeight,
 	float a_maxHeight)
 {
-	self->SetSizeLimits(a_minWidth, a_maxWidth, a_minHeight, a_maxHeight);
+	try {
+		self->SetSizeLimits(a_minWidth, a_maxWidth, a_minHeight, a_maxHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetSizeLimits");
+	}
 }
 
 
@@ -2298,7 +3437,13 @@ mojobe_BWindow_GetSizeLimits(BWindow* self,
 	float * a_minHeight,
 	float * a_maxHeight)
 {
-	self->GetSizeLimits(a_minWidth, a_maxWidth, a_minHeight, a_maxHeight);
+	try {
+		self->GetSizeLimits(a_minWidth, a_maxWidth, a_minHeight, a_maxHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_GetSizeLimits");
+	}
 }
 
 
@@ -2306,7 +3451,13 @@ mojobe_BWindow_GetSizeLimits(BWindow* self,
 void
 mojobe_BWindow_UpdateSizeLimits(BWindow* self)
 {
-	self->UpdateSizeLimits();
+	try {
+		self->UpdateSizeLimits();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_UpdateSizeLimits");
+	}
 }
 
 
@@ -2314,7 +3465,14 @@ mojobe_BWindow_UpdateSizeLimits(BWindow* self)
 status_t
 mojobe_BWindow_SetDecoratorSettings(BWindow* self, BMessage* a_settings)
 {
-	return self->SetDecoratorSettings(*a_settings);
+	try {
+		return self->SetDecoratorSettings(*a_settings);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetDecoratorSettings");
+	}
+	return B_ERROR;
 }
 
 
@@ -2322,7 +3480,14 @@ mojobe_BWindow_SetDecoratorSettings(BWindow* self, BMessage* a_settings)
 status_t
 mojobe_BWindow_GetDecoratorSettings(BWindow* self, BMessage* a_settings)
 {
-	return self->GetDecoratorSettings(a_settings);
+	try {
+		return self->GetDecoratorSettings(a_settings);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_GetDecoratorSettings");
+	}
+	return B_ERROR;
 }
 
 
@@ -2330,7 +3495,14 @@ mojobe_BWindow_GetDecoratorSettings(BWindow* self, BMessage* a_settings)
 uint32
 mojobe_BWindow_Workspaces(BWindow* self)
 {
-	return self->Workspaces();
+	try {
+		return self->Workspaces();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Workspaces");
+	}
+	return {};
 }
 
 
@@ -2338,7 +3510,13 @@ mojobe_BWindow_Workspaces(BWindow* self)
 void
 mojobe_BWindow_SetWorkspaces(BWindow* self, uint32 a_arg0)
 {
-	self->SetWorkspaces(a_arg0);
+	try {
+		self->SetWorkspaces(a_arg0);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetWorkspaces");
+	}
 }
 
 
@@ -2346,7 +3524,14 @@ mojobe_BWindow_SetWorkspaces(BWindow* self, uint32 a_arg0)
 BView*
 mojobe_BWindow_LastMouseMovedView(BWindow* self)
 {
-	return self->LastMouseMovedView();
+	try {
+		return self->LastMouseMovedView();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_LastMouseMovedView");
+	}
+	return {};
 }
 
 
@@ -2354,7 +3539,14 @@ mojobe_BWindow_LastMouseMovedView(BWindow* self)
 status_t
 mojobe_BWindow_AddToSubset(BWindow* self, BWindow* a_window)
 {
-	return self->AddToSubset(a_window);
+	try {
+		return self->AddToSubset(a_window);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_AddToSubset");
+	}
+	return B_ERROR;
 }
 
 
@@ -2362,7 +3554,14 @@ mojobe_BWindow_AddToSubset(BWindow* self, BWindow* a_window)
 status_t
 mojobe_BWindow_RemoveFromSubset(BWindow* self, BWindow* a_window)
 {
-	return self->RemoveFromSubset(a_window);
+	try {
+		return self->RemoveFromSubset(a_window);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_RemoveFromSubset");
+	}
+	return B_ERROR;
 }
 
 
@@ -2370,7 +3569,14 @@ mojobe_BWindow_RemoveFromSubset(BWindow* self, BWindow* a_window)
 status_t
 mojobe_BWindow_SetType(BWindow* self, window_type a_type)
 {
-	return self->SetType(a_type);
+	try {
+		return self->SetType(a_type);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetType");
+	}
+	return B_ERROR;
 }
 
 
@@ -2378,7 +3584,14 @@ mojobe_BWindow_SetType(BWindow* self, window_type a_type)
 window_type
 mojobe_BWindow_Type(BWindow* self)
 {
-	return self->Type();
+	try {
+		return self->Type();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Type");
+	}
+	return {};
 }
 
 
@@ -2386,7 +3599,14 @@ mojobe_BWindow_Type(BWindow* self)
 status_t
 mojobe_BWindow_SetLook(BWindow* self, window_look a_look)
 {
-	return self->SetLook(a_look);
+	try {
+		return self->SetLook(a_look);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetLook");
+	}
+	return B_ERROR;
 }
 
 
@@ -2394,7 +3614,14 @@ mojobe_BWindow_SetLook(BWindow* self, window_look a_look)
 window_look
 mojobe_BWindow_Look(BWindow* self)
 {
-	return self->Look();
+	try {
+		return self->Look();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Look");
+	}
+	return {};
 }
 
 
@@ -2402,7 +3629,14 @@ mojobe_BWindow_Look(BWindow* self)
 status_t
 mojobe_BWindow_SetFeel(BWindow* self, window_feel a_feel)
 {
-	return self->SetFeel(a_feel);
+	try {
+		return self->SetFeel(a_feel);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetFeel");
+	}
+	return B_ERROR;
 }
 
 
@@ -2410,7 +3644,14 @@ mojobe_BWindow_SetFeel(BWindow* self, window_feel a_feel)
 window_feel
 mojobe_BWindow_Feel(BWindow* self)
 {
-	return self->Feel();
+	try {
+		return self->Feel();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Feel");
+	}
+	return {};
 }
 
 
@@ -2418,7 +3659,14 @@ mojobe_BWindow_Feel(BWindow* self)
 status_t
 mojobe_BWindow_SetFlags(BWindow* self, uint32 a_arg0)
 {
-	return self->SetFlags(a_arg0);
+	try {
+		return self->SetFlags(a_arg0);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetFlags");
+	}
+	return B_ERROR;
 }
 
 
@@ -2426,7 +3674,14 @@ mojobe_BWindow_SetFlags(BWindow* self, uint32 a_arg0)
 uint32
 mojobe_BWindow_Flags(BWindow* self)
 {
-	return self->Flags();
+	try {
+		return self->Flags();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Flags");
+	}
+	return {};
 }
 
 
@@ -2434,7 +3689,14 @@ mojobe_BWindow_Flags(BWindow* self)
 bool
 mojobe_BWindow_IsModal(BWindow* self)
 {
-	return self->IsModal();
+	try {
+		return self->IsModal();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsModal");
+	}
+	return {};
 }
 
 
@@ -2442,7 +3704,14 @@ mojobe_BWindow_IsModal(BWindow* self)
 bool
 mojobe_BWindow_IsFloating(BWindow* self)
 {
-	return self->IsFloating();
+	try {
+		return self->IsFloating();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsFloating");
+	}
+	return {};
 }
 
 
@@ -2459,7 +3728,14 @@ mojobe_BWindow_SetWindowAlignment(BWindow* self,
 	int32 a_height,
 	int32 a_heightOffset)
 {
-	return self->SetWindowAlignment(a_mode, a_h, a_hOffset, a_width, a_widthOffset, a_v, a_vOffset, a_height, a_heightOffset);
+	try {
+		return self->SetWindowAlignment(a_mode, a_h, a_hOffset, a_width, a_widthOffset, a_v, a_vOffset, a_height, a_heightOffset);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetWindowAlignment");
+	}
+	return B_ERROR;
 }
 
 
@@ -2476,7 +3752,14 @@ mojobe_BWindow_GetWindowAlignment(BWindow* self,
 	int32 * a_height,
 	int32 * a_heightOffset)
 {
-	return self->GetWindowAlignment(a_mode, a_h, a_hOffset, a_width, a_widthOffset, a_v, a_vOffset, a_height, a_heightOffset);
+	try {
+		return self->GetWindowAlignment(a_mode, a_h, a_hOffset, a_width, a_widthOffset, a_v, a_vOffset, a_height, a_heightOffset);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_GetWindowAlignment");
+	}
+	return B_ERROR;
 }
 
 
@@ -2484,7 +3767,13 @@ mojobe_BWindow_GetWindowAlignment(BWindow* self,
 void
 mojobe_BWindow_InvalidateLayout(BWindow* self, bool a_descendants)
 {
-	self->InvalidateLayout(a_descendants);
+	try {
+		self->InvalidateLayout(a_descendants);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_InvalidateLayout");
+	}
 }
 
 
@@ -2492,7 +3781,13 @@ mojobe_BWindow_InvalidateLayout(BWindow* self, bool a_descendants)
 void
 mojobe_BWindow_Layout(BWindow* self, bool a_force)
 {
-	self->Layout(a_force);
+	try {
+		self->Layout(a_force);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Layout");
+	}
 }
 
 
@@ -2500,7 +3795,14 @@ mojobe_BWindow_Layout(BWindow* self, bool a_force)
 bool
 mojobe_BWindow_IsOffscreenWindow(BWindow* self)
 {
-	return self->IsOffscreenWindow();
+	try {
+		return self->IsOffscreenWindow();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_IsOffscreenWindow");
+	}
+	return {};
 }
 
 
@@ -2528,7 +3830,14 @@ mojobe_BWindow_new__BRect_charP_window_type_uint32_uint32(mojobe_BRect a_frame,
 	uint32 a_flags,
 	uint32 a_workspace)
 {
-	return new(std::nothrow) BWindow(mojobe_from_c(a_frame), a_title, a_type, a_flags, a_workspace);
+	try {
+		return new(std::nothrow) BWindow(mojobe_from_c(a_frame), a_title, a_type, a_flags, a_workspace);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_new__BRect_charP_window_type_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -2542,7 +3851,14 @@ mojobe_MojoBWindow_new__BRect_charP_window_type_uint32_uint32(mojobe_BRect a_fra
 	const mojobe_BWindow_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBWindow(mojobe_from_c(a_frame), a_title, a_type, a_flags, a_workspace, hooks, context);
+	try {
+		return new(std::nothrow) MojoBWindow(mojobe_from_c(a_frame), a_title, a_type, a_flags, a_workspace, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBWindow_new__BRect_charP_window_type_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -2555,7 +3871,14 @@ mojobe_BWindow_new__BRect_charP_window_look_window_feel_uint32_uint32(mojobe_BRe
 	uint32 a_flags,
 	uint32 a_workspace)
 {
-	return new(std::nothrow) BWindow(mojobe_from_c(a_frame), a_title, a_look, a_feel, a_flags, a_workspace);
+	try {
+		return new(std::nothrow) BWindow(mojobe_from_c(a_frame), a_title, a_look, a_feel, a_flags, a_workspace);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_new__BRect_charP_window_look_window_feel_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -2570,7 +3893,14 @@ mojobe_MojoBWindow_new__BRect_charP_window_look_window_feel_uint32_uint32(mojobe
 	const mojobe_BWindow_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBWindow(mojobe_from_c(a_frame), a_title, a_look, a_feel, a_flags, a_workspace, hooks, context);
+	try {
+		return new(std::nothrow) MojoBWindow(mojobe_from_c(a_frame), a_title, a_look, a_feel, a_flags, a_workspace, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBWindow_new__BRect_charP_window_look_window_feel_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -2578,8 +3908,14 @@ mojobe_MojoBWindow_new__BRect_charP_window_look_window_feel_uint32_uint32(mojobe
 void
 mojobe_BWindow_destroy(BWindow* self)
 {
-	if (self->Lock())
-		self->Quit();
+	try {
+		if (self->Lock())
+			self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_destroy");
+	}
 }
 
 
@@ -2587,7 +3923,13 @@ mojobe_BWindow_destroy(BWindow* self)
 void
 mojobe_BWindow_base_MessageReceived(BWindow* self, BMessage* message)
 {
-	self->BWindow::MessageReceived(message);
+	try {
+		self->BWindow::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_MessageReceived");
+	}
 }
 
 
@@ -2595,7 +3937,14 @@ mojobe_BWindow_base_MessageReceived(BWindow* self, BMessage* message)
 bool
 mojobe_BWindow_base_QuitRequested(BWindow* self)
 {
-	return self->BWindow::QuitRequested();
+	try {
+		return self->BWindow::QuitRequested();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_QuitRequested");
+	}
+	return {};
 }
 
 
@@ -2603,7 +3952,13 @@ mojobe_BWindow_base_QuitRequested(BWindow* self)
 void
 mojobe_BWindow_base_FrameMoved(BWindow* self, mojobe_BPoint newPosition)
 {
-	self->BWindow::FrameMoved(mojobe_from_c(newPosition));
+	try {
+		self->BWindow::FrameMoved(mojobe_from_c(newPosition));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_FrameMoved");
+	}
 }
 
 
@@ -2611,7 +3966,13 @@ mojobe_BWindow_base_FrameMoved(BWindow* self, mojobe_BPoint newPosition)
 void
 mojobe_BWindow_base_FrameResized(BWindow* self, float newWidth, float newHeight)
 {
-	self->BWindow::FrameResized(newWidth, newHeight);
+	try {
+		self->BWindow::FrameResized(newWidth, newHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_FrameResized");
+	}
 }
 
 
@@ -2619,7 +3980,13 @@ mojobe_BWindow_base_FrameResized(BWindow* self, float newWidth, float newHeight)
 void
 mojobe_BWindow_base_WindowActivated(BWindow* self, bool focus)
 {
-	self->BWindow::WindowActivated(focus);
+	try {
+		self->BWindow::WindowActivated(focus);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_WindowActivated");
+	}
 }
 
 
@@ -2629,7 +3996,13 @@ mojobe_BWindow_base_WorkspaceActivated(BWindow* self,
 	int32 workspace,
 	bool state)
 {
-	self->BWindow::WorkspaceActivated(workspace, state);
+	try {
+		self->BWindow::WorkspaceActivated(workspace, state);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_WorkspaceActivated");
+	}
 }
 
 
@@ -2637,7 +4010,13 @@ mojobe_BWindow_base_WorkspaceActivated(BWindow* self,
 void
 mojobe_BWindow_base_MenusBeginning(BWindow* self)
 {
-	self->BWindow::MenusBeginning();
+	try {
+		self->BWindow::MenusBeginning();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_MenusBeginning");
+	}
 }
 
 
@@ -2645,7 +4024,13 @@ mojobe_BWindow_base_MenusBeginning(BWindow* self)
 void
 mojobe_BWindow_base_MenusEnded(BWindow* self)
 {
-	self->BWindow::MenusEnded();
+	try {
+		self->BWindow::MenusEnded();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_MenusEnded");
+	}
 }
 
 
@@ -2656,7 +4041,13 @@ mojobe_BWindow_base_Zoom(BWindow* self,
 	float width,
 	float height)
 {
-	self->BWindow::Zoom(mojobe_from_c(origin), width, height);
+	try {
+		self->BWindow::Zoom(mojobe_from_c(origin), width, height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_Zoom");
+	}
 }
 
 
@@ -2664,7 +4055,13 @@ mojobe_BWindow_base_Zoom(BWindow* self,
 void
 mojobe_BWindow_base_Minimize(BWindow* self, bool minimize)
 {
-	self->BWindow::Minimize(minimize);
+	try {
+		self->BWindow::Minimize(minimize);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_base_Minimize");
+	}
 }
 
 
@@ -2676,7 +4073,13 @@ mojobe_BWindow_base_Minimize(BWindow* self, bool minimize)
 void
 mojobe_BView_AttachedToWindow(BView* self)
 {
-	self->AttachedToWindow();
+	try {
+		self->AttachedToWindow();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AttachedToWindow");
+	}
 }
 
 
@@ -2684,7 +4087,13 @@ mojobe_BView_AttachedToWindow(BView* self)
 void
 mojobe_BView_AllAttached(BView* self)
 {
-	self->AllAttached();
+	try {
+		self->AllAttached();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AllAttached");
+	}
 }
 
 
@@ -2692,7 +4101,13 @@ mojobe_BView_AllAttached(BView* self)
 void
 mojobe_BView_DetachedFromWindow(BView* self)
 {
-	self->DetachedFromWindow();
+	try {
+		self->DetachedFromWindow();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DetachedFromWindow");
+	}
 }
 
 
@@ -2700,7 +4115,13 @@ mojobe_BView_DetachedFromWindow(BView* self)
 void
 mojobe_BView_AllDetached(BView* self)
 {
-	self->AllDetached();
+	try {
+		self->AllDetached();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AllDetached");
+	}
 }
 
 
@@ -2708,7 +4129,13 @@ mojobe_BView_AllDetached(BView* self)
 void
 mojobe_BView_AddChild(BView* self, BView* a_child, BView* a_before)
 {
-	self->AddChild(a_child, a_before);
+	try {
+		self->AddChild(a_child, a_before);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AddChild");
+	}
 }
 
 
@@ -2716,7 +4143,14 @@ mojobe_BView_AddChild(BView* self, BView* a_child, BView* a_before)
 bool
 mojobe_BView_RemoveChild(BView* self, BView* a_child)
 {
-	return self->RemoveChild(a_child);
+	try {
+		return self->RemoveChild(a_child);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_RemoveChild");
+	}
+	return {};
 }
 
 
@@ -2724,7 +4158,14 @@ mojobe_BView_RemoveChild(BView* self, BView* a_child)
 int32
 mojobe_BView_CountChildren(BView* self)
 {
-	return self->CountChildren();
+	try {
+		return self->CountChildren();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_CountChildren");
+	}
+	return {};
 }
 
 
@@ -2732,7 +4173,14 @@ mojobe_BView_CountChildren(BView* self)
 BView*
 mojobe_BView_ChildAt(BView* self, int32 a_index)
 {
-	return self->ChildAt(a_index);
+	try {
+		return self->ChildAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ChildAt");
+	}
+	return {};
 }
 
 
@@ -2740,7 +4188,14 @@ mojobe_BView_ChildAt(BView* self, int32 a_index)
 BView*
 mojobe_BView_NextSibling(BView* self)
 {
-	return self->NextSibling();
+	try {
+		return self->NextSibling();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_NextSibling");
+	}
+	return {};
 }
 
 
@@ -2748,7 +4203,14 @@ mojobe_BView_NextSibling(BView* self)
 BView*
 mojobe_BView_PreviousSibling(BView* self)
 {
-	return self->PreviousSibling();
+	try {
+		return self->PreviousSibling();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PreviousSibling");
+	}
+	return {};
 }
 
 
@@ -2756,7 +4218,14 @@ mojobe_BView_PreviousSibling(BView* self)
 bool
 mojobe_BView_RemoveSelf(BView* self)
 {
-	return self->RemoveSelf();
+	try {
+		return self->RemoveSelf();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_RemoveSelf");
+	}
+	return {};
 }
 
 
@@ -2764,7 +4233,14 @@ mojobe_BView_RemoveSelf(BView* self)
 BWindow*
 mojobe_BView_Window(BView* self)
 {
-	return self->Window();
+	try {
+		return self->Window();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Window");
+	}
+	return {};
 }
 
 
@@ -2772,7 +4248,13 @@ mojobe_BView_Window(BView* self)
 void
 mojobe_BView_Draw(BView* self, mojobe_BRect a_updateRect)
 {
-	self->Draw(mojobe_from_c(a_updateRect));
+	try {
+		self->Draw(mojobe_from_c(a_updateRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Draw");
+	}
 }
 
 
@@ -2780,7 +4262,13 @@ mojobe_BView_Draw(BView* self, mojobe_BRect a_updateRect)
 void
 mojobe_BView_MouseDown(BView* self, mojobe_BPoint a_where)
 {
-	self->MouseDown(mojobe_from_c(a_where));
+	try {
+		self->MouseDown(mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MouseDown");
+	}
 }
 
 
@@ -2788,7 +4276,13 @@ mojobe_BView_MouseDown(BView* self, mojobe_BPoint a_where)
 void
 mojobe_BView_MouseUp(BView* self, mojobe_BPoint a_where)
 {
-	self->MouseUp(mojobe_from_c(a_where));
+	try {
+		self->MouseUp(mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MouseUp");
+	}
 }
 
 
@@ -2799,7 +4293,13 @@ mojobe_BView_MouseMoved(BView* self,
 	uint32 a_code,
 	BMessage* a_dragMessage)
 {
-	self->MouseMoved(mojobe_from_c(a_where), a_code, a_dragMessage);
+	try {
+		self->MouseMoved(mojobe_from_c(a_where), a_code, a_dragMessage);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MouseMoved");
+	}
 }
 
 
@@ -2807,7 +4307,13 @@ mojobe_BView_MouseMoved(BView* self,
 void
 mojobe_BView_WindowActivated(BView* self, bool a_active)
 {
-	self->WindowActivated(a_active);
+	try {
+		self->WindowActivated(a_active);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_WindowActivated");
+	}
 }
 
 
@@ -2815,7 +4321,13 @@ mojobe_BView_WindowActivated(BView* self, bool a_active)
 void
 mojobe_BView_KeyDown(BView* self, const char* a_bytes, int32 a_numBytes)
 {
-	self->KeyDown(a_bytes, a_numBytes);
+	try {
+		self->KeyDown(a_bytes, a_numBytes);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_KeyDown");
+	}
 }
 
 
@@ -2823,7 +4335,13 @@ mojobe_BView_KeyDown(BView* self, const char* a_bytes, int32 a_numBytes)
 void
 mojobe_BView_KeyUp(BView* self, const char* a_bytes, int32 a_numBytes)
 {
-	self->KeyUp(a_bytes, a_numBytes);
+	try {
+		self->KeyUp(a_bytes, a_numBytes);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_KeyUp");
+	}
 }
 
 
@@ -2831,7 +4349,13 @@ mojobe_BView_KeyUp(BView* self, const char* a_bytes, int32 a_numBytes)
 void
 mojobe_BView_Pulse(BView* self)
 {
-	self->Pulse();
+	try {
+		self->Pulse();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Pulse");
+	}
 }
 
 
@@ -2839,7 +4363,13 @@ mojobe_BView_Pulse(BView* self)
 void
 mojobe_BView_FrameMoved(BView* self, mojobe_BPoint a_newPosition)
 {
-	self->FrameMoved(mojobe_from_c(a_newPosition));
+	try {
+		self->FrameMoved(mojobe_from_c(a_newPosition));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FrameMoved");
+	}
 }
 
 
@@ -2847,7 +4377,13 @@ mojobe_BView_FrameMoved(BView* self, mojobe_BPoint a_newPosition)
 void
 mojobe_BView_FrameResized(BView* self, float a_newWidth, float a_newHeight)
 {
-	self->FrameResized(a_newWidth, a_newHeight);
+	try {
+		self->FrameResized(a_newWidth, a_newHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FrameResized");
+	}
 }
 
 
@@ -2857,7 +4393,13 @@ mojobe_BView_BeginRectTracking(BView* self,
 	mojobe_BRect a_startRect,
 	uint32 a_style)
 {
-	self->BeginRectTracking(mojobe_from_c(a_startRect), a_style);
+	try {
+		self->BeginRectTracking(mojobe_from_c(a_startRect), a_style);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_BeginRectTracking");
+	}
 }
 
 
@@ -2865,7 +4407,13 @@ mojobe_BView_BeginRectTracking(BView* self,
 void
 mojobe_BView_EndRectTracking(BView* self)
 {
-	self->EndRectTracking();
+	try {
+		self->EndRectTracking();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_EndRectTracking");
+	}
 }
 
 
@@ -2876,10 +4424,16 @@ mojobe_BView_GetMouse(BView* self,
 	uint32 * a_buttons,
 	bool a_checkMessageQueue)
 {
-	BPoint t_location;
-	self->GetMouse(&t_location, a_buttons, a_checkMessageQueue);
-	if (a_location != NULL)
+	try {
+		BPoint t_location;
+		self->GetMouse(&t_location, a_buttons, a_checkMessageQueue);
+		if (a_location != NULL)
 		*a_location = mojobe_to_c(t_location);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetMouse");
+	}
 }
 
 
@@ -2890,7 +4444,13 @@ mojobe_BView_DragMessage(BView* self,
 	mojobe_BRect a_dragRect,
 	BHandler* a_replyTo)
 {
-	self->DragMessage(a_message, mojobe_from_c(a_dragRect), a_replyTo);
+	try {
+		self->DragMessage(a_message, mojobe_from_c(a_dragRect), a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DragMessage");
+	}
 }
 
 
@@ -2898,7 +4458,14 @@ mojobe_BView_DragMessage(BView* self,
 BView*
 mojobe_BView_FindView(BView* self, const char* a_name)
 {
-	return self->FindView(a_name);
+	try {
+		return self->FindView(a_name);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FindView");
+	}
+	return {};
 }
 
 
@@ -2906,7 +4473,14 @@ mojobe_BView_FindView(BView* self, const char* a_name)
 BView*
 mojobe_BView_Parent(BView* self)
 {
-	return self->Parent();
+	try {
+		return self->Parent();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Parent");
+	}
+	return {};
 }
 
 
@@ -2914,7 +4488,14 @@ mojobe_BView_Parent(BView* self)
 mojobe_BRect
 mojobe_BView_Bounds(BView* self)
 {
-	return mojobe_to_c(self->Bounds());
+	try {
+		return mojobe_to_c(self->Bounds());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Bounds");
+	}
+	return {};
 }
 
 
@@ -2922,7 +4503,14 @@ mojobe_BView_Bounds(BView* self)
 mojobe_BRect
 mojobe_BView_Frame(BView* self)
 {
-	return mojobe_to_c(self->Frame());
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Frame");
+	}
+	return {};
 }
 
 
@@ -2930,7 +4518,14 @@ mojobe_BView_Frame(BView* self)
 mojobe_BPoint
 mojobe_BView_ConvertToScreen__BPoint(BView* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertToScreen__BPoint");
+	}
+	return {};
 }
 
 
@@ -2938,7 +4533,14 @@ mojobe_BView_ConvertToScreen__BPoint(BView* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BView_ConvertToScreen__BRect(BView* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertToScreen__BRect");
+	}
+	return {};
 }
 
 
@@ -2946,7 +4548,14 @@ mojobe_BView_ConvertToScreen__BRect(BView* self, mojobe_BRect a_rect)
 mojobe_BPoint
 mojobe_BView_ConvertFromScreen__BPoint(BView* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertFromScreen__BPoint");
+	}
+	return {};
 }
 
 
@@ -2954,7 +4563,14 @@ mojobe_BView_ConvertFromScreen__BPoint(BView* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BView_ConvertFromScreen__BRect(BView* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertFromScreen__BRect");
+	}
+	return {};
 }
 
 
@@ -2962,7 +4578,14 @@ mojobe_BView_ConvertFromScreen__BRect(BView* self, mojobe_BRect a_rect)
 mojobe_BPoint
 mojobe_BView_ConvertToParent__BPoint(BView* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertToParent__BPoint");
+	}
+	return {};
 }
 
 
@@ -2970,7 +4593,14 @@ mojobe_BView_ConvertToParent__BPoint(BView* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BView_ConvertToParent__BRect(BView* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertToParent__BRect");
+	}
+	return {};
 }
 
 
@@ -2978,7 +4608,14 @@ mojobe_BView_ConvertToParent__BRect(BView* self, mojobe_BRect a_rect)
 mojobe_BPoint
 mojobe_BView_ConvertFromParent__BPoint(BView* self, mojobe_BPoint a_point)
 {
-	return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_point)));
+	try {
+		return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_point)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertFromParent__BPoint");
+	}
+	return {};
 }
 
 
@@ -2986,7 +4623,14 @@ mojobe_BView_ConvertFromParent__BPoint(BView* self, mojobe_BPoint a_point)
 mojobe_BRect
 mojobe_BView_ConvertFromParent__BRect(BView* self, mojobe_BRect a_rect)
 {
-	return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_rect)));
+	try {
+		return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_rect)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ConvertFromParent__BRect");
+	}
+	return {};
 }
 
 
@@ -2994,7 +4638,14 @@ mojobe_BView_ConvertFromParent__BRect(BView* self, mojobe_BRect a_rect)
 mojobe_BPoint
 mojobe_BView_LeftTop(BView* self)
 {
-	return mojobe_to_c(self->LeftTop());
+	try {
+		return mojobe_to_c(self->LeftTop());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LeftTop");
+	}
+	return {};
 }
 
 
@@ -3002,7 +4653,13 @@ mojobe_BView_LeftTop(BView* self)
 void
 mojobe_BView_ClipToRect(BView* self, mojobe_BRect a_rect)
 {
-	self->ClipToRect(mojobe_from_c(a_rect));
+	try {
+		self->ClipToRect(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ClipToRect");
+	}
 }
 
 
@@ -3010,7 +4667,13 @@ mojobe_BView_ClipToRect(BView* self, mojobe_BRect a_rect)
 void
 mojobe_BView_ClipToInverseRect(BView* self, mojobe_BRect a_rect)
 {
-	self->ClipToInverseRect(mojobe_from_c(a_rect));
+	try {
+		self->ClipToInverseRect(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ClipToInverseRect");
+	}
 }
 
 
@@ -3018,7 +4681,13 @@ mojobe_BView_ClipToInverseRect(BView* self, mojobe_BRect a_rect)
 void
 mojobe_BView_SetDrawingMode(BView* self, drawing_mode a_mode)
 {
-	self->SetDrawingMode(a_mode);
+	try {
+		self->SetDrawingMode(a_mode);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetDrawingMode");
+	}
 }
 
 
@@ -3026,7 +4695,14 @@ mojobe_BView_SetDrawingMode(BView* self, drawing_mode a_mode)
 drawing_mode
 mojobe_BView_DrawingMode(BView* self)
 {
-	return self->DrawingMode();
+	try {
+		return self->DrawingMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawingMode");
+	}
+	return {};
 }
 
 
@@ -3036,7 +4712,13 @@ mojobe_BView_SetBlendingMode(BView* self,
 	source_alpha a_srcAlpha,
 	alpha_function a_alphaFunc)
 {
-	self->SetBlendingMode(a_srcAlpha, a_alphaFunc);
+	try {
+		self->SetBlendingMode(a_srcAlpha, a_alphaFunc);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetBlendingMode");
+	}
 }
 
 
@@ -3046,7 +4728,13 @@ mojobe_BView_GetBlendingMode(BView* self,
 	source_alpha * a_srcAlpha,
 	alpha_function * a_alphaFunc)
 {
-	self->GetBlendingMode(a_srcAlpha, a_alphaFunc);
+	try {
+		self->GetBlendingMode(a_srcAlpha, a_alphaFunc);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetBlendingMode");
+	}
 }
 
 
@@ -3054,7 +4742,13 @@ mojobe_BView_GetBlendingMode(BView* self,
 void
 mojobe_BView_SetPenSize(BView* self, float a_size)
 {
-	self->SetPenSize(a_size);
+	try {
+		self->SetPenSize(a_size);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetPenSize");
+	}
 }
 
 
@@ -3062,7 +4756,14 @@ mojobe_BView_SetPenSize(BView* self, float a_size)
 float
 mojobe_BView_PenSize(BView* self)
 {
-	return self->PenSize();
+	try {
+		return self->PenSize();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PenSize");
+	}
+	return {};
 }
 
 
@@ -3070,7 +4771,14 @@ mojobe_BView_PenSize(BView* self)
 bool
 mojobe_BView_HasDefaultColors(BView* self)
 {
-	return self->HasDefaultColors();
+	try {
+		return self->HasDefaultColors();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HasDefaultColors");
+	}
+	return {};
 }
 
 
@@ -3078,7 +4786,14 @@ mojobe_BView_HasDefaultColors(BView* self)
 bool
 mojobe_BView_HasSystemColors(BView* self)
 {
-	return self->HasSystemColors();
+	try {
+		return self->HasSystemColors();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HasSystemColors");
+	}
+	return {};
 }
 
 
@@ -3086,7 +4801,13 @@ mojobe_BView_HasSystemColors(BView* self)
 void
 mojobe_BView_AdoptParentColors(BView* self)
 {
-	self->AdoptParentColors();
+	try {
+		self->AdoptParentColors();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AdoptParentColors");
+	}
 }
 
 
@@ -3094,7 +4815,13 @@ mojobe_BView_AdoptParentColors(BView* self)
 void
 mojobe_BView_AdoptSystemColors(BView* self)
 {
-	self->AdoptSystemColors();
+	try {
+		self->AdoptSystemColors();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AdoptSystemColors");
+	}
 }
 
 
@@ -3102,7 +4829,13 @@ mojobe_BView_AdoptSystemColors(BView* self)
 void
 mojobe_BView_AdoptViewColors(BView* self, BView* a_view)
 {
-	self->AdoptViewColors(a_view);
+	try {
+		self->AdoptViewColors(a_view);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AdoptViewColors");
+	}
 }
 
 
@@ -3110,7 +4843,13 @@ mojobe_BView_AdoptViewColors(BView* self, BView* a_view)
 void
 mojobe_BView_SetViewColor__rgb_color(BView* self, mojobe_rgb_color a_color)
 {
-	self->SetViewColor(mojobe_from_c(a_color));
+	try {
+		self->SetViewColor(mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewColor__rgb_color");
+	}
 }
 
 
@@ -3122,7 +4861,13 @@ mojobe_BView_SetViewColor__uchar_uchar_uchar_uchar(BView* self,
 	uchar a_blue,
 	uchar a_alpha)
 {
-	self->SetViewColor(a_red, a_green, a_blue, a_alpha);
+	try {
+		self->SetViewColor(a_red, a_green, a_blue, a_alpha);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewColor__uchar_uchar_uchar_uchar");
+	}
 }
 
 
@@ -3130,7 +4875,14 @@ mojobe_BView_SetViewColor__uchar_uchar_uchar_uchar(BView* self,
 mojobe_rgb_color
 mojobe_BView_ViewColor(BView* self)
 {
-	return mojobe_to_c(self->ViewColor());
+	try {
+		return mojobe_to_c(self->ViewColor());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ViewColor");
+	}
+	return {};
 }
 
 
@@ -3138,7 +4890,13 @@ mojobe_BView_ViewColor(BView* self)
 void
 mojobe_BView_SetViewUIColor(BView* self, color_which a_which, float a_tint)
 {
-	self->SetViewUIColor(a_which, a_tint);
+	try {
+		self->SetViewUIColor(a_which, a_tint);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetViewUIColor");
+	}
 }
 
 
@@ -3146,7 +4904,14 @@ mojobe_BView_SetViewUIColor(BView* self, color_which a_which, float a_tint)
 color_which
 mojobe_BView_ViewUIColor(BView* self, float * a_tint)
 {
-	return self->ViewUIColor(a_tint);
+	try {
+		return self->ViewUIColor(a_tint);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ViewUIColor");
+	}
+	return {};
 }
 
 
@@ -3154,7 +4919,13 @@ mojobe_BView_ViewUIColor(BView* self, float * a_tint)
 void
 mojobe_BView_ClearViewBitmap(BView* self)
 {
-	self->ClearViewBitmap();
+	try {
+		self->ClearViewBitmap();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ClearViewBitmap");
+	}
 }
 
 
@@ -3162,7 +4933,13 @@ mojobe_BView_ClearViewBitmap(BView* self)
 void
 mojobe_BView_ClearViewOverlay(BView* self)
 {
-	self->ClearViewOverlay();
+	try {
+		self->ClearViewOverlay();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ClearViewOverlay");
+	}
 }
 
 
@@ -3170,7 +4947,13 @@ mojobe_BView_ClearViewOverlay(BView* self)
 void
 mojobe_BView_SetHighColor__rgb_color(BView* self, mojobe_rgb_color a_color)
 {
-	self->SetHighColor(mojobe_from_c(a_color));
+	try {
+		self->SetHighColor(mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetHighColor__rgb_color");
+	}
 }
 
 
@@ -3182,7 +4965,13 @@ mojobe_BView_SetHighColor__uchar_uchar_uchar_uchar(BView* self,
 	uchar a_blue,
 	uchar a_alpha)
 {
-	self->SetHighColor(a_red, a_green, a_blue, a_alpha);
+	try {
+		self->SetHighColor(a_red, a_green, a_blue, a_alpha);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetHighColor__uchar_uchar_uchar_uchar");
+	}
 }
 
 
@@ -3190,7 +4979,14 @@ mojobe_BView_SetHighColor__uchar_uchar_uchar_uchar(BView* self,
 mojobe_rgb_color
 mojobe_BView_HighColor(BView* self)
 {
-	return mojobe_to_c(self->HighColor());
+	try {
+		return mojobe_to_c(self->HighColor());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HighColor");
+	}
+	return {};
 }
 
 
@@ -3198,7 +4994,13 @@ mojobe_BView_HighColor(BView* self)
 void
 mojobe_BView_SetHighUIColor(BView* self, color_which a_which, float a_tint)
 {
-	self->SetHighUIColor(a_which, a_tint);
+	try {
+		self->SetHighUIColor(a_which, a_tint);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetHighUIColor");
+	}
 }
 
 
@@ -3206,7 +5008,14 @@ mojobe_BView_SetHighUIColor(BView* self, color_which a_which, float a_tint)
 color_which
 mojobe_BView_HighUIColor(BView* self, float * a_tint)
 {
-	return self->HighUIColor(a_tint);
+	try {
+		return self->HighUIColor(a_tint);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HighUIColor");
+	}
+	return {};
 }
 
 
@@ -3214,7 +5023,13 @@ mojobe_BView_HighUIColor(BView* self, float * a_tint)
 void
 mojobe_BView_SetLowColor__rgb_color(BView* self, mojobe_rgb_color a_color)
 {
-	self->SetLowColor(mojobe_from_c(a_color));
+	try {
+		self->SetLowColor(mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetLowColor__rgb_color");
+	}
 }
 
 
@@ -3226,7 +5041,13 @@ mojobe_BView_SetLowColor__uchar_uchar_uchar_uchar(BView* self,
 	uchar a_blue,
 	uchar a_alpha)
 {
-	self->SetLowColor(a_red, a_green, a_blue, a_alpha);
+	try {
+		self->SetLowColor(a_red, a_green, a_blue, a_alpha);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetLowColor__uchar_uchar_uchar_uchar");
+	}
 }
 
 
@@ -3234,7 +5055,14 @@ mojobe_BView_SetLowColor__uchar_uchar_uchar_uchar(BView* self,
 mojobe_rgb_color
 mojobe_BView_LowColor(BView* self)
 {
-	return mojobe_to_c(self->LowColor());
+	try {
+		return mojobe_to_c(self->LowColor());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LowColor");
+	}
+	return {};
 }
 
 
@@ -3242,7 +5070,13 @@ mojobe_BView_LowColor(BView* self)
 void
 mojobe_BView_SetLowUIColor(BView* self, color_which a_which, float a_tint)
 {
-	self->SetLowUIColor(a_which, a_tint);
+	try {
+		self->SetLowUIColor(a_which, a_tint);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetLowUIColor");
+	}
 }
 
 
@@ -3250,7 +5084,14 @@ mojobe_BView_SetLowUIColor(BView* self, color_which a_which, float a_tint)
 color_which
 mojobe_BView_LowUIColor(BView* self, float * a_tint)
 {
-	return self->LowUIColor(a_tint);
+	try {
+		return self->LowUIColor(a_tint);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LowUIColor");
+	}
+	return {};
 }
 
 
@@ -3261,7 +5102,13 @@ mojobe_BView_SetLineMode(BView* self,
 	join_mode a_lineJoin,
 	float a_miterLimit)
 {
-	self->SetLineMode(a_lineCap, a_lineJoin, a_miterLimit);
+	try {
+		self->SetLineMode(a_lineCap, a_lineJoin, a_miterLimit);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetLineMode");
+	}
 }
 
 
@@ -3269,7 +5116,14 @@ mojobe_BView_SetLineMode(BView* self,
 join_mode
 mojobe_BView_LineJoinMode(BView* self)
 {
-	return self->LineJoinMode();
+	try {
+		return self->LineJoinMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LineJoinMode");
+	}
+	return {};
 }
 
 
@@ -3277,7 +5131,14 @@ mojobe_BView_LineJoinMode(BView* self)
 cap_mode
 mojobe_BView_LineCapMode(BView* self)
 {
-	return self->LineCapMode();
+	try {
+		return self->LineCapMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LineCapMode");
+	}
+	return {};
 }
 
 
@@ -3285,7 +5146,14 @@ mojobe_BView_LineCapMode(BView* self)
 float
 mojobe_BView_LineMiterLimit(BView* self)
 {
-	return self->LineMiterLimit();
+	try {
+		return self->LineMiterLimit();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LineMiterLimit");
+	}
+	return {};
 }
 
 
@@ -3293,7 +5161,13 @@ mojobe_BView_LineMiterLimit(BView* self)
 void
 mojobe_BView_SetFillRule(BView* self, int32 a_rule)
 {
-	self->SetFillRule(a_rule);
+	try {
+		self->SetFillRule(a_rule);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetFillRule");
+	}
 }
 
 
@@ -3301,7 +5175,14 @@ mojobe_BView_SetFillRule(BView* self, int32 a_rule)
 int32
 mojobe_BView_FillRule(BView* self)
 {
-	return self->FillRule();
+	try {
+		return self->FillRule();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillRule");
+	}
+	return {};
 }
 
 
@@ -3309,7 +5190,13 @@ mojobe_BView_FillRule(BView* self)
 void
 mojobe_BView_SetOrigin__BPoint(BView* self, mojobe_BPoint a_where)
 {
-	self->SetOrigin(mojobe_from_c(a_where));
+	try {
+		self->SetOrigin(mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetOrigin__BPoint");
+	}
 }
 
 
@@ -3317,7 +5204,13 @@ mojobe_BView_SetOrigin__BPoint(BView* self, mojobe_BPoint a_where)
 void
 mojobe_BView_SetOrigin__float_float(BView* self, float a_x, float a_y)
 {
-	self->SetOrigin(a_x, a_y);
+	try {
+		self->SetOrigin(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetOrigin__float_float");
+	}
 }
 
 
@@ -3325,7 +5218,14 @@ mojobe_BView_SetOrigin__float_float(BView* self, float a_x, float a_y)
 mojobe_BPoint
 mojobe_BView_Origin(BView* self)
 {
-	return mojobe_to_c(self->Origin());
+	try {
+		return mojobe_to_c(self->Origin());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Origin");
+	}
+	return {};
 }
 
 
@@ -3333,7 +5233,13 @@ mojobe_BView_Origin(BView* self)
 void
 mojobe_BView_TranslateBy(BView* self, double a_x, double a_y)
 {
-	self->TranslateBy(a_x, a_y);
+	try {
+		self->TranslateBy(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_TranslateBy");
+	}
 }
 
 
@@ -3341,7 +5247,13 @@ mojobe_BView_TranslateBy(BView* self, double a_x, double a_y)
 void
 mojobe_BView_ScaleBy(BView* self, double a_x, double a_y)
 {
-	self->ScaleBy(a_x, a_y);
+	try {
+		self->ScaleBy(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ScaleBy");
+	}
 }
 
 
@@ -3349,7 +5261,13 @@ mojobe_BView_ScaleBy(BView* self, double a_x, double a_y)
 void
 mojobe_BView_RotateBy(BView* self, double a_angleRadians)
 {
-	self->RotateBy(a_angleRadians);
+	try {
+		self->RotateBy(a_angleRadians);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_RotateBy");
+	}
 }
 
 
@@ -3357,7 +5275,13 @@ mojobe_BView_RotateBy(BView* self, double a_angleRadians)
 void
 mojobe_BView_PushState(BView* self)
 {
-	self->PushState();
+	try {
+		self->PushState();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PushState");
+	}
 }
 
 
@@ -3365,7 +5289,13 @@ mojobe_BView_PushState(BView* self)
 void
 mojobe_BView_PopState(BView* self)
 {
-	self->PopState();
+	try {
+		self->PopState();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PopState");
+	}
 }
 
 
@@ -3373,7 +5303,13 @@ mojobe_BView_PopState(BView* self)
 void
 mojobe_BView_MovePenTo__BPoint(BView* self, mojobe_BPoint a_pt)
 {
-	self->MovePenTo(mojobe_from_c(a_pt));
+	try {
+		self->MovePenTo(mojobe_from_c(a_pt));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MovePenTo__BPoint");
+	}
 }
 
 
@@ -3381,7 +5317,13 @@ mojobe_BView_MovePenTo__BPoint(BView* self, mojobe_BPoint a_pt)
 void
 mojobe_BView_MovePenTo__float_float(BView* self, float a_x, float a_y)
 {
-	self->MovePenTo(a_x, a_y);
+	try {
+		self->MovePenTo(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MovePenTo__float_float");
+	}
 }
 
 
@@ -3389,7 +5331,13 @@ mojobe_BView_MovePenTo__float_float(BView* self, float a_x, float a_y)
 void
 mojobe_BView_MovePenBy(BView* self, float a_x, float a_y)
 {
-	self->MovePenBy(a_x, a_y);
+	try {
+		self->MovePenBy(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MovePenBy");
+	}
 }
 
 
@@ -3397,7 +5345,14 @@ mojobe_BView_MovePenBy(BView* self, float a_x, float a_y)
 mojobe_BPoint
 mojobe_BView_PenLocation(BView* self)
 {
-	return mojobe_to_c(self->PenLocation());
+	try {
+		return mojobe_to_c(self->PenLocation());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PenLocation");
+	}
+	return {};
 }
 
 
@@ -3407,7 +5362,13 @@ mojobe_BView_StrokeLine__BPoint_pattern(BView* self,
 	mojobe_BPoint a_toPoint,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeLine(mojobe_from_c(a_toPoint), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeLine(mojobe_from_c(a_toPoint), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeLine__BPoint_pattern");
+	}
 }
 
 
@@ -3418,7 +5379,13 @@ mojobe_BView_StrokeLine__BPoint_BPoint_pattern(BView* self,
 	mojobe_BPoint a_end,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeLine(mojobe_from_c(a_start), mojobe_from_c(a_end), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeLine(mojobe_from_c(a_start), mojobe_from_c(a_end), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeLine__BPoint_BPoint_pattern");
+	}
 }
 
 
@@ -3426,7 +5393,13 @@ mojobe_BView_StrokeLine__BPoint_BPoint_pattern(BView* self,
 void
 mojobe_BView_BeginLineArray(BView* self, int32 a_count)
 {
-	self->BeginLineArray(a_count);
+	try {
+		self->BeginLineArray(a_count);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_BeginLineArray");
+	}
 }
 
 
@@ -3437,7 +5410,13 @@ mojobe_BView_AddLine(BView* self,
 	mojobe_BPoint a_end,
 	mojobe_rgb_color a_color)
 {
-	self->AddLine(mojobe_from_c(a_start), mojobe_from_c(a_end), mojobe_from_c(a_color));
+	try {
+		self->AddLine(mojobe_from_c(a_start), mojobe_from_c(a_end), mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AddLine");
+	}
 }
 
 
@@ -3445,7 +5424,13 @@ mojobe_BView_AddLine(BView* self,
 void
 mojobe_BView_EndLineArray(BView* self)
 {
-	self->EndLineArray();
+	try {
+		self->EndLineArray();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_EndLineArray");
+	}
 }
 
 
@@ -3458,7 +5443,13 @@ mojobe_BView_StrokeTriangle__BPoint_BPoint_BPoint_BRect_pattern(BView* self,
 	mojobe_BRect a_bounds,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_bounds), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_bounds), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeTriangle__BPoint_BPoint_BPoint_BRect_pattern");
+	}
 }
 
 
@@ -3470,7 +5461,13 @@ mojobe_BView_StrokeTriangle__BPoint_BPoint_BPoint_pattern(BView* self,
 	mojobe_BPoint a_point3,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeTriangle__BPoint_BPoint_BPoint_pattern");
+	}
 }
 
 
@@ -3482,7 +5479,13 @@ mojobe_BView_FillTriangle__BPoint_BPoint_BPoint_pattern(BView* self,
 	mojobe_BPoint a_point3,
 	mojobe_pattern a_pattern)
 {
-	self->FillTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_pattern));
+	try {
+		self->FillTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillTriangle__BPoint_BPoint_BPoint_pattern");
+	}
 }
 
 
@@ -3495,7 +5498,13 @@ mojobe_BView_FillTriangle__BPoint_BPoint_BPoint_BRect_pattern(BView* self,
 	mojobe_BRect a_bounds,
 	mojobe_pattern a_pattern)
 {
-	self->FillTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_bounds), mojobe_from_c(a_pattern));
+	try {
+		self->FillTriangle(mojobe_from_c(a_point1), mojobe_from_c(a_point2), mojobe_from_c(a_point3), mojobe_from_c(a_bounds), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillTriangle__BPoint_BPoint_BPoint_BRect_pattern");
+	}
 }
 
 
@@ -3505,7 +5514,13 @@ mojobe_BView_StrokeRect(BView* self,
 	mojobe_BRect a_rect,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeRect(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeRect(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeRect");
+	}
 }
 
 
@@ -3515,7 +5530,13 @@ mojobe_BView_FillRect(BView* self,
 	mojobe_BRect a_rect,
 	mojobe_pattern a_pattern)
 {
-	self->FillRect(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	try {
+		self->FillRect(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillRect");
+	}
 }
 
 
@@ -3523,7 +5544,13 @@ mojobe_BView_FillRect(BView* self,
 void
 mojobe_BView_InvertRect(BView* self, mojobe_BRect a_rect)
 {
-	self->InvertRect(mojobe_from_c(a_rect));
+	try {
+		self->InvertRect(mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_InvertRect");
+	}
 }
 
 
@@ -3535,7 +5562,13 @@ mojobe_BView_StrokeRoundRect(BView* self,
 	float a_yRadius,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeRoundRect(mojobe_from_c(a_rect), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	try {
+		self->StrokeRoundRect(mojobe_from_c(a_rect), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeRoundRect");
+	}
 }
 
 
@@ -3547,7 +5580,13 @@ mojobe_BView_FillRoundRect(BView* self,
 	float a_yRadius,
 	mojobe_pattern a_pattern)
 {
-	self->FillRoundRect(mojobe_from_c(a_rect), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	try {
+		self->FillRoundRect(mojobe_from_c(a_rect), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillRoundRect");
+	}
 }
 
 
@@ -3559,7 +5598,13 @@ mojobe_BView_StrokeEllipse__BPoint_float_float_pattern(BView* self,
 	float a_yRadius,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeEllipse(mojobe_from_c(a_center), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	try {
+		self->StrokeEllipse(mojobe_from_c(a_center), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeEllipse__BPoint_float_float_pattern");
+	}
 }
 
 
@@ -3569,7 +5614,13 @@ mojobe_BView_StrokeEllipse__BRect_pattern(BView* self,
 	mojobe_BRect a_rect,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeEllipse(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	try {
+		self->StrokeEllipse(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeEllipse__BRect_pattern");
+	}
 }
 
 
@@ -3581,7 +5632,13 @@ mojobe_BView_FillEllipse__BPoint_float_float_pattern(BView* self,
 	float a_yRadius,
 	mojobe_pattern a_pattern)
 {
-	self->FillEllipse(mojobe_from_c(a_center), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	try {
+		self->FillEllipse(mojobe_from_c(a_center), a_xRadius, a_yRadius, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillEllipse__BPoint_float_float_pattern");
+	}
 }
 
 
@@ -3591,7 +5648,13 @@ mojobe_BView_FillEllipse__BRect_pattern(BView* self,
 	mojobe_BRect a_rect,
 	mojobe_pattern a_pattern)
 {
-	self->FillEllipse(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	try {
+		self->FillEllipse(mojobe_from_c(a_rect), mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillEllipse__BRect_pattern");
+	}
 }
 
 
@@ -3605,7 +5668,13 @@ mojobe_BView_StrokeArc__BPoint_float_float_float_float_pattern(BView* self,
 	float a_arcAngle,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeArc(mojobe_from_c(a_center), a_xRadius, a_yRadius, a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	try {
+		self->StrokeArc(mojobe_from_c(a_center), a_xRadius, a_yRadius, a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeArc__BPoint_float_float_float_float_pattern");
+	}
 }
 
 
@@ -3617,7 +5686,13 @@ mojobe_BView_StrokeArc__BRect_float_float_pattern(BView* self,
 	float a_arcAngle,
 	mojobe_pattern a_pattern)
 {
-	self->StrokeArc(mojobe_from_c(a_rect), a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	try {
+		self->StrokeArc(mojobe_from_c(a_rect), a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeArc__BRect_float_float_pattern");
+	}
 }
 
 
@@ -3631,7 +5706,13 @@ mojobe_BView_FillArc__BPoint_float_float_float_float_pattern(BView* self,
 	float a_arcAngle,
 	mojobe_pattern a_pattern)
 {
-	self->FillArc(mojobe_from_c(a_center), a_xRadius, a_yRadius, a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	try {
+		self->FillArc(mojobe_from_c(a_center), a_xRadius, a_yRadius, a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillArc__BPoint_float_float_float_float_pattern");
+	}
 }
 
 
@@ -3643,7 +5724,13 @@ mojobe_BView_FillArc__BRect_float_float_pattern(BView* self,
 	float a_arcAngle,
 	mojobe_pattern a_pattern)
 {
-	self->FillArc(mojobe_from_c(a_rect), a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	try {
+		self->FillArc(mojobe_from_c(a_rect), a_startAngle, a_arcAngle, mojobe_from_c(a_pattern));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillArc__BRect_float_float_pattern");
+	}
 }
 
 
@@ -3653,10 +5740,16 @@ mojobe_BView_StrokeBezier(BView* self,
 	mojobe_BPoint* a_controlPoints,
 	mojobe_pattern a_pattern)
 {
-	BPoint t_controlPoints;
-	self->StrokeBezier(&t_controlPoints, mojobe_from_c(a_pattern));
-	if (a_controlPoints != NULL)
+	try {
+		BPoint t_controlPoints;
+		self->StrokeBezier(&t_controlPoints, mojobe_from_c(a_pattern));
+		if (a_controlPoints != NULL)
 		*a_controlPoints = mojobe_to_c(t_controlPoints);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StrokeBezier");
+	}
 }
 
 
@@ -3666,10 +5759,16 @@ mojobe_BView_FillBezier(BView* self,
 	mojobe_BPoint* a_controlPoints,
 	mojobe_pattern a_pattern)
 {
-	BPoint t_controlPoints;
-	self->FillBezier(&t_controlPoints, mojobe_from_c(a_pattern));
-	if (a_controlPoints != NULL)
+	try {
+		BPoint t_controlPoints;
+		self->FillBezier(&t_controlPoints, mojobe_from_c(a_pattern));
+		if (a_controlPoints != NULL)
 		*a_controlPoints = mojobe_to_c(t_controlPoints);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_FillBezier");
+	}
 }
 
 
@@ -3677,7 +5776,13 @@ mojobe_BView_FillBezier(BView* self,
 void
 mojobe_BView_CopyBits(BView* self, mojobe_BRect a_src, mojobe_BRect a_dst)
 {
-	self->CopyBits(mojobe_from_c(a_src), mojobe_from_c(a_dst));
+	try {
+		self->CopyBits(mojobe_from_c(a_src), mojobe_from_c(a_dst));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_CopyBits");
+	}
 }
 
 
@@ -3685,7 +5790,13 @@ mojobe_BView_CopyBits(BView* self, mojobe_BRect a_src, mojobe_BRect a_dst)
 void
 mojobe_BView_DrawChar__char(BView* self, char a_aChar)
 {
-	self->DrawChar(a_aChar);
+	try {
+		self->DrawChar(a_aChar);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawChar__char");
+	}
 }
 
 
@@ -3695,7 +5806,13 @@ mojobe_BView_DrawChar__char_BPoint(BView* self,
 	char a_aChar,
 	mojobe_BPoint a_location)
 {
-	self->DrawChar(a_aChar, mojobe_from_c(a_location));
+	try {
+		self->DrawChar(a_aChar, mojobe_from_c(a_location));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawChar__char_BPoint");
+	}
 }
 
 
@@ -3703,7 +5820,13 @@ mojobe_BView_DrawChar__char_BPoint(BView* self,
 void
 mojobe_BView_DrawString__charP(BView* self, const char* a_string)
 {
-	self->DrawString(a_string, static_cast<escapement_delta *>(NULL));
+	try {
+		self->DrawString(a_string, static_cast<escapement_delta *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawString__charP");
+	}
 }
 
 
@@ -3713,7 +5836,13 @@ mojobe_BView_DrawString__charP_BPoint(BView* self,
 	const char* a_string,
 	mojobe_BPoint a_location)
 {
-	self->DrawString(a_string, mojobe_from_c(a_location), static_cast<escapement_delta *>(NULL));
+	try {
+		self->DrawString(a_string, mojobe_from_c(a_location), static_cast<escapement_delta *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawString__charP_BPoint");
+	}
 }
 
 
@@ -3723,7 +5852,13 @@ mojobe_BView_DrawString__charP_int32(BView* self,
 	const char* a_string,
 	int32 a_length)
 {
-	self->DrawString(a_string, a_length, static_cast<escapement_delta *>(NULL));
+	try {
+		self->DrawString(a_string, a_length, static_cast<escapement_delta *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawString__charP_int32");
+	}
 }
 
 
@@ -3731,7 +5866,14 @@ mojobe_BView_DrawString__charP_int32(BView* self,
 float
 mojobe_BView_StringWidth__charP(BView* self, const char* a_string)
 {
-	return self->StringWidth(a_string);
+	try {
+		return self->StringWidth(a_string);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StringWidth__charP");
+	}
+	return {};
 }
 
 
@@ -3741,7 +5883,14 @@ mojobe_BView_StringWidth__charP_int32(BView* self,
 	const char* a_string,
 	int32 a_length)
 {
-	return self->StringWidth(a_string, a_length);
+	try {
+		return self->StringWidth(a_string, a_length);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_StringWidth__charP_int32");
+	}
+	return {};
 }
 
 
@@ -3749,7 +5898,13 @@ mojobe_BView_StringWidth__charP_int32(BView* self,
 void
 mojobe_BView_SetFontSize(BView* self, float a_size)
 {
-	self->SetFontSize(a_size);
+	try {
+		self->SetFontSize(a_size);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetFontSize");
+	}
 }
 
 
@@ -3757,7 +5912,13 @@ mojobe_BView_SetFontSize(BView* self, float a_size)
 void
 mojobe_BView_ForceFontAliasing(BView* self, bool a_enable)
 {
-	self->ForceFontAliasing(a_enable);
+	try {
+		self->ForceFontAliasing(a_enable);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ForceFontAliasing");
+	}
 }
 
 
@@ -3765,7 +5926,13 @@ mojobe_BView_ForceFontAliasing(BView* self, bool a_enable)
 void
 mojobe_BView_Invalidate__BRect(BView* self, mojobe_BRect a_invalRect)
 {
-	self->Invalidate(mojobe_from_c(a_invalRect));
+	try {
+		self->Invalidate(mojobe_from_c(a_invalRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Invalidate__BRect");
+	}
 }
 
 
@@ -3773,7 +5940,13 @@ mojobe_BView_Invalidate__BRect(BView* self, mojobe_BRect a_invalRect)
 void
 mojobe_BView_Invalidate__void(BView* self)
 {
-	self->Invalidate();
+	try {
+		self->Invalidate();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Invalidate__void");
+	}
 }
 
 
@@ -3781,7 +5954,13 @@ mojobe_BView_Invalidate__void(BView* self)
 void
 mojobe_BView_DelayedInvalidate__bigtime_t(BView* self, bigtime_t a_delay)
 {
-	self->DelayedInvalidate(a_delay);
+	try {
+		self->DelayedInvalidate(a_delay);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DelayedInvalidate__bigtime_t");
+	}
 }
 
 
@@ -3791,7 +5970,13 @@ mojobe_BView_DelayedInvalidate__bigtime_t_BRect(BView* self,
 	bigtime_t a_delay,
 	mojobe_BRect a_invalRect)
 {
-	self->DelayedInvalidate(a_delay, mojobe_from_c(a_invalRect));
+	try {
+		self->DelayedInvalidate(a_delay, mojobe_from_c(a_invalRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DelayedInvalidate__bigtime_t_BRect");
+	}
 }
 
 
@@ -3799,7 +5984,13 @@ mojobe_BView_DelayedInvalidate__bigtime_t_BRect(BView* self,
 void
 mojobe_BView_SetDiskMode(BView* self, char * a_filename, long a_offset)
 {
-	self->SetDiskMode(a_filename, a_offset);
+	try {
+		self->SetDiskMode(a_filename, a_offset);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetDiskMode");
+	}
 }
 
 
@@ -3810,7 +6001,13 @@ mojobe_BView_DrawPicture(BView* self,
 	long a_offset,
 	mojobe_BPoint a_where)
 {
-	self->DrawPicture(a_filename, a_offset, mojobe_from_c(a_where));
+	try {
+		self->DrawPicture(a_filename, a_offset, mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawPicture");
+	}
 }
 
 
@@ -3821,7 +6018,13 @@ mojobe_BView_DrawPictureAsync(BView* self,
 	long a_offset,
 	mojobe_BPoint a_where)
 {
-	self->DrawPictureAsync(a_filename, a_offset, mojobe_from_c(a_where));
+	try {
+		self->DrawPictureAsync(a_filename, a_offset, mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawPictureAsync");
+	}
 }
 
 
@@ -3829,7 +6032,13 @@ mojobe_BView_DrawPictureAsync(BView* self,
 void
 mojobe_BView_BeginLayer(BView* self, uint8 a_opacity)
 {
-	self->BeginLayer(a_opacity);
+	try {
+		self->BeginLayer(a_opacity);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_BeginLayer");
+	}
 }
 
 
@@ -3837,7 +6046,13 @@ mojobe_BView_BeginLayer(BView* self, uint8 a_opacity)
 void
 mojobe_BView_EndLayer(BView* self)
 {
-	self->EndLayer();
+	try {
+		self->EndLayer();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_EndLayer");
+	}
 }
 
 
@@ -3845,7 +6060,14 @@ mojobe_BView_EndLayer(BView* self)
 status_t
 mojobe_BView_SetEventMask(BView* self, uint32 a_mask, uint32 a_options)
 {
-	return self->SetEventMask(a_mask, a_options);
+	try {
+		return self->SetEventMask(a_mask, a_options);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetEventMask");
+	}
+	return B_ERROR;
 }
 
 
@@ -3853,7 +6075,14 @@ mojobe_BView_SetEventMask(BView* self, uint32 a_mask, uint32 a_options)
 uint32
 mojobe_BView_EventMask(BView* self)
 {
-	return self->EventMask();
+	try {
+		return self->EventMask();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_EventMask");
+	}
+	return {};
 }
 
 
@@ -3861,7 +6090,14 @@ mojobe_BView_EventMask(BView* self)
 status_t
 mojobe_BView_SetMouseEventMask(BView* self, uint32 a_mask, uint32 a_options)
 {
-	return self->SetMouseEventMask(a_mask, a_options);
+	try {
+		return self->SetMouseEventMask(a_mask, a_options);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetMouseEventMask");
+	}
+	return B_ERROR;
 }
 
 
@@ -3869,7 +6105,13 @@ mojobe_BView_SetMouseEventMask(BView* self, uint32 a_mask, uint32 a_options)
 void
 mojobe_BView_SetFlags(BView* self, uint32 a_flags)
 {
-	self->SetFlags(a_flags);
+	try {
+		self->SetFlags(a_flags);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetFlags");
+	}
 }
 
 
@@ -3877,7 +6119,14 @@ mojobe_BView_SetFlags(BView* self, uint32 a_flags)
 uint32
 mojobe_BView_Flags(BView* self)
 {
-	return self->Flags();
+	try {
+		return self->Flags();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Flags");
+	}
+	return {};
 }
 
 
@@ -3885,7 +6134,13 @@ mojobe_BView_Flags(BView* self)
 void
 mojobe_BView_SetResizingMode(BView* self, uint32 a_mode)
 {
-	self->SetResizingMode(a_mode);
+	try {
+		self->SetResizingMode(a_mode);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetResizingMode");
+	}
 }
 
 
@@ -3893,7 +6148,14 @@ mojobe_BView_SetResizingMode(BView* self, uint32 a_mode)
 uint32
 mojobe_BView_ResizingMode(BView* self)
 {
-	return self->ResizingMode();
+	try {
+		return self->ResizingMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResizingMode");
+	}
+	return {};
 }
 
 
@@ -3901,7 +6163,13 @@ mojobe_BView_ResizingMode(BView* self)
 void
 mojobe_BView_MoveBy(BView* self, float a_dh, float a_dv)
 {
-	self->MoveBy(a_dh, a_dv);
+	try {
+		self->MoveBy(a_dh, a_dv);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MoveBy");
+	}
 }
 
 
@@ -3909,7 +6177,13 @@ mojobe_BView_MoveBy(BView* self, float a_dh, float a_dv)
 void
 mojobe_BView_MoveTo__BPoint(BView* self, mojobe_BPoint a_where)
 {
-	self->MoveTo(mojobe_from_c(a_where));
+	try {
+		self->MoveTo(mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MoveTo__BPoint");
+	}
 }
 
 
@@ -3917,7 +6191,13 @@ mojobe_BView_MoveTo__BPoint(BView* self, mojobe_BPoint a_where)
 void
 mojobe_BView_MoveTo__float_float(BView* self, float a_x, float a_y)
 {
-	self->MoveTo(a_x, a_y);
+	try {
+		self->MoveTo(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MoveTo__float_float");
+	}
 }
 
 
@@ -3925,7 +6205,13 @@ mojobe_BView_MoveTo__float_float(BView* self, float a_x, float a_y)
 void
 mojobe_BView_ResizeBy(BView* self, float a_dh, float a_dv)
 {
-	self->ResizeBy(a_dh, a_dv);
+	try {
+		self->ResizeBy(a_dh, a_dv);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResizeBy");
+	}
 }
 
 
@@ -3933,7 +6219,13 @@ mojobe_BView_ResizeBy(BView* self, float a_dh, float a_dv)
 void
 mojobe_BView_ResizeTo(BView* self, float a_width, float a_height)
 {
-	self->ResizeTo(a_width, a_height);
+	try {
+		self->ResizeTo(a_width, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResizeTo");
+	}
 }
 
 
@@ -3941,7 +6233,13 @@ mojobe_BView_ResizeTo(BView* self, float a_width, float a_height)
 void
 mojobe_BView_ScrollBy(BView* self, float a_dh, float a_dv)
 {
-	self->ScrollBy(a_dh, a_dv);
+	try {
+		self->ScrollBy(a_dh, a_dv);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ScrollBy");
+	}
 }
 
 
@@ -3949,7 +6247,13 @@ mojobe_BView_ScrollBy(BView* self, float a_dh, float a_dv)
 void
 mojobe_BView_ScrollTo__float_float(BView* self, float a_x, float a_y)
 {
-	self->ScrollTo(a_x, a_y);
+	try {
+		self->ScrollTo(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ScrollTo__float_float");
+	}
 }
 
 
@@ -3957,7 +6261,13 @@ mojobe_BView_ScrollTo__float_float(BView* self, float a_x, float a_y)
 void
 mojobe_BView_ScrollTo__BPoint(BView* self, mojobe_BPoint a_where)
 {
-	self->ScrollTo(mojobe_from_c(a_where));
+	try {
+		self->ScrollTo(mojobe_from_c(a_where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ScrollTo__BPoint");
+	}
 }
 
 
@@ -3965,7 +6275,13 @@ mojobe_BView_ScrollTo__BPoint(BView* self, mojobe_BPoint a_where)
 void
 mojobe_BView_MakeFocus(BView* self, bool a_focus)
 {
-	self->MakeFocus(a_focus);
+	try {
+		self->MakeFocus(a_focus);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MakeFocus");
+	}
 }
 
 
@@ -3973,7 +6289,14 @@ mojobe_BView_MakeFocus(BView* self, bool a_focus)
 bool
 mojobe_BView_IsFocus(BView* self)
 {
-	return self->IsFocus();
+	try {
+		return self->IsFocus();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsFocus");
+	}
+	return {};
 }
 
 
@@ -3981,7 +6304,13 @@ mojobe_BView_IsFocus(BView* self)
 void
 mojobe_BView_Show(BView* self)
 {
-	self->Show();
+	try {
+		self->Show();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Show");
+	}
 }
 
 
@@ -3989,7 +6318,13 @@ mojobe_BView_Show(BView* self)
 void
 mojobe_BView_Hide(BView* self)
 {
-	self->Hide();
+	try {
+		self->Hide();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Hide");
+	}
 }
 
 
@@ -3997,7 +6332,14 @@ mojobe_BView_Hide(BView* self)
 bool
 mojobe_BView_IsHidden__void(BView* self)
 {
-	return self->IsHidden();
+	try {
+		return self->IsHidden();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsHidden__void");
+	}
+	return {};
 }
 
 
@@ -4005,7 +6347,14 @@ mojobe_BView_IsHidden__void(BView* self)
 bool
 mojobe_BView_IsHidden__BViewP(BView* self, BView* a_looking_from)
 {
-	return self->IsHidden(a_looking_from);
+	try {
+		return self->IsHidden(a_looking_from);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsHidden__BViewP");
+	}
+	return {};
 }
 
 
@@ -4013,7 +6362,13 @@ mojobe_BView_IsHidden__BViewP(BView* self, BView* a_looking_from)
 void
 mojobe_BView_Flush(BView* self)
 {
-	self->Flush();
+	try {
+		self->Flush();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Flush");
+	}
 }
 
 
@@ -4021,7 +6376,13 @@ mojobe_BView_Flush(BView* self)
 void
 mojobe_BView_Sync(BView* self)
 {
-	self->Sync();
+	try {
+		self->Sync();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Sync");
+	}
 }
 
 
@@ -4029,7 +6390,13 @@ mojobe_BView_Sync(BView* self)
 void
 mojobe_BView_GetPreferredSize(BView* self, float * a__width, float * a__height)
 {
-	self->GetPreferredSize(a__width, a__height);
+	try {
+		self->GetPreferredSize(a__width, a__height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetPreferredSize");
+	}
 }
 
 
@@ -4037,7 +6404,13 @@ mojobe_BView_GetPreferredSize(BView* self, float * a__width, float * a__height)
 void
 mojobe_BView_ResizeToPreferred(BView* self)
 {
-	self->ResizeToPreferred();
+	try {
+		self->ResizeToPreferred();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResizeToPreferred");
+	}
 }
 
 
@@ -4045,7 +6418,14 @@ mojobe_BView_ResizeToPreferred(BView* self)
 bool
 mojobe_BView_IsPrinting(BView* self)
 {
-	return self->IsPrinting();
+	try {
+		return self->IsPrinting();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsPrinting");
+	}
+	return {};
 }
 
 
@@ -4053,7 +6433,13 @@ mojobe_BView_IsPrinting(BView* self)
 void
 mojobe_BView_SetScale(BView* self, float a_scale)
 {
-	self->SetScale(a_scale);
+	try {
+		self->SetScale(a_scale);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetScale");
+	}
 }
 
 
@@ -4061,7 +6447,14 @@ mojobe_BView_SetScale(BView* self, float a_scale)
 float
 mojobe_BView_Scale(BView* self)
 {
-	return self->Scale();
+	try {
+		return self->Scale();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Scale");
+	}
+	return {};
 }
 
 
@@ -4069,7 +6462,13 @@ mojobe_BView_Scale(BView* self)
 void
 mojobe_BView_DrawAfterChildren(BView* self, mojobe_BRect a_updateRect)
 {
-	self->DrawAfterChildren(mojobe_from_c(a_updateRect));
+	try {
+		self->DrawAfterChildren(mojobe_from_c(a_updateRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawAfterChildren");
+	}
 }
 
 
@@ -4077,7 +6476,14 @@ mojobe_BView_DrawAfterChildren(BView* self, mojobe_BRect a_updateRect)
 bool
 mojobe_BView_HasHeightForWidth(BView* self)
 {
-	return self->HasHeightForWidth();
+	try {
+		return self->HasHeightForWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HasHeightForWidth");
+	}
+	return {};
 }
 
 
@@ -4089,7 +6495,13 @@ mojobe_BView_GetHeightForWidth(BView* self,
 	float * a_max,
 	float * a_preferred)
 {
-	self->GetHeightForWidth(a_width, a_min, a_max, a_preferred);
+	try {
+		self->GetHeightForWidth(a_width, a_min, a_max, a_preferred);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetHeightForWidth");
+	}
 }
 
 
@@ -4097,7 +6509,13 @@ mojobe_BView_GetHeightForWidth(BView* self,
 void
 mojobe_BView_InvalidateLayout(BView* self, bool a_descendants)
 {
-	self->InvalidateLayout(a_descendants);
+	try {
+		self->InvalidateLayout(a_descendants);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_InvalidateLayout");
+	}
 }
 
 
@@ -4105,7 +6523,13 @@ mojobe_BView_InvalidateLayout(BView* self, bool a_descendants)
 void
 mojobe_BView_EnableLayoutInvalidation(BView* self)
 {
-	self->EnableLayoutInvalidation();
+	try {
+		self->EnableLayoutInvalidation();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_EnableLayoutInvalidation");
+	}
 }
 
 
@@ -4113,7 +6537,13 @@ mojobe_BView_EnableLayoutInvalidation(BView* self)
 void
 mojobe_BView_DisableLayoutInvalidation(BView* self)
 {
-	self->DisableLayoutInvalidation();
+	try {
+		self->DisableLayoutInvalidation();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DisableLayoutInvalidation");
+	}
 }
 
 
@@ -4121,7 +6551,14 @@ mojobe_BView_DisableLayoutInvalidation(BView* self)
 bool
 mojobe_BView_IsLayoutInvalidationDisabled(BView* self)
 {
-	return self->IsLayoutInvalidationDisabled();
+	try {
+		return self->IsLayoutInvalidationDisabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsLayoutInvalidationDisabled");
+	}
+	return {};
 }
 
 
@@ -4129,7 +6566,14 @@ mojobe_BView_IsLayoutInvalidationDisabled(BView* self)
 bool
 mojobe_BView_IsLayoutValid(BView* self)
 {
-	return self->IsLayoutValid();
+	try {
+		return self->IsLayoutValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_IsLayoutValid");
+	}
+	return {};
 }
 
 
@@ -4137,7 +6581,13 @@ mojobe_BView_IsLayoutValid(BView* self)
 void
 mojobe_BView_ResetLayoutInvalidation(BView* self)
 {
-	self->ResetLayoutInvalidation();
+	try {
+		self->ResetLayoutInvalidation();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResetLayoutInvalidation");
+	}
 }
 
 
@@ -4145,7 +6595,13 @@ mojobe_BView_ResetLayoutInvalidation(BView* self)
 void
 mojobe_BView_Layout(BView* self, bool a_force)
 {
-	self->Layout(a_force);
+	try {
+		self->Layout(a_force);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Layout");
+	}
 }
 
 
@@ -4153,7 +6609,13 @@ mojobe_BView_Layout(BView* self, bool a_force)
 void
 mojobe_BView_Relayout(BView* self)
 {
-	self->Relayout();
+	try {
+		self->Relayout();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_Relayout");
+	}
 }
 
 
@@ -4161,7 +6623,13 @@ mojobe_BView_Relayout(BView* self)
 void
 mojobe_BView_SetToolTip(BView* self, const char* a_text)
 {
-	self->SetToolTip(a_text);
+	try {
+		self->SetToolTip(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetToolTip");
+	}
 }
 
 
@@ -4169,7 +6637,13 @@ mojobe_BView_SetToolTip(BView* self, const char* a_text)
 void
 mojobe_BView_ShowToolTip(BView* self)
 {
-	self->ShowToolTip(static_cast<BToolTip *>(NULL));
+	try {
+		self->ShowToolTip(static_cast<BToolTip *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ShowToolTip");
+	}
 }
 
 
@@ -4177,7 +6651,13 @@ mojobe_BView_ShowToolTip(BView* self)
 void
 mojobe_BView_HideToolTip(BView* self)
 {
-	self->HideToolTip();
+	try {
+		self->HideToolTip();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_HideToolTip");
+	}
 }
 
 
@@ -4209,7 +6689,14 @@ mojobe_BView_to_BMenuBar(BView* self)
 BView*
 mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags)
 {
-	return new(std::nothrow) BView(a_name, a_flags, static_cast<BLayout *>(NULL));
+	try {
+		return new(std::nothrow) BView(a_name, a_flags, static_cast<BLayout *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_new__charP_uint32");
+	}
+	return {};
 }
 
 
@@ -4220,7 +6707,14 @@ mojobe_MojoBView_new__charP_uint32(const char* a_name,
 	const mojobe_BView_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBView(a_name, a_flags, static_cast<BLayout *>(NULL), hooks, context);
+	try {
+		return new(std::nothrow) MojoBView(a_name, a_flags, static_cast<BLayout *>(NULL), hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBView_new__charP_uint32");
+	}
+	return {};
 }
 
 
@@ -4231,7 +6725,14 @@ mojobe_BView_new__BRect_charP_uint32_uint32(mojobe_BRect a_frame,
 	uint32 a_resizingMode,
 	uint32 a_flags)
 {
-	return new(std::nothrow) BView(mojobe_from_c(a_frame), a_name, a_resizingMode, a_flags);
+	try {
+		return new(std::nothrow) BView(mojobe_from_c(a_frame), a_name, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_new__BRect_charP_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -4244,7 +6745,14 @@ mojobe_MojoBView_new__BRect_charP_uint32_uint32(mojobe_BRect a_frame,
 	const mojobe_BView_hooks* hooks,
 	void* context)
 {
-	return new(std::nothrow) MojoBView(mojobe_from_c(a_frame), a_name, a_resizingMode, a_flags, hooks, context);
+	try {
+		return new(std::nothrow) MojoBView(mojobe_from_c(a_frame), a_name, a_resizingMode, a_flags, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBView_new__BRect_charP_uint32_uint32");
+	}
+	return {};
 }
 
 
@@ -4260,7 +6768,13 @@ mojobe_BView_delete(BView* self)
 void
 mojobe_BView_base_Draw(BView* self, mojobe_BRect updateRect)
 {
-	self->BView::Draw(mojobe_from_c(updateRect));
+	try {
+		self->BView::Draw(mojobe_from_c(updateRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_Draw");
+	}
 }
 
 
@@ -4268,7 +6782,13 @@ mojobe_BView_base_Draw(BView* self, mojobe_BRect updateRect)
 void
 mojobe_BView_base_DrawAfterChildren(BView* self, mojobe_BRect updateRect)
 {
-	self->BView::DrawAfterChildren(mojobe_from_c(updateRect));
+	try {
+		self->BView::DrawAfterChildren(mojobe_from_c(updateRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_DrawAfterChildren");
+	}
 }
 
 
@@ -4276,7 +6796,13 @@ mojobe_BView_base_DrawAfterChildren(BView* self, mojobe_BRect updateRect)
 void
 mojobe_BView_base_MouseDown(BView* self, mojobe_BPoint where)
 {
-	self->BView::MouseDown(mojobe_from_c(where));
+	try {
+		self->BView::MouseDown(mojobe_from_c(where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_MouseDown");
+	}
 }
 
 
@@ -4284,7 +6810,13 @@ mojobe_BView_base_MouseDown(BView* self, mojobe_BPoint where)
 void
 mojobe_BView_base_MouseUp(BView* self, mojobe_BPoint where)
 {
-	self->BView::MouseUp(mojobe_from_c(where));
+	try {
+		self->BView::MouseUp(mojobe_from_c(where));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_MouseUp");
+	}
 }
 
 
@@ -4295,7 +6827,13 @@ mojobe_BView_base_MouseMoved(BView* self,
 	uint32 code,
 	BMessage* dragMessage)
 {
-	self->BView::MouseMoved(mojobe_from_c(where), code, dragMessage);
+	try {
+		self->BView::MouseMoved(mojobe_from_c(where), code, dragMessage);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_MouseMoved");
+	}
 }
 
 
@@ -4303,7 +6841,13 @@ mojobe_BView_base_MouseMoved(BView* self,
 void
 mojobe_BView_base_KeyDown(BView* self, const char* bytes, int32 numBytes)
 {
-	self->BView::KeyDown(bytes, numBytes);
+	try {
+		self->BView::KeyDown(bytes, numBytes);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_KeyDown");
+	}
 }
 
 
@@ -4311,7 +6855,13 @@ mojobe_BView_base_KeyDown(BView* self, const char* bytes, int32 numBytes)
 void
 mojobe_BView_base_KeyUp(BView* self, const char* bytes, int32 numBytes)
 {
-	self->BView::KeyUp(bytes, numBytes);
+	try {
+		self->BView::KeyUp(bytes, numBytes);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_KeyUp");
+	}
 }
 
 
@@ -4319,7 +6869,13 @@ mojobe_BView_base_KeyUp(BView* self, const char* bytes, int32 numBytes)
 void
 mojobe_BView_base_MessageReceived(BView* self, BMessage* message)
 {
-	self->BView::MessageReceived(message);
+	try {
+		self->BView::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_MessageReceived");
+	}
 }
 
 
@@ -4327,7 +6883,13 @@ mojobe_BView_base_MessageReceived(BView* self, BMessage* message)
 void
 mojobe_BView_base_AttachedToWindow(BView* self)
 {
-	self->BView::AttachedToWindow();
+	try {
+		self->BView::AttachedToWindow();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_AttachedToWindow");
+	}
 }
 
 
@@ -4335,7 +6897,13 @@ mojobe_BView_base_AttachedToWindow(BView* self)
 void
 mojobe_BView_base_AllAttached(BView* self)
 {
-	self->BView::AllAttached();
+	try {
+		self->BView::AllAttached();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_AllAttached");
+	}
 }
 
 
@@ -4343,7 +6911,13 @@ mojobe_BView_base_AllAttached(BView* self)
 void
 mojobe_BView_base_DetachedFromWindow(BView* self)
 {
-	self->BView::DetachedFromWindow();
+	try {
+		self->BView::DetachedFromWindow();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_DetachedFromWindow");
+	}
 }
 
 
@@ -4351,7 +6925,13 @@ mojobe_BView_base_DetachedFromWindow(BView* self)
 void
 mojobe_BView_base_AllDetached(BView* self)
 {
-	self->BView::AllDetached();
+	try {
+		self->BView::AllDetached();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_AllDetached");
+	}
 }
 
 
@@ -4359,7 +6939,13 @@ mojobe_BView_base_AllDetached(BView* self)
 void
 mojobe_BView_base_FrameMoved(BView* self, mojobe_BPoint newPosition)
 {
-	self->BView::FrameMoved(mojobe_from_c(newPosition));
+	try {
+		self->BView::FrameMoved(mojobe_from_c(newPosition));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_FrameMoved");
+	}
 }
 
 
@@ -4367,7 +6953,13 @@ mojobe_BView_base_FrameMoved(BView* self, mojobe_BPoint newPosition)
 void
 mojobe_BView_base_FrameResized(BView* self, float newWidth, float newHeight)
 {
-	self->BView::FrameResized(newWidth, newHeight);
+	try {
+		self->BView::FrameResized(newWidth, newHeight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_FrameResized");
+	}
 }
 
 
@@ -4375,7 +6967,13 @@ mojobe_BView_base_FrameResized(BView* self, float newWidth, float newHeight)
 void
 mojobe_BView_base_WindowActivated(BView* self, bool active)
 {
-	self->BView::WindowActivated(active);
+	try {
+		self->BView::WindowActivated(active);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_WindowActivated");
+	}
 }
 
 
@@ -4383,7 +6981,13 @@ mojobe_BView_base_WindowActivated(BView* self, bool active)
 void
 mojobe_BView_base_Pulse(BView* self)
 {
-	self->BView::Pulse();
+	try {
+		self->BView::Pulse();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_base_Pulse");
+	}
 }
 
 
@@ -4398,7 +7002,14 @@ mojobe_BMessage_GetInfo__charP_type_codeP_int32P(BMessage* self,
 	type_code * a_typeFound,
 	int32 * a_countFound)
 {
-	return self->GetInfo(a_name, a_typeFound, a_countFound);
+	try {
+		return self->GetInfo(a_name, a_typeFound, a_countFound);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInfo__charP_type_codeP_int32P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4406,7 +7017,14 @@ mojobe_BMessage_GetInfo__charP_type_codeP_int32P(BMessage* self,
 int32
 mojobe_BMessage_CountNames(BMessage* self, type_code a_type)
 {
-	return self->CountNames(a_type);
+	try {
+		return self->CountNames(a_type);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_CountNames");
+	}
+	return {};
 }
 
 
@@ -4414,7 +7032,14 @@ mojobe_BMessage_CountNames(BMessage* self, type_code a_type)
 bool
 mojobe_BMessage_IsEmpty(BMessage* self)
 {
-	return self->IsEmpty();
+	try {
+		return self->IsEmpty();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_IsEmpty");
+	}
+	return {};
 }
 
 
@@ -4422,7 +7047,14 @@ mojobe_BMessage_IsEmpty(BMessage* self)
 bool
 mojobe_BMessage_IsSystem(BMessage* self)
 {
-	return self->IsSystem();
+	try {
+		return self->IsSystem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_IsSystem");
+	}
+	return {};
 }
 
 
@@ -4430,7 +7062,14 @@ mojobe_BMessage_IsSystem(BMessage* self)
 bool
 mojobe_BMessage_IsReply(BMessage* self)
 {
-	return self->IsReply();
+	try {
+		return self->IsReply();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_IsReply");
+	}
+	return {};
 }
 
 
@@ -4438,7 +7077,13 @@ mojobe_BMessage_IsReply(BMessage* self)
 void
 mojobe_BMessage_PrintToStream(BMessage* self)
 {
-	self->PrintToStream();
+	try {
+		self->PrintToStream();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_PrintToStream");
+	}
 }
 
 
@@ -4448,7 +7093,14 @@ mojobe_BMessage_Rename(BMessage* self,
 	const char* a_oldEntry,
 	const char* a_newEntry)
 {
-	return self->Rename(a_oldEntry, a_newEntry);
+	try {
+		return self->Rename(a_oldEntry, a_newEntry);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_Rename");
+	}
+	return B_ERROR;
 }
 
 
@@ -4456,7 +7108,14 @@ mojobe_BMessage_Rename(BMessage* self,
 bool
 mojobe_BMessage_WasDelivered(BMessage* self)
 {
-	return self->WasDelivered();
+	try {
+		return self->WasDelivered();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_WasDelivered");
+	}
+	return {};
 }
 
 
@@ -4464,7 +7123,14 @@ mojobe_BMessage_WasDelivered(BMessage* self)
 bool
 mojobe_BMessage_IsSourceWaiting(BMessage* self)
 {
-	return self->IsSourceWaiting();
+	try {
+		return self->IsSourceWaiting();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_IsSourceWaiting");
+	}
+	return {};
 }
 
 
@@ -4472,7 +7138,14 @@ mojobe_BMessage_IsSourceWaiting(BMessage* self)
 bool
 mojobe_BMessage_IsSourceRemote(BMessage* self)
 {
-	return self->IsSourceRemote();
+	try {
+		return self->IsSourceRemote();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_IsSourceRemote");
+	}
+	return {};
 }
 
 
@@ -4480,7 +7153,13 @@ mojobe_BMessage_IsSourceRemote(BMessage* self)
 void
 mojobe_BMessage_ReturnAddress(BMessage* self, BMessenger* a_result)
 {
-	new(a_result) BMessenger(self->ReturnAddress());
+	try {
+		new(a_result) BMessenger(self->ReturnAddress());
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReturnAddress");
+	}
 }
 
 
@@ -4488,7 +7167,14 @@ mojobe_BMessage_ReturnAddress(BMessage* self, BMessenger* a_result)
 const BMessage*
 mojobe_BMessage_Previous(BMessage* self)
 {
-	return self->Previous();
+	try {
+		return self->Previous();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_Previous");
+	}
+	return {};
 }
 
 
@@ -4496,7 +7182,14 @@ mojobe_BMessage_Previous(BMessage* self)
 bool
 mojobe_BMessage_WasDropped(BMessage* self)
 {
-	return self->WasDropped();
+	try {
+		return self->WasDropped();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_WasDropped");
+	}
+	return {};
 }
 
 
@@ -4504,11 +7197,18 @@ mojobe_BMessage_WasDropped(BMessage* self)
 mojobe_BPoint
 mojobe_BMessage_DropPoint(BMessage* self, mojobe_BPoint* a_offset)
 {
-	BPoint t_offset;
-	mojobe_BPoint result = mojobe_to_c(self->DropPoint(&t_offset));
-	if (a_offset != NULL)
+	try {
+		BPoint t_offset;
+		mojobe_BPoint result = mojobe_to_c(self->DropPoint(&t_offset));
+		if (a_offset != NULL)
 		*a_offset = mojobe_to_c(t_offset);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_DropPoint");
+	}
+	return {};
 }
 
 
@@ -4518,7 +7218,14 @@ mojobe_BMessage_SendReply__uint32_BHandlerP(BMessage* self,
 	uint32 a_command,
 	BHandler* a_replyTo)
 {
-	return self->SendReply(a_command, a_replyTo);
+	try {
+		return self->SendReply(a_command, a_replyTo);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SendReply__uint32_BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4529,7 +7236,14 @@ mojobe_BMessage_SendReply__BMessageP_BHandlerP_bigtime_t(BMessage* self,
 	BHandler* a_replyTo,
 	bigtime_t a_timeout)
 {
-	return self->SendReply(a_reply, a_replyTo, a_timeout);
+	try {
+		return self->SendReply(a_reply, a_replyTo, a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SendReply__BMessageP_BHandlerP_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -4540,7 +7254,14 @@ mojobe_BMessage_SendReply__BMessageP_BMessenger_bigtime_t(BMessage* self,
 	const BMessenger* a_replyTo,
 	bigtime_t a_timeout)
 {
-	return self->SendReply(a_reply, *a_replyTo, a_timeout);
+	try {
+		return self->SendReply(a_reply, *a_replyTo, a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SendReply__BMessageP_BMessenger_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -4550,7 +7271,14 @@ mojobe_BMessage_SendReply__uint32_BMessageP(BMessage* self,
 	uint32 a_command,
 	BMessage* a_replyToReply)
 {
-	return self->SendReply(a_command, a_replyToReply);
+	try {
+		return self->SendReply(a_command, a_replyToReply);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SendReply__uint32_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4562,7 +7290,14 @@ mojobe_BMessage_SendReply__BMessageP_BMessageP_bigtime_t_bigtime_t(BMessage* sel
 	bigtime_t a_sendTimeout,
 	bigtime_t a_replyTimeout)
 {
-	return self->SendReply(a_reply, a_replyToReply, a_sendTimeout, a_replyTimeout);
+	try {
+		return self->SendReply(a_reply, a_replyToReply, a_sendTimeout, a_replyTimeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SendReply__BMessageP_BMessageP_bigtime_t_bigtime_t");
+	}
+	return B_ERROR;
 }
 
 
@@ -4570,7 +7305,14 @@ mojobe_BMessage_SendReply__BMessageP_BMessageP_bigtime_t_bigtime_t(BMessage* sel
 int64
 mojobe_BMessage_FlattenedSize(BMessage* self)
 {
-	return self->FlattenedSize();
+	try {
+		return self->FlattenedSize();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FlattenedSize");
+	}
+	return {};
 }
 
 
@@ -4578,7 +7320,14 @@ mojobe_BMessage_FlattenedSize(BMessage* self)
 status_t
 mojobe_BMessage_Flatten(BMessage* self, char * a_buffer, ssize_t a_size)
 {
-	return self->Flatten(a_buffer, a_size);
+	try {
+		return self->Flatten(a_buffer, a_size);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_Flatten");
+	}
+	return B_ERROR;
 }
 
 
@@ -4586,7 +7335,14 @@ mojobe_BMessage_Flatten(BMessage* self, char * a_buffer, ssize_t a_size)
 status_t
 mojobe_BMessage_Unflatten(BMessage* self, const char* a_flatBuffer)
 {
-	return self->Unflatten(a_flatBuffer);
+	try {
+		return self->Unflatten(a_flatBuffer);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_Unflatten");
+	}
+	return B_ERROR;
 }
 
 
@@ -4594,7 +7350,14 @@ mojobe_BMessage_Unflatten(BMessage* self, const char* a_flatBuffer)
 status_t
 mojobe_BMessage_AddSpecifier__charP(BMessage* self, const char* a_property)
 {
-	return self->AddSpecifier(a_property);
+	try {
+		return self->AddSpecifier(a_property);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSpecifier__charP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4604,7 +7367,14 @@ mojobe_BMessage_AddSpecifier__charP_int32(BMessage* self,
 	const char* a_property,
 	int32 a_index)
 {
-	return self->AddSpecifier(a_property, a_index);
+	try {
+		return self->AddSpecifier(a_property, a_index);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSpecifier__charP_int32");
+	}
+	return B_ERROR;
 }
 
 
@@ -4615,7 +7385,14 @@ mojobe_BMessage_AddSpecifier__charP_int32_int32(BMessage* self,
 	int32 a_index,
 	int32 a_range)
 {
-	return self->AddSpecifier(a_property, a_index, a_range);
+	try {
+		return self->AddSpecifier(a_property, a_index, a_range);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSpecifier__charP_int32_int32");
+	}
+	return B_ERROR;
 }
 
 
@@ -4625,7 +7402,14 @@ mojobe_BMessage_AddSpecifier__charP_charP(BMessage* self,
 	const char* a_property,
 	const char* a_name)
 {
-	return self->AddSpecifier(a_property, a_name);
+	try {
+		return self->AddSpecifier(a_property, a_name);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSpecifier__charP_charP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4633,7 +7417,14 @@ mojobe_BMessage_AddSpecifier__charP_charP(BMessage* self,
 status_t
 mojobe_BMessage_AddSpecifier__BMessageP(BMessage* self, BMessage* a_specifier)
 {
-	return self->AddSpecifier(a_specifier);
+	try {
+		return self->AddSpecifier(a_specifier);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSpecifier__BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4641,7 +7432,14 @@ mojobe_BMessage_AddSpecifier__BMessageP(BMessage* self, BMessage* a_specifier)
 status_t
 mojobe_BMessage_SetCurrentSpecifier(BMessage* self, int32 a_index)
 {
-	return self->SetCurrentSpecifier(a_index);
+	try {
+		return self->SetCurrentSpecifier(a_index);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetCurrentSpecifier");
+	}
+	return B_ERROR;
 }
 
 
@@ -4653,7 +7451,14 @@ mojobe_BMessage_GetCurrentSpecifier(BMessage* self,
 	int32 * a_what,
 	const char** a_property)
 {
-	return self->GetCurrentSpecifier(a_index, a_specifier, a_what, a_property);
+	try {
+		return self->GetCurrentSpecifier(a_index, a_specifier, a_what, a_property);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetCurrentSpecifier");
+	}
+	return B_ERROR;
 }
 
 
@@ -4661,7 +7466,14 @@ mojobe_BMessage_GetCurrentSpecifier(BMessage* self,
 bool
 mojobe_BMessage_HasSpecifiers(BMessage* self)
 {
-	return self->HasSpecifiers();
+	try {
+		return self->HasSpecifiers();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasSpecifiers");
+	}
+	return {};
 }
 
 
@@ -4669,7 +7481,14 @@ mojobe_BMessage_HasSpecifiers(BMessage* self)
 status_t
 mojobe_BMessage_PopSpecifier(BMessage* self)
 {
-	return self->PopSpecifier();
+	try {
+		return self->PopSpecifier();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_PopSpecifier");
+	}
+	return B_ERROR;
 }
 
 
@@ -4677,7 +7496,14 @@ mojobe_BMessage_PopSpecifier(BMessage* self)
 status_t
 mojobe_BMessage_AddRect(BMessage* self, const char* a_name, mojobe_BRect a_rect)
 {
-	return self->AddRect(a_name, mojobe_from_c(a_rect));
+	try {
+		return self->AddRect(a_name, mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddRect");
+	}
+	return B_ERROR;
 }
 
 
@@ -4687,7 +7513,14 @@ mojobe_BMessage_AddPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_point)
 {
-	return self->AddPoint(a_name, mojobe_from_c(a_point));
+	try {
+		return self->AddPoint(a_name, mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddPoint");
+	}
+	return B_ERROR;
 }
 
 
@@ -4697,7 +7530,14 @@ mojobe_BMessage_AddString(BMessage* self,
 	const char* a_name,
 	const char* a_string)
 {
-	return self->AddString(a_name, a_string);
+	try {
+		return self->AddString(a_name, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddString");
+	}
+	return B_ERROR;
 }
 
 
@@ -4705,7 +7545,14 @@ mojobe_BMessage_AddString(BMessage* self,
 status_t
 mojobe_BMessage_AddInt8(BMessage* self, const char* a_name, int8 a_value)
 {
-	return self->AddInt8(a_name, a_value);
+	try {
+		return self->AddInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddInt8");
+	}
+	return B_ERROR;
 }
 
 
@@ -4713,7 +7560,14 @@ mojobe_BMessage_AddInt8(BMessage* self, const char* a_name, int8 a_value)
 status_t
 mojobe_BMessage_AddUInt8(BMessage* self, const char* a_name, uint8 a_value)
 {
-	return self->AddUInt8(a_name, a_value);
+	try {
+		return self->AddUInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddUInt8");
+	}
+	return B_ERROR;
 }
 
 
@@ -4721,7 +7575,14 @@ mojobe_BMessage_AddUInt8(BMessage* self, const char* a_name, uint8 a_value)
 status_t
 mojobe_BMessage_AddInt16(BMessage* self, const char* a_name, int16 a_value)
 {
-	return self->AddInt16(a_name, a_value);
+	try {
+		return self->AddInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddInt16");
+	}
+	return B_ERROR;
 }
 
 
@@ -4729,7 +7590,14 @@ mojobe_BMessage_AddInt16(BMessage* self, const char* a_name, int16 a_value)
 status_t
 mojobe_BMessage_AddUInt16(BMessage* self, const char* a_name, uint16 a_value)
 {
-	return self->AddUInt16(a_name, a_value);
+	try {
+		return self->AddUInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddUInt16");
+	}
+	return B_ERROR;
 }
 
 
@@ -4737,7 +7605,14 @@ mojobe_BMessage_AddUInt16(BMessage* self, const char* a_name, uint16 a_value)
 status_t
 mojobe_BMessage_AddInt32(BMessage* self, const char* a_name, int32 a_value)
 {
-	return self->AddInt32(a_name, a_value);
+	try {
+		return self->AddInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddInt32");
+	}
+	return B_ERROR;
 }
 
 
@@ -4745,7 +7620,14 @@ mojobe_BMessage_AddInt32(BMessage* self, const char* a_name, int32 a_value)
 status_t
 mojobe_BMessage_AddUInt32(BMessage* self, const char* a_name, uint32 a_value)
 {
-	return self->AddUInt32(a_name, a_value);
+	try {
+		return self->AddUInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddUInt32");
+	}
+	return B_ERROR;
 }
 
 
@@ -4753,7 +7635,14 @@ mojobe_BMessage_AddUInt32(BMessage* self, const char* a_name, uint32 a_value)
 status_t
 mojobe_BMessage_AddInt64(BMessage* self, const char* a_name, int64 a_value)
 {
-	return self->AddInt64(a_name, a_value);
+	try {
+		return self->AddInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddInt64");
+	}
+	return B_ERROR;
 }
 
 
@@ -4761,7 +7650,14 @@ mojobe_BMessage_AddInt64(BMessage* self, const char* a_name, int64 a_value)
 status_t
 mojobe_BMessage_AddUInt64(BMessage* self, const char* a_name, uint64 a_value)
 {
-	return self->AddUInt64(a_name, a_value);
+	try {
+		return self->AddUInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddUInt64");
+	}
+	return B_ERROR;
 }
 
 
@@ -4769,7 +7665,14 @@ mojobe_BMessage_AddUInt64(BMessage* self, const char* a_name, uint64 a_value)
 status_t
 mojobe_BMessage_AddBool(BMessage* self, const char* a_name, bool a_value)
 {
-	return self->AddBool(a_name, a_value);
+	try {
+		return self->AddBool(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddBool");
+	}
+	return B_ERROR;
 }
 
 
@@ -4777,7 +7680,14 @@ mojobe_BMessage_AddBool(BMessage* self, const char* a_name, bool a_value)
 status_t
 mojobe_BMessage_AddFloat(BMessage* self, const char* a_name, float a_value)
 {
-	return self->AddFloat(a_name, a_value);
+	try {
+		return self->AddFloat(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddFloat");
+	}
+	return B_ERROR;
 }
 
 
@@ -4785,7 +7695,14 @@ mojobe_BMessage_AddFloat(BMessage* self, const char* a_name, float a_value)
 status_t
 mojobe_BMessage_AddDouble(BMessage* self, const char* a_name, double a_value)
 {
-	return self->AddDouble(a_name, a_value);
+	try {
+		return self->AddDouble(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddDouble");
+	}
+	return B_ERROR;
 }
 
 
@@ -4795,7 +7712,14 @@ mojobe_BMessage_AddColor(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color a_value)
 {
-	return self->AddColor(a_name, mojobe_from_c(a_value));
+	try {
+		return self->AddColor(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddColor");
+	}
+	return B_ERROR;
 }
 
 
@@ -4805,7 +7729,14 @@ mojobe_BMessage_AddMessenger(BMessage* self,
 	const char* a_name,
 	const BMessenger* a_messenger)
 {
-	return self->AddMessenger(a_name, *a_messenger);
+	try {
+		return self->AddMessenger(a_name, *a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -4815,7 +7746,14 @@ mojobe_BMessage_AddMessage(BMessage* self,
 	const char* a_name,
 	BMessage* a_message)
 {
-	return self->AddMessage(a_name, a_message);
+	try {
+		return self->AddMessage(a_name, a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddMessage");
+	}
+	return B_ERROR;
 }
 
 
@@ -4823,7 +7761,14 @@ mojobe_BMessage_AddMessage(BMessage* self,
 status_t
 mojobe_BMessage_Append(BMessage* self, BMessage* a_message)
 {
-	return self->Append(*a_message);
+	try {
+		return self->Append(*a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_Append");
+	}
+	return B_ERROR;
 }
 
 
@@ -4831,7 +7776,14 @@ mojobe_BMessage_Append(BMessage* self, BMessage* a_message)
 status_t
 mojobe_BMessage_RemoveData(BMessage* self, const char* a_name, int32 a_index)
 {
-	return self->RemoveData(a_name, a_index);
+	try {
+		return self->RemoveData(a_name, a_index);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_RemoveData");
+	}
+	return B_ERROR;
 }
 
 
@@ -4839,7 +7791,14 @@ mojobe_BMessage_RemoveData(BMessage* self, const char* a_name, int32 a_index)
 status_t
 mojobe_BMessage_RemoveName(BMessage* self, const char* a_name)
 {
-	return self->RemoveName(a_name);
+	try {
+		return self->RemoveName(a_name);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_RemoveName");
+	}
+	return B_ERROR;
 }
 
 
@@ -4847,7 +7806,14 @@ mojobe_BMessage_RemoveName(BMessage* self, const char* a_name)
 status_t
 mojobe_BMessage_MakeEmpty(BMessage* self)
 {
-	return self->MakeEmpty();
+	try {
+		return self->MakeEmpty();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_MakeEmpty");
+	}
+	return B_ERROR;
 }
 
 
@@ -4857,11 +7823,18 @@ mojobe_BMessage_FindRect__charP_BRectP(BMessage* self,
 	const char* a_name,
 	mojobe_BRect* a_rect)
 {
-	BRect t_rect;
-	status_t result = self->FindRect(a_name, &t_rect);
-	if (a_rect != NULL)
+	try {
+		BRect t_rect;
+		status_t result = self->FindRect(a_name, &t_rect);
+		if (a_rect != NULL)
 		*a_rect = mojobe_to_c(t_rect);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindRect__charP_BRectP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4872,11 +7845,18 @@ mojobe_BMessage_FindRect__charP_int32_BRectP(BMessage* self,
 	int32 a_index,
 	mojobe_BRect* a_rect)
 {
-	BRect t_rect;
-	status_t result = self->FindRect(a_name, a_index, &t_rect);
-	if (a_rect != NULL)
+	try {
+		BRect t_rect;
+		status_t result = self->FindRect(a_name, a_index, &t_rect);
+		if (a_rect != NULL)
 		*a_rect = mojobe_to_c(t_rect);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindRect__charP_int32_BRectP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4886,11 +7866,18 @@ mojobe_BMessage_FindPoint__charP_BPointP(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint* a_point)
 {
-	BPoint t_point;
-	status_t result = self->FindPoint(a_name, &t_point);
-	if (a_point != NULL)
+	try {
+		BPoint t_point;
+		status_t result = self->FindPoint(a_name, &t_point);
+		if (a_point != NULL)
 		*a_point = mojobe_to_c(t_point);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindPoint__charP_BPointP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4901,11 +7888,18 @@ mojobe_BMessage_FindPoint__charP_int32_BPointP(BMessage* self,
 	int32 a_index,
 	mojobe_BPoint* a_point)
 {
-	BPoint t_point;
-	status_t result = self->FindPoint(a_name, a_index, &t_point);
-	if (a_point != NULL)
+	try {
+		BPoint t_point;
+		status_t result = self->FindPoint(a_name, a_index, &t_point);
+		if (a_point != NULL)
 		*a_point = mojobe_to_c(t_point);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindPoint__charP_int32_BPointP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4915,7 +7909,14 @@ mojobe_BMessage_FindString__charP_charPP(BMessage* self,
 	const char* a_name,
 	const char** a_string)
 {
-	return self->FindString(a_name, a_string);
+	try {
+		return self->FindString(a_name, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindString__charP_charPP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4926,7 +7927,14 @@ mojobe_BMessage_FindString__charP_int32_charPP(BMessage* self,
 	int32 a_index,
 	const char** a_string)
 {
-	return self->FindString(a_name, a_index, a_string);
+	try {
+		return self->FindString(a_name, a_index, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindString__charP_int32_charPP");
+	}
+	return B_ERROR;
 }
 
 
@@ -4936,7 +7944,14 @@ mojobe_BMessage_FindInt8__charP_int8P(BMessage* self,
 	const char* a_name,
 	int8 * a_value)
 {
-	return self->FindInt8(a_name, a_value);
+	try {
+		return self->FindInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt8__charP_int8P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4947,7 +7962,14 @@ mojobe_BMessage_FindInt8__charP_int32_int8P(BMessage* self,
 	int32 a_index,
 	int8 * a_value)
 {
-	return self->FindInt8(a_name, a_index, a_value);
+	try {
+		return self->FindInt8(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt8__charP_int32_int8P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4957,7 +7979,14 @@ mojobe_BMessage_FindUInt8__charP_uint8P(BMessage* self,
 	const char* a_name,
 	uint8 * a_value)
 {
-	return self->FindUInt8(a_name, a_value);
+	try {
+		return self->FindUInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt8__charP_uint8P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4968,7 +7997,14 @@ mojobe_BMessage_FindUInt8__charP_int32_uint8P(BMessage* self,
 	int32 a_index,
 	uint8 * a_value)
 {
-	return self->FindUInt8(a_name, a_index, a_value);
+	try {
+		return self->FindUInt8(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt8__charP_int32_uint8P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4978,7 +8014,14 @@ mojobe_BMessage_FindInt16__charP_int16P(BMessage* self,
 	const char* a_name,
 	int16 * a_value)
 {
-	return self->FindInt16(a_name, a_value);
+	try {
+		return self->FindInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt16__charP_int16P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4989,7 +8032,14 @@ mojobe_BMessage_FindInt16__charP_int32_int16P(BMessage* self,
 	int32 a_index,
 	int16 * a_value)
 {
-	return self->FindInt16(a_name, a_index, a_value);
+	try {
+		return self->FindInt16(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt16__charP_int32_int16P");
+	}
+	return B_ERROR;
 }
 
 
@@ -4999,7 +8049,14 @@ mojobe_BMessage_FindUInt16__charP_uint16P(BMessage* self,
 	const char* a_name,
 	uint16 * a_value)
 {
-	return self->FindUInt16(a_name, a_value);
+	try {
+		return self->FindUInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt16__charP_uint16P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5010,7 +8067,14 @@ mojobe_BMessage_FindUInt16__charP_int32_uint16P(BMessage* self,
 	int32 a_index,
 	uint16 * a_value)
 {
-	return self->FindUInt16(a_name, a_index, a_value);
+	try {
+		return self->FindUInt16(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt16__charP_int32_uint16P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5020,7 +8084,14 @@ mojobe_BMessage_FindInt32__charP_int32P(BMessage* self,
 	const char* a_name,
 	int32 * a_value)
 {
-	return self->FindInt32(a_name, a_value);
+	try {
+		return self->FindInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt32__charP_int32P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5031,7 +8102,14 @@ mojobe_BMessage_FindInt32__charP_int32_int32P(BMessage* self,
 	int32 a_index,
 	int32 * a_value)
 {
-	return self->FindInt32(a_name, a_index, a_value);
+	try {
+		return self->FindInt32(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt32__charP_int32_int32P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5041,7 +8119,14 @@ mojobe_BMessage_FindUInt32__charP_uint32P(BMessage* self,
 	const char* a_name,
 	uint32 * a_value)
 {
-	return self->FindUInt32(a_name, a_value);
+	try {
+		return self->FindUInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt32__charP_uint32P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5052,7 +8137,14 @@ mojobe_BMessage_FindUInt32__charP_int32_uint32P(BMessage* self,
 	int32 a_index,
 	uint32 * a_value)
 {
-	return self->FindUInt32(a_name, a_index, a_value);
+	try {
+		return self->FindUInt32(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt32__charP_int32_uint32P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5062,7 +8154,14 @@ mojobe_BMessage_FindInt64__charP_int64P(BMessage* self,
 	const char* a_name,
 	int64 * a_value)
 {
-	return self->FindInt64(a_name, a_value);
+	try {
+		return self->FindInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt64__charP_int64P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5073,7 +8172,14 @@ mojobe_BMessage_FindInt64__charP_int32_int64P(BMessage* self,
 	int32 a_index,
 	int64 * a_value)
 {
-	return self->FindInt64(a_name, a_index, a_value);
+	try {
+		return self->FindInt64(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindInt64__charP_int32_int64P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5083,7 +8189,14 @@ mojobe_BMessage_FindUInt64__charP_uint64P(BMessage* self,
 	const char* a_name,
 	uint64 * a_value)
 {
-	return self->FindUInt64(a_name, a_value);
+	try {
+		return self->FindUInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt64__charP_uint64P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5094,7 +8207,14 @@ mojobe_BMessage_FindUInt64__charP_int32_uint64P(BMessage* self,
 	int32 a_index,
 	uint64 * a_value)
 {
-	return self->FindUInt64(a_name, a_index, a_value);
+	try {
+		return self->FindUInt64(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindUInt64__charP_int32_uint64P");
+	}
+	return B_ERROR;
 }
 
 
@@ -5104,7 +8224,14 @@ mojobe_BMessage_FindBool__charP_boolP(BMessage* self,
 	const char* a_name,
 	bool * a_value)
 {
-	return self->FindBool(a_name, a_value);
+	try {
+		return self->FindBool(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindBool__charP_boolP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5115,7 +8242,14 @@ mojobe_BMessage_FindBool__charP_int32_boolP(BMessage* self,
 	int32 a_index,
 	bool * a_value)
 {
-	return self->FindBool(a_name, a_index, a_value);
+	try {
+		return self->FindBool(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindBool__charP_int32_boolP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5125,7 +8259,14 @@ mojobe_BMessage_FindFloat__charP_floatP(BMessage* self,
 	const char* a_name,
 	float * a_value)
 {
-	return self->FindFloat(a_name, a_value);
+	try {
+		return self->FindFloat(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindFloat__charP_floatP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5136,7 +8277,14 @@ mojobe_BMessage_FindFloat__charP_int32_floatP(BMessage* self,
 	int32 a_index,
 	float * a_value)
 {
-	return self->FindFloat(a_name, a_index, a_value);
+	try {
+		return self->FindFloat(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindFloat__charP_int32_floatP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5146,7 +8294,14 @@ mojobe_BMessage_FindDouble__charP_doubleP(BMessage* self,
 	const char* a_name,
 	double * a_value)
 {
-	return self->FindDouble(a_name, a_value);
+	try {
+		return self->FindDouble(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindDouble__charP_doubleP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5157,7 +8312,14 @@ mojobe_BMessage_FindDouble__charP_int32_doubleP(BMessage* self,
 	int32 a_index,
 	double * a_value)
 {
-	return self->FindDouble(a_name, a_index, a_value);
+	try {
+		return self->FindDouble(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindDouble__charP_int32_doubleP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5167,11 +8329,18 @@ mojobe_BMessage_FindColor__charP_rgb_colorP(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color* a_value)
 {
-	rgb_color t_value;
-	status_t result = self->FindColor(a_name, &t_value);
-	if (a_value != NULL)
+	try {
+		rgb_color t_value;
+		status_t result = self->FindColor(a_name, &t_value);
+		if (a_value != NULL)
 		*a_value = mojobe_to_c(t_value);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindColor__charP_rgb_colorP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5182,11 +8351,18 @@ mojobe_BMessage_FindColor__charP_int32_rgb_colorP(BMessage* self,
 	int32 a_index,
 	mojobe_rgb_color* a_value)
 {
-	rgb_color t_value;
-	status_t result = self->FindColor(a_name, a_index, &t_value);
-	if (a_value != NULL)
+	try {
+		rgb_color t_value;
+		status_t result = self->FindColor(a_name, a_index, &t_value);
+		if (a_value != NULL)
 		*a_value = mojobe_to_c(t_value);
-	return result;
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindColor__charP_int32_rgb_colorP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5196,7 +8372,14 @@ mojobe_BMessage_FindMessenger__charP_BMessengerP(BMessage* self,
 	const char* a_name,
 	BMessenger* a_messenger)
 {
-	return self->FindMessenger(a_name, a_messenger);
+	try {
+		return self->FindMessenger(a_name, a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindMessenger__charP_BMessengerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5207,7 +8390,14 @@ mojobe_BMessage_FindMessenger__charP_int32_BMessengerP(BMessage* self,
 	int32 a_index,
 	BMessenger* a_messenger)
 {
-	return self->FindMessenger(a_name, a_index, a_messenger);
+	try {
+		return self->FindMessenger(a_name, a_index, a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindMessenger__charP_int32_BMessengerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5217,7 +8407,14 @@ mojobe_BMessage_FindMessage__charP_BMessageP(BMessage* self,
 	const char* a_name,
 	BMessage* a_message)
 {
-	return self->FindMessage(a_name, a_message);
+	try {
+		return self->FindMessage(a_name, a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindMessage__charP_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5228,7 +8425,14 @@ mojobe_BMessage_FindMessage__charP_int32_BMessageP(BMessage* self,
 	int32 a_index,
 	BMessage* a_message)
 {
-	return self->FindMessage(a_name, a_index, a_message);
+	try {
+		return self->FindMessage(a_name, a_index, a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindMessage__charP_int32_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5238,7 +8442,14 @@ mojobe_BMessage_ReplaceRect__charP_BRect(BMessage* self,
 	const char* a_name,
 	mojobe_BRect a_rect)
 {
-	return self->ReplaceRect(a_name, mojobe_from_c(a_rect));
+	try {
+		return self->ReplaceRect(a_name, mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceRect__charP_BRect");
+	}
+	return B_ERROR;
 }
 
 
@@ -5249,7 +8460,14 @@ mojobe_BMessage_ReplaceRect__charP_int32_BRect(BMessage* self,
 	int32 a_index,
 	mojobe_BRect a_rect)
 {
-	return self->ReplaceRect(a_name, a_index, mojobe_from_c(a_rect));
+	try {
+		return self->ReplaceRect(a_name, a_index, mojobe_from_c(a_rect));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceRect__charP_int32_BRect");
+	}
+	return B_ERROR;
 }
 
 
@@ -5259,7 +8477,14 @@ mojobe_BMessage_ReplacePoint__charP_BPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_aPoint)
 {
-	return self->ReplacePoint(a_name, mojobe_from_c(a_aPoint));
+	try {
+		return self->ReplacePoint(a_name, mojobe_from_c(a_aPoint));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplacePoint__charP_BPoint");
+	}
+	return B_ERROR;
 }
 
 
@@ -5270,7 +8495,14 @@ mojobe_BMessage_ReplacePoint__charP_int32_BPoint(BMessage* self,
 	int32 a_index,
 	mojobe_BPoint a_aPoint)
 {
-	return self->ReplacePoint(a_name, a_index, mojobe_from_c(a_aPoint));
+	try {
+		return self->ReplacePoint(a_name, a_index, mojobe_from_c(a_aPoint));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplacePoint__charP_int32_BPoint");
+	}
+	return B_ERROR;
 }
 
 
@@ -5280,7 +8512,14 @@ mojobe_BMessage_ReplaceString__charP_charP(BMessage* self,
 	const char* a_name,
 	const char* a_string)
 {
-	return self->ReplaceString(a_name, a_string);
+	try {
+		return self->ReplaceString(a_name, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceString__charP_charP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5291,7 +8530,14 @@ mojobe_BMessage_ReplaceString__charP_int32_charP(BMessage* self,
 	int32 a_index,
 	const char* a_string)
 {
-	return self->ReplaceString(a_name, a_index, a_string);
+	try {
+		return self->ReplaceString(a_name, a_index, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceString__charP_int32_charP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5301,7 +8547,14 @@ mojobe_BMessage_ReplaceInt8__charP_int8(BMessage* self,
 	const char* a_name,
 	int8 a_value)
 {
-	return self->ReplaceInt8(a_name, a_value);
+	try {
+		return self->ReplaceInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt8__charP_int8");
+	}
+	return B_ERROR;
 }
 
 
@@ -5312,7 +8565,14 @@ mojobe_BMessage_ReplaceInt8__charP_int32_int8(BMessage* self,
 	int32 a_index,
 	int8 a_value)
 {
-	return self->ReplaceInt8(a_name, a_index, a_value);
+	try {
+		return self->ReplaceInt8(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt8__charP_int32_int8");
+	}
+	return B_ERROR;
 }
 
 
@@ -5322,7 +8582,14 @@ mojobe_BMessage_ReplaceUInt8__charP_uint8(BMessage* self,
 	const char* a_name,
 	uint8 a_value)
 {
-	return self->ReplaceUInt8(a_name, a_value);
+	try {
+		return self->ReplaceUInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt8__charP_uint8");
+	}
+	return B_ERROR;
 }
 
 
@@ -5333,7 +8600,14 @@ mojobe_BMessage_ReplaceUInt8__charP_int32_uint8(BMessage* self,
 	int32 a_index,
 	uint8 a_value)
 {
-	return self->ReplaceUInt8(a_name, a_index, a_value);
+	try {
+		return self->ReplaceUInt8(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt8__charP_int32_uint8");
+	}
+	return B_ERROR;
 }
 
 
@@ -5343,7 +8617,14 @@ mojobe_BMessage_ReplaceInt16__charP_int16(BMessage* self,
 	const char* a_name,
 	int16 a_value)
 {
-	return self->ReplaceInt16(a_name, a_value);
+	try {
+		return self->ReplaceInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt16__charP_int16");
+	}
+	return B_ERROR;
 }
 
 
@@ -5354,7 +8635,14 @@ mojobe_BMessage_ReplaceInt16__charP_int32_int16(BMessage* self,
 	int32 a_index,
 	int16 a_value)
 {
-	return self->ReplaceInt16(a_name, a_index, a_value);
+	try {
+		return self->ReplaceInt16(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt16__charP_int32_int16");
+	}
+	return B_ERROR;
 }
 
 
@@ -5364,7 +8652,14 @@ mojobe_BMessage_ReplaceUInt16__charP_uint16(BMessage* self,
 	const char* a_name,
 	uint16 a_value)
 {
-	return self->ReplaceUInt16(a_name, a_value);
+	try {
+		return self->ReplaceUInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt16__charP_uint16");
+	}
+	return B_ERROR;
 }
 
 
@@ -5375,7 +8670,14 @@ mojobe_BMessage_ReplaceUInt16__charP_int32_uint16(BMessage* self,
 	int32 a_index,
 	uint16 a_value)
 {
-	return self->ReplaceUInt16(a_name, a_index, a_value);
+	try {
+		return self->ReplaceUInt16(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt16__charP_int32_uint16");
+	}
+	return B_ERROR;
 }
 
 
@@ -5385,7 +8687,14 @@ mojobe_BMessage_ReplaceInt32__charP_int32(BMessage* self,
 	const char* a_name,
 	int32 a_value)
 {
-	return self->ReplaceInt32(a_name, a_value);
+	try {
+		return self->ReplaceInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt32__charP_int32");
+	}
+	return B_ERROR;
 }
 
 
@@ -5396,7 +8705,14 @@ mojobe_BMessage_ReplaceInt32__charP_int32_int32(BMessage* self,
 	int32 a_index,
 	int32 a_value)
 {
-	return self->ReplaceInt32(a_name, a_index, a_value);
+	try {
+		return self->ReplaceInt32(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt32__charP_int32_int32");
+	}
+	return B_ERROR;
 }
 
 
@@ -5406,7 +8722,14 @@ mojobe_BMessage_ReplaceUInt32__charP_uint32(BMessage* self,
 	const char* a_name,
 	uint32 a_value)
 {
-	return self->ReplaceUInt32(a_name, a_value);
+	try {
+		return self->ReplaceUInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt32__charP_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -5417,7 +8740,14 @@ mojobe_BMessage_ReplaceUInt32__charP_int32_uint32(BMessage* self,
 	int32 a_index,
 	uint32 a_value)
 {
-	return self->ReplaceUInt32(a_name, a_index, a_value);
+	try {
+		return self->ReplaceUInt32(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt32__charP_int32_uint32");
+	}
+	return B_ERROR;
 }
 
 
@@ -5427,7 +8757,14 @@ mojobe_BMessage_ReplaceInt64__charP_int64(BMessage* self,
 	const char* a_name,
 	int64 a_value)
 {
-	return self->ReplaceInt64(a_name, a_value);
+	try {
+		return self->ReplaceInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt64__charP_int64");
+	}
+	return B_ERROR;
 }
 
 
@@ -5438,7 +8775,14 @@ mojobe_BMessage_ReplaceInt64__charP_int32_int64(BMessage* self,
 	int32 a_index,
 	int64 a_value)
 {
-	return self->ReplaceInt64(a_name, a_index, a_value);
+	try {
+		return self->ReplaceInt64(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceInt64__charP_int32_int64");
+	}
+	return B_ERROR;
 }
 
 
@@ -5448,7 +8792,14 @@ mojobe_BMessage_ReplaceUInt64__charP_uint64(BMessage* self,
 	const char* a_name,
 	uint64 a_value)
 {
-	return self->ReplaceUInt64(a_name, a_value);
+	try {
+		return self->ReplaceUInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt64__charP_uint64");
+	}
+	return B_ERROR;
 }
 
 
@@ -5459,7 +8810,14 @@ mojobe_BMessage_ReplaceUInt64__charP_int32_uint64(BMessage* self,
 	int32 a_index,
 	uint64 a_value)
 {
-	return self->ReplaceUInt64(a_name, a_index, a_value);
+	try {
+		return self->ReplaceUInt64(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceUInt64__charP_int32_uint64");
+	}
+	return B_ERROR;
 }
 
 
@@ -5469,7 +8827,14 @@ mojobe_BMessage_ReplaceBool__charP_bool(BMessage* self,
 	const char* a_name,
 	bool a_aBoolean)
 {
-	return self->ReplaceBool(a_name, a_aBoolean);
+	try {
+		return self->ReplaceBool(a_name, a_aBoolean);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceBool__charP_bool");
+	}
+	return B_ERROR;
 }
 
 
@@ -5480,7 +8845,14 @@ mojobe_BMessage_ReplaceBool__charP_int32_bool(BMessage* self,
 	int32 a_index,
 	bool a_value)
 {
-	return self->ReplaceBool(a_name, a_index, a_value);
+	try {
+		return self->ReplaceBool(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceBool__charP_int32_bool");
+	}
+	return B_ERROR;
 }
 
 
@@ -5490,7 +8862,14 @@ mojobe_BMessage_ReplaceFloat__charP_float(BMessage* self,
 	const char* a_name,
 	float a_value)
 {
-	return self->ReplaceFloat(a_name, a_value);
+	try {
+		return self->ReplaceFloat(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceFloat__charP_float");
+	}
+	return B_ERROR;
 }
 
 
@@ -5501,7 +8880,14 @@ mojobe_BMessage_ReplaceFloat__charP_int32_float(BMessage* self,
 	int32 a_index,
 	float a_value)
 {
-	return self->ReplaceFloat(a_name, a_index, a_value);
+	try {
+		return self->ReplaceFloat(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceFloat__charP_int32_float");
+	}
+	return B_ERROR;
 }
 
 
@@ -5511,7 +8897,14 @@ mojobe_BMessage_ReplaceDouble__charP_double(BMessage* self,
 	const char* a_name,
 	double a_value)
 {
-	return self->ReplaceDouble(a_name, a_value);
+	try {
+		return self->ReplaceDouble(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceDouble__charP_double");
+	}
+	return B_ERROR;
 }
 
 
@@ -5522,7 +8915,14 @@ mojobe_BMessage_ReplaceDouble__charP_int32_double(BMessage* self,
 	int32 a_index,
 	double a_value)
 {
-	return self->ReplaceDouble(a_name, a_index, a_value);
+	try {
+		return self->ReplaceDouble(a_name, a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceDouble__charP_int32_double");
+	}
+	return B_ERROR;
 }
 
 
@@ -5532,7 +8932,14 @@ mojobe_BMessage_ReplaceColor__charP_rgb_color(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color a_value)
 {
-	return self->ReplaceColor(a_name, mojobe_from_c(a_value));
+	try {
+		return self->ReplaceColor(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceColor__charP_rgb_color");
+	}
+	return B_ERROR;
 }
 
 
@@ -5543,7 +8950,14 @@ mojobe_BMessage_ReplaceColor__charP_int32_rgb_color(BMessage* self,
 	int32 a_index,
 	mojobe_rgb_color a_value)
 {
-	return self->ReplaceColor(a_name, a_index, mojobe_from_c(a_value));
+	try {
+		return self->ReplaceColor(a_name, a_index, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceColor__charP_int32_rgb_color");
+	}
+	return B_ERROR;
 }
 
 
@@ -5553,7 +8967,14 @@ mojobe_BMessage_ReplaceMessenger__charP_BMessenger(BMessage* self,
 	const char* a_name,
 	const BMessenger* a_messenger)
 {
-	return self->ReplaceMessenger(a_name, *a_messenger);
+	try {
+		return self->ReplaceMessenger(a_name, *a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceMessenger__charP_BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -5564,7 +8985,14 @@ mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger(BMessage* self,
 	int32 a_index,
 	const BMessenger* a_messenger)
 {
-	return self->ReplaceMessenger(a_name, a_index, *a_messenger);
+	try {
+		return self->ReplaceMessenger(a_name, a_index, *a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -5574,7 +9002,14 @@ mojobe_BMessage_ReplaceMessage__charP_BMessageP(BMessage* self,
 	const char* a_name,
 	BMessage* a_message)
 {
-	return self->ReplaceMessage(a_name, a_message);
+	try {
+		return self->ReplaceMessage(a_name, a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceMessage__charP_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5585,7 +9020,14 @@ mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP(BMessage* self,
 	int32 a_index,
 	BMessage* a_message)
 {
-	return self->ReplaceMessage(a_name, a_index, a_message);
+	try {
+		return self->ReplaceMessage(a_name, a_index, a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP");
+	}
+	return B_ERROR;
 }
 
 
@@ -5596,7 +9038,14 @@ mojobe_BMessage_HasSameData(BMessage* self,
 	bool a_ignoreFieldOrder,
 	bool a_deep)
 {
-	return self->HasSameData(*a_other, a_ignoreFieldOrder, a_deep);
+	try {
+		return self->HasSameData(*a_other, a_ignoreFieldOrder, a_deep);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasSameData");
+	}
+	return {};
 }
 
 
@@ -5604,7 +9053,14 @@ mojobe_BMessage_HasSameData(BMessage* self,
 bool
 mojobe_BMessage_HasAlignment(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasAlignment(a_name, a_n);
+	try {
+		return self->HasAlignment(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasAlignment");
+	}
+	return {};
 }
 
 
@@ -5612,7 +9068,14 @@ mojobe_BMessage_HasAlignment(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasRect(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasRect(a_name, a_n);
+	try {
+		return self->HasRect(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasRect");
+	}
+	return {};
 }
 
 
@@ -5620,7 +9083,14 @@ mojobe_BMessage_HasRect(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasPoint(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasPoint(a_name, a_n);
+	try {
+		return self->HasPoint(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasPoint");
+	}
+	return {};
 }
 
 
@@ -5628,7 +9098,14 @@ mojobe_BMessage_HasPoint(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasSize(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasSize(a_name, a_n);
+	try {
+		return self->HasSize(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasSize");
+	}
+	return {};
 }
 
 
@@ -5636,7 +9113,14 @@ mojobe_BMessage_HasSize(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasString(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasString(a_name, a_n);
+	try {
+		return self->HasString(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasString");
+	}
+	return {};
 }
 
 
@@ -5644,7 +9128,14 @@ mojobe_BMessage_HasString(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasInt8(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasInt8(a_name, a_n);
+	try {
+		return self->HasInt8(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasInt8");
+	}
+	return {};
 }
 
 
@@ -5652,7 +9143,14 @@ mojobe_BMessage_HasInt8(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasUInt8(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasUInt8(a_name, a_n);
+	try {
+		return self->HasUInt8(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasUInt8");
+	}
+	return {};
 }
 
 
@@ -5660,7 +9158,14 @@ mojobe_BMessage_HasUInt8(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasInt16(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasInt16(a_name, a_n);
+	try {
+		return self->HasInt16(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasInt16");
+	}
+	return {};
 }
 
 
@@ -5668,7 +9173,14 @@ mojobe_BMessage_HasInt16(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasUInt16(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasUInt16(a_name, a_n);
+	try {
+		return self->HasUInt16(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasUInt16");
+	}
+	return {};
 }
 
 
@@ -5676,7 +9188,14 @@ mojobe_BMessage_HasUInt16(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasInt32(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasInt32(a_name, a_n);
+	try {
+		return self->HasInt32(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasInt32");
+	}
+	return {};
 }
 
 
@@ -5684,7 +9203,14 @@ mojobe_BMessage_HasInt32(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasUInt32(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasUInt32(a_name, a_n);
+	try {
+		return self->HasUInt32(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasUInt32");
+	}
+	return {};
 }
 
 
@@ -5692,7 +9218,14 @@ mojobe_BMessage_HasUInt32(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasInt64(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasInt64(a_name, a_n);
+	try {
+		return self->HasInt64(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasInt64");
+	}
+	return {};
 }
 
 
@@ -5700,7 +9233,14 @@ mojobe_BMessage_HasInt64(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasUInt64(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasUInt64(a_name, a_n);
+	try {
+		return self->HasUInt64(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasUInt64");
+	}
+	return {};
 }
 
 
@@ -5708,7 +9248,14 @@ mojobe_BMessage_HasUInt64(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasBool(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasBool(a_name, a_n);
+	try {
+		return self->HasBool(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasBool");
+	}
+	return {};
 }
 
 
@@ -5716,7 +9263,14 @@ mojobe_BMessage_HasBool(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasFloat(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasFloat(a_name, a_n);
+	try {
+		return self->HasFloat(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasFloat");
+	}
+	return {};
 }
 
 
@@ -5724,7 +9278,14 @@ mojobe_BMessage_HasFloat(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasDouble(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasDouble(a_name, a_n);
+	try {
+		return self->HasDouble(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasDouble");
+	}
+	return {};
 }
 
 
@@ -5732,7 +9293,14 @@ mojobe_BMessage_HasDouble(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasColor(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasColor(a_name, a_n);
+	try {
+		return self->HasColor(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasColor");
+	}
+	return {};
 }
 
 
@@ -5740,7 +9308,14 @@ mojobe_BMessage_HasColor(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasPointer(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasPointer(a_name, a_n);
+	try {
+		return self->HasPointer(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasPointer");
+	}
+	return {};
 }
 
 
@@ -5748,7 +9323,14 @@ mojobe_BMessage_HasPointer(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasMessenger(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasMessenger(a_name, a_n);
+	try {
+		return self->HasMessenger(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasMessenger");
+	}
+	return {};
 }
 
 
@@ -5756,7 +9338,14 @@ mojobe_BMessage_HasMessenger(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasRef(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasRef(a_name, a_n);
+	try {
+		return self->HasRef(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasRef");
+	}
+	return {};
 }
 
 
@@ -5764,7 +9353,14 @@ mojobe_BMessage_HasRef(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasNodeRef(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasNodeRef(a_name, a_n);
+	try {
+		return self->HasNodeRef(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasNodeRef");
+	}
+	return {};
 }
 
 
@@ -5772,7 +9368,14 @@ mojobe_BMessage_HasNodeRef(BMessage* self, const char* a_name, int32 a_n)
 bool
 mojobe_BMessage_HasMessage(BMessage* self, const char* a_name, int32 a_n)
 {
-	return self->HasMessage(a_name, a_n);
+	try {
+		return self->HasMessage(a_name, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasMessage");
+	}
+	return {};
 }
 
 
@@ -5783,7 +9386,14 @@ mojobe_BMessage_HasData(BMessage* self,
 	type_code a_arg1,
 	int32 a_n)
 {
-	return self->HasData(a_name, a_arg1, a_n);
+	try {
+		return self->HasData(a_name, a_arg1, a_n);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_HasData");
+	}
+	return {};
 }
 
 
@@ -5793,7 +9403,14 @@ mojobe_BMessage_GetBool__charP_bool(BMessage* self,
 	const char* a_name,
 	bool a_defaultValue)
 {
-	return self->GetBool(a_name, a_defaultValue);
+	try {
+		return self->GetBool(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetBool__charP_bool");
+	}
+	return {};
 }
 
 
@@ -5804,7 +9421,14 @@ mojobe_BMessage_GetBool__charP_int32_bool(BMessage* self,
 	int32 a_index,
 	bool a_defaultValue)
 {
-	return self->GetBool(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetBool(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetBool__charP_int32_bool");
+	}
+	return {};
 }
 
 
@@ -5814,7 +9438,14 @@ mojobe_BMessage_GetInt8__charP_int8(BMessage* self,
 	const char* a_name,
 	int8 a_defaultValue)
 {
-	return self->GetInt8(a_name, a_defaultValue);
+	try {
+		return self->GetInt8(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt8__charP_int8");
+	}
+	return {};
 }
 
 
@@ -5825,7 +9456,14 @@ mojobe_BMessage_GetInt8__charP_int32_int8(BMessage* self,
 	int32 a_index,
 	int8 a_defaultValue)
 {
-	return self->GetInt8(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetInt8(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt8__charP_int32_int8");
+	}
+	return {};
 }
 
 
@@ -5835,7 +9473,14 @@ mojobe_BMessage_GetUInt8__charP_uint8(BMessage* self,
 	const char* a_name,
 	uint8 a_defaultValue)
 {
-	return self->GetUInt8(a_name, a_defaultValue);
+	try {
+		return self->GetUInt8(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt8__charP_uint8");
+	}
+	return {};
 }
 
 
@@ -5846,7 +9491,14 @@ mojobe_BMessage_GetUInt8__charP_int32_uint8(BMessage* self,
 	int32 a_index,
 	uint8 a_defaultValue)
 {
-	return self->GetUInt8(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetUInt8(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt8__charP_int32_uint8");
+	}
+	return {};
 }
 
 
@@ -5856,7 +9508,14 @@ mojobe_BMessage_GetInt16__charP_int16(BMessage* self,
 	const char* a_name,
 	int16 a_defaultValue)
 {
-	return self->GetInt16(a_name, a_defaultValue);
+	try {
+		return self->GetInt16(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt16__charP_int16");
+	}
+	return {};
 }
 
 
@@ -5867,7 +9526,14 @@ mojobe_BMessage_GetInt16__charP_int32_int16(BMessage* self,
 	int32 a_index,
 	int16 a_defaultValue)
 {
-	return self->GetInt16(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetInt16(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt16__charP_int32_int16");
+	}
+	return {};
 }
 
 
@@ -5877,7 +9543,14 @@ mojobe_BMessage_GetUInt16__charP_uint16(BMessage* self,
 	const char* a_name,
 	uint16 a_defaultValue)
 {
-	return self->GetUInt16(a_name, a_defaultValue);
+	try {
+		return self->GetUInt16(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt16__charP_uint16");
+	}
+	return {};
 }
 
 
@@ -5888,7 +9561,14 @@ mojobe_BMessage_GetUInt16__charP_int32_uint16(BMessage* self,
 	int32 a_index,
 	uint16 a_defaultValue)
 {
-	return self->GetUInt16(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetUInt16(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt16__charP_int32_uint16");
+	}
+	return {};
 }
 
 
@@ -5898,7 +9578,14 @@ mojobe_BMessage_GetInt32__charP_int32(BMessage* self,
 	const char* a_name,
 	int32 a_defaultValue)
 {
-	return self->GetInt32(a_name, a_defaultValue);
+	try {
+		return self->GetInt32(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt32__charP_int32");
+	}
+	return {};
 }
 
 
@@ -5909,7 +9596,14 @@ mojobe_BMessage_GetInt32__charP_int32_int32(BMessage* self,
 	int32 a_index,
 	int32 a_defaultValue)
 {
-	return self->GetInt32(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetInt32(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt32__charP_int32_int32");
+	}
+	return {};
 }
 
 
@@ -5919,7 +9613,14 @@ mojobe_BMessage_GetUInt32__charP_uint32(BMessage* self,
 	const char* a_name,
 	uint32 a_defaultValue)
 {
-	return self->GetUInt32(a_name, a_defaultValue);
+	try {
+		return self->GetUInt32(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt32__charP_uint32");
+	}
+	return {};
 }
 
 
@@ -5930,7 +9631,14 @@ mojobe_BMessage_GetUInt32__charP_int32_uint32(BMessage* self,
 	int32 a_index,
 	uint32 a_defaultValue)
 {
-	return self->GetUInt32(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetUInt32(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt32__charP_int32_uint32");
+	}
+	return {};
 }
 
 
@@ -5940,7 +9648,14 @@ mojobe_BMessage_GetInt64__charP_int64(BMessage* self,
 	const char* a_name,
 	int64 a_defaultValue)
 {
-	return self->GetInt64(a_name, a_defaultValue);
+	try {
+		return self->GetInt64(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt64__charP_int64");
+	}
+	return {};
 }
 
 
@@ -5951,7 +9666,14 @@ mojobe_BMessage_GetInt64__charP_int32_int64(BMessage* self,
 	int32 a_index,
 	int64 a_defaultValue)
 {
-	return self->GetInt64(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetInt64(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetInt64__charP_int32_int64");
+	}
+	return {};
 }
 
 
@@ -5961,7 +9683,14 @@ mojobe_BMessage_GetUInt64__charP_uint64(BMessage* self,
 	const char* a_name,
 	uint64 a_defaultValue)
 {
-	return self->GetUInt64(a_name, a_defaultValue);
+	try {
+		return self->GetUInt64(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt64__charP_uint64");
+	}
+	return {};
 }
 
 
@@ -5972,7 +9701,14 @@ mojobe_BMessage_GetUInt64__charP_int32_uint64(BMessage* self,
 	int32 a_index,
 	uint64 a_defaultValue)
 {
-	return self->GetUInt64(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetUInt64(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetUInt64__charP_int32_uint64");
+	}
+	return {};
 }
 
 
@@ -5982,7 +9718,14 @@ mojobe_BMessage_GetFloat__charP_float(BMessage* self,
 	const char* a_name,
 	float a_defaultValue)
 {
-	return self->GetFloat(a_name, a_defaultValue);
+	try {
+		return self->GetFloat(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetFloat__charP_float");
+	}
+	return {};
 }
 
 
@@ -5993,7 +9736,14 @@ mojobe_BMessage_GetFloat__charP_int32_float(BMessage* self,
 	int32 a_index,
 	float a_defaultValue)
 {
-	return self->GetFloat(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetFloat(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetFloat__charP_int32_float");
+	}
+	return {};
 }
 
 
@@ -6003,7 +9753,14 @@ mojobe_BMessage_GetDouble__charP_double(BMessage* self,
 	const char* a_name,
 	double a_defaultValue)
 {
-	return self->GetDouble(a_name, a_defaultValue);
+	try {
+		return self->GetDouble(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetDouble__charP_double");
+	}
+	return {};
 }
 
 
@@ -6014,7 +9771,14 @@ mojobe_BMessage_GetDouble__charP_int32_double(BMessage* self,
 	int32 a_index,
 	double a_defaultValue)
 {
-	return self->GetDouble(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetDouble(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetDouble__charP_int32_double");
+	}
+	return {};
 }
 
 
@@ -6024,7 +9788,14 @@ mojobe_BMessage_GetColor__charP_rgb_color(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color a_defaultValue)
 {
-	return mojobe_to_c(self->GetColor(a_name, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetColor(a_name, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetColor__charP_rgb_color");
+	}
+	return {};
 }
 
 
@@ -6035,7 +9806,14 @@ mojobe_BMessage_GetColor__charP_int32_rgb_color(BMessage* self,
 	int32 a_index,
 	mojobe_rgb_color a_defaultValue)
 {
-	return mojobe_to_c(self->GetColor(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetColor(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetColor__charP_int32_rgb_color");
+	}
+	return {};
 }
 
 
@@ -6045,7 +9823,14 @@ mojobe_BMessage_GetString__charP_charP(BMessage* self,
 	const char* a_name,
 	const char* a_defaultValue)
 {
-	return self->GetString(a_name, a_defaultValue);
+	try {
+		return self->GetString(a_name, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetString__charP_charP");
+	}
+	return {};
 }
 
 
@@ -6056,7 +9841,14 @@ mojobe_BMessage_GetString__charP_int32_charP(BMessage* self,
 	int32 a_index,
 	const char* a_defaultValue)
 {
-	return self->GetString(a_name, a_index, a_defaultValue);
+	try {
+		return self->GetString(a_name, a_index, a_defaultValue);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetString__charP_int32_charP");
+	}
+	return {};
 }
 
 
@@ -6067,7 +9859,14 @@ mojobe_BMessage_GetRect__charP_int32_BRect(BMessage* self,
 	int32 a_index,
 	mojobe_BRect a_defaultValue)
 {
-	return mojobe_to_c(self->GetRect(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetRect(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetRect__charP_int32_BRect");
+	}
+	return {};
 }
 
 
@@ -6077,7 +9876,14 @@ mojobe_BMessage_GetRect__charP_BRect(BMessage* self,
 	const char* a_name,
 	mojobe_BRect a_defaultValue)
 {
-	return mojobe_to_c(self->GetRect(a_name, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetRect(a_name, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetRect__charP_BRect");
+	}
+	return {};
 }
 
 
@@ -6088,7 +9894,14 @@ mojobe_BMessage_GetPoint__charP_int32_BPoint(BMessage* self,
 	int32 a_index,
 	mojobe_BPoint a_defaultValue)
 {
-	return mojobe_to_c(self->GetPoint(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetPoint(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetPoint__charP_int32_BPoint");
+	}
+	return {};
 }
 
 
@@ -6098,7 +9911,14 @@ mojobe_BMessage_GetPoint__charP_BPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_defaultValue)
 {
-	return mojobe_to_c(self->GetPoint(a_name, mojobe_from_c(a_defaultValue)));
+	try {
+		return mojobe_to_c(self->GetPoint(a_name, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetPoint__charP_BPoint");
+	}
+	return {};
 }
 
 
@@ -6106,7 +9926,14 @@ mojobe_BMessage_GetPoint__charP_BPoint(BMessage* self,
 status_t
 mojobe_BMessage_SetBool(BMessage* self, const char* a_name, bool a_value)
 {
-	return self->SetBool(a_name, a_value);
+	try {
+		return self->SetBool(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetBool");
+	}
+	return B_ERROR;
 }
 
 
@@ -6114,7 +9941,14 @@ mojobe_BMessage_SetBool(BMessage* self, const char* a_name, bool a_value)
 status_t
 mojobe_BMessage_SetInt8(BMessage* self, const char* a_name, int8 a_value)
 {
-	return self->SetInt8(a_name, a_value);
+	try {
+		return self->SetInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetInt8");
+	}
+	return B_ERROR;
 }
 
 
@@ -6122,7 +9956,14 @@ mojobe_BMessage_SetInt8(BMessage* self, const char* a_name, int8 a_value)
 status_t
 mojobe_BMessage_SetUInt8(BMessage* self, const char* a_name, uint8 a_value)
 {
-	return self->SetUInt8(a_name, a_value);
+	try {
+		return self->SetUInt8(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetUInt8");
+	}
+	return B_ERROR;
 }
 
 
@@ -6130,7 +9971,14 @@ mojobe_BMessage_SetUInt8(BMessage* self, const char* a_name, uint8 a_value)
 status_t
 mojobe_BMessage_SetInt16(BMessage* self, const char* a_name, int16 a_value)
 {
-	return self->SetInt16(a_name, a_value);
+	try {
+		return self->SetInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetInt16");
+	}
+	return B_ERROR;
 }
 
 
@@ -6138,7 +9986,14 @@ mojobe_BMessage_SetInt16(BMessage* self, const char* a_name, int16 a_value)
 status_t
 mojobe_BMessage_SetUInt16(BMessage* self, const char* a_name, uint16 a_value)
 {
-	return self->SetUInt16(a_name, a_value);
+	try {
+		return self->SetUInt16(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetUInt16");
+	}
+	return B_ERROR;
 }
 
 
@@ -6146,7 +10001,14 @@ mojobe_BMessage_SetUInt16(BMessage* self, const char* a_name, uint16 a_value)
 status_t
 mojobe_BMessage_SetInt32(BMessage* self, const char* a_name, int32 a_value)
 {
-	return self->SetInt32(a_name, a_value);
+	try {
+		return self->SetInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetInt32");
+	}
+	return B_ERROR;
 }
 
 
@@ -6154,7 +10016,14 @@ mojobe_BMessage_SetInt32(BMessage* self, const char* a_name, int32 a_value)
 status_t
 mojobe_BMessage_SetUInt32(BMessage* self, const char* a_name, uint32 a_value)
 {
-	return self->SetUInt32(a_name, a_value);
+	try {
+		return self->SetUInt32(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetUInt32");
+	}
+	return B_ERROR;
 }
 
 
@@ -6162,7 +10031,14 @@ mojobe_BMessage_SetUInt32(BMessage* self, const char* a_name, uint32 a_value)
 status_t
 mojobe_BMessage_SetInt64(BMessage* self, const char* a_name, int64 a_value)
 {
-	return self->SetInt64(a_name, a_value);
+	try {
+		return self->SetInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetInt64");
+	}
+	return B_ERROR;
 }
 
 
@@ -6170,7 +10046,14 @@ mojobe_BMessage_SetInt64(BMessage* self, const char* a_name, int64 a_value)
 status_t
 mojobe_BMessage_SetUInt64(BMessage* self, const char* a_name, uint64 a_value)
 {
-	return self->SetUInt64(a_name, a_value);
+	try {
+		return self->SetUInt64(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetUInt64");
+	}
+	return B_ERROR;
 }
 
 
@@ -6180,7 +10063,14 @@ mojobe_BMessage_SetColor(BMessage* self,
 	const char* a_name,
 	mojobe_rgb_color a_value)
 {
-	return self->SetColor(a_name, mojobe_from_c(a_value));
+	try {
+		return self->SetColor(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetColor");
+	}
+	return B_ERROR;
 }
 
 
@@ -6190,7 +10080,14 @@ mojobe_BMessage_SetString(BMessage* self,
 	const char* a_name,
 	const char* a_string)
 {
-	return self->SetString(a_name, a_string);
+	try {
+		return self->SetString(a_name, a_string);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetString");
+	}
+	return B_ERROR;
 }
 
 
@@ -6198,7 +10095,14 @@ mojobe_BMessage_SetString(BMessage* self,
 status_t
 mojobe_BMessage_SetFloat(BMessage* self, const char* a_name, float a_value)
 {
-	return self->SetFloat(a_name, a_value);
+	try {
+		return self->SetFloat(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetFloat");
+	}
+	return B_ERROR;
 }
 
 
@@ -6206,7 +10110,14 @@ mojobe_BMessage_SetFloat(BMessage* self, const char* a_name, float a_value)
 status_t
 mojobe_BMessage_SetDouble(BMessage* self, const char* a_name, double a_value)
 {
-	return self->SetDouble(a_name, a_value);
+	try {
+		return self->SetDouble(a_name, a_value);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetDouble");
+	}
+	return B_ERROR;
 }
 
 
@@ -6216,7 +10127,14 @@ mojobe_BMessage_SetPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_value)
 {
-	return self->SetPoint(a_name, mojobe_from_c(a_value));
+	try {
+		return self->SetPoint(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetPoint");
+	}
+	return B_ERROR;
 }
 
 
@@ -6226,7 +10144,14 @@ mojobe_BMessage_SetRect(BMessage* self,
 	const char* a_name,
 	mojobe_BRect a_value)
 {
-	return self->SetRect(a_name, mojobe_from_c(a_value));
+	try {
+		return self->SetRect(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetRect");
+	}
+	return B_ERROR;
 }
 
 
@@ -6250,7 +10175,14 @@ mojobe_BMessage_set_what(BMessage* self, uint32 value)
 BMessage*
 mojobe_BMessage_new__void()
 {
-	return new(std::nothrow) BMessage();
+	try {
+		return new(std::nothrow) BMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_new__void");
+	}
+	return {};
 }
 
 
@@ -6258,7 +10190,14 @@ mojobe_BMessage_new__void()
 BMessage*
 mojobe_BMessage_new__uint32(uint32 a_what)
 {
-	return new(std::nothrow) BMessage(a_what);
+	try {
+		return new(std::nothrow) BMessage(a_what);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_new__uint32");
+	}
+	return {};
 }
 
 
@@ -6278,7 +10217,13 @@ mojobe_BMessage_delete(BMessage* self)
 void
 mojobe_BMenu_DoLayout(BMenu* self)
 {
-	self->DoLayout();
+	try {
+		self->DoLayout();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_DoLayout");
+	}
 }
 
 
@@ -6286,7 +10231,18 @@ mojobe_BMenu_DoLayout(BMenu* self)
 bool
 mojobe_BMenu_AddItem__BMenuItemP(BMenu* self, BMenuItem* a_item)
 {
-	return self->AddItem(a_item);
+	try {
+		bool result = self->AddItem(a_item);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuItemP");
+	}
+	return {};
 }
 
 
@@ -6296,7 +10252,18 @@ mojobe_BMenu_AddItem__BMenuItemP_int32(BMenu* self,
 	BMenuItem* a_item,
 	int32 a_index)
 {
-	return self->AddItem(a_item, a_index);
+	try {
+		bool result = self->AddItem(a_item, a_index);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuItemP_int32");
+	}
+	return {};
 }
 
 
@@ -6306,7 +10273,18 @@ mojobe_BMenu_AddItem__BMenuItemP_BRect(BMenu* self,
 	BMenuItem* a_item,
 	mojobe_BRect a_frame)
 {
-	return self->AddItem(a_item, mojobe_from_c(a_frame));
+	try {
+		bool result = self->AddItem(a_item, mojobe_from_c(a_frame));
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuItemP_BRect");
+	}
+	return {};
 }
 
 
@@ -6314,7 +10292,18 @@ mojobe_BMenu_AddItem__BMenuItemP_BRect(BMenu* self,
 bool
 mojobe_BMenu_AddItem__BMenuP(BMenu* self, BMenu* a_menu)
 {
-	return self->AddItem(a_menu);
+	try {
+		bool result = self->AddItem(a_menu);
+		if (!result) {
+			delete a_menu;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuP");
+	}
+	return {};
 }
 
 
@@ -6322,7 +10311,18 @@ mojobe_BMenu_AddItem__BMenuP(BMenu* self, BMenu* a_menu)
 bool
 mojobe_BMenu_AddItem__BMenuP_int32(BMenu* self, BMenu* a_menu, int32 a_index)
 {
-	return self->AddItem(a_menu, a_index);
+	try {
+		bool result = self->AddItem(a_menu, a_index);
+		if (!result) {
+			delete a_menu;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuP_int32");
+	}
+	return {};
 }
 
 
@@ -6332,7 +10332,18 @@ mojobe_BMenu_AddItem__BMenuP_BRect(BMenu* self,
 	BMenu* a_menu,
 	mojobe_BRect a_frame)
 {
-	return self->AddItem(a_menu, mojobe_from_c(a_frame));
+	try {
+		bool result = self->AddItem(a_menu, mojobe_from_c(a_frame));
+		if (!result) {
+			delete a_menu;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddItem__BMenuP_BRect");
+	}
+	return {};
 }
 
 
@@ -6340,7 +10351,14 @@ mojobe_BMenu_AddItem__BMenuP_BRect(BMenu* self,
 bool
 mojobe_BMenu_AddSeparatorItem(BMenu* self)
 {
-	return self->AddSeparatorItem();
+	try {
+		return self->AddSeparatorItem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AddSeparatorItem");
+	}
+	return {};
 }
 
 
@@ -6348,7 +10366,14 @@ mojobe_BMenu_AddSeparatorItem(BMenu* self)
 bool
 mojobe_BMenu_RemoveItem__BMenuItemP(BMenu* self, BMenuItem* a_item)
 {
-	return self->RemoveItem(a_item);
+	try {
+		return self->RemoveItem(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_RemoveItem__BMenuItemP");
+	}
+	return {};
 }
 
 
@@ -6356,7 +10381,14 @@ mojobe_BMenu_RemoveItem__BMenuItemP(BMenu* self, BMenuItem* a_item)
 BMenuItem*
 mojobe_BMenu_RemoveItem__int32(BMenu* self, int32 a_index)
 {
-	return self->RemoveItem(a_index);
+	try {
+		return self->RemoveItem(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_RemoveItem__int32");
+	}
+	return {};
 }
 
 
@@ -6364,7 +10396,14 @@ mojobe_BMenu_RemoveItem__int32(BMenu* self, int32 a_index)
 bool
 mojobe_BMenu_RemoveItem__BMenuP(BMenu* self, BMenu* a_menu)
 {
-	return self->RemoveItem(a_menu);
+	try {
+		return self->RemoveItem(a_menu);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_RemoveItem__BMenuP");
+	}
+	return {};
 }
 
 
@@ -6375,7 +10414,14 @@ mojobe_BMenu_RemoveItems(BMenu* self,
 	int32 a_count,
 	bool a_deleteItems)
 {
-	return self->RemoveItems(a_index, a_count, a_deleteItems);
+	try {
+		return self->RemoveItems(a_index, a_count, a_deleteItems);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_RemoveItems");
+	}
+	return {};
 }
 
 
@@ -6383,7 +10429,14 @@ mojobe_BMenu_RemoveItems(BMenu* self,
 BMenuItem*
 mojobe_BMenu_ItemAt(BMenu* self, int32 a_index)
 {
-	return self->ItemAt(a_index);
+	try {
+		return self->ItemAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_ItemAt");
+	}
+	return {};
 }
 
 
@@ -6391,7 +10444,14 @@ mojobe_BMenu_ItemAt(BMenu* self, int32 a_index)
 BMenu*
 mojobe_BMenu_SubmenuAt(BMenu* self, int32 a_index)
 {
-	return self->SubmenuAt(a_index);
+	try {
+		return self->SubmenuAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SubmenuAt");
+	}
+	return {};
 }
 
 
@@ -6399,7 +10459,14 @@ mojobe_BMenu_SubmenuAt(BMenu* self, int32 a_index)
 int32
 mojobe_BMenu_CountItems(BMenu* self)
 {
-	return self->CountItems();
+	try {
+		return self->CountItems();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_CountItems");
+	}
+	return {};
 }
 
 
@@ -6407,7 +10474,14 @@ mojobe_BMenu_CountItems(BMenu* self)
 int32
 mojobe_BMenu_IndexOf__BMenuItemP(BMenu* self, BMenuItem* a_item)
 {
-	return self->IndexOf(a_item);
+	try {
+		return self->IndexOf(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IndexOf__BMenuItemP");
+	}
+	return {};
 }
 
 
@@ -6415,7 +10489,14 @@ mojobe_BMenu_IndexOf__BMenuItemP(BMenu* self, BMenuItem* a_item)
 int32
 mojobe_BMenu_IndexOf__BMenuP(BMenu* self, BMenu* a_menu)
 {
-	return self->IndexOf(a_menu);
+	try {
+		return self->IndexOf(a_menu);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IndexOf__BMenuP");
+	}
+	return {};
 }
 
 
@@ -6423,7 +10504,14 @@ mojobe_BMenu_IndexOf__BMenuP(BMenu* self, BMenu* a_menu)
 BMenuItem*
 mojobe_BMenu_FindItem__uint32(BMenu* self, uint32 a_command)
 {
-	return self->FindItem(a_command);
+	try {
+		return self->FindItem(a_command);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_FindItem__uint32");
+	}
+	return {};
 }
 
 
@@ -6431,7 +10519,14 @@ mojobe_BMenu_FindItem__uint32(BMenu* self, uint32 a_command)
 BMenuItem*
 mojobe_BMenu_FindItem__charP(BMenu* self, const char* a_name)
 {
-	return self->FindItem(a_name);
+	try {
+		return self->FindItem(a_name);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_FindItem__charP");
+	}
+	return {};
 }
 
 
@@ -6439,7 +10534,14 @@ mojobe_BMenu_FindItem__charP(BMenu* self, const char* a_name)
 status_t
 mojobe_BMenu_SetTargetForItems__BHandlerP(BMenu* self, BHandler* a_target)
 {
-	return self->SetTargetForItems(a_target);
+	try {
+		return self->SetTargetForItems(a_target);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetTargetForItems__BHandlerP");
+	}
+	return B_ERROR;
 }
 
 
@@ -6448,7 +10550,14 @@ status_t
 mojobe_BMenu_SetTargetForItems__BMessenger(BMenu* self,
 	const BMessenger* a_messenger)
 {
-	return self->SetTargetForItems(*a_messenger);
+	try {
+		return self->SetTargetForItems(*a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetTargetForItems__BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -6456,7 +10565,13 @@ mojobe_BMenu_SetTargetForItems__BMessenger(BMenu* self,
 void
 mojobe_BMenu_SetEnabled(BMenu* self, bool a_enable)
 {
-	self->SetEnabled(a_enable);
+	try {
+		self->SetEnabled(a_enable);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetEnabled");
+	}
 }
 
 
@@ -6464,7 +10579,13 @@ mojobe_BMenu_SetEnabled(BMenu* self, bool a_enable)
 void
 mojobe_BMenu_SetRadioMode(BMenu* self, bool a_on)
 {
-	self->SetRadioMode(a_on);
+	try {
+		self->SetRadioMode(a_on);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetRadioMode");
+	}
 }
 
 
@@ -6472,7 +10593,13 @@ mojobe_BMenu_SetRadioMode(BMenu* self, bool a_on)
 void
 mojobe_BMenu_SetTriggersEnabled(BMenu* self, bool a_enable)
 {
-	self->SetTriggersEnabled(a_enable);
+	try {
+		self->SetTriggersEnabled(a_enable);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetTriggersEnabled");
+	}
 }
 
 
@@ -6480,7 +10607,13 @@ mojobe_BMenu_SetTriggersEnabled(BMenu* self, bool a_enable)
 void
 mojobe_BMenu_SetMaxContentWidth(BMenu* self, float a_maxWidth)
 {
-	self->SetMaxContentWidth(a_maxWidth);
+	try {
+		self->SetMaxContentWidth(a_maxWidth);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetMaxContentWidth");
+	}
 }
 
 
@@ -6488,7 +10621,13 @@ mojobe_BMenu_SetMaxContentWidth(BMenu* self, float a_maxWidth)
 void
 mojobe_BMenu_SetLabelFromMarked(BMenu* self, bool a_on)
 {
-	self->SetLabelFromMarked(a_on);
+	try {
+		self->SetLabelFromMarked(a_on);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SetLabelFromMarked");
+	}
 }
 
 
@@ -6496,7 +10635,14 @@ mojobe_BMenu_SetLabelFromMarked(BMenu* self, bool a_on)
 bool
 mojobe_BMenu_IsLabelFromMarked(BMenu* self)
 {
-	return self->IsLabelFromMarked();
+	try {
+		return self->IsLabelFromMarked();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IsLabelFromMarked");
+	}
+	return {};
 }
 
 
@@ -6504,7 +10650,14 @@ mojobe_BMenu_IsLabelFromMarked(BMenu* self)
 bool
 mojobe_BMenu_IsEnabled(BMenu* self)
 {
-	return self->IsEnabled();
+	try {
+		return self->IsEnabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IsEnabled");
+	}
+	return {};
 }
 
 
@@ -6512,7 +10665,14 @@ mojobe_BMenu_IsEnabled(BMenu* self)
 bool
 mojobe_BMenu_IsRadioMode(BMenu* self)
 {
-	return self->IsRadioMode();
+	try {
+		return self->IsRadioMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IsRadioMode");
+	}
+	return {};
 }
 
 
@@ -6520,7 +10680,14 @@ mojobe_BMenu_IsRadioMode(BMenu* self)
 bool
 mojobe_BMenu_AreTriggersEnabled(BMenu* self)
 {
-	return self->AreTriggersEnabled();
+	try {
+		return self->AreTriggersEnabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_AreTriggersEnabled");
+	}
+	return {};
 }
 
 
@@ -6528,7 +10695,14 @@ mojobe_BMenu_AreTriggersEnabled(BMenu* self)
 bool
 mojobe_BMenu_IsRedrawAfterSticky(BMenu* self)
 {
-	return self->IsRedrawAfterSticky();
+	try {
+		return self->IsRedrawAfterSticky();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_IsRedrawAfterSticky");
+	}
+	return {};
 }
 
 
@@ -6536,7 +10710,14 @@ mojobe_BMenu_IsRedrawAfterSticky(BMenu* self)
 float
 mojobe_BMenu_MaxContentWidth(BMenu* self)
 {
-	return self->MaxContentWidth();
+	try {
+		return self->MaxContentWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_MaxContentWidth");
+	}
+	return {};
 }
 
 
@@ -6544,7 +10725,14 @@ mojobe_BMenu_MaxContentWidth(BMenu* self)
 BMenuItem*
 mojobe_BMenu_FindMarked(BMenu* self)
 {
-	return self->FindMarked();
+	try {
+		return self->FindMarked();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_FindMarked");
+	}
+	return {};
 }
 
 
@@ -6552,7 +10740,14 @@ mojobe_BMenu_FindMarked(BMenu* self)
 int32
 mojobe_BMenu_FindMarkedIndex(BMenu* self)
 {
-	return self->FindMarkedIndex();
+	try {
+		return self->FindMarkedIndex();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_FindMarkedIndex");
+	}
+	return {};
 }
 
 
@@ -6560,7 +10755,14 @@ mojobe_BMenu_FindMarkedIndex(BMenu* self)
 BMenu*
 mojobe_BMenu_Supermenu(BMenu* self)
 {
-	return self->Supermenu();
+	try {
+		return self->Supermenu();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_Supermenu");
+	}
+	return {};
 }
 
 
@@ -6568,7 +10770,14 @@ mojobe_BMenu_Supermenu(BMenu* self)
 BMenuItem*
 mojobe_BMenu_Superitem(BMenu* self)
 {
-	return self->Superitem();
+	try {
+		return self->Superitem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_Superitem");
+	}
+	return {};
 }
 
 
@@ -6576,7 +10785,13 @@ mojobe_BMenu_Superitem(BMenu* self)
 void
 mojobe_BMenu_DrawBackground(BMenu* self, mojobe_BRect a_updateRect)
 {
-	self->DrawBackground(mojobe_from_c(a_updateRect));
+	try {
+		self->DrawBackground(mojobe_from_c(a_updateRect));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_DrawBackground");
+	}
 }
 
 
@@ -6584,7 +10799,14 @@ mojobe_BMenu_DrawBackground(BMenu* self, mojobe_BRect a_updateRect)
 bool
 mojobe_BMenu_SwapItems(BMenu* self, int32 a_indexA, int32 a_indexB)
 {
-	return self->SwapItems(a_indexA, a_indexB);
+	try {
+		return self->SwapItems(a_indexA, a_indexB);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_SwapItems");
+	}
+	return {};
 }
 
 
@@ -6592,7 +10814,14 @@ mojobe_BMenu_SwapItems(BMenu* self, int32 a_indexA, int32 a_indexB)
 bool
 mojobe_BMenu_MoveItem(BMenu* self, int32 a_indexFrom, int32 a_indexTo)
 {
-	return self->MoveItem(a_indexFrom, a_indexTo);
+	try {
+		return self->MoveItem(a_indexFrom, a_indexTo);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_MoveItem");
+	}
+	return {};
 }
 
 
@@ -6624,7 +10853,14 @@ mojobe_BMenu_to_BMenuBar(BMenu* self)
 BMenu*
 mojobe_BMenu_new__charP_menu_layout(const char* a_name, menu_layout a_layout)
 {
-	return new(std::nothrow) BMenu(a_name, a_layout);
+	try {
+		return new(std::nothrow) BMenu(a_name, a_layout);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_new__charP_menu_layout");
+	}
+	return {};
 }
 
 
@@ -6634,7 +10870,14 @@ mojobe_BMenu_new__charP_float_float(const char* a_name,
 	float a_width,
 	float a_height)
 {
-	return new(std::nothrow) BMenu(a_name, a_width, a_height);
+	try {
+		return new(std::nothrow) BMenu(a_name, a_width, a_height);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenu_new__charP_float_float");
+	}
+	return {};
 }
 
 
@@ -6654,7 +10897,13 @@ mojobe_BMenu_delete(BMenu* self)
 void
 mojobe_BMenuBar_SetBorder(BMenuBar* self, menu_bar_border a_border)
 {
-	self->SetBorder(a_border);
+	try {
+		self->SetBorder(a_border);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_SetBorder");
+	}
 }
 
 
@@ -6662,7 +10911,14 @@ mojobe_BMenuBar_SetBorder(BMenuBar* self, menu_bar_border a_border)
 menu_bar_border
 mojobe_BMenuBar_Border(BMenuBar* self)
 {
-	return self->Border();
+	try {
+		return self->Border();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_Border");
+	}
+	return {};
 }
 
 
@@ -6670,7 +10926,13 @@ mojobe_BMenuBar_Border(BMenuBar* self)
 void
 mojobe_BMenuBar_SetBorders(BMenuBar* self, uint32 a_borders)
 {
-	self->SetBorders(a_borders);
+	try {
+		self->SetBorders(a_borders);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_SetBorders");
+	}
 }
 
 
@@ -6678,7 +10940,14 @@ mojobe_BMenuBar_SetBorders(BMenuBar* self, uint32 a_borders)
 uint32
 mojobe_BMenuBar_Borders(BMenuBar* self)
 {
-	return self->Borders();
+	try {
+		return self->Borders();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_Borders");
+	}
+	return {};
 }
 
 
@@ -6714,7 +10983,14 @@ mojobe_BMenuBar_new__BRect_charP_uint32_menu_layout_bool(mojobe_BRect a_frame,
 	menu_layout a_layout,
 	bool a_resizeToFit)
 {
-	return new(std::nothrow) BMenuBar(mojobe_from_c(a_frame), a_name, a_resizingMode, a_layout, a_resizeToFit);
+	try {
+		return new(std::nothrow) BMenuBar(mojobe_from_c(a_frame), a_name, a_resizingMode, a_layout, a_resizeToFit);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_new__BRect_charP_uint32_menu_layout_bool");
+	}
+	return {};
 }
 
 
@@ -6724,7 +11000,14 @@ mojobe_BMenuBar_new__charP_menu_layout_uint32(const char* a_name,
 	menu_layout a_layout,
 	uint32 a_flags)
 {
-	return new(std::nothrow) BMenuBar(a_name, a_layout, a_flags);
+	try {
+		return new(std::nothrow) BMenuBar(a_name, a_layout, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuBar_new__charP_menu_layout_uint32");
+	}
+	return {};
 }
 
 
@@ -6744,7 +11027,14 @@ mojobe_BMenuBar_delete(BMenuBar* self)
 status_t
 mojobe_BMenuItem_Archive(BMenuItem* self, BMessage* a_archive, bool a_deep)
 {
-	return self->Archive(a_archive, a_deep);
+	try {
+		return self->Archive(a_archive, a_deep);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Archive");
+	}
+	return B_ERROR;
 }
 
 
@@ -6752,7 +11042,13 @@ mojobe_BMenuItem_Archive(BMenuItem* self, BMessage* a_archive, bool a_deep)
 void
 mojobe_BMenuItem_SetLabel(BMenuItem* self, const char* a_name)
 {
-	self->SetLabel(a_name);
+	try {
+		self->SetLabel(a_name);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetLabel");
+	}
 }
 
 
@@ -6760,7 +11056,13 @@ mojobe_BMenuItem_SetLabel(BMenuItem* self, const char* a_name)
 void
 mojobe_BMenuItem_SetEnabled(BMenuItem* self, bool a_enable)
 {
-	self->SetEnabled(a_enable);
+	try {
+		self->SetEnabled(a_enable);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetEnabled");
+	}
 }
 
 
@@ -6768,7 +11070,13 @@ mojobe_BMenuItem_SetEnabled(BMenuItem* self, bool a_enable)
 void
 mojobe_BMenuItem_SetMarked(BMenuItem* self, bool a_mark)
 {
-	self->SetMarked(a_mark);
+	try {
+		self->SetMarked(a_mark);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetMarked");
+	}
 }
 
 
@@ -6776,7 +11084,13 @@ mojobe_BMenuItem_SetMarked(BMenuItem* self, bool a_mark)
 void
 mojobe_BMenuItem_SetTrigger(BMenuItem* self, char a_trigger)
 {
-	self->SetTrigger(a_trigger);
+	try {
+		self->SetTrigger(a_trigger);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetTrigger");
+	}
 }
 
 
@@ -6786,7 +11100,13 @@ mojobe_BMenuItem_SetShortcut(BMenuItem* self,
 	char a_shortcut,
 	uint32 a_modifiers)
 {
-	self->SetShortcut(a_shortcut, a_modifiers);
+	try {
+		self->SetShortcut(a_shortcut, a_modifiers);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetShortcut");
+	}
 }
 
 
@@ -6794,7 +11114,14 @@ mojobe_BMenuItem_SetShortcut(BMenuItem* self,
 const char*
 mojobe_BMenuItem_Label(BMenuItem* self)
 {
-	return self->Label();
+	try {
+		return self->Label();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Label");
+	}
+	return {};
 }
 
 
@@ -6802,7 +11129,14 @@ mojobe_BMenuItem_Label(BMenuItem* self)
 bool
 mojobe_BMenuItem_IsEnabled(BMenuItem* self)
 {
-	return self->IsEnabled();
+	try {
+		return self->IsEnabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_IsEnabled");
+	}
+	return {};
 }
 
 
@@ -6810,7 +11144,14 @@ mojobe_BMenuItem_IsEnabled(BMenuItem* self)
 bool
 mojobe_BMenuItem_IsMarked(BMenuItem* self)
 {
-	return self->IsMarked();
+	try {
+		return self->IsMarked();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_IsMarked");
+	}
+	return {};
 }
 
 
@@ -6818,7 +11159,14 @@ mojobe_BMenuItem_IsMarked(BMenuItem* self)
 char
 mojobe_BMenuItem_Trigger(BMenuItem* self)
 {
-	return self->Trigger();
+	try {
+		return self->Trigger();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Trigger");
+	}
+	return {};
 }
 
 
@@ -6826,7 +11174,14 @@ mojobe_BMenuItem_Trigger(BMenuItem* self)
 char
 mojobe_BMenuItem_Shortcut(BMenuItem* self, uint32 * a__modifiers)
 {
-	return self->Shortcut(a__modifiers);
+	try {
+		return self->Shortcut(a__modifiers);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Shortcut");
+	}
+	return {};
 }
 
 
@@ -6834,7 +11189,14 @@ mojobe_BMenuItem_Shortcut(BMenuItem* self, uint32 * a__modifiers)
 BMenu*
 mojobe_BMenuItem_Submenu(BMenuItem* self)
 {
-	return self->Submenu();
+	try {
+		return self->Submenu();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Submenu");
+	}
+	return {};
 }
 
 
@@ -6842,7 +11204,14 @@ mojobe_BMenuItem_Submenu(BMenuItem* self)
 BMenu*
 mojobe_BMenuItem_Menu(BMenuItem* self)
 {
-	return self->Menu();
+	try {
+		return self->Menu();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Menu");
+	}
+	return {};
 }
 
 
@@ -6850,7 +11219,14 @@ mojobe_BMenuItem_Menu(BMenuItem* self)
 mojobe_BRect
 mojobe_BMenuItem_Frame(BMenuItem* self)
 {
-	return mojobe_to_c(self->Frame());
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Frame");
+	}
+	return {};
 }
 
 
@@ -6858,7 +11234,14 @@ mojobe_BMenuItem_Frame(BMenuItem* self)
 status_t
 mojobe_BMenuItem_AllUnarchived(BMenuItem* self, BMessage* a_archive)
 {
-	return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	try {
+		return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_AllUnarchived");
+	}
+	return B_ERROR;
 }
 
 
@@ -6866,7 +11249,14 @@ mojobe_BMenuItem_AllUnarchived(BMenuItem* self, BMessage* a_archive)
 status_t
 mojobe_BMenuItem_AllArchived(BMenuItem* self, BMessage* a_archive)
 {
-	return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	try {
+		return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_AllArchived");
+	}
+	return B_ERROR;
 }
 
 
@@ -6874,7 +11264,14 @@ mojobe_BMenuItem_AllArchived(BMenuItem* self, BMessage* a_archive)
 status_t
 mojobe_BMenuItem_SetMessage(BMenuItem* self, BMessage* a_message)
 {
-	return static_cast<BInvoker*>(self)->SetMessage(a_message);
+	try {
+		return static_cast<BInvoker*>(self)->SetMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetMessage");
+	}
+	return B_ERROR;
 }
 
 
@@ -6882,7 +11279,14 @@ mojobe_BMenuItem_SetMessage(BMenuItem* self, BMessage* a_message)
 BMessage*
 mojobe_BMenuItem_Message(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->Message();
+	try {
+		return static_cast<BInvoker*>(self)->Message();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Message");
+	}
+	return {};
 }
 
 
@@ -6890,7 +11294,14 @@ mojobe_BMenuItem_Message(BMenuItem* self)
 uint32
 mojobe_BMenuItem_Command(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->Command();
+	try {
+		return static_cast<BInvoker*>(self)->Command();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Command");
+	}
+	return {};
 }
 
 
@@ -6900,7 +11311,14 @@ mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP(BMenuItem* self,
 	BHandler* a_handler,
 	BLooper* a_looper)
 {
-	return static_cast<BInvoker*>(self)->SetTarget(a_handler, a_looper);
+	try {
+		return static_cast<BInvoker*>(self)->SetTarget(a_handler, a_looper);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP");
+	}
+	return B_ERROR;
 }
 
 
@@ -6909,7 +11327,14 @@ status_t
 mojobe_BMenuItem_SetTarget__BMessenger(BMenuItem* self,
 	const BMessenger* a_messenger)
 {
-	return static_cast<BInvoker*>(self)->SetTarget(*a_messenger);
+	try {
+		return static_cast<BInvoker*>(self)->SetTarget(*a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetTarget__BMessenger");
+	}
+	return B_ERROR;
 }
 
 
@@ -6917,7 +11342,14 @@ mojobe_BMenuItem_SetTarget__BMessenger(BMenuItem* self,
 bool
 mojobe_BMenuItem_IsTargetLocal(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->IsTargetLocal();
+	try {
+		return static_cast<BInvoker*>(self)->IsTargetLocal();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_IsTargetLocal");
+	}
+	return {};
 }
 
 
@@ -6925,7 +11357,14 @@ mojobe_BMenuItem_IsTargetLocal(BMenuItem* self)
 BHandler*
 mojobe_BMenuItem_Target(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->Target(static_cast<BLooper **>(NULL));
+	try {
+		return static_cast<BInvoker*>(self)->Target(static_cast<BLooper **>(NULL));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Target");
+	}
+	return {};
 }
 
 
@@ -6933,7 +11372,13 @@ mojobe_BMenuItem_Target(BMenuItem* self)
 void
 mojobe_BMenuItem_Messenger(BMenuItem* self, BMessenger* a_result)
 {
-	new(a_result) BMessenger(static_cast<BInvoker*>(self)->Messenger());
+	try {
+		new(a_result) BMessenger(static_cast<BInvoker*>(self)->Messenger());
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Messenger");
+	}
 }
 
 
@@ -6941,7 +11386,14 @@ mojobe_BMenuItem_Messenger(BMenuItem* self, BMessenger* a_result)
 status_t
 mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self, BHandler* a_handler)
 {
-	return static_cast<BInvoker*>(self)->SetHandlerForReply(a_handler);
+	try {
+		return static_cast<BInvoker*>(self)->SetHandlerForReply(a_handler);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetHandlerForReply");
+	}
+	return B_ERROR;
 }
 
 
@@ -6949,7 +11401,14 @@ mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self, BHandler* a_handler)
 BHandler*
 mojobe_BMenuItem_HandlerForReply(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->HandlerForReply();
+	try {
+		return static_cast<BInvoker*>(self)->HandlerForReply();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_HandlerForReply");
+	}
+	return {};
 }
 
 
@@ -6957,7 +11416,14 @@ mojobe_BMenuItem_HandlerForReply(BMenuItem* self)
 status_t
 mojobe_BMenuItem_Invoke(BMenuItem* self, BMessage* a_message)
 {
-	return static_cast<BInvoker*>(self)->Invoke(a_message);
+	try {
+		return static_cast<BInvoker*>(self)->Invoke(a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Invoke");
+	}
+	return B_ERROR;
 }
 
 
@@ -6967,7 +11433,14 @@ mojobe_BMenuItem_InvokeNotify(BMenuItem* self,
 	BMessage* a_message,
 	uint32 a_kind)
 {
-	return static_cast<BInvoker*>(self)->InvokeNotify(a_message, a_kind);
+	try {
+		return static_cast<BInvoker*>(self)->InvokeNotify(a_message, a_kind);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_InvokeNotify");
+	}
+	return B_ERROR;
 }
 
 
@@ -6975,7 +11448,14 @@ mojobe_BMenuItem_InvokeNotify(BMenuItem* self,
 status_t
 mojobe_BMenuItem_SetTimeout(BMenuItem* self, bigtime_t a_timeout)
 {
-	return static_cast<BInvoker*>(self)->SetTimeout(a_timeout);
+	try {
+		return static_cast<BInvoker*>(self)->SetTimeout(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_SetTimeout");
+	}
+	return B_ERROR;
 }
 
 
@@ -6983,7 +11463,14 @@ mojobe_BMenuItem_SetTimeout(BMenuItem* self, bigtime_t a_timeout)
 int64
 mojobe_BMenuItem_Timeout(BMenuItem* self)
 {
-	return static_cast<BInvoker*>(self)->Timeout();
+	try {
+		return static_cast<BInvoker*>(self)->Timeout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_Timeout");
+	}
+	return {};
 }
 
 
@@ -6994,7 +11481,14 @@ mojobe_BMenuItem_new__charP_BMessageP_char_uint32(const char* a_label,
 	char a_shortcut,
 	uint32 a_modifiers)
 {
-	return new(std::nothrow) BMenuItem(a_label, a_message, a_shortcut, a_modifiers);
+	try {
+		return new(std::nothrow) BMenuItem(a_label, a_message, a_shortcut, a_modifiers);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_new__charP_BMessageP_char_uint32");
+	}
+	return {};
 }
 
 
@@ -7002,7 +11496,14 @@ mojobe_BMenuItem_new__charP_BMessageP_char_uint32(const char* a_label,
 BMenuItem*
 mojobe_BMenuItem_new__BMenuP_BMessageP(BMenu* a_menu, BMessage* a_message)
 {
-	return new(std::nothrow) BMenuItem(a_menu, a_message);
+	try {
+		return new(std::nothrow) BMenuItem(a_menu, a_message);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMenuItem_new__BMenuP_BMessageP");
+	}
+	return {};
 }
 
 

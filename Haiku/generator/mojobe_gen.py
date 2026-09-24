@@ -1016,7 +1016,16 @@ class Emitter:
         body = []
         body.extend(pre_c)
         kind = result[0]
-        if kind == "valueobj":
+        adopted = ["a_" + e["p"].name for e in params if e["role"] == "adopt"]
+        if adopted and c_ret == "bool" and not post_c:
+            # false: not taken, and the caller keeps it -- but Mojo already
+            # gave it up (BMenu::AddItem of an index out of range)
+            body.append("bool result = %s;" % call)
+            body.append("if (!result) {")
+            body.extend("\tdelete %s;" % a for a in adopted)
+            body.append("}")
+            body.append("return result;")
+        elif kind == "valueobj":
             c_params.append("%s* a_result" % result[1])
             body.append("new(a_result) %s(%s);" % (result[1], call))
             body.extend(post_c)
@@ -1105,10 +1114,23 @@ class Emitter:
                 lines.append("    return (%s)" % ", ".join(values))
         return lines, [p for p in m_params]
 
-    def add_entry(self, ret, name, params, body, comment):
+    def add_entry(self, ret, name, params, body, comment, guard=True):
+        """An entry point. `guard`: its body may throw, and no C++ exception
+        may unwind into Mojo: bad_alloc becomes B_NO_MEMORY or a zero
+        result, anything else a bridge bug for debugger() (design 7.1)."""
         if name in self.entries:
             raise Unbridged("entry point %s exists" % name)
         self.entries.add(name)
+        if guard:
+            body = ["try {"] + ["\t" + l for l in body] + [
+                "} catch (const std::bad_alloc&) {",
+                "\treturn%s;" % ("" if ret == "void" else
+                                 " B_NO_MEMORY" if ret == "status_t" else " {}"),
+                "} catch (...) {",
+                '\tmojobe_unexpected("%s");' % name,
+                "}"]
+            if ret != "void":
+                body.append("return %s;" % ("B_ERROR" if ret == "status_t" else "{}"))
         self.h.append("")
         self.h.append("// %s" % comment)
         one_line = "%s %s(%s);" % (ret, name, ", ".join(params))
@@ -1463,10 +1485,11 @@ class Emitter:
             setter = "mojobe_%s_set_%s" % (cls, fname)
             conv = "mojobe_to_c(self->%s)" % fname if kind == "value" and self.b.mirrored(detail) else "self->%s" % fname
             self.add_entry(ctype, getter, ["%s* self" % cls], ["return %s;" % conv],
-                           "%s::%s (read)" % (cls, fname))
+                           "%s::%s (read)" % (cls, fname), guard=False)
             setv = "mojobe_from_c(value)" if kind == "value" and self.b.mirrored(detail) else "value"
             self.add_entry("void", setter, ["%s* self" % cls, "%s value" % ctype],
-                           ["self->%s = %s;" % (fname, setv)], "%s::%s (write)" % (cls, fname))
+                           ["self->%s = %s;" % (fname, setv)], "%s::%s (write)" % (cls, fname),
+                           guard=False)
             mt = self.b.mojo_scalar(kind, detail)
             field_lines.append([
                 "def get_%s(self) -> %s:" % (fname, mt),
@@ -1505,12 +1528,12 @@ class Emitter:
         for ancestor in self.bridged_ancestors(cls):
             self.add_entry("%s*" % ancestor, "mojobe_%s_as_%s" % (cls, ancestor),
                            ["%s* self" % cls], ["return self;"],
-                           "%s* as %s*" % (cls, ancestor))
+                           "%s* as %s*" % (cls, ancestor), guard=False)
         for descendant in self.descendants(cls):
             self.add_entry("%s*" % descendant, "mojobe_%s_to_%s" % (cls, descendant),
                            ["%s* self" % cls],
                            ["return dynamic_cast<%s*>(self);" % descendant],
-                           "%s* as %s*, or NULL" % (cls, descendant))
+                           "%s* as %s*, or NULL" % (cls, descendant), guard=False)
 
     # ---- constructors -------------------------------------------------------------
 
@@ -1585,7 +1608,7 @@ class Emitter:
                            "deletes a %s that was never handed over: locked, then Quit()" % cls)
         else:
             self.add_entry("void", "mojobe_%s_delete" % cls, ["%s* self" % cls],
-                           ["delete self;"], "~%s()" % cls)
+                           ["delete self;"], "~%s()" % cls, guard=False)
         self.shadow_ctors[cls] = shadow
         return plain, shadow
 
@@ -2162,6 +2185,21 @@ LICENSE_MOJO = """# ===---------------------------------------------------------
 # ===----------------------------------------------------------------------=== #
 """
 
+UNEXPECTED = """
+/*!	A C++ exception other than bad_alloc reached an entry point: a bridge
+	bug. It must not unwind into Mojo's frames, so it stops here.
+*/
+void
+mojobe_unexpected(const char* entry)
+{
+	char text[256];
+	snprintf(text, sizeof(text),
+		"mojobe: %s: a C++ exception reached the bridge", entry);
+	debugger(text);
+}
+
+"""
+
 HOOK_DEPTH = """
 /*!	Counts the hooks of one object that are running, so that a hook entered
 	again on the same object -- AddChild() calling AttachedToWindow(), say --
@@ -2294,6 +2332,7 @@ def write_c(emitter, bridge, includes):
         c.append("\treturn result;")
         c.append("}")
         c.append("")
+    c.append(UNEXPECTED)
     c.append(HOOK_DEPTH)
     for cls, parts in emitter.shadow_parts.items():
         c.append("")
