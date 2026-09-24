@@ -702,6 +702,19 @@ class Bridge:
             return name in self.symbols or name.replace("C1E", "C2E", 1) in self.symbols
         return name in self.symbols
 
+    def span_element(self, ctype):
+        """The Mojo element type of a `const T*` that can be a Span: bytes
+        for void, a number, or a value type laid out as C's."""
+        if not ctype.const or len(ctype.pointers) != 1 or ctype.reference:
+            return None
+        if ctype.dbase == "void":
+            return "UInt8"
+        if ctype.dbase in PRIMITIVES and ctype.dbase not in ("bool",):
+            return PRIMITIVES[ctype.dbase]
+        if ctype.base in self.values:
+            return ctype.base
+        return None
+
     def value_class(self, ctype):
         """The class a type names, if it is held in a Mojo value (kind
         "value": its copy and destructor do nothing more than copy bytes)."""
@@ -757,6 +770,10 @@ class Bridge:
                 if kind == "enum":
                     return "%s(%s)" % (detail, number.group(1))
                 return number.group(1)
+            arithmetic = literal_arithmetic(text)
+            if arithmetic is not None:
+                return ("%s(%d)" % (detail, arithmetic) if kind == "enum"
+                        else str(arithmetic))
             names = re.findall(r"[A-Za-z_]\w*", text)
             if not names or not all(n in self.known_names for n in names) \
                     or not re.fullmatch(r"[\w\s|()+<>-]+", text):
@@ -800,20 +817,32 @@ class Bridge:
         inout = set(self.config.get("inout", {}).get(key, []))
         init_check = self.classes.get(cls, {}).get("init_check") if is_ctor else None
         params = []
-        spans = {}  # a length parameter's index -> its buffer's name
-        for index, param in enumerate(method.params[:-1]):
-            after = method.params[index + 1]
-            if param.type.dbase == "void" and param.type.const \
-                    and len(param.type.pointers) == 1 \
-                    and self.classify(after.type)[0] == "prim" \
-                    and after.name in ("length", "numBytes", "size", "bytes"):
-                spans[index + 1] = param.name
+        spans = {}    # a buffer's index -> its element's Mojo type
+        lengths = {}  # a length parameter's index -> its buffer's name
+        checked = self.config.get("checked_spans", {}).get(key, {})
         for index, param in enumerate(method.params):
-            if index + 1 in spans:
-                params.append({"role": "span", "p": param})
+            element = self.span_element(param.type)
+            if element is None:
                 continue
+            if param.name in checked:
+                spans[index] = element
+                continue
+            # its length: the next parameter, or the one before (a count)
+            for other in (index + 1, index - 1):
+                if 0 <= other < len(method.params) and other not in lengths \
+                        and self.classify(method.params[other].type)[0] == "prim" \
+                        and method.params[other].name in (
+                            "length", "numBytes", "size", "bytes", "count"):
+                    spans[index] = element
+                    lengths[other] = param.name
+                    break
+        for index, param in enumerate(method.params):
             if index in spans:
-                params.append({"role": "spanlen", "p": param, "span": spans[index],
+                params.append({"role": "span", "p": param, "detail": spans[index],
+                               "check": checked.get(param.name)})
+                continue
+            if index in lengths:
+                params.append({"role": "spanlen", "p": param, "span": lengths[index],
                                "detail": self.classify(param.type)[1]})
                 continue
             kind, detail = self.classify(param.type)
@@ -873,8 +902,7 @@ class Bridge:
                 rkind = "objectptr"
             if rkind == "objectptr" and key in self.config.get("factories", []):
                 rkind = "owned"  # a new object, the caller's to delete
-            if rkind == "unknown" and method.result.dbase == "void" \
-                    and len(method.result.pointers) == 1 \
+            if len(method.result.pointers) == 1 and not method.result.const \
                     and key in self.config.get("spans", {}):
                 rkind, rdetail = "span", self.config["spans"][key]
             if rkind in ("unknown", "object", "valueobjptr") or rkind.startswith("out"):
@@ -895,6 +923,20 @@ def hook_marker(cls):
     """The trait every hook trait of a class inherits (`ViewHooks`): what a
     Mojo type standing behind the class implements."""
     return "%sHooks" % (cls[1:] if cls.startswith("B") else cls)
+
+
+def literal_arithmetic(text):
+    """The value of integer arithmetic on literals (`256 * 1024`, `1 << 3`),
+    or None."""
+    if not re.fullmatch(r"[\d\s*+\-()<>|&xXa-fA-FuUlL]+", text) \
+            or not re.search(r"[*+\-<>|&]", text):
+        return None
+    try:
+        value = eval(re.sub(r"(?<=[\da-fA-F])[uUlL]+", "", text),
+                     {"__builtins__": {}}, {})
+    except Exception:
+        return None
+    return value if isinstance(value, int) else None
 
 
 def hand_written(snippet, kind):
@@ -945,7 +987,7 @@ class Emitter:
         if role == "null":
             return None, "static_cast<%s>(NULL)" % p.type.qual
         if role == "span":
-            return "const void* %s" % name, name
+            return "%s %s" % (p.type.qual, name), name
         if role == "spanlen":
             spelled = p.type.qual.replace("const ", "").strip()
             return "%s %s" % (spelled, name), name
@@ -1026,7 +1068,15 @@ class Emitter:
         if role == "null":
             return None, None, [], []
         if role == "span":
-            return ("%s: Span[UInt8, _]" % name, "Int(%s.unsafe_ptr())" % name, [], [])
+            pre = []
+            if entry.get("check"):
+                # C++ reads as far as the other arguments say: never past
+                # the end of what Mojo gives it
+                pre = ["if len(%s) < %s:" % (name, entry["check"]),
+                       '    raise Error("%s: %s is shorter than %s")'
+                       % (self.current_method, name, entry["check"].replace('"', "'"))]
+            return ("%s: Span[%s, _]" % (name, entry["detail"]),
+                    "Int(%s.unsafe_ptr())" % name, pre, [])
         if role == "spanlen":
             return None, "%s(len(%s))" % (entry["detail"], mojo_name(entry["span"])), [], []
         if role == "initcheck":
@@ -1134,6 +1184,8 @@ class Emitter:
         self`."""
         method = info["method"]
         params = info["params"]
+        self.current_method = ("%s::%s" % (method.owner, method.name) if method.owner
+                               else method.name)
         c_params = ["%s* self" % cls] if cls and not static else []
         c_args = []
         pre_c = []
@@ -1220,7 +1272,8 @@ class Emitter:
                 else:
                     outs.append((entry["detail"], name))
         rtype, call_type, convert = self.mojo_result(result)
-        raises = convert in ("status", "owned")
+        raises = convert in ("status", "owned") or any(
+            e.get("check") for e in params if e["role"] == "span")
         if static and rtype and "origin_of(self)" in rtype:
             # a static has no self to borrow from: what it returns lives
             # where the kit keeps it
@@ -1276,7 +1329,10 @@ class Emitter:
             lines.append("        unsafe_ptr=Pointer[UInt8, MutUntrackedOrigin](")
             lines.append("            unsafe_from_address=_result")
             lines.append("        ).unsafe_origin_cast[origin_of(self).unsafe_mut_cast[True]()](),")
-            lines.append("        length=Int(self.%s())," % convert[len("span:"):])
+            length = convert[len("span:"):]
+            if "(" not in length:
+                length = "self.%s()" % length  # a method's name
+            lines.append("        length=Int(%s)," % length)
             lines.append("    )")
             return lines, [p for p in m_params]
         if rtype is not None:
@@ -1625,6 +1681,17 @@ class Emitter:
         groups = {}
         members = [m for m in self.own_members(cls)
                    if m.kind == "CXXMethodDecl" and m.access == "public"]
+        # a hand-over method a bridged base declares (BGamePane's Show, a
+        # BWindow's): its owned struct needs it too
+        for name in hands_over:
+            if not any(m.name == name for m in members):
+                for owner in self.model.ancestors(cls):
+                    found = [m for m in self.model.records[owner].members
+                             if m.name == name and m.kind == "CXXMethodDecl"
+                             and m.access == "public" and not m.static]
+                    if found:
+                        members.extend(found)
+                        break
         # most-derived first: a redeclaration hides the base's
         seen_c = set()
         for m in members:

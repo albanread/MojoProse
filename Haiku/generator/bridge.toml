@@ -44,8 +44,12 @@ headers = [
 	"Path.h",
 	"FilePanel.h",
 	"FindDirectory.h",
+	"GamePane.h",
+	"ChipPlayer.h",
 ]
-constant_dirs = ["os/app", "os/interface", "os/kernel", "os/storage", "os/support"]
+constant_dirs = [
+	"os/app", "os/game", "os/interface", "os/kernel", "os/storage", "os/support",
+]
 
 # Free functions.
 functions = ["find_directory"]
@@ -59,7 +63,7 @@ factories = [
 
 # The libraries libmojobe links, where every method it calls that is neither
 # virtual nor defined in a header must be defined (BFilePanel is Tracker's).
-libraries = ["libbe.so", "libroot.so", "libtracker.so"]
+libraries = ["libbe.so", "libroot.so", "libtracker.so", "libgame.so"]
 
 # Value types: copied, laid out in Mojo as in C++. A type that C++ cannot
 # pass in registers (a user-declared copy constructor makes BRect and BPoint
@@ -231,6 +235,19 @@ kind = "owned"
 [classes.BFilePanel]
 kind = "owned"
 
+# Prose's game kit: the game pane (a window), and the chip player.
+[classes.BGamePane]
+kind = "self-owning"
+hands_over = ["Show", "Quit"]
+destroy = "quit"
+init_check = "InitCheck()"
+shadow = true
+hooks = ["MessageReceived", "QuitRequested", "WindowActivated"]
+
+[classes.BChipPlayer]
+kind = "owned"
+init_check = "InitCheck()"
+
 [classes.BMessageRunner]
 kind = "owned"
 init_check = "InitCheck()" # the constructors report only through InitCheck()
@@ -294,6 +311,14 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 # a Span of its bytes, borrowed from the object.
 [spans]
 "BBitmap::Bits" = "BitsLength"
+"BGamePane::World" = "self.BytesPerRow() * self.WorldHeight()"
+"BGamePane::RowAt" = "self.BytesPerRow()"
+
+# `const T*` buffers whose length the other arguments give: a Span, checked
+# against that length (the method raises when it is short).
+[checked_spans]
+"BGamePane::Blit" = { source = "Int(sourceStride) * Int(height)" }
+"BGamePane::DefineSprite" = { pixels = "(Int(width) * Int(height) * Int(depth) + 7) // 8" }
 
 # Pointers to values held in Mojo (BMessenger) that the method reads; the
 # rest are results.

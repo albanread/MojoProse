@@ -22,7 +22,7 @@ Build on Prose with liboracle.so (Haiku/bridge/oracle/oracle.cpp):
 from std.ffi import external_call
 
 from haiku import *
-from haiku._api import _BHandler_hooks, _BLooper_hooks, _BApplication_hooks, _BWindow_hooks, _BView_hooks
+from haiku._api import _BHandler_hooks, _BLooper_hooks, _BApplication_hooks, _BWindow_hooks, _BView_hooks, _BGamePane_hooks
 from haiku._core import _addr, _destroy, _to_heap
 from haiku.hooks import *
 
@@ -410,6 +410,46 @@ struct OracleBView(
         self.expect("Pulse view", _addr(view._ptr) == 0x10F00)
 
 
+struct OracleBGamePane(
+    GamePaneMessageReceived,
+    GamePaneQuitRequested,
+    GamePaneWindowActivated,
+    Movable,
+):
+    """Every hook of `BGamePane`, checking its arguments."""
+
+    var calls: Int
+    var wrong: Int
+
+    def __init__(out self):
+        self.calls = 0
+        self.wrong = 0
+
+    def expect(mut self, what: String, ok: Bool):
+        if not ok:
+            self.wrong += 1
+            print("  wrong:", what)
+
+    def MessageReceived(
+        mut self,
+        gamePane: BGamePaneRef[_],
+        message: BMessageRef[_],
+    ):
+        self.calls += 1
+        self.expect("MessageReceived gamePane", _addr(gamePane._ptr) == 0x10000)
+        self.expect("MessageReceived message", message.what == 0x6F720001)
+
+    def QuitRequested(mut self, gamePane: BGamePaneRef[_]) -> Bool:
+        self.calls += 1
+        self.expect("QuitRequested gamePane", _addr(gamePane._ptr) == 0x10100)
+        return True
+
+    def WindowActivated(mut self, gamePane: BGamePaneRef[_], state: Bool):
+        self.calls += 1
+        self.expect("WindowActivated gamePane", _addr(gamePane._ptr) == 0x10200)
+        self.expect("WindowActivated state", state == False)
+
+
 def main() raises:
     var checks = Checks()
 
@@ -489,6 +529,22 @@ def main() raises:
         seenBView.calls == 16 and failuresBView == 0)
     checks.check("BView: every argument as C++ passed it", seenBView.wrong == 0)
     _destroy[OracleBView](contextBView)
+
+    # BGamePane's hooks, through its generated table and trampolines
+    var hooksBGamePane = _BGamePane_hooks[OracleBGamePane]()
+    var contextBGamePane = _to_heap(OracleBGamePane())
+    var failuresBGamePane = external_call["mojobe_oracle_BGamePane", Int32](
+        Pointer(to=hooksBGamePane),
+        contextBGamePane,
+    )
+    ref seenBGamePane = contextBGamePane.unsafe_bitcast[OracleBGamePane]()[]
+    checks.check("BGamePane: all 3 hooks called, their results seen by C++",
+        seenBGamePane.calls == 3 and failuresBGamePane == 0)
+    checks.check(
+        "BGamePane: every argument as C++ passed it",
+        seenBGamePane.wrong == 0,
+    )
+    _destroy[OracleBGamePane](contextBGamePane)
 
     var givenBRect = BRect(0.25, 1.25, 2.25, 3.25)
     var seenBRect = givenBRect
@@ -851,6 +907,42 @@ def main() raises:
         seencpu_vendor == givencpu_vendor and beforecpu_vendor == -5 and aftercpu_vendor == 2.75)
     checks.check("cpu_vendor returned", resultcpu_vendor == cpu_vendor(4))
 
+    var givendirect_buffer_state = direct_buffer_state(3)
+    var seendirect_buffer_state = givendirect_buffer_state
+    var beforedirect_buffer_state = Int8(0)
+    var afterdirect_buffer_state = Float64(0)
+    var resultdirect_buffer_state = external_call["mojobe_oracle_echo_direct_buffer_state", direct_buffer_state](
+        Int8(-5), givendirect_buffer_state, Float64(2.75), Pointer(
+            to=seendirect_buffer_state,
+        ),
+        Pointer(to=beforedirect_buffer_state), Pointer(
+            to=afterdirect_buffer_state,
+        ))
+    checks.check("direct_buffer_state by value, between an int8 and a double",
+        seendirect_buffer_state == givendirect_buffer_state and beforedirect_buffer_state == -5 and afterdirect_buffer_state == 2.75)
+    checks.check(
+        "direct_buffer_state returned",
+        resultdirect_buffer_state == direct_buffer_state(4),
+    )
+
+    var givendirect_driver_state = direct_driver_state(3)
+    var seendirect_driver_state = givendirect_driver_state
+    var beforedirect_driver_state = Int8(0)
+    var afterdirect_driver_state = Float64(0)
+    var resultdirect_driver_state = external_call["mojobe_oracle_echo_direct_driver_state", direct_driver_state](
+        Int8(-5), givendirect_driver_state, Float64(2.75), Pointer(
+            to=seendirect_driver_state,
+        ),
+        Pointer(to=beforedirect_driver_state), Pointer(
+            to=afterdirect_driver_state,
+        ))
+    checks.check("direct_driver_state by value, between an int8 and a double",
+        seendirect_driver_state == givendirect_driver_state and beforedirect_driver_state == -5 and afterdirect_driver_state == 2.75)
+    checks.check(
+        "direct_driver_state returned",
+        resultdirect_driver_state == direct_driver_state(4),
+    )
+
     var givendirectory_which = directory_which(3)
     var seendirectory_which = givendirectory_which
     var beforedirectory_which = Int8(0)
@@ -958,6 +1050,51 @@ def main() raises:
     checks.check(
         "font_metric_mode returned",
         resultfont_metric_mode == font_metric_mode(4),
+    )
+
+    var givengame_blit_op = game_blit_op(3)
+    var seengame_blit_op = givengame_blit_op
+    var beforegame_blit_op = Int8(0)
+    var aftergame_blit_op = Float64(0)
+    var resultgame_blit_op = external_call["mojobe_oracle_echo_game_blit_op", game_blit_op](
+        Int8(-5), givengame_blit_op, Float64(2.75), Pointer(
+            to=seengame_blit_op,
+        ),
+        Pointer(to=beforegame_blit_op), Pointer(to=aftergame_blit_op))
+    checks.check("game_blit_op by value, between an int8 and a double",
+        seengame_blit_op == givengame_blit_op and beforegame_blit_op == -5 and aftergame_blit_op == 2.75)
+    checks.check("game_blit_op returned", resultgame_blit_op == game_blit_op(4))
+
+    var givengame_pane_effect = game_pane_effect(3)
+    var seengame_pane_effect = givengame_pane_effect
+    var beforegame_pane_effect = Int8(0)
+    var aftergame_pane_effect = Float64(0)
+    var resultgame_pane_effect = external_call["mojobe_oracle_echo_game_pane_effect", game_pane_effect](
+        Int8(-5), givengame_pane_effect, Float64(2.75), Pointer(
+            to=seengame_pane_effect,
+        ),
+        Pointer(to=beforegame_pane_effect), Pointer(to=aftergame_pane_effect))
+    checks.check("game_pane_effect by value, between an int8 and a double",
+        seengame_pane_effect == givengame_pane_effect and beforegame_pane_effect == -5 and aftergame_pane_effect == 2.75)
+    checks.check(
+        "game_pane_effect returned",
+        resultgame_pane_effect == game_pane_effect(4),
+    )
+
+    var givengame_pane_plane = game_pane_plane(3)
+    var seengame_pane_plane = givengame_pane_plane
+    var beforegame_pane_plane = Int8(0)
+    var aftergame_pane_plane = Float64(0)
+    var resultgame_pane_plane = external_call["mojobe_oracle_echo_game_pane_plane", game_pane_plane](
+        Int8(-5), givengame_pane_plane, Float64(2.75), Pointer(
+            to=seengame_pane_plane,
+        ),
+        Pointer(to=beforegame_pane_plane), Pointer(to=aftergame_pane_plane))
+    checks.check("game_pane_plane by value, between an int8 and a double",
+        seengame_pane_plane == givengame_pane_plane and beforegame_pane_plane == -5 and aftergame_pane_plane == 2.75)
+    checks.check(
+        "game_pane_plane returned",
+        resultgame_pane_plane == game_pane_plane(4),
     )
 
     var givenhash_mark_location = hash_mark_location(3)

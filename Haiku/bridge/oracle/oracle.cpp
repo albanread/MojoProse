@@ -274,6 +274,32 @@ mojobe_oracle_BView(const mojobe_BView_hooks* hooks, void* context)
 	return failures;
 }
 
+int32
+mojobe_oracle_BGamePane(const mojobe_BGamePane_hooks* hooks, void* context)
+{
+	int32 failures = 0;
+	{
+		BMessage message0_1(0x6F720001);
+		if (hooks->MessageReceived == NULL)
+			failures++;
+		else
+			hooks->MessageReceived(context, reinterpret_cast<BGamePane*>(0x10000), &message0_1);
+	}
+	{
+		if (hooks->QuitRequested == NULL)
+			failures++;
+		else if (hooks->QuitRequested(context, reinterpret_cast<BGamePane*>(0x10100)) != true)
+			failures++;
+	}
+	{
+		if (hooks->WindowActivated == NULL)
+			failures++;
+		else
+			hooks->WindowActivated(context, reinterpret_cast<BGamePane*>(0x10200), false);
+	}
+	return failures;
+}
+
 mojobe_BRect
 mojobe_oracle_echo_BRect(int8 before, mojobe_BRect value, double after,
 	mojobe_BRect* seen, int8* seenBefore, double* seenAfter)
@@ -613,6 +639,30 @@ mojobe_oracle_echo_cpu_vendor(int8 before, cpu_vendor value, double after,
 	return result;
 }
 
+direct_buffer_state
+mojobe_oracle_echo_direct_buffer_state(int8 before, direct_buffer_state value, double after,
+	direct_buffer_state* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	direct_buffer_state result = value;
+	result = (direct_buffer_state)(result + 1);
+	return result;
+}
+
+direct_driver_state
+mojobe_oracle_echo_direct_driver_state(int8 before, direct_driver_state value, double after,
+	direct_driver_state* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	direct_driver_state result = value;
+	result = (direct_driver_state)(result + 1);
+	return result;
+}
+
 directory_which
 mojobe_oracle_echo_directory_which(int8 before, directory_which value, double after,
 	directory_which* seen, int8* seenBefore, double* seenAfter)
@@ -694,6 +744,42 @@ mojobe_oracle_echo_font_metric_mode(int8 before, font_metric_mode value, double 
 	*seenAfter = after;
 	font_metric_mode result = value;
 	result = (font_metric_mode)(result + 1);
+	return result;
+}
+
+game_blit_op
+mojobe_oracle_echo_game_blit_op(int8 before, game_blit_op value, double after,
+	game_blit_op* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	game_blit_op result = value;
+	result = (game_blit_op)(result + 1);
+	return result;
+}
+
+game_pane_effect
+mojobe_oracle_echo_game_pane_effect(int8 before, game_pane_effect value, double after,
+	game_pane_effect* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	game_pane_effect result = value;
+	result = (game_pane_effect)(result + 1);
+	return result;
+}
+
+game_pane_plane
+mojobe_oracle_echo_game_pane_plane(int8 before, game_pane_plane value, double after,
+	game_pane_plane* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	game_pane_plane result = value;
+	result = (game_pane_plane)(result + 1);
 	return result;
 }
 

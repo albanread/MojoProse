@@ -193,6 +193,26 @@ struct cpu_vendor(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct direct_buffer_state(Equatable, TrivialRegisterPassable):
+    """`enum direct_buffer_state`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct direct_driver_state(Equatable, TrivialRegisterPassable):
+    """`enum direct_driver_state`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct directory_which(Equatable, TrivialRegisterPassable):
     """`enum directory_which`."""
 
@@ -255,6 +275,36 @@ struct font_file_format(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct font_metric_mode(Equatable, TrivialRegisterPassable):
     """`enum font_metric_mode`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct game_blit_op(Equatable, TrivialRegisterPassable):
+    """`enum game_blit_op`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct game_pane_effect(Equatable, TrivialRegisterPassable):
+    """`enum game_pane_effect`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct game_pane_plane(Equatable, TrivialRegisterPassable):
+    """`enum game_pane_plane`."""
 
     var value: UInt32
 
@@ -665,9 +715,12 @@ comptime B_BORDER_CONTENTS = menu_bar_border(1)
 comptime B_BORDER_EACH_ITEM = menu_bar_border(2)
 comptime B_BORDER_FRAME = menu_bar_border(0)
 comptime B_BUFFER_BOTTOM_TO_TOP = buffer_orientation(1)
+comptime B_BUFFER_MOVED = direct_buffer_state(0x40)
 comptime B_BUFFER_NONINTERLEAVED = buffer_layout(1)
 comptime B_BUFFER_NOT_AVAILABLE: Int32 = -2147467258
 comptime B_BUFFER_OVERFLOW: Int32 = -2147454935
+comptime B_BUFFER_RESET = direct_buffer_state(0x80)
+comptime B_BUFFER_RESIZED = direct_buffer_state(0x20)
 comptime B_BUFFER_TOP_TO_BOTTOM = buffer_orientation(0)
 comptime B_BUSTED_PIPE: Int32 = -2147459059
 comptime B_BUSY: Int32 = -2147483634
@@ -686,6 +739,7 @@ comptime B_CHAR_SPACING: UInt32 = 0
 comptime B_CHAR_TYPE: UInt32 = 0x43484152
 comptime B_CHECK_PERMISSION: UInt32 = 4
 comptime B_CLICK_TO_FOCUS_MOUSE = mode_mouse(-1)
+comptime B_CLIPPING_MODIFIED = direct_buffer_state(0x10)
 comptime B_CLONEABLE_AREA: Int32 = 0x100
 comptime B_CLONE_ADDRESS: Int32 = 3
 comptime B_CLOSE_ON_ESCAPE: UInt32 = 0x800000
@@ -821,7 +875,11 @@ comptime B_DEV_UNREADABLE: Int32 = -2147442684
 comptime B_DEV_WRITE_ERROR: Int32 = -2147442677
 comptime B_DIRECTORY_NODE = node_flavor(4)
 comptime B_DIRECTORY_NOT_EMPTY: Int32 = -2147459066
+comptime B_DIRECT_MODE_MASK = direct_buffer_state(0xf)
+comptime B_DIRECT_MODIFY = direct_buffer_state(2)
 comptime B_DIRECT_SPECIFIER: UInt32 = 1
+comptime B_DIRECT_START = direct_buffer_state(0)
+comptime B_DIRECT_STOP = direct_buffer_state(1)
 comptime B_DISABLED_ICON_BITMAP: UInt32 = 0x80
 comptime B_DISABLED_LABEL_TINT: Float32 = 1.406999945640564
 comptime B_DISABLED_MARK_TINT: Float32 = 0.38499999046325684
@@ -837,6 +895,7 @@ comptime B_DOWN_ARROW: UInt32 = 0x1f
 comptime B_DO_NOT_RESCHEDULE: UInt32 = 2
 comptime B_DO_NOT_RESIZE_TO_FIT: UInt32 = 1
 comptime B_DRAW_ON_CHILDREN: UInt32 = 0x800000
+comptime B_DRIVER_CHANGED = direct_driver_state(1)
 comptime B_DUPLICATE_REPLY: Int32 = -2147475455
 comptime B_EMPTY_ALERT = alert_type(0)
 comptime B_END: UInt32 = 4
@@ -961,6 +1020,22 @@ comptime B_FULL_LOCK: Int32 = 2
 comptime B_FULL_POINTER_HISTORY: UInt32 = 8
 comptime B_FULL_UPDATE_ON_RESIZE: UInt32 = 0x80000000
 comptime B_FUNCTION_KEY: UInt32 = 0x10
+comptime B_GAME_AND = game_blit_op(2)
+comptime B_GAME_COPY = game_blit_op(0)
+comptime B_GAME_COPY_KEYED = game_blit_op(1)
+comptime B_GAME_FRONT = game_pane_plane(1)
+comptime B_GAME_OR = game_blit_op(3)
+comptime B_GAME_PANE_CRT = game_pane_effect(2)
+comptime B_GAME_PANE_FRONT_PLANE: UInt32 = 4
+comptime B_GAME_PANE_FULLSCREEN: UInt32 = 2
+comptime B_GAME_PANE_PLAIN = game_pane_effect(0)
+comptime B_GAME_PANE_SCANLINES = game_pane_effect(1)
+comptime B_GAME_PANE_SCANLINE_PALETTE: UInt32 = 1
+comptime B_GAME_SPRITE_FLIP_X: UInt32 = 2
+comptime B_GAME_SPRITE_FLIP_Y: UInt32 = 4
+comptime B_GAME_SPRITE_SCREEN: UInt32 = 1
+comptime B_GAME_WORLD = game_pane_plane(0)
+comptime B_GAME_XOR = game_blit_op(4)
 comptime B_GENERAL_ERROR_BASE: Int32 = -2147483648
 comptime B_GET_PROPERTY = command_code(0x50474554)
 comptime B_GET_SUPPORTED_SUITES = command_code(0x53554954)
@@ -1192,6 +1267,7 @@ comptime B_MODAL_APP_WINDOW_FEEL = window_feel(1)
 comptime B_MODAL_SUBSET_WINDOW_FEEL = window_feel(2)
 comptime B_MODAL_WINDOW = window_type(3)
 comptime B_MODAL_WINDOW_LOOK = window_look(3)
+comptime B_MODE_CHANGED = direct_driver_state(2)
 comptime B_MODIFIERS_CHANGED: UInt32 = 0x5f4d4348
 comptime B_MONOCHROME_1_BIT = color_space(1)
 comptime B_MONOCHROME_1_BIT_TYPE: UInt32 = 0x4d4e4f42

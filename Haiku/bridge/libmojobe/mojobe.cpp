@@ -778,6 +778,66 @@ private:
 };
 
 
+class MojoBGamePane : public BGamePane {
+public:
+	MojoBGamePane(BRect frame, const char * title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes, const mojobe_BGamePane_hooks* hooks, void* context)
+		:
+		BGamePane(frame, title, worldWidth, worldHeight, buffers, flags, spriteBytes),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	virtual ~MojoBGamePane()
+	{
+		// While ~BGamePane runs this is a BGamePane, so no hook can reach the
+		// Mojo state after it is gone.
+		if (fHooks.destroy != NULL)
+			fHooks.destroy(fContext);
+	}
+
+	virtual void MessageReceived(BMessage * message)
+	{
+		if (fHooks.MessageReceived == NULL || !fDepth.Enter("MessageReceived")) {
+			BGamePane::MessageReceived(message);
+			return;
+		}
+		fHooks.MessageReceived(fContext, this, message);
+		fDepth.Leave();
+	}
+
+	virtual bool QuitRequested()
+	{
+		if (fHooks.QuitRequested == NULL || !fDepth.Enter("QuitRequested"))
+			return BGamePane::QuitRequested();
+		bool result = fHooks.QuitRequested(fContext, this);
+		fDepth.Leave();
+		return result;
+	}
+
+	virtual void WindowActivated(bool state)
+	{
+		if (fHooks.WindowActivated == NULL || !fDepth.Enter("WindowActivated")) {
+			BGamePane::WindowActivated(state);
+			return;
+		}
+		fHooks.WindowActivated(fContext, this, state);
+		fDepth.Leave();
+	}
+
+	//! The Mojo state, if it is of the type tagged.
+	void* Context(uint64 type) const
+	{
+		return fHooks.type == type ? fContext : NULL;
+	}
+
+private:
+	mojobe_BGamePane_hooks	fHooks;
+	void*			fContext;
+	HookDepth		fDepth;
+};
+
+
 }	// namespace
 
 
@@ -820,6 +880,14 @@ void*
 mojobe_MojoBView_context(BView* self, uint64 type)
 {
 	MojoBView* object = dynamic_cast<MojoBView*>(self);
+	return object != NULL ? object->Context(type) : NULL;
+}
+
+
+void*
+mojobe_MojoBGamePane_context(BGamePane* self, uint64 type)
+{
+	MojoBGamePane* object = dynamic_cast<MojoBGamePane*>(self);
 	return object != NULL ? object->Context(type) : NULL;
 }
 
@@ -2283,6 +2351,14 @@ mojobe_BHandler_to_BGridView(BHandler* self)
 }
 
 
+// BHandler* as BGamePane*, or NULL
+BGamePane*
+mojobe_BHandler_to_BGamePane(BHandler* self)
+{
+	return dynamic_cast<BGamePane*>(self);
+}
+
+
 // BHandler::BHandler(const char* name)
 BHandler*
 mojobe_BHandler_new(const char* a_name)
@@ -2839,6 +2915,14 @@ BAlert*
 mojobe_BLooper_to_BAlert(BLooper* self)
 {
 	return dynamic_cast<BAlert*>(self);
+}
+
+
+// BLooper* as BGamePane*, or NULL
+BGamePane*
+mojobe_BLooper_to_BGamePane(BLooper* self)
+{
+	return dynamic_cast<BGamePane*>(self);
 }
 
 
@@ -4846,6 +4930,14 @@ BAlert*
 mojobe_BWindow_to_BAlert(BWindow* self)
 {
 	return dynamic_cast<BAlert*>(self);
+}
+
+
+// BWindow* as BGamePane*, or NULL
+BGamePane*
+mojobe_BWindow_to_BGamePane(BWindow* self)
+{
+	return dynamic_cast<BGamePane*>(self);
 }
 
 
@@ -7285,6 +7377,24 @@ mojobe_BView_DrawString__charP_int32(BView* self,
 }
 
 
+// void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)
+void
+mojobe_BView_DrawString__charP_int32_BPointP_int32(BView* self,
+	const char* a_string,
+	int32 a_length,
+	const BPoint * a_locations,
+	int32 a_locationCount)
+{
+	try {
+		self->DrawString(a_string, a_length, a_locations, a_locationCount);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_DrawString__charP_int32_BPointP_int32");
+	}
+}
+
+
 // void BView::SetFont(const BFont* font, uint32 mask)
 void
 mojobe_BView_SetFont(BView* self, const BFont* a_font, uint32 a_mask)
@@ -9586,7 +9696,7 @@ status_t
 mojobe_BMessage_AddData(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes,
 	bool a_isFixedSize,
 	int32 a_count)
@@ -11107,7 +11217,7 @@ status_t
 mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes)
 {
 	try {
@@ -11127,7 +11237,7 @@ mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t(BMessage* self,
 	const char* a_name,
 	type_code a_type,
 	int32 a_index,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes)
 {
 	try {
@@ -12374,7 +12484,7 @@ status_t
 mojobe_BMessage_SetData(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes,
 	bool a_fixedSize,
 	int a_count)
@@ -16897,7 +17007,7 @@ mojobe_BBitmap_Flags(BBitmap* self)
 // status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)
 status_t
 mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_bpr,
 	int32 a_offset,
@@ -16917,7 +17027,7 @@ mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
 // status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)
 status_t
 mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_bpr,
 	color_space a_colorSpace,
@@ -17106,7 +17216,7 @@ mojobe_BBitmap_IsLocked(BBitmap* self)
 // void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)
 void
 mojobe_BBitmap_SetBits(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_offset,
 	color_space a_colorSpace)
@@ -20275,7 +20385,7 @@ mojobe_BPath_AllowsTypeCode(BPath* self, type_code a_code)
 status_t
 mojobe_BPath_Unflatten(BPath* self,
 	type_code a_code,
-	const void* a_buffer,
+	const void * a_buffer,
 	ssize_t a_size)
 {
 	try {
@@ -20722,6 +20832,1085 @@ mojobe_BFilePanel_new(file_panel_mode a_mode,
 // ~BFilePanel()
 void
 mojobe_BFilePanel_delete(BFilePanel* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BGamePane
+
+
+// status_t BGamePane::InitCheck() const
+status_t
+mojobe_BGamePane_InitCheck(BGamePane* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// uint8* BGamePane::World() const
+void*
+mojobe_BGamePane_World(BGamePane* self)
+{
+	try {
+		return self->World();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_World");
+	}
+	return {};
+}
+
+
+// uint8* BGamePane::RowAt(int32 y) const
+void*
+mojobe_BGamePane_RowAt(BGamePane* self, int32 a_y)
+{
+	try {
+		return self->RowAt(a_y);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_RowAt");
+	}
+	return {};
+}
+
+
+// void BGamePane::SetPlane(game_pane_plane plane)
+void
+mojobe_BGamePane_SetPlane(BGamePane* self, game_pane_plane a_plane)
+{
+	try {
+		self->SetPlane(a_plane);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetPlane");
+	}
+}
+
+
+// game_pane_plane BGamePane::Plane() const
+game_pane_plane
+mojobe_BGamePane_Plane(BGamePane* self)
+{
+	try {
+		return self->Plane();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Plane");
+	}
+	return {};
+}
+
+
+// uint32 BGamePane::WorldWidth() const
+uint32
+mojobe_BGamePane_WorldWidth(BGamePane* self)
+{
+	try {
+		return self->WorldWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_WorldWidth");
+	}
+	return {};
+}
+
+
+// uint32 BGamePane::WorldHeight() const
+uint32
+mojobe_BGamePane_WorldHeight(BGamePane* self)
+{
+	try {
+		return self->WorldHeight();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_WorldHeight");
+	}
+	return {};
+}
+
+
+// uint32 BGamePane::BytesPerRow() const
+uint32
+mojobe_BGamePane_BytesPerRow(BGamePane* self)
+{
+	try {
+		return self->BytesPerRow();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_BytesPerRow");
+	}
+	return {};
+}
+
+
+// void BGamePane::SetColor(uint8 index, rgb_color color)
+void
+mojobe_BGamePane_SetColor(BGamePane* self,
+	uint8 a_index,
+	mojobe_rgb_color a_color)
+{
+	try {
+		self->SetColor(a_index, mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetColor");
+	}
+}
+
+
+// void BGamePane::SetColors(uint8 first, uint32 count, const rgb_color* colors)
+void
+mojobe_BGamePane_SetColors(BGamePane* self,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors)
+{
+	try {
+		self->SetColors(a_first, a_count, a_colors);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetColors");
+	}
+}
+
+
+// rgb_color BGamePane::Color(uint8 index) const
+mojobe_rgb_color
+mojobe_BGamePane_Color(BGamePane* self, uint8 a_index)
+{
+	try {
+		return mojobe_to_c(self->Color(a_index));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Color");
+	}
+	return {};
+}
+
+
+// void BGamePane::SetScanlineColor(uint32 row, uint8 index, rgb_color color)
+void
+mojobe_BGamePane_SetScanlineColor(BGamePane* self,
+	uint32 a_row,
+	uint8 a_index,
+	mojobe_rgb_color a_color)
+{
+	try {
+		self->SetScanlineColor(a_row, a_index, mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetScanlineColor");
+	}
+}
+
+
+// void BGamePane::SetScanlineColors(uint32 row, uint8 first, uint32 count, const rgb_color* colors)
+void
+mojobe_BGamePane_SetScanlineColors(BGamePane* self,
+	uint32 a_row,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors)
+{
+	try {
+		self->SetScanlineColors(a_row, a_first, a_count, a_colors);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetScanlineColors");
+	}
+}
+
+
+// void BGamePane::SetSpriteColor(uint8 palette, uint8 index, rgb_color color)
+void
+mojobe_BGamePane_SetSpriteColor(BGamePane* self,
+	uint8 a_palette,
+	uint8 a_index,
+	mojobe_rgb_color a_color)
+{
+	try {
+		self->SetSpriteColor(a_palette, a_index, mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetSpriteColor");
+	}
+}
+
+
+// void BGamePane::SetSpriteColors(uint8 palette, uint8 first, uint32 count, const rgb_color* colors)
+void
+mojobe_BGamePane_SetSpriteColors(BGamePane* self,
+	uint8 a_palette,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors)
+{
+	try {
+		self->SetSpriteColors(a_palette, a_first, a_count, a_colors);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetSpriteColors");
+	}
+}
+
+
+// void BGamePane::SetView(uint32 width, uint32 height)
+void
+mojobe_BGamePane_SetView(BGamePane* self, uint32 a_width, uint32 a_height)
+{
+	try {
+		self->SetView(a_width, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetView");
+	}
+}
+
+
+// void BGamePane::SetScroll(int32 x, int32 y)
+void
+mojobe_BGamePane_SetScroll(BGamePane* self, int32 a_x, int32 a_y)
+{
+	try {
+		self->SetScroll(a_x, a_y);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetScroll");
+	}
+}
+
+
+// int32 BGamePane::ScrollX() const
+int32
+mojobe_BGamePane_ScrollX(BGamePane* self)
+{
+	try {
+		return self->ScrollX();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_ScrollX");
+	}
+	return {};
+}
+
+
+// int32 BGamePane::ScrollY() const
+int32
+mojobe_BGamePane_ScrollY(BGamePane* self)
+{
+	try {
+		return self->ScrollY();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_ScrollY");
+	}
+	return {};
+}
+
+
+// void BGamePane::SetEffect(game_pane_effect effect)
+void
+mojobe_BGamePane_SetEffect(BGamePane* self, game_pane_effect a_effect)
+{
+	try {
+		self->SetEffect(a_effect);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetEffect");
+	}
+}
+
+
+// void BGamePane::Clear(uint8 index)
+void
+mojobe_BGamePane_Clear(BGamePane* self, uint8 a_index)
+{
+	try {
+		self->Clear(a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Clear");
+	}
+}
+
+
+// void BGamePane::FillRect(int32 x, int32 y, uint32 width, uint32 height, uint8 index)
+void
+mojobe_BGamePane_FillRect(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	uint32 a_width,
+	uint32 a_height,
+	uint8 a_index)
+{
+	try {
+		self->FillRect(a_x, a_y, a_width, a_height, a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_FillRect");
+	}
+}
+
+
+// void BGamePane::Plot(int32 x, int32 y, uint8 index)
+void
+mojobe_BGamePane_Plot(BGamePane* self, int32 a_x, int32 a_y, uint8 a_index)
+{
+	try {
+		self->Plot(a_x, a_y, a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Plot");
+	}
+}
+
+
+// void BGamePane::Blit(const uint8* source, uint32 sourceStride, int32 x, int32 y, uint32 width, uint32 height, game_blit_op op)
+void
+mojobe_BGamePane_Blit(BGamePane* self,
+	const uint8 * a_source,
+	uint32 a_sourceStride,
+	int32 a_x,
+	int32 a_y,
+	uint32 a_width,
+	uint32 a_height,
+	game_blit_op a_op)
+{
+	try {
+		self->Blit(a_source, a_sourceStride, a_x, a_y, a_width, a_height, a_op);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Blit");
+	}
+}
+
+
+// status_t BGamePane::SetBackgroundShader(const char* metalSource)
+status_t
+mojobe_BGamePane_SetBackgroundShader(BGamePane* self, const char* a_metalSource)
+{
+	try {
+		return self->SetBackgroundShader(a_metalSource);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetBackgroundShader");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BGamePane::SetOverlayShader(const char* metalSource)
+status_t
+mojobe_BGamePane_SetOverlayShader(BGamePane* self, const char* a_metalSource)
+{
+	try {
+		return self->SetOverlayShader(a_metalSource);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetOverlayShader");
+	}
+	return B_ERROR;
+}
+
+
+// const char* BGamePane::ShaderError() const
+const char*
+mojobe_BGamePane_ShaderError(BGamePane* self)
+{
+	try {
+		return self->ShaderError();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_ShaderError");
+	}
+	return {};
+}
+
+
+// void BGamePane::SetShaderParam(uint32 index, float value)
+void
+mojobe_BGamePane_SetShaderParam(BGamePane* self, uint32 a_index, float a_value)
+{
+	try {
+		self->SetShaderParam(a_index, a_value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetShaderParam");
+	}
+}
+
+
+// float BGamePane::ShaderParam(uint32 index) const
+float
+mojobe_BGamePane_ShaderParam(BGamePane* self, uint32 a_index)
+{
+	try {
+		return self->ShaderParam(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_ShaderParam");
+	}
+	return {};
+}
+
+
+// int32 BGamePane::DefineSprite(const uint8* pixels, uint32 width, uint32 height, uint32 depth)
+int32
+mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32(BGamePane* self,
+	const uint8 * a_pixels,
+	uint32 a_width,
+	uint32 a_height,
+	uint32 a_depth)
+{
+	try {
+		return self->DefineSprite(a_pixels, a_width, a_height, a_depth);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32");
+	}
+	return {};
+}
+
+
+// int32 BGamePane::DefineSprite(const BBitmap* bitmap, uint32 depth, uint8 palette)
+int32
+mojobe_BGamePane_DefineSprite__BBitmapP_uint32_uint8(BGamePane* self,
+	BBitmap* a_bitmap,
+	uint32 a_depth,
+	uint8 a_palette)
+{
+	try {
+		return self->DefineSprite(a_bitmap, a_depth, a_palette);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DefineSprite__BBitmapP_uint32_uint8");
+	}
+	return {};
+}
+
+
+// int32 BGamePane::DefineSprite(const char* imagePath, uint32 depth, uint8 palette)
+int32
+mojobe_BGamePane_DefineSprite__charP_uint32_uint8(BGamePane* self,
+	const char* a_imagePath,
+	uint32 a_depth,
+	uint8 a_palette)
+{
+	try {
+		return self->DefineSprite(a_imagePath, a_depth, a_palette);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DefineSprite__charP_uint32_uint8");
+	}
+	return {};
+}
+
+
+// void BGamePane::ClearSprites()
+void
+mojobe_BGamePane_ClearSprites(BGamePane* self)
+{
+	try {
+		self->ClearSprites();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_ClearSprites");
+	}
+}
+
+
+// status_t BGamePane::DrawSprite(int32 shape, int32 x, int32 y, float scale, float rotation, float alpha, uint8 palette, uint32 flags)
+status_t
+mojobe_BGamePane_DrawSprite(BGamePane* self,
+	int32 a_shape,
+	int32 a_x,
+	int32 a_y,
+	float a_scale,
+	float a_rotation,
+	float a_alpha,
+	uint8 a_palette,
+	uint32 a_flags)
+{
+	try {
+		return self->DrawSprite(a_shape, a_x, a_y, a_scale, a_rotation, a_alpha, a_palette, a_flags);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DrawSprite");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BGamePane::SetTextFont(const BFont* font, float size, uint32 slot)
+status_t
+mojobe_BGamePane_SetTextFont(BGamePane* self,
+	const BFont* a_font,
+	float a_size,
+	uint32 a_slot)
+{
+	try {
+		return self->SetTextFont(a_font, a_size, a_slot);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetTextFont");
+	}
+	return B_ERROR;
+}
+
+
+// uint32 BGamePane::TextWidth(const char* text, uint32 slot) const
+uint32
+mojobe_BGamePane_TextWidth(BGamePane* self, const char* a_text, uint32 a_slot)
+{
+	try {
+		return self->TextWidth(a_text, a_slot);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_TextWidth");
+	}
+	return {};
+}
+
+
+// uint32 BGamePane::TextHeight(uint32 slot) const
+uint32
+mojobe_BGamePane_TextHeight(BGamePane* self, uint32 a_slot)
+{
+	try {
+		return self->TextHeight(a_slot);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_TextHeight");
+	}
+	return {};
+}
+
+
+// void BGamePane::DrawText(int32 x, int32 y, const char* text, uint8 index, uint32 slot)
+void
+mojobe_BGamePane_DrawText(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	const char* a_text,
+	uint8 a_index,
+	uint32 a_slot)
+{
+	try {
+		self->DrawText(a_x, a_y, a_text, a_index, a_slot);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DrawText");
+	}
+}
+
+
+// void BGamePane::DrawTextInView(int32 x, int32 y, const char* text, uint8 index, uint32 slot)
+void
+mojobe_BGamePane_DrawTextInView(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	const char* a_text,
+	uint8 a_index,
+	uint32 a_slot)
+{
+	try {
+		self->DrawTextInView(a_x, a_y, a_text, a_index, a_slot);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_DrawTextInView");
+	}
+}
+
+
+// void BGamePane::Present()
+void
+mojobe_BGamePane_Present(BGamePane* self)
+{
+	try {
+		self->Present();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Present");
+	}
+}
+
+
+// status_t BGamePane::WaitForRetrace(bigtime_t timeout)
+status_t
+mojobe_BGamePane_WaitForRetrace(BGamePane* self, bigtime_t a_timeout)
+{
+	try {
+		return self->WaitForRetrace(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_WaitForRetrace");
+	}
+	return B_ERROR;
+}
+
+
+// void BDirectWindow::Quit()
+void
+mojobe_BGamePane_Quit(BGamePane* self)
+{
+	try {
+		static_cast<BDirectWindow*>(self)->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Quit");
+	}
+}
+
+
+// void BDirectWindow::Show()
+void
+mojobe_BGamePane_Show(BGamePane* self)
+{
+	try {
+		static_cast<BDirectWindow*>(self)->Show();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_Show");
+	}
+}
+
+
+// status_t BDirectWindow::GetClippingRegion(BRegion* region, BPoint* origin) const
+status_t
+mojobe_BGamePane_GetClippingRegion(BGamePane* self,
+	BRegion* a_region,
+	mojobe_BPoint* a_origin)
+{
+	try {
+		BPoint t_origin;
+		status_t result = static_cast<BDirectWindow*>(self)->GetClippingRegion(a_region, &t_origin);
+		if (a_origin != NULL)
+		*a_origin = mojobe_to_c(t_origin);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_GetClippingRegion");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BDirectWindow::SetFullScreen(bool enable)
+status_t
+mojobe_BGamePane_SetFullScreen(BGamePane* self, bool a_enable)
+{
+	try {
+		return static_cast<BDirectWindow*>(self)->SetFullScreen(a_enable);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_SetFullScreen");
+	}
+	return B_ERROR;
+}
+
+
+// bool BDirectWindow::IsFullScreen() const
+bool
+mojobe_BGamePane_IsFullScreen(BGamePane* self)
+{
+	try {
+		return static_cast<BDirectWindow*>(self)->IsFullScreen();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_IsFullScreen");
+	}
+	return {};
+}
+
+
+// BGamePane* as BWindow*
+BWindow*
+mojobe_BGamePane_as_BWindow(BGamePane* self)
+{
+	return self;
+}
+
+
+// BGamePane* as BLooper*
+BLooper*
+mojobe_BGamePane_as_BLooper(BGamePane* self)
+{
+	return self;
+}
+
+
+// BGamePane* as BHandler*
+BHandler*
+mojobe_BGamePane_as_BHandler(BGamePane* self)
+{
+	return self;
+}
+
+
+// BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes)
+BGamePane*
+mojobe_BGamePane_new(mojobe_BRect a_frame,
+	const char* a_title,
+	uint32 a_worldWidth,
+	uint32 a_worldHeight,
+	uint32 a_buffers,
+	uint32 a_flags,
+	size_t a_spriteBytes,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BGamePane* object = new(std::nothrow) BGamePane(mojobe_from_c(a_frame), a_title, a_worldWidth, a_worldHeight, a_buffers, a_flags, a_spriteBytes);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_new");
+	}
+	return {};
+}
+
+
+// BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes), as a MojoBGamePane
+BGamePane*
+mojobe_MojoBGamePane_new(mojobe_BRect a_frame,
+	const char* a_title,
+	uint32 a_worldWidth,
+	uint32 a_worldHeight,
+	uint32 a_buffers,
+	uint32 a_flags,
+	size_t a_spriteBytes,
+	const mojobe_BGamePane_hooks* hooks,
+	void* context,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BGamePane* object = new(std::nothrow) MojoBGamePane(mojobe_from_c(a_frame), a_title, a_worldWidth, a_worldHeight, a_buffers, a_flags, a_spriteBytes, hooks, context);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBGamePane_new");
+	}
+	return {};
+}
+
+
+// deletes a BGamePane that was never handed over: locked, then Quit()
+void
+mojobe_BGamePane_destroy(BGamePane* self)
+{
+	try {
+		if (self->Lock())
+			self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_destroy");
+	}
+}
+
+
+// BGamePane's own MessageReceived
+void
+mojobe_BGamePane_base_MessageReceived(BGamePane* self, BMessage* message)
+{
+	try {
+		self->BGamePane::MessageReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_base_MessageReceived");
+	}
+}
+
+
+// BGamePane's own QuitRequested
+bool
+mojobe_BGamePane_base_QuitRequested(BGamePane* self)
+{
+	try {
+		return self->BGamePane::QuitRequested();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_base_QuitRequested");
+	}
+	return {};
+}
+
+
+// BGamePane's own WindowActivated
+void
+mojobe_BGamePane_base_WindowActivated(BGamePane* self, bool state)
+{
+	try {
+		self->BGamePane::WindowActivated(state);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGamePane_base_WindowActivated");
+	}
+}
+
+
+
+// #pragma mark - BChipPlayer
+
+
+// status_t BChipPlayer::InitCheck() const
+status_t
+mojobe_BChipPlayer_InitCheck(BChipPlayer* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BChipPlayer::Play(const char* abc, uint32 track, bool loop)
+status_t
+mojobe_BChipPlayer_Play(BChipPlayer* self,
+	const char* a_abc,
+	uint32 a_track,
+	bool a_loop)
+{
+	try {
+		return self->Play(a_abc, a_track, a_loop);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_Play");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BChipPlayer::Stop(uint32 track)
+status_t
+mojobe_BChipPlayer_Stop(BChipPlayer* self, uint32 a_track)
+{
+	try {
+		return self->Stop(a_track);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_Stop");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BChipPlayer::StopAll()
+status_t
+mojobe_BChipPlayer_StopAll(BChipPlayer* self)
+{
+	try {
+		return self->StopAll();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_StopAll");
+	}
+	return B_ERROR;
+}
+
+
+// uint32 BChipPlayer::Playing() const
+uint32
+mojobe_BChipPlayer_Playing(BChipPlayer* self)
+{
+	try {
+		return self->Playing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_Playing");
+	}
+	return {};
+}
+
+
+// bool BChipPlayer::IsPlaying(uint32 track) const
+bool
+mojobe_BChipPlayer_IsPlaying(BChipPlayer* self, uint32 a_track)
+{
+	try {
+		return self->IsPlaying(a_track);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_IsPlaying");
+	}
+	return {};
+}
+
+
+// status_t BChipPlayer::SetVolume(float volume)
+status_t
+mojobe_BChipPlayer_SetVolume(BChipPlayer* self, float a_volume)
+{
+	try {
+		return self->SetVolume(a_volume);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_SetVolume");
+	}
+	return B_ERROR;
+}
+
+
+// uint32 BChipPlayer::CountChips() const
+uint32
+mojobe_BChipPlayer_CountChips(BChipPlayer* self)
+{
+	try {
+		return self->CountChips();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_CountChips");
+	}
+	return {};
+}
+
+
+// uint32 BChipPlayer::CountVoices() const
+uint32
+mojobe_BChipPlayer_CountVoices(BChipPlayer* self)
+{
+	try {
+		return self->CountVoices();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_CountVoices");
+	}
+	return {};
+}
+
+
+// uint32 BChipPlayer::CountTracks() const
+uint32
+mojobe_BChipPlayer_CountTracks(BChipPlayer* self)
+{
+	try {
+		return self->CountTracks();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_CountTracks");
+	}
+	return {};
+}
+
+
+// BChipPlayer::BChipPlayer()
+BChipPlayer*
+mojobe_BChipPlayer_new(status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BChipPlayer* object = new(std::nothrow) BChipPlayer();
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BChipPlayer_new");
+	}
+	return {};
+}
+
+
+// ~BChipPlayer()
+void
+mojobe_BChipPlayer_delete(BChipPlayer* self)
 {
 	delete self;
 }

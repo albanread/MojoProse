@@ -55,6 +55,8 @@
 #include <Path.h>
 #include <FilePanel.h>
 #include <FindDirectory.h>
+#include <GamePane.h>
+#include <ChipPlayer.h>
 
 
 extern "C" {
@@ -248,6 +250,19 @@ struct mojobe_BView_hooks {
 			float newHeight);
 	void	(*WindowActivated)(void* context, BView* self, bool active);
 	void	(*Pulse)(void* context, BView* self);
+};
+
+
+/*!	A Mojo type's hooks for a `BGamePane`: a NULL slot is a hook the type
+	does not implement. The type tag names the Mojo type. */
+struct mojobe_BGamePane_hooks {
+	uint64	type;
+	void	(*destroy)(void* context);
+	void	(*MessageReceived)(void* context,
+			BGamePane* self,
+			BMessage* message);
+	bool	(*QuitRequested)(void* context, BGamePane* self);
+	void	(*WindowActivated)(void* context, BGamePane* self, bool state);
 };
 
 
@@ -643,6 +658,9 @@ BGroupView* mojobe_BHandler_to_BGroupView(BHandler* self);
 // BHandler* as BGridView*, or NULL
 BGridView* mojobe_BHandler_to_BGridView(BHandler* self);
 
+// BHandler* as BGamePane*, or NULL
+BGamePane* mojobe_BHandler_to_BGamePane(BHandler* self);
+
 // BHandler::BHandler(const char* name)
 BHandler* mojobe_BHandler_new(const char* a_name);
 
@@ -777,6 +795,9 @@ BWindow* mojobe_BLooper_to_BWindow(BLooper* self);
 
 // BLooper* as BAlert*, or NULL
 BAlert* mojobe_BLooper_to_BAlert(BLooper* self);
+
+// BLooper* as BGamePane*, or NULL
+BGamePane* mojobe_BLooper_to_BGamePane(BLooper* self);
 
 // BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)
 BLooper* mojobe_BLooper_new(const char* a_name,
@@ -1266,6 +1287,9 @@ BHandler* mojobe_BWindow_as_BHandler(BWindow* self);
 
 // BWindow* as BAlert*, or NULL
 BAlert* mojobe_BWindow_to_BAlert(BWindow* self);
+
+// BWindow* as BGamePane*, or NULL
+BGamePane* mojobe_BWindow_to_BGamePane(BWindow* self);
 
 // BWindow::BWindow(BRect frame, const char* title, window_type type, uint32 flags, uint32 workspace)
 BWindow* mojobe_BWindow_new__BRect_charP_window_type_uint32_uint32(mojobe_BRect a_frame,
@@ -1950,6 +1974,13 @@ void mojobe_BView_DrawString__charP_int32(BView* self,
 	const char* a_string,
 	int32 a_length);
 
+// void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)
+void mojobe_BView_DrawString__charP_int32_BPointP_int32(BView* self,
+	const char* a_string,
+	int32 a_length,
+	const BPoint * a_locations,
+	int32 a_locationCount);
+
 // void BView::SetFont(const BFont* font, uint32 mask)
 void mojobe_BView_SetFont(BView* self, const BFont* a_font, uint32 a_mask);
 
@@ -2550,7 +2581,7 @@ status_t mojobe_BMessage_AddMessage(BMessage* self,
 status_t mojobe_BMessage_AddData(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes,
 	bool a_isFixedSize,
 	int32 a_count);
@@ -3013,7 +3044,7 @@ status_t mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP(BMessage* self,
 status_t mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes);
 
 // status_t BMessage::ReplaceData(const char* name, type_code type, int32 index, const void* data, ssize_t numBytes)
@@ -3021,7 +3052,7 @@ status_t mojobe_BMessage_ReplaceData__charP_type_code_int32_voidP_ssize_t(BMessa
 	const char* a_name,
 	type_code a_type,
 	int32 a_index,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes);
 
 // bool BMessage::HasSameData(const BMessage& other, bool ignoreFieldOrder, bool deep) const
@@ -3382,7 +3413,7 @@ status_t mojobe_BMessage_SetSize(BMessage* self,
 status_t mojobe_BMessage_SetData(BMessage* self,
 	const char* a_name,
 	type_code a_type,
-	const void* a_data,
+	const void * a_data,
 	ssize_t a_numBytes,
 	bool a_fixedSize,
 	int a_count);
@@ -4593,7 +4624,7 @@ uint32 mojobe_BBitmap_Flags(BBitmap* self);
 
 // status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)
 status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_bpr,
 	int32 a_offset,
@@ -4601,7 +4632,7 @@ status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap*
 
 // status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)
 status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_bpr,
 	color_space a_colorSpace,
@@ -4648,7 +4679,7 @@ bool mojobe_BBitmap_IsLocked(BBitmap* self);
 
 // void BBitmap::SetBits(const void* data, int32 length, int32 offset, color_space colorSpace)
 void mojobe_BBitmap_SetBits(BBitmap* self,
-	const void* a_data,
+	const void * a_data,
 	int32 a_length,
 	int32 a_offset,
 	color_space a_colorSpace);
@@ -5462,7 +5493,7 @@ bool mojobe_BPath_AllowsTypeCode(BPath* self, type_code a_code);
 // status_t BPath::Unflatten(type_code code, const void* buffer, ssize_t size)
 status_t mojobe_BPath_Unflatten(BPath* self,
 	type_code a_code,
-	const void* a_buffer,
+	const void * a_buffer,
 	ssize_t a_size);
 
 // BPath::BPath()
@@ -5577,6 +5608,307 @@ BFilePanel* mojobe_BFilePanel_new(file_panel_mode a_mode,
 void mojobe_BFilePanel_delete(BFilePanel* self);
 
 
+// #pragma mark - BGamePane
+
+
+// status_t BGamePane::InitCheck() const
+status_t mojobe_BGamePane_InitCheck(BGamePane* self);
+
+// uint8* BGamePane::World() const
+void* mojobe_BGamePane_World(BGamePane* self);
+
+// uint8* BGamePane::RowAt(int32 y) const
+void* mojobe_BGamePane_RowAt(BGamePane* self, int32 a_y);
+
+// void BGamePane::SetPlane(game_pane_plane plane)
+void mojobe_BGamePane_SetPlane(BGamePane* self, game_pane_plane a_plane);
+
+// game_pane_plane BGamePane::Plane() const
+game_pane_plane mojobe_BGamePane_Plane(BGamePane* self);
+
+// uint32 BGamePane::WorldWidth() const
+uint32 mojobe_BGamePane_WorldWidth(BGamePane* self);
+
+// uint32 BGamePane::WorldHeight() const
+uint32 mojobe_BGamePane_WorldHeight(BGamePane* self);
+
+// uint32 BGamePane::BytesPerRow() const
+uint32 mojobe_BGamePane_BytesPerRow(BGamePane* self);
+
+// void BGamePane::SetColor(uint8 index, rgb_color color)
+void mojobe_BGamePane_SetColor(BGamePane* self,
+	uint8 a_index,
+	mojobe_rgb_color a_color);
+
+// void BGamePane::SetColors(uint8 first, uint32 count, const rgb_color* colors)
+void mojobe_BGamePane_SetColors(BGamePane* self,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors);
+
+// rgb_color BGamePane::Color(uint8 index) const
+mojobe_rgb_color mojobe_BGamePane_Color(BGamePane* self, uint8 a_index);
+
+// void BGamePane::SetScanlineColor(uint32 row, uint8 index, rgb_color color)
+void mojobe_BGamePane_SetScanlineColor(BGamePane* self,
+	uint32 a_row,
+	uint8 a_index,
+	mojobe_rgb_color a_color);
+
+// void BGamePane::SetScanlineColors(uint32 row, uint8 first, uint32 count, const rgb_color* colors)
+void mojobe_BGamePane_SetScanlineColors(BGamePane* self,
+	uint32 a_row,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors);
+
+// void BGamePane::SetSpriteColor(uint8 palette, uint8 index, rgb_color color)
+void mojobe_BGamePane_SetSpriteColor(BGamePane* self,
+	uint8 a_palette,
+	uint8 a_index,
+	mojobe_rgb_color a_color);
+
+// void BGamePane::SetSpriteColors(uint8 palette, uint8 first, uint32 count, const rgb_color* colors)
+void mojobe_BGamePane_SetSpriteColors(BGamePane* self,
+	uint8 a_palette,
+	uint8 a_first,
+	uint32 a_count,
+	const rgb_color * a_colors);
+
+// void BGamePane::SetView(uint32 width, uint32 height)
+void mojobe_BGamePane_SetView(BGamePane* self, uint32 a_width, uint32 a_height);
+
+// void BGamePane::SetScroll(int32 x, int32 y)
+void mojobe_BGamePane_SetScroll(BGamePane* self, int32 a_x, int32 a_y);
+
+// int32 BGamePane::ScrollX() const
+int32 mojobe_BGamePane_ScrollX(BGamePane* self);
+
+// int32 BGamePane::ScrollY() const
+int32 mojobe_BGamePane_ScrollY(BGamePane* self);
+
+// void BGamePane::SetEffect(game_pane_effect effect)
+void mojobe_BGamePane_SetEffect(BGamePane* self, game_pane_effect a_effect);
+
+// void BGamePane::Clear(uint8 index)
+void mojobe_BGamePane_Clear(BGamePane* self, uint8 a_index);
+
+// void BGamePane::FillRect(int32 x, int32 y, uint32 width, uint32 height, uint8 index)
+void mojobe_BGamePane_FillRect(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	uint32 a_width,
+	uint32 a_height,
+	uint8 a_index);
+
+// void BGamePane::Plot(int32 x, int32 y, uint8 index)
+void mojobe_BGamePane_Plot(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	uint8 a_index);
+
+// void BGamePane::Blit(const uint8* source, uint32 sourceStride, int32 x, int32 y, uint32 width, uint32 height, game_blit_op op)
+void mojobe_BGamePane_Blit(BGamePane* self,
+	const uint8 * a_source,
+	uint32 a_sourceStride,
+	int32 a_x,
+	int32 a_y,
+	uint32 a_width,
+	uint32 a_height,
+	game_blit_op a_op);
+
+// status_t BGamePane::SetBackgroundShader(const char* metalSource)
+status_t mojobe_BGamePane_SetBackgroundShader(BGamePane* self,
+	const char* a_metalSource);
+
+// status_t BGamePane::SetOverlayShader(const char* metalSource)
+status_t mojobe_BGamePane_SetOverlayShader(BGamePane* self,
+	const char* a_metalSource);
+
+// const char* BGamePane::ShaderError() const
+const char* mojobe_BGamePane_ShaderError(BGamePane* self);
+
+// void BGamePane::SetShaderParam(uint32 index, float value)
+void mojobe_BGamePane_SetShaderParam(BGamePane* self,
+	uint32 a_index,
+	float a_value);
+
+// float BGamePane::ShaderParam(uint32 index) const
+float mojobe_BGamePane_ShaderParam(BGamePane* self, uint32 a_index);
+
+// int32 BGamePane::DefineSprite(const uint8* pixels, uint32 width, uint32 height, uint32 depth)
+int32 mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32(BGamePane* self,
+	const uint8 * a_pixels,
+	uint32 a_width,
+	uint32 a_height,
+	uint32 a_depth);
+
+// int32 BGamePane::DefineSprite(const BBitmap* bitmap, uint32 depth, uint8 palette)
+int32 mojobe_BGamePane_DefineSprite__BBitmapP_uint32_uint8(BGamePane* self,
+	BBitmap* a_bitmap,
+	uint32 a_depth,
+	uint8 a_palette);
+
+// int32 BGamePane::DefineSprite(const char* imagePath, uint32 depth, uint8 palette)
+int32 mojobe_BGamePane_DefineSprite__charP_uint32_uint8(BGamePane* self,
+	const char* a_imagePath,
+	uint32 a_depth,
+	uint8 a_palette);
+
+// void BGamePane::ClearSprites()
+void mojobe_BGamePane_ClearSprites(BGamePane* self);
+
+// status_t BGamePane::DrawSprite(int32 shape, int32 x, int32 y, float scale, float rotation, float alpha, uint8 palette, uint32 flags)
+status_t mojobe_BGamePane_DrawSprite(BGamePane* self,
+	int32 a_shape,
+	int32 a_x,
+	int32 a_y,
+	float a_scale,
+	float a_rotation,
+	float a_alpha,
+	uint8 a_palette,
+	uint32 a_flags);
+
+// status_t BGamePane::SetTextFont(const BFont* font, float size, uint32 slot)
+status_t mojobe_BGamePane_SetTextFont(BGamePane* self,
+	const BFont* a_font,
+	float a_size,
+	uint32 a_slot);
+
+// uint32 BGamePane::TextWidth(const char* text, uint32 slot) const
+uint32 mojobe_BGamePane_TextWidth(BGamePane* self,
+	const char* a_text,
+	uint32 a_slot);
+
+// uint32 BGamePane::TextHeight(uint32 slot) const
+uint32 mojobe_BGamePane_TextHeight(BGamePane* self, uint32 a_slot);
+
+// void BGamePane::DrawText(int32 x, int32 y, const char* text, uint8 index, uint32 slot)
+void mojobe_BGamePane_DrawText(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	const char* a_text,
+	uint8 a_index,
+	uint32 a_slot);
+
+// void BGamePane::DrawTextInView(int32 x, int32 y, const char* text, uint8 index, uint32 slot)
+void mojobe_BGamePane_DrawTextInView(BGamePane* self,
+	int32 a_x,
+	int32 a_y,
+	const char* a_text,
+	uint8 a_index,
+	uint32 a_slot);
+
+// void BGamePane::Present()
+void mojobe_BGamePane_Present(BGamePane* self);
+
+// status_t BGamePane::WaitForRetrace(bigtime_t timeout)
+status_t mojobe_BGamePane_WaitForRetrace(BGamePane* self, bigtime_t a_timeout);
+
+// void BDirectWindow::Quit()
+void mojobe_BGamePane_Quit(BGamePane* self);
+
+// void BDirectWindow::Show()
+void mojobe_BGamePane_Show(BGamePane* self);
+
+// status_t BDirectWindow::GetClippingRegion(BRegion* region, BPoint* origin) const
+status_t mojobe_BGamePane_GetClippingRegion(BGamePane* self,
+	BRegion* a_region,
+	mojobe_BPoint* a_origin);
+
+// status_t BDirectWindow::SetFullScreen(bool enable)
+status_t mojobe_BGamePane_SetFullScreen(BGamePane* self, bool a_enable);
+
+// bool BDirectWindow::IsFullScreen() const
+bool mojobe_BGamePane_IsFullScreen(BGamePane* self);
+
+// BGamePane* as BWindow*
+BWindow* mojobe_BGamePane_as_BWindow(BGamePane* self);
+
+// BGamePane* as BLooper*
+BLooper* mojobe_BGamePane_as_BLooper(BGamePane* self);
+
+// BGamePane* as BHandler*
+BHandler* mojobe_BGamePane_as_BHandler(BGamePane* self);
+
+// BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes)
+BGamePane* mojobe_BGamePane_new(mojobe_BRect a_frame,
+	const char* a_title,
+	uint32 a_worldWidth,
+	uint32 a_worldHeight,
+	uint32 a_buffers,
+	uint32 a_flags,
+	size_t a_spriteBytes,
+	status_t* _status);
+
+// BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes), as a MojoBGamePane
+BGamePane* mojobe_MojoBGamePane_new(mojobe_BRect a_frame,
+	const char* a_title,
+	uint32 a_worldWidth,
+	uint32 a_worldHeight,
+	uint32 a_buffers,
+	uint32 a_flags,
+	size_t a_spriteBytes,
+	const mojobe_BGamePane_hooks* hooks,
+	void* context,
+	status_t* _status);
+
+// deletes a BGamePane that was never handed over: locked, then Quit()
+void mojobe_BGamePane_destroy(BGamePane* self);
+
+// BGamePane's own MessageReceived
+void mojobe_BGamePane_base_MessageReceived(BGamePane* self, BMessage* message);
+
+// BGamePane's own QuitRequested
+bool mojobe_BGamePane_base_QuitRequested(BGamePane* self);
+
+// BGamePane's own WindowActivated
+void mojobe_BGamePane_base_WindowActivated(BGamePane* self, bool state);
+
+
+// #pragma mark - BChipPlayer
+
+
+// status_t BChipPlayer::InitCheck() const
+status_t mojobe_BChipPlayer_InitCheck(BChipPlayer* self);
+
+// status_t BChipPlayer::Play(const char* abc, uint32 track, bool loop)
+status_t mojobe_BChipPlayer_Play(BChipPlayer* self,
+	const char* a_abc,
+	uint32 a_track,
+	bool a_loop);
+
+// status_t BChipPlayer::Stop(uint32 track)
+status_t mojobe_BChipPlayer_Stop(BChipPlayer* self, uint32 a_track);
+
+// status_t BChipPlayer::StopAll()
+status_t mojobe_BChipPlayer_StopAll(BChipPlayer* self);
+
+// uint32 BChipPlayer::Playing() const
+uint32 mojobe_BChipPlayer_Playing(BChipPlayer* self);
+
+// bool BChipPlayer::IsPlaying(uint32 track) const
+bool mojobe_BChipPlayer_IsPlaying(BChipPlayer* self, uint32 a_track);
+
+// status_t BChipPlayer::SetVolume(float volume)
+status_t mojobe_BChipPlayer_SetVolume(BChipPlayer* self, float a_volume);
+
+// uint32 BChipPlayer::CountChips() const
+uint32 mojobe_BChipPlayer_CountChips(BChipPlayer* self);
+
+// uint32 BChipPlayer::CountVoices() const
+uint32 mojobe_BChipPlayer_CountVoices(BChipPlayer* self);
+
+// uint32 BChipPlayer::CountTracks() const
+uint32 mojobe_BChipPlayer_CountTracks(BChipPlayer* self);
+
+// BChipPlayer::BChipPlayer()
+BChipPlayer* mojobe_BChipPlayer_new(status_t* _status);
+
+// ~BChipPlayer()
+void mojobe_BChipPlayer_delete(BChipPlayer* self);
+
+
 // #pragma mark - BMessageRunner
 
 
@@ -5649,6 +5981,7 @@ void* mojobe_MojoBLooper_context(BLooper* self, uint64 type);
 void* mojobe_MojoBApplication_context(BApplication* self, uint64 type);
 void* mojobe_MojoBWindow_context(BWindow* self, uint64 type);
 void* mojobe_MojoBView_context(BView* self, uint64 type);
+void* mojobe_MojoBGamePane_context(BGamePane* self, uint64 type);
 
 
 }	// extern "C"

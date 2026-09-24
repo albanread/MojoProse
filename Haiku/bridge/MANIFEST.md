@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 1185 included, 338 overrides reached through a base, 317 left out.
+In all: 1247 included, 354 overrides reached through a base, 320 left out.
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 
@@ -362,7 +362,7 @@ In all: 1185 included, 338 overrides reached through a base, 317 left out.
 | `hook void BWindow::Zoom(BPoint origin, float width, float height)` | included | WindowZoom |
 | `hook void BWindow::Minimize(bool minimize)` | included | WindowMinimize |
 
-## BView: 232 included, 6 overrides reached through a base, 73 left out
+## BView: 233 included, 6 overrides reached through a base, 72 left out
 
 | C++ | | |
 |---|---|---|
@@ -422,7 +422,6 @@ In all: 1185 included, 338 overrides reached through a base, 317 left out.
 | `void BView::FillShape(BShape* shape, const BGradient& gradient)` | skipped | parameter shape: BShape * is not bridged |
 | `void BView::DrawString(const char* string, int32 length, BPoint location, escapement_delta* delta)` | skipped | parameter delta: escapement_delta * is not bridged |
 | `void BView::DrawString(const char* string, const BPoint* locations, int32 locationCount)` | skipped | parameter locations: const BPoint * is not bridged |
-| `void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)` | skipped | parameter locations: const BPoint * is not bridged |
 | `void BView::TruncateString(BString* in_out, uint32 mode, float width) const` | skipped | parameter in_out: BString * is not bridged |
 | `void BView::GetStringWidths(char** stringArray, int32* lengthArray, int32 numStrings, float* widthArray) const` | skipped | parameter stringArray: char ** is not bridged |
 | `void BView::SetDiskMode(char* filename, long offset)` | skipped | parameter filename: char * is not bridged |
@@ -582,6 +581,7 @@ In all: 1185 included, 338 overrides reached through a base, 317 left out.
 | `void BView::DrawString(const char* string, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP |
 | `void BView::DrawString(const char* string, BPoint location, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP_BPoint |
 | `void BView::DrawString(const char* string, int32 length, escapement_delta* delta)` | included | mojobe_BView_DrawString__charP_int32 |
+| `void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)` | included | mojobe_BView_DrawString__charP_int32_BPointP_int32 |
 | `void BView::SetFont(const BFont* font, uint32 mask)` | included | mojobe_BView_SetFont |
 | `void BView::GetFont(BFont* font) const` | included | mojobe_BView_GetFont |
 | `float BView::StringWidth(const char* string) const` | included | mojobe_BView_StringWidth__charP |
@@ -1584,7 +1584,7 @@ In all: 1185 included, 338 overrides reached through a base, 317 left out.
 | C++ | | |
 |---|---|---|
 | `BArchivable* BBitmap::Instantiate(BMessage* data)` | skipped | static |
-| `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so, libtracker.so |
+| `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so, libtracker.so, libgame.so |
 | `status_t BBitmap::GetOverlayRestrictions(overlay_restrictions* restrictions) const` | skipped | parameter restrictions: overlay_restrictions * is not bridged |
 | `BBitmap& BBitmap::operator=(const BBitmap& source)` | skipped | operator |
 | `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
@@ -2014,6 +2014,97 @@ In all: 1185 included, 338 overrides reached through a base, 317 left out.
 | `void BFilePanel::Rewind()` | included | mojobe_BFilePanel_Rewind |
 | `status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)` | included | mojobe_BFilePanel_GetNextSelectedRef |
 | `BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)` | included | mojobe_BFilePanel_new |
+
+## BGamePane: 50 included, 16 overrides reached through a base, 4 left out
+
+| C++ | | |
+|---|---|---|
+| `void BGamePane::DirectConnected(direct_buffer_info* info)` | skipped | parameter info: direct_buffer_info * is not bridged |
+| `BArchivable* BDirectWindow::Instantiate(BMessage* data)` | skipped | a static of BDirectWindow |
+| `status_t BDirectWindow::Perform(perform_code code, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `bool BDirectWindow::SupportsWindowMode(screen_id id)` | skipped | a static of BDirectWindow |
+| `status_t BGamePane::InitCheck() const` | included | mojobe_BGamePane_InitCheck |
+| `uint8* BGamePane::World() const` | included | mojobe_BGamePane_World |
+| `uint8* BGamePane::RowAt(int32 y) const` | included | mojobe_BGamePane_RowAt |
+| `void BGamePane::SetPlane(game_pane_plane plane)` | included | mojobe_BGamePane_SetPlane |
+| `game_pane_plane BGamePane::Plane() const` | included | mojobe_BGamePane_Plane |
+| `uint32 BGamePane::WorldWidth() const` | included | mojobe_BGamePane_WorldWidth |
+| `uint32 BGamePane::WorldHeight() const` | included | mojobe_BGamePane_WorldHeight |
+| `uint32 BGamePane::BytesPerRow() const` | included | mojobe_BGamePane_BytesPerRow |
+| `void BGamePane::SetColor(uint8 index, rgb_color color)` | included | mojobe_BGamePane_SetColor |
+| `void BGamePane::SetColors(uint8 first, uint32 count, const rgb_color* colors)` | included | mojobe_BGamePane_SetColors |
+| `rgb_color BGamePane::Color(uint8 index) const` | included | mojobe_BGamePane_Color |
+| `void BGamePane::SetScanlineColor(uint32 row, uint8 index, rgb_color color)` | included | mojobe_BGamePane_SetScanlineColor |
+| `void BGamePane::SetScanlineColors(uint32 row, uint8 first, uint32 count, const rgb_color* colors)` | included | mojobe_BGamePane_SetScanlineColors |
+| `void BGamePane::SetSpriteColor(uint8 palette, uint8 index, rgb_color color)` | included | mojobe_BGamePane_SetSpriteColor |
+| `void BGamePane::SetSpriteColors(uint8 palette, uint8 first, uint32 count, const rgb_color* colors)` | included | mojobe_BGamePane_SetSpriteColors |
+| `void BGamePane::SetView(uint32 width, uint32 height)` | included | mojobe_BGamePane_SetView |
+| `void BGamePane::SetScroll(int32 x, int32 y)` | included | mojobe_BGamePane_SetScroll |
+| `int32 BGamePane::ScrollX() const` | included | mojobe_BGamePane_ScrollX |
+| `int32 BGamePane::ScrollY() const` | included | mojobe_BGamePane_ScrollY |
+| `void BGamePane::SetEffect(game_pane_effect effect)` | included | mojobe_BGamePane_SetEffect |
+| `void BGamePane::Clear(uint8 index)` | included | mojobe_BGamePane_Clear |
+| `void BGamePane::FillRect(int32 x, int32 y, uint32 width, uint32 height, uint8 index)` | included | mojobe_BGamePane_FillRect |
+| `void BGamePane::Plot(int32 x, int32 y, uint8 index)` | included | mojobe_BGamePane_Plot |
+| `void BGamePane::Blit(const uint8* source, uint32 sourceStride, int32 x, int32 y, uint32 width, uint32 height, game_blit_op op)` | included | mojobe_BGamePane_Blit |
+| `status_t BGamePane::SetBackgroundShader(const char* metalSource)` | included | mojobe_BGamePane_SetBackgroundShader |
+| `status_t BGamePane::SetOverlayShader(const char* metalSource)` | included | mojobe_BGamePane_SetOverlayShader |
+| `const char* BGamePane::ShaderError() const` | included | mojobe_BGamePane_ShaderError |
+| `void BGamePane::SetShaderParam(uint32 index, float value)` | included | mojobe_BGamePane_SetShaderParam |
+| `float BGamePane::ShaderParam(uint32 index) const` | included | mojobe_BGamePane_ShaderParam |
+| `int32 BGamePane::DefineSprite(const uint8* pixels, uint32 width, uint32 height, uint32 depth)` | included | mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32 |
+| `int32 BGamePane::DefineSprite(const BBitmap* bitmap, uint32 depth, uint8 palette)` | included | mojobe_BGamePane_DefineSprite__BBitmapP_uint32_uint8 |
+| `int32 BGamePane::DefineSprite(const char* imagePath, uint32 depth, uint8 palette)` | included | mojobe_BGamePane_DefineSprite__charP_uint32_uint8 |
+| `void BGamePane::ClearSprites()` | included | mojobe_BGamePane_ClearSprites |
+| `status_t BGamePane::DrawSprite(int32 shape, int32 x, int32 y, float scale, float rotation, float alpha, uint8 palette, uint32 flags)` | included | mojobe_BGamePane_DrawSprite |
+| `status_t BGamePane::SetTextFont(const BFont* font, float size, uint32 slot)` | included | mojobe_BGamePane_SetTextFont |
+| `uint32 BGamePane::TextWidth(const char* text, uint32 slot) const` | included | mojobe_BGamePane_TextWidth |
+| `uint32 BGamePane::TextHeight(uint32 slot) const` | included | mojobe_BGamePane_TextHeight |
+| `void BGamePane::DrawText(int32 x, int32 y, const char* text, uint8 index, uint32 slot)` | included | mojobe_BGamePane_DrawText |
+| `void BGamePane::DrawTextInView(int32 x, int32 y, const char* text, uint8 index, uint32 slot)` | included | mojobe_BGamePane_DrawTextInView |
+| `void BGamePane::Present()` | included | mojobe_BGamePane_Present |
+| `status_t BGamePane::WaitForRetrace(bigtime_t timeout)` | included | mojobe_BGamePane_WaitForRetrace |
+| `status_t BDirectWindow::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
+| `void BDirectWindow::Quit()` | included | mojobe_BGamePane_Quit |
+| `void BDirectWindow::DispatchMessage(BMessage* message, BHandler* handler)` | skipped | reached through BLooper's DispatchMessage |
+| `void BDirectWindow::MessageReceived(BMessage* message)` | skipped | reached through BHandler's MessageReceived |
+| `void BDirectWindow::FrameMoved(BPoint newPosition)` | skipped | reached through BWindow's FrameMoved |
+| `void BDirectWindow::FrameResized(float newWidth, float newHeight)` | skipped | reached through BWindow's FrameResized |
+| `void BDirectWindow::WorkspacesChanged(uint32 oldWorkspaces, uint32 newWorkspaces)` | skipped | reached through BWindow's WorkspacesChanged |
+| `void BDirectWindow::WorkspaceActivated(int32 workspaceIndex, bool state)` | skipped | reached through BWindow's WorkspaceActivated |
+| `void BDirectWindow::Minimize(bool minimize)` | skipped | reached through BWindow's Minimize |
+| `void BDirectWindow::Zoom(BPoint recPosition, float recWidth, float recHeight)` | skipped | reached through BWindow's Zoom |
+| `void BDirectWindow::ScreenChanged(BRect screenFrame, color_space depth)` | skipped | reached through BWindow's ScreenChanged |
+| `void BDirectWindow::MenusBeginning()` | skipped | reached through BWindow's MenusBeginning |
+| `void BDirectWindow::MenusEnded()` | skipped | reached through BWindow's MenusEnded |
+| `void BDirectWindow::WindowActivated(bool state)` | skipped | reached through BWindow's WindowActivated |
+| `void BDirectWindow::Show()` | included | mojobe_BGamePane_Show |
+| `void BDirectWindow::Hide()` | skipped | reached through BWindow's Hide |
+| `BHandler* BDirectWindow::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
+| `status_t BDirectWindow::GetSupportedSuites(BMessage* data)` | skipped | reached through BHandler's GetSupportedSuites |
+| `status_t BDirectWindow::GetClippingRegion(BRegion* region, BPoint* origin) const` | included | mojobe_BGamePane_GetClippingRegion |
+| `status_t BDirectWindow::SetFullScreen(bool enable)` | included | mojobe_BGamePane_SetFullScreen |
+| `bool BDirectWindow::IsFullScreen() const` | included | mojobe_BGamePane_IsFullScreen |
+| `BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes)` | included | mojobe_BGamePane_new |
+| `hook void BDirectWindow::MessageReceived(BMessage* message)` | included | GamePaneMessageReceived |
+| `hook bool BWindow::QuitRequested()` | included | GamePaneQuitRequested |
+| `hook void BDirectWindow::WindowActivated(bool state)` | included | GamePaneWindowActivated |
+
+## BChipPlayer: 11 included, 0 overrides reached through a base, 0 left out
+
+| C++ | | |
+|---|---|---|
+| `status_t BChipPlayer::InitCheck() const` | included | mojobe_BChipPlayer_InitCheck |
+| `status_t BChipPlayer::Play(const char* abc, uint32 track, bool loop)` | included | mojobe_BChipPlayer_Play |
+| `status_t BChipPlayer::Stop(uint32 track)` | included | mojobe_BChipPlayer_Stop |
+| `status_t BChipPlayer::StopAll()` | included | mojobe_BChipPlayer_StopAll |
+| `uint32 BChipPlayer::Playing() const` | included | mojobe_BChipPlayer_Playing |
+| `bool BChipPlayer::IsPlaying(uint32 track) const` | included | mojobe_BChipPlayer_IsPlaying |
+| `status_t BChipPlayer::SetVolume(float volume)` | included | mojobe_BChipPlayer_SetVolume |
+| `uint32 BChipPlayer::CountChips() const` | included | mojobe_BChipPlayer_CountChips |
+| `uint32 BChipPlayer::CountVoices() const` | included | mojobe_BChipPlayer_CountVoices |
+| `uint32 BChipPlayer::CountTracks() const` | included | mojobe_BChipPlayer_CountTracks |
+| `BChipPlayer::BChipPlayer()` | included | mojobe_BChipPlayer_new |
 
 ## BMessageRunner: 7 included, 0 overrides reached through a base, 3 left out
 

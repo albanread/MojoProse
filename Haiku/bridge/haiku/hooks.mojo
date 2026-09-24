@@ -53,4 +53,8 @@ from ._api import (
     ViewWindowActivated,
     ViewPulse,
     ViewHooks,
+    GamePaneMessageReceived,
+    GamePaneQuitRequested,
+    GamePaneWindowActivated,
+    GamePaneHooks,
 )

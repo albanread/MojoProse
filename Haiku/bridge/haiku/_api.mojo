@@ -57,6 +57,8 @@ from ._constants import (
     coordinate_space,
     cpu_platform,
     cpu_vendor,
+    direct_buffer_state,
+    direct_driver_state,
     directory_which,
     drawing_mode,
     file_panel_button,
@@ -64,6 +66,9 @@ from ._constants import (
     font_direction,
     font_file_format,
     font_metric_mode,
+    game_blit_op,
+    game_pane_effect,
+    game_pane_plane,
     hash_mark_location,
     image_type,
     join_mode,
@@ -100,6 +105,7 @@ from ._constants import (
     B_FONT_ALL,
     B_FRAME_EVENTS,
     B_FULL_UPDATE_ON_RESIZE,
+    B_GAME_COPY_KEYED,
     B_HORIZONTAL,
     B_INFINITE_TIMEOUT,
     B_INFO_ALERT,
@@ -1090,6 +1096,11 @@ struct BHandlerRef[origin: ImmOrigin](
         """A `BGridView` is a `BHandler`."""
         self = BHandlerRef[Self.origin](other._as_BHandler())
 
+    @implicit
+    def __init__(out self, other: BGamePaneRef[Self.origin]):
+        """A `BGamePane` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -1275,6 +1286,16 @@ struct BHandlerRef[origin: ImmOrigin](
         return BGridViewRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BHandler_to_BGridView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BHandler` as a `BGamePane`: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGamePane", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -1833,6 +1854,11 @@ struct BLooperRef[origin: ImmOrigin](
         """A `BAlert` is a `BLooper`."""
         self = BLooperRef[Self.origin](other._as_BLooper())
 
+    @implicit
+    def __init__(out self, other: BGamePaneRef[Self.origin]):
+        """A `BGamePane` is a `BLooper`."""
+        self = BLooperRef[Self.origin](other._as_BLooper())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -1868,6 +1894,16 @@ struct BLooperRef[origin: ImmOrigin](
         return BAlertRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BLooper_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BLooper` as a `BGamePane`: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BGamePane", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -1989,6 +2025,13 @@ struct BLooper(Movable, _BLooperMethods):
         """A `BAlert` is a `BLooper`: this one takes it over."""
         self._ptr = _ptr_from(
             external_call["mojobe_BAlert_as_BLooper", Int](other^._adopt()),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGamePane):
+        """A `BGamePane` is a `BLooper`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGamePane_as_BLooper", Int](other^._adopt()),
         )
 
     def __deinit__(deinit self):
@@ -3471,6 +3514,11 @@ struct BWindowRef[origin: ImmOrigin](
         """A `BAlert` is a `BWindow`."""
         self = BWindowRef[Self.origin](other._as_BWindow())
 
+    @implicit
+    def __init__(out self, other: BGamePaneRef[Self.origin]):
+        """A `BGamePane` is a `BWindow`."""
+        self = BWindowRef[Self.origin](other._as_BWindow())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -3486,6 +3534,16 @@ struct BWindowRef[origin: ImmOrigin](
         return BAlertRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BWindow_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BWindow` as a `BGamePane`: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BWindow_to_BGamePane", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -3716,6 +3774,13 @@ struct BWindow(Movable, _BWindowMethods):
         """A `BAlert` is a `BWindow`: this one takes it over."""
         self._ptr = _ptr_from(
             external_call["mojobe_BAlert_as_BWindow", Int](other^._adopt()),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGamePane):
+        """A `BGamePane` is a `BWindow`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGamePane_as_BWindow", Int](other^._adopt()),
         )
 
     def __deinit__(deinit self):
@@ -5427,6 +5492,22 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             _nonnull(self._as_BView(), "BView::DrawString"),
             string.as_c_string_span(),
             length,
+        )
+        _ = string^
+
+    def DrawString(
+        self,
+        var string: String,
+        locations: Span[BPoint, _],
+        locationCount: Int32,
+    ):
+        """`void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)`."""
+        external_call["mojobe_BView_DrawString__charP_int32_BPointP_int32", NoneType](
+            _nonnull(self._as_BView(), "BView::DrawString"),
+            string.as_c_string_span(),
+            Int32(len(locations)),
+            Int(locations.unsafe_ptr()),
+            locationCount,
         )
         _ = string^
 
@@ -16947,6 +17028,1002 @@ struct BFilePanel(Movable, _BFilePanelMethods):
         return _addr(self._ptr)
 
     def _as_BFilePanel(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BGamePane
+# ========================================================================== #
+
+
+trait _AsBGamePane(_AsBWindow):
+    """Has a `BGamePane*` for libmojobe."""
+
+    def _as_BGamePane(self) -> _NPtr:
+        ...
+
+
+trait _BGamePaneMethods(_AsBGamePane, _BWindowMethods):
+    """`BGamePane`'s methods, for its references and the values Mojo owns."""
+
+    def InitCheck(self) raises:
+        """`status_t BGamePane::InitCheck() const`."""
+        var _result = external_call["mojobe_BGamePane_InitCheck", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::InitCheck"),
+        )
+        _check(_result, "BGamePane::InitCheck")
+
+    def World(ref self) -> Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]:
+        """`uint8* BGamePane::World() const`."""
+        var _result = external_call["mojobe_BGamePane_World", Int](
+            _nonnull(self._as_BGamePane(), "BGamePane::World"),
+        )
+        if _result == 0:
+            return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]()
+        return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()](
+            unsafe_ptr=Pointer[UInt8, MutUntrackedOrigin](
+                unsafe_from_address=_result
+            ).unsafe_origin_cast[origin_of(self).unsafe_mut_cast[True]()](),
+            length=Int(self.BytesPerRow() * self.WorldHeight()),
+        )
+
+    def RowAt(
+        ref self,
+        y: Int32,
+    ) -> Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]:
+        """`uint8* BGamePane::RowAt(int32 y) const`."""
+        var _result = external_call["mojobe_BGamePane_RowAt", Int](
+            _nonnull(self._as_BGamePane(), "BGamePane::RowAt"),
+            y,
+        )
+        if _result == 0:
+            return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()]()
+        return Span[UInt8, origin_of(self).unsafe_mut_cast[True]()](
+            unsafe_ptr=Pointer[UInt8, MutUntrackedOrigin](
+                unsafe_from_address=_result
+            ).unsafe_origin_cast[origin_of(self).unsafe_mut_cast[True]()](),
+            length=Int(self.BytesPerRow()),
+        )
+
+    def SetPlane(self, plane: game_pane_plane):
+        """`void BGamePane::SetPlane(game_pane_plane plane)`."""
+        external_call["mojobe_BGamePane_SetPlane", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetPlane"),
+            plane,
+        )
+
+    def Plane(self) -> game_pane_plane:
+        """`game_pane_plane BGamePane::Plane() const`."""
+        var _result = external_call["mojobe_BGamePane_Plane", game_pane_plane](
+            _nonnull(self._as_BGamePane(), "BGamePane::Plane"),
+        )
+        return _result
+
+    def WorldWidth(self) -> UInt32:
+        """`uint32 BGamePane::WorldWidth() const`."""
+        var _result = external_call["mojobe_BGamePane_WorldWidth", UInt32](
+            _nonnull(self._as_BGamePane(), "BGamePane::WorldWidth"),
+        )
+        return _result
+
+    def WorldHeight(self) -> UInt32:
+        """`uint32 BGamePane::WorldHeight() const`."""
+        var _result = external_call["mojobe_BGamePane_WorldHeight", UInt32](
+            _nonnull(self._as_BGamePane(), "BGamePane::WorldHeight"),
+        )
+        return _result
+
+    def BytesPerRow(self) -> UInt32:
+        """`uint32 BGamePane::BytesPerRow() const`."""
+        var _result = external_call["mojobe_BGamePane_BytesPerRow", UInt32](
+            _nonnull(self._as_BGamePane(), "BGamePane::BytesPerRow"),
+        )
+        return _result
+
+    def SetColor(self, index: UInt8, color: rgb_color):
+        """`void BGamePane::SetColor(uint8 index, rgb_color color)`."""
+        external_call["mojobe_BGamePane_SetColor", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetColor"),
+            index,
+            color,
+        )
+
+    def SetColors(self, first: UInt8, colors: Span[rgb_color, _]):
+        """`void BGamePane::SetColors(uint8 first, uint32 count, const rgb_color* colors)`."""
+        external_call["mojobe_BGamePane_SetColors", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetColors"),
+            first,
+            UInt32(len(colors)),
+            Int(colors.unsafe_ptr()),
+        )
+
+    def Color(self, index: UInt8) -> rgb_color:
+        """`rgb_color BGamePane::Color(uint8 index) const`."""
+        var _result = external_call["mojobe_BGamePane_Color", rgb_color](
+            _nonnull(self._as_BGamePane(), "BGamePane::Color"),
+            index,
+        )
+        return _result
+
+    def SetScanlineColor(self, row: UInt32, index: UInt8, color: rgb_color):
+        """`void BGamePane::SetScanlineColor(uint32 row, uint8 index, rgb_color color)`."""
+        external_call["mojobe_BGamePane_SetScanlineColor", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetScanlineColor"),
+            row,
+            index,
+            color,
+        )
+
+    def SetScanlineColors(
+        self,
+        row: UInt32,
+        first: UInt8,
+        colors: Span[rgb_color, _],
+    ):
+        """`void BGamePane::SetScanlineColors(uint32 row, uint8 first, uint32 count, const rgb_color* colors)`."""
+        external_call["mojobe_BGamePane_SetScanlineColors", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetScanlineColors"),
+            row,
+            first,
+            UInt32(len(colors)),
+            Int(colors.unsafe_ptr()),
+        )
+
+    def SetSpriteColor(self, palette: UInt8, index: UInt8, color: rgb_color):
+        """`void BGamePane::SetSpriteColor(uint8 palette, uint8 index, rgb_color color)`."""
+        external_call["mojobe_BGamePane_SetSpriteColor", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetSpriteColor"),
+            palette,
+            index,
+            color,
+        )
+
+    def SetSpriteColors(
+        self,
+        palette: UInt8,
+        first: UInt8,
+        colors: Span[rgb_color, _],
+    ):
+        """`void BGamePane::SetSpriteColors(uint8 palette, uint8 first, uint32 count, const rgb_color* colors)`."""
+        external_call["mojobe_BGamePane_SetSpriteColors", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetSpriteColors"),
+            palette,
+            first,
+            UInt32(len(colors)),
+            Int(colors.unsafe_ptr()),
+        )
+
+    def SetView(self, width: UInt32, height: UInt32):
+        """`void BGamePane::SetView(uint32 width, uint32 height)`."""
+        external_call["mojobe_BGamePane_SetView", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetView"),
+            width,
+            height,
+        )
+
+    def SetScroll(self, x: Int32, y: Int32):
+        """`void BGamePane::SetScroll(int32 x, int32 y)`."""
+        external_call["mojobe_BGamePane_SetScroll", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetScroll"),
+            x,
+            y,
+        )
+
+    def ScrollX(self) -> Int32:
+        """`int32 BGamePane::ScrollX() const`."""
+        var _result = external_call["mojobe_BGamePane_ScrollX", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::ScrollX"),
+        )
+        return _result
+
+    def ScrollY(self) -> Int32:
+        """`int32 BGamePane::ScrollY() const`."""
+        var _result = external_call["mojobe_BGamePane_ScrollY", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::ScrollY"),
+        )
+        return _result
+
+    def SetEffect(self, effect: game_pane_effect):
+        """`void BGamePane::SetEffect(game_pane_effect effect)`."""
+        external_call["mojobe_BGamePane_SetEffect", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetEffect"),
+            effect,
+        )
+
+    def Clear(self, index: UInt8 = 0):
+        """`void BGamePane::Clear(uint8 index)`."""
+        external_call["mojobe_BGamePane_Clear", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Clear"),
+            index,
+        )
+
+    def FillRect(
+        self,
+        x: Int32,
+        y: Int32,
+        width: UInt32,
+        height: UInt32,
+        index: UInt8,
+    ):
+        """`void BGamePane::FillRect(int32 x, int32 y, uint32 width, uint32 height, uint8 index)`."""
+        external_call["mojobe_BGamePane_FillRect", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::FillRect"),
+            x,
+            y,
+            width,
+            height,
+            index,
+        )
+
+    def Plot(self, x: Int32, y: Int32, index: UInt8):
+        """`void BGamePane::Plot(int32 x, int32 y, uint8 index)`."""
+        external_call["mojobe_BGamePane_Plot", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Plot"),
+            x,
+            y,
+            index,
+        )
+
+    def Blit(
+        self,
+        source: Span[UInt8, _],
+        sourceStride: UInt32,
+        x: Int32,
+        y: Int32,
+        width: UInt32,
+        height: UInt32,
+        op: game_blit_op = B_GAME_COPY_KEYED,
+    ) raises:
+        """`void BGamePane::Blit(const uint8* source, uint32 sourceStride, int32 x, int32 y, uint32 width, uint32 height, game_blit_op op)`."""
+        if len(source) < Int(sourceStride) * Int(height):
+            raise Error(
+                "BGamePane::Blit: source is shorter than Int(sourceStride) * Int(height)",
+            )
+        external_call["mojobe_BGamePane_Blit", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Blit"),
+            Int(source.unsafe_ptr()),
+            sourceStride,
+            x,
+            y,
+            width,
+            height,
+            op,
+        )
+
+    def SetBackgroundShader(self, var metalSource: String) raises:
+        """`status_t BGamePane::SetBackgroundShader(const char* metalSource)`."""
+        var _result = external_call["mojobe_BGamePane_SetBackgroundShader", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetBackgroundShader"),
+            metalSource.as_c_string_span(),
+        )
+        _ = metalSource^
+        _check(_result, "BGamePane::SetBackgroundShader")
+
+    def SetOverlayShader(self, var metalSource: String) raises:
+        """`status_t BGamePane::SetOverlayShader(const char* metalSource)`."""
+        var _result = external_call["mojobe_BGamePane_SetOverlayShader", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetOverlayShader"),
+            metalSource.as_c_string_span(),
+        )
+        _ = metalSource^
+        _check(_result, "BGamePane::SetOverlayShader")
+
+    def ShaderError(self) -> String:
+        """`const char* BGamePane::ShaderError() const`."""
+        var _result = external_call["mojobe_BGamePane_ShaderError", Int](
+            _nonnull(self._as_BGamePane(), "BGamePane::ShaderError"),
+        )
+        return _string_from(_result)
+
+    def SetShaderParam(self, index: UInt32, value: Float32):
+        """`void BGamePane::SetShaderParam(uint32 index, float value)`."""
+        external_call["mojobe_BGamePane_SetShaderParam", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetShaderParam"),
+            index,
+            value,
+        )
+
+    def ShaderParam(self, index: UInt32) -> Float32:
+        """`float BGamePane::ShaderParam(uint32 index) const`."""
+        var _result = external_call["mojobe_BGamePane_ShaderParam", Float32](
+            _nonnull(self._as_BGamePane(), "BGamePane::ShaderParam"),
+            index,
+        )
+        return _result
+
+    def DefineSprite(
+        self,
+        pixels: Span[UInt8, _],
+        width: UInt32,
+        height: UInt32,
+        depth: UInt32 = 8,
+    ) raises -> Int32:
+        """`int32 BGamePane::DefineSprite(const uint8* pixels, uint32 width, uint32 height, uint32 depth)`."""
+        if len(pixels) < (Int(width) * Int(height) * Int(depth) + 7) // 8:
+            raise Error(
+                "BGamePane::DefineSprite: pixels is shorter than (Int(width) * Int(height) * Int(depth) + 7) // 8",
+            )
+        var _result = external_call["mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::DefineSprite"),
+            Int(pixels.unsafe_ptr()),
+            width,
+            height,
+            depth,
+        )
+        return _result
+
+    def DefineSprite(
+        self,
+        bitmap: Some[_AsBBitmap],
+        depth: UInt32 = 4,
+        palette: UInt8 = 1,
+    ) -> Int32:
+        """`int32 BGamePane::DefineSprite(const BBitmap* bitmap, uint32 depth, uint8 palette)`."""
+        var _result = external_call["mojobe_BGamePane_DefineSprite__BBitmapP_uint32_uint8", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::DefineSprite"),
+            _addr(bitmap._as_BBitmap()),
+            depth,
+            palette,
+        )
+        return _result
+
+    def DefineSprite(
+        self,
+        var imagePath: String,
+        depth: UInt32 = 4,
+        palette: UInt8 = 1,
+    ) -> Int32:
+        """`int32 BGamePane::DefineSprite(const char* imagePath, uint32 depth, uint8 palette)`."""
+        var _result = external_call["mojobe_BGamePane_DefineSprite__charP_uint32_uint8", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::DefineSprite"),
+            imagePath.as_c_string_span(),
+            depth,
+            palette,
+        )
+        _ = imagePath^
+        return _result
+
+    def ClearSprites(self):
+        """`void BGamePane::ClearSprites()`."""
+        external_call["mojobe_BGamePane_ClearSprites", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::ClearSprites"),
+        )
+
+    def DrawSprite(
+        self,
+        shape: Int32,
+        x: Int32,
+        y: Int32,
+        scale: Float32 = 1.0,
+        rotation: Float32 = 0.0,
+        alpha: Float32 = 1.0,
+        palette: UInt8 = 0,
+        flags: UInt32 = 0,
+    ) raises:
+        """`status_t BGamePane::DrawSprite(int32 shape, int32 x, int32 y, float scale, float rotation, float alpha, uint8 palette, uint32 flags)`."""
+        var _result = external_call["mojobe_BGamePane_DrawSprite", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::DrawSprite"),
+            shape,
+            x,
+            y,
+            scale,
+            rotation,
+            alpha,
+            palette,
+            flags,
+        )
+        _check(_result, "BGamePane::DrawSprite")
+
+    def SetTextFont(
+        self,
+        var font: Optional[BFont] = None,
+        size: Float32 = 8.0,
+        slot: UInt32 = 0,
+    ) raises:
+        """`status_t BGamePane::SetTextFont(const BFont* font, float size, uint32 slot)`."""
+        var font_address = 0
+        if font:
+            font_address = _address_of(font.value())
+        var _result = external_call["mojobe_BGamePane_SetTextFont", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetTextFont"),
+            font_address,
+            size,
+            slot,
+        )
+        _ = font^
+        _check(_result, "BGamePane::SetTextFont")
+
+    def TextWidth(self, var text: String, slot: UInt32 = 0) -> UInt32:
+        """`uint32 BGamePane::TextWidth(const char* text, uint32 slot) const`."""
+        var _result = external_call["mojobe_BGamePane_TextWidth", UInt32](
+            _nonnull(self._as_BGamePane(), "BGamePane::TextWidth"),
+            text.as_c_string_span(),
+            slot,
+        )
+        _ = text^
+        return _result
+
+    def TextHeight(self, slot: UInt32 = 0) -> UInt32:
+        """`uint32 BGamePane::TextHeight(uint32 slot) const`."""
+        var _result = external_call["mojobe_BGamePane_TextHeight", UInt32](
+            _nonnull(self._as_BGamePane(), "BGamePane::TextHeight"),
+            slot,
+        )
+        return _result
+
+    def DrawText(
+        self,
+        x: Int32,
+        y: Int32,
+        var text: String,
+        index: UInt8,
+        slot: UInt32 = 0,
+    ):
+        """`void BGamePane::DrawText(int32 x, int32 y, const char* text, uint8 index, uint32 slot)`."""
+        external_call["mojobe_BGamePane_DrawText", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::DrawText"),
+            x,
+            y,
+            text.as_c_string_span(),
+            index,
+            slot,
+        )
+        _ = text^
+
+    def DrawTextInView(
+        self,
+        x: Int32,
+        y: Int32,
+        var text: String,
+        index: UInt8,
+        slot: UInt32 = 0,
+    ):
+        """`void BGamePane::DrawTextInView(int32 x, int32 y, const char* text, uint8 index, uint32 slot)`."""
+        external_call["mojobe_BGamePane_DrawTextInView", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::DrawTextInView"),
+            x,
+            y,
+            text.as_c_string_span(),
+            index,
+            slot,
+        )
+        _ = text^
+
+    def Present(self):
+        """`void BGamePane::Present()`."""
+        external_call["mojobe_BGamePane_Present", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Present"),
+        )
+
+    def WaitForRetrace(self, timeout: Int64 = 100000) raises:
+        """`status_t BGamePane::WaitForRetrace(bigtime_t timeout)`."""
+        var _result = external_call["mojobe_BGamePane_WaitForRetrace", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::WaitForRetrace"),
+            timeout,
+        )
+        _check(_result, "BGamePane::WaitForRetrace")
+
+    def GetClippingRegion(self, region: Some[_AsBRegion]) raises -> BPoint:
+        """`status_t BDirectWindow::GetClippingRegion(BRegion* region, BPoint* origin) const`."""
+        var origin = BPoint(Float32(0), Float32(0))
+        var _result = external_call["mojobe_BGamePane_GetClippingRegion", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::GetClippingRegion"),
+            _addr(region._as_BRegion()),
+            Pointer(to=origin),
+        )
+        _check(_result, "BDirectWindow::GetClippingRegion")
+        return origin
+
+    def SetFullScreen(self, enable: Bool) raises:
+        """`status_t BDirectWindow::SetFullScreen(bool enable)`."""
+        var _result = external_call["mojobe_BGamePane_SetFullScreen", Int32](
+            _nonnull(self._as_BGamePane(), "BGamePane::SetFullScreen"),
+            enable,
+        )
+        _check(_result, "BDirectWindow::SetFullScreen")
+
+    def IsFullScreen(self) -> Bool:
+        """`bool BDirectWindow::IsFullScreen() const`."""
+        var _result = external_call["mojobe_BGamePane_IsFullScreen", Bool](
+            _nonnull(self._as_BGamePane(), "BGamePane::IsFullScreen"),
+        )
+        return _result
+
+
+struct BGamePaneRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BGamePaneMethods,
+):
+    """A `BGamePane` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BGamePaneRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BGamePaneRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BGamePaneRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BGamePane(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BWindow(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BWindow", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BLooper", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    def Quit(self):
+        """`void BDirectWindow::Quit()`."""
+        external_call["mojobe_BGamePane_Quit", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Quit"),
+        )
+
+    def Show(self):
+        """`void BDirectWindow::Show()`."""
+        external_call["mojobe_BGamePane_Show", NoneType](
+            _nonnull(self._as_BGamePane(), "BGamePane::Show"),
+        )
+
+    def state[T: Movable & Deinitable](
+        self,
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BGamePane was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBGamePane_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BGamePane",
+        )
+
+    def base_MessageReceived(self, message: BMessageRef[_]):
+        """`BGamePane::MessageReceived`, the class's own."""
+        external_call["mojobe_BGamePane_base_MessageReceived", NoneType](
+            _nonnull(self._ptr, "BGamePane::MessageReceived"),
+            _addr(message._ptr),
+        )
+
+    def base_QuitRequested(self) -> Bool:
+        """`BGamePane::QuitRequested`, the class's own."""
+        return external_call["mojobe_BGamePane_base_QuitRequested", Bool](
+            _nonnull(self._ptr, "BGamePane::QuitRequested"),
+        )
+
+    def base_WindowActivated(self, state: Bool):
+        """`BGamePane::WindowActivated`, the class's own."""
+        external_call["mojobe_BGamePane_base_WindowActivated", NoneType](
+            _nonnull(self._ptr, "BGamePane::WindowActivated"),
+            state,
+        )
+
+
+struct BGamePane(Movable, _BGamePaneMethods):
+    """A `BGamePane` Mojo made. It owns itself once handed over (Show, Quit); until then, Mojo deletes it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        frame: BRect,
+        var title: String,
+        worldWidth: UInt32,
+        worldHeight: UInt32,
+        buffers: UInt32 = 2,
+        flags: UInt32 = 0,
+        spriteBytes: UInt64 = 262144,
+    ) raises:
+        """`BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes)`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BGamePane_new", Int](
+            frame,
+            title.as_c_string_span(),
+            worldWidth,
+            worldHeight,
+            buffers,
+            flags,
+            spriteBytes,
+            Pointer(to=_status),
+        )
+        _ = title^
+        if address == 0:
+            _check(_status, "BGamePane")
+            raise Error("BGamePane could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: GamePaneHooks & Movable & Deinitable](
+        out self,
+        frame: BRect,
+        var title: String,
+        worldWidth: UInt32,
+        worldHeight: UInt32,
+        var state: T,
+        buffers: UInt32 = 2,
+        flags: UInt32 = 0,
+        spriteBytes: UInt64 = 262144,
+    ) raises:
+        """`BGamePane::BGamePane(BRect frame, const char* title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes)`, its hooks those of `state`."""
+        var hooks = _BGamePane_hooks[T]()
+        var context = _to_heap(state^)
+        var _status = Int32(-1)
+        var address = external_call["mojobe_MojoBGamePane_new", Int](
+            frame,
+            title.as_c_string_span(),
+            worldWidth,
+            worldHeight,
+            buffers,
+            flags,
+            spriteBytes,
+            Pointer(to=hooks),
+            context,
+            Pointer(to=_status),
+        )
+        _ = title^
+        if address == 0:
+            _destroy[T](context)
+            _check(_status, "BGamePane")
+            raise Error("BGamePane could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BGamePane_destroy", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BGamePane(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BWindow(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BWindow", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BLooper", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGamePane_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    def Quit(deinit self):
+        """`void BDirectWindow::Quit()`."""
+        external_call["mojobe_BGamePane_Quit", NoneType](
+            _nonnull(self._ptr, "BGamePane::Quit"),
+        )
+
+    def Show(deinit self):
+        """`void BDirectWindow::Show()`."""
+        external_call["mojobe_BGamePane_Show", NoneType](
+            _nonnull(self._ptr, "BGamePane::Show"),
+        )
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BGamePane was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBGamePane_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BGamePane",
+        )
+
+
+trait GamePaneHooks:
+    """A Mojo type that stands behind a `BGamePane`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BGamePane` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait GamePaneMessageReceived(GamePaneHooks):
+    """`void BDirectWindow::MessageReceived(BMessage* message)`: a hook of BGamePane."""
+
+    def MessageReceived(
+        mut self,
+        gamePane: BGamePaneRef[_],
+        message: BMessageRef[_],
+    ):
+        ...
+
+
+trait GamePaneQuitRequested(GamePaneHooks):
+    """`bool BWindow::QuitRequested()`: a hook of BGamePane."""
+
+    def QuitRequested(mut self, gamePane: BGamePaneRef[_]) -> Bool:
+        ...
+
+
+trait GamePaneWindowActivated(GamePaneHooks):
+    """`void BDirectWindow::WindowActivated(bool state)`: a hook of BGamePane."""
+
+    def WindowActivated(mut self, gamePane: BGamePaneRef[_], state: Bool):
+        ...
+
+
+struct _BGamePaneHooks(ImplicitlyCopyable, RegisterPassable):
+    """`mojobe_BGamePane_hooks`, laid out as C's."""
+
+    var type: UInt64
+    var destroy: _FnPtr
+    var MessageReceived: _FnPtr
+    var QuitRequested: _FnPtr
+    var WindowActivated: _FnPtr
+
+    def __init__(out self):
+        self.type = 0
+        self.destroy = {}
+        self.MessageReceived = {}
+        self.QuitRequested = {}
+        self.WindowActivated = {}
+
+
+def _BGamePane_MessageReceived[T: GamePaneMessageReceived](
+    context: _Ptr,
+    gamePane: Int,
+    message: Int,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MessageReceived(
+        BGamePaneRef[origin_of(call)](_ptr_from(gamePane)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
+    )
+    _ = call^
+
+
+def _BGamePane_QuitRequested[T: GamePaneQuitRequested](
+    context: _Ptr,
+    gamePane: Int,
+) abi("C") -> Bool:
+    var call = _HookCall()
+    var result = context.unsafe_bitcast[T]()[].QuitRequested(
+        BGamePaneRef[origin_of(call)](_ptr_from(gamePane)),
+    )
+    _ = call^
+    return result
+
+
+def _BGamePane_WindowActivated[T: GamePaneWindowActivated](
+    context: _Ptr,
+    gamePane: Int,
+    state: Bool,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].WindowActivated(
+        BGamePaneRef[origin_of(call)](_ptr_from(gamePane)),
+        state,
+    )
+    _ = call^
+
+
+def _BGamePane_hooks[T: Movable & Deinitable]() -> _BGamePaneHooks:
+    """`T`'s hooks for a `BGamePane`: a slot for each hook it implements, NULL for the rest, decided at compile time."""
+    var hooks = _BGamePaneHooks()
+    hooks.type = _type_tag[T]()
+    hooks.destroy = _fn_ptr(_destroy[T])
+    comptime if conforms_to(T, GamePaneMessageReceived):
+        hooks.MessageReceived = _fn_ptr(
+            _BGamePane_MessageReceived[downcast[T, GamePaneMessageReceived]],
+        )
+    comptime if conforms_to(T, GamePaneQuitRequested):
+        hooks.QuitRequested = _fn_ptr(
+            _BGamePane_QuitRequested[downcast[T, GamePaneQuitRequested]],
+        )
+    comptime if conforms_to(T, GamePaneWindowActivated):
+        hooks.WindowActivated = _fn_ptr(
+            _BGamePane_WindowActivated[downcast[T, GamePaneWindowActivated]],
+        )
+    return hooks
+
+# ========================================================================== #
+# BChipPlayer
+# ========================================================================== #
+
+
+trait _AsBChipPlayer:
+    """Has a `BChipPlayer*` for libmojobe."""
+
+    def _as_BChipPlayer(self) -> _NPtr:
+        ...
+
+
+trait _BChipPlayerMethods(_AsBChipPlayer):
+    """`BChipPlayer`'s methods, for its references and the values Mojo owns."""
+
+    def InitCheck(self) raises:
+        """`status_t BChipPlayer::InitCheck() const`."""
+        var _result = external_call["mojobe_BChipPlayer_InitCheck", Int32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::InitCheck"),
+        )
+        _check(_result, "BChipPlayer::InitCheck")
+
+    def Play(
+        self,
+        var abc: String,
+        track: UInt32 = 0,
+        loop: Bool = False,
+    ) raises:
+        """`status_t BChipPlayer::Play(const char* abc, uint32 track, bool loop)`."""
+        var _result = external_call["mojobe_BChipPlayer_Play", Int32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::Play"),
+            abc.as_c_string_span(),
+            track,
+            loop,
+        )
+        _ = abc^
+        _check(_result, "BChipPlayer::Play")
+
+    def Stop(self, track: UInt32 = 0) raises:
+        """`status_t BChipPlayer::Stop(uint32 track)`."""
+        var _result = external_call["mojobe_BChipPlayer_Stop", Int32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::Stop"),
+            track,
+        )
+        _check(_result, "BChipPlayer::Stop")
+
+    def StopAll(self) raises:
+        """`status_t BChipPlayer::StopAll()`."""
+        var _result = external_call["mojobe_BChipPlayer_StopAll", Int32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::StopAll"),
+        )
+        _check(_result, "BChipPlayer::StopAll")
+
+    def Playing(self) -> UInt32:
+        """`uint32 BChipPlayer::Playing() const`."""
+        var _result = external_call["mojobe_BChipPlayer_Playing", UInt32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::Playing"),
+        )
+        return _result
+
+    def IsPlaying(self, track: UInt32 = 0) -> Bool:
+        """`bool BChipPlayer::IsPlaying(uint32 track) const`."""
+        var _result = external_call["mojobe_BChipPlayer_IsPlaying", Bool](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::IsPlaying"),
+            track,
+        )
+        return _result
+
+    def SetVolume(self, volume: Float32) raises:
+        """`status_t BChipPlayer::SetVolume(float volume)`."""
+        var _result = external_call["mojobe_BChipPlayer_SetVolume", Int32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::SetVolume"),
+            volume,
+        )
+        _check(_result, "BChipPlayer::SetVolume")
+
+    def CountChips(self) -> UInt32:
+        """`uint32 BChipPlayer::CountChips() const`."""
+        var _result = external_call["mojobe_BChipPlayer_CountChips", UInt32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::CountChips"),
+        )
+        return _result
+
+    def CountVoices(self) -> UInt32:
+        """`uint32 BChipPlayer::CountVoices() const`."""
+        var _result = external_call["mojobe_BChipPlayer_CountVoices", UInt32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::CountVoices"),
+        )
+        return _result
+
+    def CountTracks(self) -> UInt32:
+        """`uint32 BChipPlayer::CountTracks() const`."""
+        var _result = external_call["mojobe_BChipPlayer_CountTracks", UInt32](
+            _nonnull(self._as_BChipPlayer(), "BChipPlayer::CountTracks"),
+        )
+        return _result
+
+
+struct BChipPlayerRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BChipPlayerMethods,
+):
+    """A `BChipPlayer` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BChipPlayerRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BChipPlayerRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BChipPlayerRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BChipPlayer(self) -> _NPtr:
+        return self._ptr
+
+
+struct BChipPlayer(Movable, _BChipPlayerMethods):
+    """A `BChipPlayer` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self) raises:
+        """`BChipPlayer::BChipPlayer()`."""
+        var _status = Int32(-1)
+        var address = external_call["mojobe_BChipPlayer_new", Int](
+            Pointer(to=_status),
+        )
+        if address == 0:
+            _check(_status, "BChipPlayer")
+            raise Error("BChipPlayer could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BChipPlayer_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BChipPlayer(self) -> _NPtr:
         return self._ptr
 
 # ========================================================================== #
