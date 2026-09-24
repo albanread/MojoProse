@@ -16,10 +16,11 @@ Build on Prose, as Dots is built:
         -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
 """
 
+from std.ffi import external_call
 from std.time import sleep
 
 from haiku import BLooper, BLooperRef, BMessage, BMessageRef, BMessenger
-from haiku import B_QUIT_REQUESTED, fourcc
+from haiku import B_INFINITE_TIMEOUT, B_QUIT_REQUESTED, fourcc
 from haiku.hooks import LooperMessageReceived
 
 comptime MSG_TICK = fourcc("tick")
@@ -100,6 +101,26 @@ def main() raises:
     checks.check("a copied messenger compares equal", copy == messenger)
     checks.check("a messenger to nothing differs", BMessenger() != messenger)
 
+    # From this thread, under the looper's lock: its state, and its lock.
+    with messenger.Locked() as locked:
+        var this_thread = external_call["find_thread", Int32](0)
+        checks.check(
+            "Locked(): this thread holds the looper's lock",
+            locked.IsLocked() and locked.LockingThread() == this_thread,
+        )
+        checks.check(
+            "Locked(): the Mojo state, read under the lock",
+            locked.state[Counter]().ticks == 5,
+        )
+        checks.check("as_BWindow() of a plain looper is NULL",
+                     not locked.as_BWindow())
+    # The block unlocked it: the looper answers again, which it could not
+    # do while this thread held its lock (the reply would time out).
+    var again = BMessage()
+    messenger.SendMessage(BMessage(MSG_ASK), again, B_INFINITE_TIMEOUT, 2000000)
+    checks.check("the block's end unlocks the looper",
+                 again.FindInt32("ticks") == 5)
+
     # Quitting deletes the looper and, with it, the Counter.
     messenger.SendMessage(B_QUIT_REQUESTED)
     var gone = False
@@ -117,6 +138,14 @@ def main() raises:
     except e:
         print("  raised:", e)
         checks.check("SendMessage to a looper that has gone raises", True)
+
+    try:
+        with messenger.Locked() as locked:
+            _ = locked.Thread()
+        checks.check("Locked() of a looper that has gone raises", False)
+    except e:
+        print("  raised:", e)
+        checks.check("Locked() of a looper that has gone raises", True)
 
     var total = checks.passed + checks.failed
     if checks.failed:

@@ -352,6 +352,24 @@ status_t mojobe_BHandler_AllUnarchived(BHandler* self, BMessage* a_archive);
 // status_t BArchivable::AllArchived(BMessage* archive) const
 status_t mojobe_BHandler_AllArchived(BHandler* self, BMessage* a_archive);
 
+// BHandler* as BLooper*, or NULL
+BLooper* mojobe_BHandler_to_BLooper(BHandler* self);
+
+// BHandler* as BApplication*, or NULL
+BApplication* mojobe_BHandler_to_BApplication(BHandler* self);
+
+// BHandler* as BWindow*, or NULL
+BWindow* mojobe_BHandler_to_BWindow(BHandler* self);
+
+// BHandler* as BView*, or NULL
+BView* mojobe_BHandler_to_BView(BHandler* self);
+
+// BHandler* as BMenu*, or NULL
+BMenu* mojobe_BHandler_to_BMenu(BHandler* self);
+
+// BHandler* as BMenuBar*, or NULL
+BMenuBar* mojobe_BHandler_to_BMenuBar(BHandler* self);
+
 // BHandler::BHandler(const char* name)
 BHandler* mojobe_BHandler_new(const char* a_name);
 
@@ -474,6 +492,12 @@ int32 mojobe_BLooper_Sem(BLooper* self);
 
 // BLooper* as BHandler*
 BHandler* mojobe_BLooper_as_BHandler(BLooper* self);
+
+// BLooper* as BApplication*, or NULL
+BApplication* mojobe_BLooper_to_BApplication(BLooper* self);
+
+// BLooper* as BWindow*, or NULL
+BWindow* mojobe_BLooper_to_BWindow(BLooper* self);
 
 // BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)
 BLooper* mojobe_BLooper_new(const char* a_name,
@@ -1671,6 +1695,12 @@ void mojobe_BView_HideToolTip(BView* self);
 // BView* as BHandler*
 BHandler* mojobe_BView_as_BHandler(BView* self);
 
+// BView* as BMenu*, or NULL
+BMenu* mojobe_BView_to_BMenu(BView* self);
+
+// BView* as BMenuBar*, or NULL
+BMenuBar* mojobe_BView_to_BMenuBar(BView* self);
+
 // BView::BView(const char* name, uint32 flags, BLayout* layout)
 BView* mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags);
 
@@ -2832,6 +2862,9 @@ BView* mojobe_BMenu_as_BView(BMenu* self);
 // BMenu* as BHandler*
 BHandler* mojobe_BMenu_as_BHandler(BMenu* self);
 
+// BMenu* as BMenuBar*, or NULL
+BMenuBar* mojobe_BMenu_to_BMenuBar(BMenu* self);
+
 // BMenu::BMenu(const char* name, menu_layout layout)
 BMenu* mojobe_BMenu_new__charP_menu_layout(const char* a_name,
 	menu_layout a_layout);
@@ -3000,6 +3033,15 @@ BMenuItem* mojobe_BMenuItem_new__BMenuP_BMessageP(BMenu* a_menu,
 
 // ~BMenuItem()
 void mojobe_BMenuItem_delete(BMenuItem* self);
+
+
+// #pragma mark - Hand-written (Haiku/generator/snippets/mojobe.h)
+
+
+// Locks the looper a BMessenger targets and returns it; NULL when the looper
+// has gone or the timeout passed first.
+BLooper* mojobe_BMessenger_LockedTarget(const BMessenger* self,
+	bigtime_t timeout);
 
 
 void* mojobe_MojoBHandler_context(BHandler* self, uint64 type);

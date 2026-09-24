@@ -35,6 +35,7 @@ from ._api import (
     BMenuBarRef,
     BMenuItem,
     BMenuItemRef,
+    LooperLock,
 )
 from ._constants import (
     BSpacing,

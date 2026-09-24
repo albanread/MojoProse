@@ -1079,6 +1079,54 @@ mojobe_BHandler_AllArchived(BHandler* self, BMessage* a_archive)
 }
 
 
+// BHandler* as BLooper*, or NULL
+BLooper*
+mojobe_BHandler_to_BLooper(BHandler* self)
+{
+	return dynamic_cast<BLooper*>(self);
+}
+
+
+// BHandler* as BApplication*, or NULL
+BApplication*
+mojobe_BHandler_to_BApplication(BHandler* self)
+{
+	return dynamic_cast<BApplication*>(self);
+}
+
+
+// BHandler* as BWindow*, or NULL
+BWindow*
+mojobe_BHandler_to_BWindow(BHandler* self)
+{
+	return dynamic_cast<BWindow*>(self);
+}
+
+
+// BHandler* as BView*, or NULL
+BView*
+mojobe_BHandler_to_BView(BHandler* self)
+{
+	return dynamic_cast<BView*>(self);
+}
+
+
+// BHandler* as BMenu*, or NULL
+BMenu*
+mojobe_BHandler_to_BMenu(BHandler* self)
+{
+	return dynamic_cast<BMenu*>(self);
+}
+
+
+// BHandler* as BMenuBar*, or NULL
+BMenuBar*
+mojobe_BHandler_to_BMenuBar(BHandler* self)
+{
+	return dynamic_cast<BMenuBar*>(self);
+}
+
+
 // BHandler::BHandler(const char* name)
 BHandler*
 mojobe_BHandler_new(const char* a_name)
@@ -1373,6 +1421,22 @@ BHandler*
 mojobe_BLooper_as_BHandler(BLooper* self)
 {
 	return self;
+}
+
+
+// BLooper* as BApplication*, or NULL
+BApplication*
+mojobe_BLooper_to_BApplication(BLooper* self)
+{
+	return dynamic_cast<BApplication*>(self);
+}
+
+
+// BLooper* as BWindow*, or NULL
+BWindow*
+mojobe_BLooper_to_BWindow(BLooper* self)
+{
+	return dynamic_cast<BWindow*>(self);
 }
 
 
@@ -4125,6 +4189,22 @@ mojobe_BView_as_BHandler(BView* self)
 }
 
 
+// BView* as BMenu*, or NULL
+BMenu*
+mojobe_BView_to_BMenu(BView* self)
+{
+	return dynamic_cast<BMenu*>(self);
+}
+
+
+// BView* as BMenuBar*, or NULL
+BMenuBar*
+mojobe_BView_to_BMenuBar(BView* self)
+{
+	return dynamic_cast<BMenuBar*>(self);
+}
+
+
 // BView::BView(const char* name, uint32 flags, BLayout* layout)
 BView*
 mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags)
@@ -6532,6 +6612,14 @@ mojobe_BMenu_as_BHandler(BMenu* self)
 }
 
 
+// BMenu* as BMenuBar*, or NULL
+BMenuBar*
+mojobe_BMenu_to_BMenuBar(BMenu* self)
+{
+	return dynamic_cast<BMenuBar*>(self);
+}
+
+
 // BMenu::BMenu(const char* name, menu_layout layout)
 BMenu*
 mojobe_BMenu_new__charP_menu_layout(const char* a_name, menu_layout a_layout)
@@ -6924,5 +7012,22 @@ mojobe_BMenuItem_delete(BMenuItem* self)
 {
 	delete self;
 }
+
+
+// #pragma mark - Hand-written (Haiku/generator/snippets/mojobe.cpp)
+
+
+BLooper*
+mojobe_BMessenger_LockedTarget(const BMessenger* self, bigtime_t timeout)
+{
+	if (self->LockTargetWithTimeout(timeout) != B_OK)
+		return NULL;
+
+	// Locked, the target cannot go away until it is unlocked.
+	BLooper* looper = NULL;
+	self->Target(&looper);
+	return looper;
+}
+
 
 }	// extern "C"

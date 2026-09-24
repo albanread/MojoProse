@@ -1498,11 +1498,19 @@ class Emitter:
 
     # ---- casts ------------------------------------------------------------------
 
+    def descendants(self, cls):
+        return [c for c in self.b.classes if cls in self.bridged_ancestors(c)]
+
     def emit_casts(self, cls):
         for ancestor in self.bridged_ancestors(cls):
             self.add_entry("%s*" % ancestor, "mojobe_%s_as_%s" % (cls, ancestor),
                            ["%s* self" % cls], ["return self;"],
                            "%s* as %s*" % (cls, ancestor))
+        for descendant in self.descendants(cls):
+            self.add_entry("%s*" % descendant, "mojobe_%s_to_%s" % (cls, descendant),
+                           ["%s* self" % cls],
+                           ["return dynamic_cast<%s*>(self);" % descendant],
+                           "%s* as %s*, or NULL" % (cls, descendant))
 
     # ---- constructors -------------------------------------------------------------
 
@@ -1908,6 +1916,12 @@ class Emitter:
         out.append('        looper\'s hooks or with the looper locked."""')
         out.append("        return %sRef[ImmUntrackedOrigin](self._ptr)" % cls)
         out.append("")
+        for d in descendants:
+            out.append("    def as_%s(ref self) -> %sRef[origin_of(self)]:" % (d, d))
+            out.append('        """This `%s` as a `%s`: NULL if it is not one."""' % (cls, d))
+            out.append("        return %sRef[origin_of(self)](_ptr_from(external_call["
+                       '"mojobe_%s_to_%s", Int](_addr(self._ptr))))' % (d, cls, d))
+            out.append("")
         out.extend("    " + l for l in casts)
         for lines in ref_extra:
             out.append("")
@@ -2233,6 +2247,11 @@ def write_c(emitter, bridge, includes):
         h.append("")
         h.append("")
     h.extend(emitter.h)
+    extra = SNIPPETS / "mojobe.h"
+    if extra.exists():
+        h.append("")
+        h.append("")
+        h.append(extra.read_text().rstrip("\n"))
     h.append("")
     h.append("")
     h.append('}\t// extern "C"')
@@ -2330,6 +2349,12 @@ def write_c(emitter, bridge, includes):
         c.append("")
         c.append("")
     c.extend(emitter.cpp)
+    extra = SNIPPETS / "mojobe.cpp"
+    if extra.exists():
+        c.append("")
+        c.append(extra.read_text().rstrip("\n"))
+        c.append("")
+        c.append("")
     c.append('}\t// extern "C"')
     (BRIDGE / "libmojobe" / "mojobe.cpp").write_text("\n".join(c) + "\n")
     # the context lookups' prototypes
@@ -2457,6 +2482,11 @@ def write_api(emitter, bridge):
         out.extend("    %s," % n for n in consts)
         out.append(")")
     out.extend(emitter.mojo)
+    extra = SNIPPETS / "_api.mojo"
+    if extra.exists():
+        out.append("")
+        out.append("")
+        out.extend(extra.read_text().rstrip("\n").split("\n"))
     (BRIDGE / "haiku" / "_api.mojo").write_text("\n".join(wrap_all(out)) + "\n")
 
 
@@ -2489,6 +2519,7 @@ def write_init(emitter, bridge, constants):
         out.append("    %s," % cls)
         if bridge.classes[cls].get("kind") != "value":
             out.append("    %sRef," % cls)
+    out.append("    LooperLock,")
     out.append(")")
     out.append("from ._constants import (")
     out.extend("    %s," % n for n in constants)

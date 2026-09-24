@@ -303,6 +303,21 @@ struct BMessenger(Equatable, ImplicitlyCopyable, Movable):
             _address_of(other),
         )
 
+    def Locked(self, timeout: Int64 = B_INFINITE_TIMEOUT) raises -> LooperLock:
+        """Locks the looper this messenger targets, from any thread, for a
+        `with` block:
+
+            with messenger.Locked() as looper:
+                looper.as_BWindow().FindView("canvas").Invalidate()
+
+        The reference `looper` is borrowed from the lock, and cannot outlive
+        the block; the looper is unlocked when it ends.
+
+        Raises:
+            When the looper has gone, or `timeout` passed first.
+        """
+        return LooperLock(self, timeout)
+
 # ========================================================================== #
 # BHandler
 # ========================================================================== #
@@ -581,6 +596,66 @@ struct BHandlerRef[origin: ImmOrigin](
         anywhere. Use it only while the object exists, and in its
         looper's hooks or with the looper locked."""
         return BHandlerRef[ImmUntrackedOrigin](self._ptr)
+
+    def as_BLooper(ref self) -> BLooperRef[origin_of(self)]:
+        """This `BHandler` as a `BLooper`: NULL if it is not one."""
+        return BLooperRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BLooper", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BApplication(ref self) -> BApplicationRef[origin_of(self)]:
+        """This `BHandler` as a `BApplication`: NULL if it is not one."""
+        return BApplicationRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BApplication", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BWindow(ref self) -> BWindowRef[origin_of(self)]:
+        """This `BHandler` as a `BWindow`: NULL if it is not one."""
+        return BWindowRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BWindow", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BView(ref self) -> BViewRef[origin_of(self)]:
+        """This `BHandler` as a `BView`: NULL if it is not one."""
+        return BViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BMenu(ref self) -> BMenuRef[origin_of(self)]:
+        """This `BHandler` as a `BMenu`: NULL if it is not one."""
+        return BMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BMenu", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BHandler` as a `BMenuBar`: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
 
     def _as_BHandler(self) -> _NPtr:
         return self._ptr
@@ -1046,6 +1121,26 @@ struct BLooperRef[origin: ImmOrigin](
         anywhere. Use it only while the object exists, and in its
         looper's hooks or with the looper locked."""
         return BLooperRef[ImmUntrackedOrigin](self._ptr)
+
+    def as_BApplication(ref self) -> BApplicationRef[origin_of(self)]:
+        """This `BLooper` as a `BApplication`: NULL if it is not one."""
+        return BApplicationRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BApplication", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BWindow(ref self) -> BWindowRef[origin_of(self)]:
+        """This `BLooper` as a `BWindow`: NULL if it is not one."""
+        return BWindowRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BWindow", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
 
     def _as_BLooper(self) -> _NPtr:
         return self._ptr
@@ -4638,6 +4733,24 @@ struct BViewRef[origin: ImmOrigin](
         looper's hooks or with the looper locked."""
         return BViewRef[ImmUntrackedOrigin](self._ptr)
 
+    def as_BMenu(ref self) -> BMenuRef[origin_of(self)]:
+        """This `BView` as a `BMenu`: NULL if it is not one."""
+        return BMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BMenu", Int](_addr(self._ptr)),
+            ),
+        )
+
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BView` as a `BMenuBar`: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
     def _as_BView(self) -> _NPtr:
         return self._ptr
     
@@ -7949,6 +8062,16 @@ struct BMenuRef[origin: ImmOrigin](
         looper's hooks or with the looper locked."""
         return BMenuRef[ImmUntrackedOrigin](self._ptr)
 
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BMenu` as a `BMenuBar`: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BMenu_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
     def _as_BMenu(self) -> _NPtr:
         return self._ptr
     
@@ -8519,3 +8642,45 @@ struct BMenuItem(Movable, _BMenuItemMethods):
 
     def _as_BMenuItem(self) -> _NPtr:
         return self._ptr
+
+
+# ===----------------------------------------------------------------------=== #
+# Hand-written (Haiku/generator/snippets/_api.mojo)
+# ===----------------------------------------------------------------------=== #
+
+
+struct LooperLock(Movable):
+    """A looper's lock, held while this value lives: `BMessenger.Locked()`,
+    for a `with` block (design section 8.5)."""
+
+    var _looper: Int
+
+    def __init__(out self, messenger: BMessenger, timeout: Int64) raises:
+        self._looper = external_call["mojobe_BMessenger_LockedTarget", Int](
+            _address_of(messenger), timeout
+        )
+        if self._looper == 0:
+            raise Error(
+                "BMessenger::Locked: the looper has gone, or the timeout"
+                " passed"
+            )
+
+    def __enter__(ref self) -> BLooperRef[origin_of(self)]:
+        """The locked looper, borrowed from the lock."""
+        return BLooperRef[origin_of(self)](_ptr_from(self._looper))
+
+    def _unlock(mut self):
+        if self._looper != 0:
+            external_call["mojobe_BLooper_Unlock", NoneType](self._looper)
+            self._looper = 0
+
+    def __exit__(mut self):
+        self._unlock()
+
+    def __exit__(mut self, error: Error) -> Bool:
+        self._unlock()
+        return False
+
+    def __deinit__(deinit self):
+        if self._looper != 0:
+            external_call["mojobe_BLooper_Unlock", NoneType](self._looper)
