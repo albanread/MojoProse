@@ -20,7 +20,25 @@ from haiku import BApplication, BMenu, BMenuItem, BView, fourcc, rgb
 from haiku import B_ANY_TYPE, B_DOCUMENT_WINDOW, B_INT32_TYPE
 from haiku import B_TITLED_WINDOW, B_WILL_DRAW
 from haiku import B_ERROR, B_NAME_NOT_FOUND, status_of, window_type
-from haiku.hooks import LooperMessageReceived
+from haiku.hooks import LooperMessageReceived, ViewMessageReceived
+from haiku import BViewRef
+
+
+struct Reentrant(Movable, ViewMessageReceived):
+    """A hook that calls its own object's virtual method, which would enter
+    it again (design section 9)."""
+
+    var calls: Int
+
+    def __init__(out self):
+        self.calls = 0
+
+    def MessageReceived(mut self, view: BViewRef[_], message: BMessageRef[_]):
+        self.calls += 1
+        # BView::MessageReceived is virtual: this comes back through the
+        # shadow, which must hand it to BView's own instead of to this hook
+        # while it runs.
+        view.MessageReceived(message)
 
 
 struct Worker(LooperMessageReceived, Movable):
@@ -219,6 +237,16 @@ def main() raises:
     )
     _ = menu^
     _ = app^
+
+    # Re-entrancy: the nested call goes to the base class, once.
+    var reentrant = BView(BRect(0, 0, 9, 9), "reentrant", 0, 0, Reentrant())
+    reentrant.MessageReceived(BMessage(fourcc("reen")))
+    checks.check("a hook entered again on its own object reaches the base",
+                 reentrant.state[Reentrant]().calls == 1,
+                 String(reentrant.state[Reentrant]().calls))
+    reentrant.MessageReceived(BMessage(fourcc("agin")))
+    checks.check("and the next call enters the hook again",
+                 reentrant.state[Reentrant]().calls == 2)
 
     var total = checks.passed + checks.failed
     if checks.failed:
