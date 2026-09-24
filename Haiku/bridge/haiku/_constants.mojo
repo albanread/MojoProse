@@ -1355,3 +1355,713 @@ comptime B_YUV422: UInt32 = 0x4020
 comptime B_YUV444: UInt32 = 0x4023
 comptime B_YUV9: UInt32 = 0x402c
 comptime B_ZOOM: UInt32 = 0x5f575a4d
+
+
+def _status_name(status: Int32) -> StaticString:
+    """The name Errors.h gives a `status_t`; "" when it gives none."""
+    if status == -2147483648:
+        return "B_NO_MEMORY"
+    if status == -2147483647:
+        return "B_IO_ERROR"
+    if status == -2147483646:
+        return "B_PERMISSION_DENIED"
+    if status == -2147483645:
+        return "B_BAD_INDEX"
+    if status == -2147483644:
+        return "B_BAD_TYPE"
+    if status == -2147483643:
+        return "B_BAD_VALUE"
+    if status == -2147483642:
+        return "B_MISMATCHED_VALUES"
+    if status == -2147483641:
+        return "B_NAME_NOT_FOUND"
+    if status == -2147483640:
+        return "B_NAME_IN_USE"
+    if status == -2147483639:
+        return "B_TIMED_OUT"
+    if status == -2147483638:
+        return "B_INTERRUPTED"
+    if status == -2147483637:
+        return "B_WOULD_BLOCK"
+    if status == -2147483636:
+        return "B_CANCELED"
+    if status == -2147483635:
+        return "B_NO_INIT"
+    if status == -2147483634:
+        return "B_BUSY"
+    if status == -2147483633:
+        return "B_NOT_ALLOWED"
+    if status == -2147483632:
+        return "B_BAD_DATA"
+    if status == -2147483631:
+        return "B_DONT_DO_THAT"
+    if status == -2147479552:
+        return "B_BAD_SEM_ID"
+    if status == -2147479551:
+        return "B_NO_MORE_SEMS"
+    if status == -2147479296:
+        return "B_BAD_THREAD_ID"
+    if status == -2147479295:
+        return "B_NO_MORE_THREADS"
+    if status == -2147479294:
+        return "B_BAD_THREAD_STATE"
+    if status == -2147479293:
+        return "B_BAD_TEAM_ID"
+    if status == -2147479292:
+        return "B_NO_MORE_TEAMS"
+    if status == -2147479040:
+        return "B_BAD_PORT_ID"
+    if status == -2147479039:
+        return "B_NO_MORE_PORTS"
+    if status == -2147478784:
+        return "B_BAD_IMAGE_ID"
+    if status == -2147478783:
+        return "B_BAD_ADDRESS"
+    if status == -2147478782:
+        return "B_NOT_AN_EXECUTABLE"
+    if status == -2147478781:
+        return "B_MISSING_LIBRARY"
+    if status == -2147478780:
+        return "B_MISSING_SYMBOL"
+    if status == -2147478779:
+        return "B_UNKNOWN_EXECUTABLE"
+    if status == -2147478778:
+        return "B_LEGACY_EXECUTABLE"
+    if status == -2147478528:
+        return "B_DEBUGGER_ALREADY_INSTALLED"
+    if status == -2147475456:
+        return "B_BAD_REPLY"
+    if status == -2147475455:
+        return "B_DUPLICATE_REPLY"
+    if status == -2147475454:
+        return "B_MESSAGE_TO_SELF"
+    if status == -2147475453:
+        return "B_BAD_HANDLER"
+    if status == -2147475452:
+        return "B_ALREADY_RUNNING"
+    if status == -2147475451:
+        return "B_LAUNCH_FAILED"
+    if status == -2147475450:
+        return "B_AMBIGUOUS_APP_LAUNCH"
+    if status == -2147475449:
+        return "B_UNKNOWN_MIME_TYPE"
+    if status == -2147475448:
+        return "B_BAD_SCRIPT_SYNTAX"
+    if status == -2147475447:
+        return "B_LAUNCH_FAILED_NO_RESOLVE_LINK"
+    if status == -2147475446:
+        return "B_LAUNCH_FAILED_EXECUTABLE"
+    if status == -2147475445:
+        return "B_LAUNCH_FAILED_APP_NOT_FOUND"
+    if status == -2147475444:
+        return "B_LAUNCH_FAILED_APP_IN_TRASH"
+    if status == -2147475443:
+        return "B_LAUNCH_FAILED_NO_PREFERRED_APP"
+    if status == -2147475442:
+        return "B_LAUNCH_FAILED_FILES_APP_NOT_FOUND"
+    if status == -2147475441:
+        return "B_BAD_MIME_SNIFFER_RULE"
+    if status == -2147475440:
+        return "B_NOT_A_MESSAGE"
+    if status == -2147475439:
+        return "B_SHUTDOWN_CANCELLED"
+    if status == -2147475438:
+        return "B_SHUTTING_DOWN"
+    if status == -2147471360:
+        return "B_INTERFACE_ERROR_BASE"
+    if status == -2147467264:
+        return "B_MEDIA_ERROR_BASE"
+    if status == -2147467263:
+        return "B_SERVER_NOT_FOUND"
+    if status == -2147467262:
+        return "B_RESOURCE_NOT_FOUND"
+    if status == -2147467261:
+        return "B_RESOURCE_UNAVAILABLE"
+    if status == -2147467260:
+        return "B_BAD_SUBSCRIBER"
+    if status == -2147467259:
+        return "B_SUBSCRIBER_NOT_ENTERED"
+    if status == -2147467258:
+        return "B_BUFFER_NOT_AVAILABLE"
+    if status == -2147467257:
+        return "B_LAST_BUFFER_ERROR"
+    if status == -2147467164:
+        return "B_MEDIA_SYSTEM_FAILURE"
+    if status == -2147467163:
+        return "B_MEDIA_BAD_NODE"
+    if status == -2147467162:
+        return "B_MEDIA_NODE_BUSY"
+    if status == -2147467161:
+        return "B_MEDIA_BAD_FORMAT"
+    if status == -2147467160:
+        return "B_MEDIA_BAD_BUFFER"
+    if status == -2147467159:
+        return "B_MEDIA_TOO_MANY_NODES"
+    if status == -2147467158:
+        return "B_MEDIA_TOO_MANY_BUFFERS"
+    if status == -2147467157:
+        return "B_MEDIA_NODE_ALREADY_EXISTS"
+    if status == -2147467156:
+        return "B_MEDIA_BUFFER_ALREADY_EXISTS"
+    if status == -2147467155:
+        return "B_MEDIA_CANNOT_SEEK"
+    if status == -2147467154:
+        return "B_MEDIA_CANNOT_CHANGE_RUN_MODE"
+    if status == -2147467153:
+        return "B_MEDIA_APP_ALREADY_REGISTERED"
+    if status == -2147467152:
+        return "B_MEDIA_APP_NOT_REGISTERED"
+    if status == -2147467151:
+        return "B_MEDIA_CANNOT_RECLAIM_BUFFERS"
+    if status == -2147467150:
+        return "B_MEDIA_BUFFERS_NOT_RECLAIMED"
+    if status == -2147467149:
+        return "B_MEDIA_TIME_SOURCE_STOPPED"
+    if status == -2147467148:
+        return "B_MEDIA_TIME_SOURCE_BUSY"
+    if status == -2147467147:
+        return "B_MEDIA_BAD_SOURCE"
+    if status == -2147467146:
+        return "B_MEDIA_BAD_DESTINATION"
+    if status == -2147467145:
+        return "B_MEDIA_ALREADY_CONNECTED"
+    if status == -2147467144:
+        return "B_MEDIA_NOT_CONNECTED"
+    if status == -2147467143:
+        return "B_MEDIA_BAD_CLIP_FORMAT"
+    if status == -2147467142:
+        return "B_MEDIA_ADDON_FAILED"
+    if status == -2147467141:
+        return "B_MEDIA_ADDON_DISABLED"
+    if status == -2147467140:
+        return "B_MEDIA_CHANGE_IN_PROGRESS"
+    if status == -2147467139:
+        return "B_MEDIA_STALE_CHANGE_COUNT"
+    if status == -2147467138:
+        return "B_MEDIA_ADDON_RESTRICTED"
+    if status == -2147467137:
+        return "B_MEDIA_NO_HANDLER"
+    if status == -2147467136:
+        return "B_MEDIA_DUPLICATE_FORMAT"
+    if status == -2147467135:
+        return "B_MEDIA_REALTIME_DISABLED"
+    if status == -2147467134:
+        return "B_MEDIA_REALTIME_UNAVAILABLE"
+    if status == -2147465216:
+        return "B_TRANSLATION_BASE_ERROR"
+    if status == -2147465215:
+        return "B_NO_TRANSLATOR"
+    if status == -2147465214:
+        return "B_ILLEGAL_DATA"
+    if status == -2147463168:
+        return "B_MIDI_ERROR_BASE"
+    if status == -2147459072:
+        return "B_FILE_ERROR"
+    if status == -2147459070:
+        return "B_FILE_EXISTS"
+    if status == -2147459069:
+        return "B_ENTRY_NOT_FOUND"
+    if status == -2147459068:
+        return "B_NAME_TOO_LONG"
+    if status == -2147459067:
+        return "B_NOT_A_DIRECTORY"
+    if status == -2147459066:
+        return "B_DIRECTORY_NOT_EMPTY"
+    if status == -2147459065:
+        return "B_DEVICE_FULL"
+    if status == -2147459064:
+        return "B_READ_ONLY_DEVICE"
+    if status == -2147459063:
+        return "B_IS_A_DIRECTORY"
+    if status == -2147459062:
+        return "B_NO_MORE_FDS"
+    if status == -2147459061:
+        return "B_CROSS_DEVICE_LINK"
+    if status == -2147459060:
+        return "B_LINK_LIMIT"
+    if status == -2147459059:
+        return "B_BUSTED_PIPE"
+    if status == -2147459058:
+        return "B_UNSUPPORTED"
+    if status == -2147459057:
+        return "B_PARTITION_TOO_SMALL"
+    if status == -2147459056:
+        return "B_PARTIAL_READ"
+    if status == -2147459055:
+        return "B_PARTIAL_WRITE"
+    if status == -2147454976:
+        return "B_POSIX_ENOMEM"
+    if status == -2147454975:
+        return "B_TOO_MANY_ARGS"
+    if status == -2147454972:
+        return "B_FILE_TOO_LARGE"
+    if status == -2147454969:
+        return "B_DEVICE_NOT_FOUND"
+    if status == -2147454959:
+        return "B_RESULT_NOT_REPRESENTABLE"
+    if status == -2147454935:
+        return "B_BUFFER_OVERFLOW"
+    if status == -2147454933:
+        return "B_NOT_SUPPORTED"
+    if status == -2147450880:
+        return "B_MAIL_NO_DAEMON"
+    if status == -2147450879:
+        return "B_MAIL_UNKNOWN_USER"
+    if status == -2147450878:
+        return "B_MAIL_WRONG_PASSWORD"
+    if status == -2147450877:
+        return "B_MAIL_UNKNOWN_HOST"
+    if status == -2147450876:
+        return "B_MAIL_ACCESS_ERROR"
+    if status == -2147450875:
+        return "B_MAIL_UNKNOWN_FIELD"
+    if status == -2147450874:
+        return "B_MAIL_NO_RECIPIENT"
+    if status == -2147450873:
+        return "B_MAIL_INVALID_MAIL"
+    if status == -2147446784:
+        return "B_NO_PRINT_SERVER"
+    if status == -2147442688:
+        return "B_DEVICE_ERROR_BASE"
+    if status == -2147442687:
+        return "B_DEV_NO_MEMORY"
+    if status == -2147442686:
+        return "B_DEV_BAD_DRIVE_NUM"
+    if status == -2147442685:
+        return "B_DEV_NO_MEDIA"
+    if status == -2147442684:
+        return "B_DEV_UNREADABLE"
+    if status == -2147442683:
+        return "B_DEV_FORMAT_ERROR"
+    if status == -2147442682:
+        return "B_DEV_TIMEOUT"
+    if status == -2147442681:
+        return "B_DEV_RECALIBRATE_ERROR"
+    if status == -2147442680:
+        return "B_DEV_SEEK_ERROR"
+    if status == -2147442679:
+        return "B_DEV_ID_ERROR"
+    if status == -2147442678:
+        return "B_DEV_READ_ERROR"
+    if status == -2147442677:
+        return "B_DEV_WRITE_ERROR"
+    if status == -2147442676:
+        return "B_DEV_NOT_READY"
+    if status == -2147442675:
+        return "B_DEV_MEDIA_CHANGED"
+    if status == -2147442674:
+        return "B_DEV_MEDIA_CHANGE_REQUESTED"
+    if status == -2147442673:
+        return "B_DEV_RESOURCE_CONFLICT"
+    if status == -2147442672:
+        return "B_DEV_CONFIGURATION_ERROR"
+    if status == -2147442671:
+        return "B_DEV_DISABLED_BY_USER"
+    if status == -2147442670:
+        return "B_DEV_DOOR_OPEN"
+    if status == -2147442669:
+        return "B_DEV_INVALID_PIPE"
+    if status == -2147442668:
+        return "B_DEV_CRC_ERROR"
+    if status == -2147442667:
+        return "B_DEV_STALLED"
+    if status == -2147442666:
+        return "B_DEV_BAD_PID"
+    if status == -2147442665:
+        return "B_DEV_UNEXPECTED_PID"
+    if status == -2147442664:
+        return "B_DEV_DATA_OVERRUN"
+    if status == -2147442663:
+        return "B_DEV_DATA_UNDERRUN"
+    if status == -2147442662:
+        return "B_DEV_FIFO_OVERRUN"
+    if status == -2147442661:
+        return "B_DEV_FIFO_UNDERRUN"
+    if status == -2147442660:
+        return "B_DEV_PENDING"
+    if status == -2147442659:
+        return "B_DEV_MULTIPLE_ERRORS"
+    if status == -2147442658:
+        return "B_DEV_TOO_LATE"
+    if status == -2147418113:
+        return "B_ERRORS_END"
+    if status == -1:
+        return "B_ERROR"
+    if status == 0:
+        return "B_OK"
+    return ""
+
+
+def status_of(error: Error) -> Int32:
+    """The `status_t` an error the bridge raised stands for, as its
+    message ends by naming it: `BMessage::FindInt32: Name not found
+    (B_NAME_NOT_FOUND)`. B_ERROR for an error that names none.
+
+    The bridge raises plain `Error`s rather than a typed error, so that
+    one `try` block can call it and anything else (design section
+    18.4)."""
+    var text = String(error)
+    var start = text.rfind(" (")
+    if start < 0 or not text.endswith(")"):
+        return B_ERROR
+    var name = String(text[byte = start + 2 : text.byte_length() - 1])
+    if name.startswith("status "):
+        try:
+            return Int32(atol(name[byte=7:]))
+        except:
+            return B_ERROR
+    if name == "B_ALREADY_RUNNING":
+        return -2147475452
+    if name == "B_AMBIGUOUS_APP_LAUNCH":
+        return -2147475450
+    if name == "B_APP_ERROR_BASE":
+        return -2147475456
+    if name == "B_BAD_ADDRESS":
+        return -2147478783
+    if name == "B_BAD_DATA":
+        return -2147483632
+    if name == "B_BAD_HANDLER":
+        return -2147475453
+    if name == "B_BAD_IMAGE_ID":
+        return -2147478784
+    if name == "B_BAD_INDEX":
+        return -2147483645
+    if name == "B_BAD_MIME_SNIFFER_RULE":
+        return -2147475441
+    if name == "B_BAD_PORT_ID":
+        return -2147479040
+    if name == "B_BAD_REPLY":
+        return -2147475456
+    if name == "B_BAD_SCRIPT_SYNTAX":
+        return -2147475448
+    if name == "B_BAD_SEM_ID":
+        return -2147479552
+    if name == "B_BAD_SUBSCRIBER":
+        return -2147467260
+    if name == "B_BAD_TEAM_ID":
+        return -2147479293
+    if name == "B_BAD_THREAD_ID":
+        return -2147479296
+    if name == "B_BAD_THREAD_STATE":
+        return -2147479294
+    if name == "B_BAD_TYPE":
+        return -2147483644
+    if name == "B_BAD_VALUE":
+        return -2147483643
+    if name == "B_BUFFER_NOT_AVAILABLE":
+        return -2147467258
+    if name == "B_BUFFER_OVERFLOW":
+        return -2147454935
+    if name == "B_BUSTED_PIPE":
+        return -2147459059
+    if name == "B_BUSY":
+        return -2147483634
+    if name == "B_CANCELED":
+        return -2147483636
+    if name == "B_CROSS_DEVICE_LINK":
+        return -2147459061
+    if name == "B_DEBUGGER_ALREADY_INSTALLED":
+        return -2147478528
+    if name == "B_DEVICE_ERROR_BASE":
+        return -2147442688
+    if name == "B_DEVICE_FULL":
+        return -2147459065
+    if name == "B_DEVICE_NOT_FOUND":
+        return -2147454969
+    if name == "B_DEV_BAD_DRIVE_NUM":
+        return -2147442686
+    if name == "B_DEV_BAD_PID":
+        return -2147442666
+    if name == "B_DEV_CONFIGURATION_ERROR":
+        return -2147442672
+    if name == "B_DEV_CRC_ERROR":
+        return -2147442668
+    if name == "B_DEV_DATA_OVERRUN":
+        return -2147442664
+    if name == "B_DEV_DATA_UNDERRUN":
+        return -2147442663
+    if name == "B_DEV_DISABLED_BY_USER":
+        return -2147442671
+    if name == "B_DEV_DOOR_OPEN":
+        return -2147442670
+    if name == "B_DEV_FIFO_OVERRUN":
+        return -2147442662
+    if name == "B_DEV_FIFO_UNDERRUN":
+        return -2147442661
+    if name == "B_DEV_FORMAT_ERROR":
+        return -2147442683
+    if name == "B_DEV_ID_ERROR":
+        return -2147442679
+    if name == "B_DEV_INVALID_IOCTL":
+        return -2147442688
+    if name == "B_DEV_INVALID_PIPE":
+        return -2147442669
+    if name == "B_DEV_MEDIA_CHANGED":
+        return -2147442675
+    if name == "B_DEV_MEDIA_CHANGE_REQUESTED":
+        return -2147442674
+    if name == "B_DEV_MULTIPLE_ERRORS":
+        return -2147442659
+    if name == "B_DEV_NOT_READY":
+        return -2147442676
+    if name == "B_DEV_NO_MEDIA":
+        return -2147442685
+    if name == "B_DEV_NO_MEMORY":
+        return -2147442687
+    if name == "B_DEV_PENDING":
+        return -2147442660
+    if name == "B_DEV_READ_ERROR":
+        return -2147442678
+    if name == "B_DEV_RECALIBRATE_ERROR":
+        return -2147442681
+    if name == "B_DEV_RESOURCE_CONFLICT":
+        return -2147442673
+    if name == "B_DEV_SEEK_ERROR":
+        return -2147442680
+    if name == "B_DEV_STALLED":
+        return -2147442667
+    if name == "B_DEV_TIMEOUT":
+        return -2147442682
+    if name == "B_DEV_TOO_LATE":
+        return -2147442658
+    if name == "B_DEV_UNEXPECTED_PID":
+        return -2147442665
+    if name == "B_DEV_UNREADABLE":
+        return -2147442684
+    if name == "B_DEV_WRITE_ERROR":
+        return -2147442677
+    if name == "B_DIRECTORY_NOT_EMPTY":
+        return -2147459066
+    if name == "B_DONT_DO_THAT":
+        return -2147483631
+    if name == "B_DUPLICATE_REPLY":
+        return -2147475455
+    if name == "B_ENTRY_NOT_FOUND":
+        return -2147459069
+    if name == "B_ERROR":
+        return -1
+    if name == "B_ERRORS_END":
+        return -2147418113
+    if name == "B_FILE_ERROR":
+        return -2147459072
+    if name == "B_FILE_EXISTS":
+        return -2147459070
+    if name == "B_FILE_TOO_LARGE":
+        return -2147454972
+    if name == "B_GENERAL_ERROR_BASE":
+        return -2147483648
+    if name == "B_ILLEGAL_DATA":
+        return -2147465214
+    if name == "B_INTERFACE_ERROR_BASE":
+        return -2147471360
+    if name == "B_INTERRUPTED":
+        return -2147483638
+    if name == "B_IO_ERROR":
+        return -2147483647
+    if name == "B_IS_A_DIRECTORY":
+        return -2147459063
+    if name == "B_LAST_BUFFER_ERROR":
+        return -2147467257
+    if name == "B_LAUNCH_FAILED":
+        return -2147475451
+    if name == "B_LAUNCH_FAILED_APP_IN_TRASH":
+        return -2147475444
+    if name == "B_LAUNCH_FAILED_APP_NOT_FOUND":
+        return -2147475445
+    if name == "B_LAUNCH_FAILED_EXECUTABLE":
+        return -2147475446
+    if name == "B_LAUNCH_FAILED_FILES_APP_NOT_FOUND":
+        return -2147475442
+    if name == "B_LAUNCH_FAILED_NO_PREFERRED_APP":
+        return -2147475443
+    if name == "B_LAUNCH_FAILED_NO_RESOLVE_LINK":
+        return -2147475447
+    if name == "B_LEGACY_EXECUTABLE":
+        return -2147478778
+    if name == "B_LINK_LIMIT":
+        return -2147459060
+    if name == "B_MAIL_ACCESS_ERROR":
+        return -2147450876
+    if name == "B_MAIL_ERROR_BASE":
+        return -2147450880
+    if name == "B_MAIL_INVALID_MAIL":
+        return -2147450873
+    if name == "B_MAIL_NO_DAEMON":
+        return -2147450880
+    if name == "B_MAIL_NO_RECIPIENT":
+        return -2147450874
+    if name == "B_MAIL_UNKNOWN_FIELD":
+        return -2147450875
+    if name == "B_MAIL_UNKNOWN_HOST":
+        return -2147450877
+    if name == "B_MAIL_UNKNOWN_USER":
+        return -2147450879
+    if name == "B_MAIL_WRONG_PASSWORD":
+        return -2147450878
+    if name == "B_MEDIA_ADDON_DISABLED":
+        return -2147467141
+    if name == "B_MEDIA_ADDON_FAILED":
+        return -2147467142
+    if name == "B_MEDIA_ADDON_RESTRICTED":
+        return -2147467138
+    if name == "B_MEDIA_ALREADY_CONNECTED":
+        return -2147467145
+    if name == "B_MEDIA_APP_ALREADY_REGISTERED":
+        return -2147467153
+    if name == "B_MEDIA_APP_NOT_REGISTERED":
+        return -2147467152
+    if name == "B_MEDIA_BAD_BUFFER":
+        return -2147467160
+    if name == "B_MEDIA_BAD_CLIP_FORMAT":
+        return -2147467143
+    if name == "B_MEDIA_BAD_DESTINATION":
+        return -2147467146
+    if name == "B_MEDIA_BAD_FORMAT":
+        return -2147467161
+    if name == "B_MEDIA_BAD_NODE":
+        return -2147467163
+    if name == "B_MEDIA_BAD_SOURCE":
+        return -2147467147
+    if name == "B_MEDIA_BUFFERS_NOT_RECLAIMED":
+        return -2147467150
+    if name == "B_MEDIA_BUFFER_ALREADY_EXISTS":
+        return -2147467156
+    if name == "B_MEDIA_CANNOT_CHANGE_RUN_MODE":
+        return -2147467154
+    if name == "B_MEDIA_CANNOT_RECLAIM_BUFFERS":
+        return -2147467151
+    if name == "B_MEDIA_CANNOT_SEEK":
+        return -2147467155
+    if name == "B_MEDIA_CHANGE_IN_PROGRESS":
+        return -2147467140
+    if name == "B_MEDIA_DUPLICATE_FORMAT":
+        return -2147467136
+    if name == "B_MEDIA_ERROR_BASE":
+        return -2147467264
+    if name == "B_MEDIA_NODE_ALREADY_EXISTS":
+        return -2147467157
+    if name == "B_MEDIA_NODE_BUSY":
+        return -2147467162
+    if name == "B_MEDIA_NOT_CONNECTED":
+        return -2147467144
+    if name == "B_MEDIA_NO_HANDLER":
+        return -2147467137
+    if name == "B_MEDIA_REALTIME_DISABLED":
+        return -2147467135
+    if name == "B_MEDIA_REALTIME_UNAVAILABLE":
+        return -2147467134
+    if name == "B_MEDIA_STALE_CHANGE_COUNT":
+        return -2147467139
+    if name == "B_MEDIA_SYSTEM_FAILURE":
+        return -2147467164
+    if name == "B_MEDIA_TIME_SOURCE_BUSY":
+        return -2147467148
+    if name == "B_MEDIA_TIME_SOURCE_STOPPED":
+        return -2147467149
+    if name == "B_MEDIA_TOO_MANY_BUFFERS":
+        return -2147467158
+    if name == "B_MEDIA_TOO_MANY_NODES":
+        return -2147467159
+    if name == "B_MESSAGE_TO_SELF":
+        return -2147475454
+    if name == "B_MIDI_ERROR_BASE":
+        return -2147463168
+    if name == "B_MISMATCHED_VALUES":
+        return -2147483642
+    if name == "B_MISSING_LIBRARY":
+        return -2147478781
+    if name == "B_MISSING_SYMBOL":
+        return -2147478780
+    if name == "B_NAME_IN_USE":
+        return -2147483640
+    if name == "B_NAME_NOT_FOUND":
+        return -2147483641
+    if name == "B_NAME_TOO_LONG":
+        return -2147459068
+    if name == "B_NOT_ALLOWED":
+        return -2147483633
+    if name == "B_NOT_AN_EXECUTABLE":
+        return -2147478782
+    if name == "B_NOT_A_DIRECTORY":
+        return -2147459067
+    if name == "B_NOT_A_MESSAGE":
+        return -2147475440
+    if name == "B_NOT_INITIALIZED":
+        return -2147483635
+    if name == "B_NOT_SUPPORTED":
+        return -2147454933
+    if name == "B_NO_ERROR":
+        return 0
+    if name == "B_NO_INIT":
+        return -2147483635
+    if name == "B_NO_MEMORY":
+        return -2147483648
+    if name == "B_NO_MORE_FDS":
+        return -2147459062
+    if name == "B_NO_MORE_PORTS":
+        return -2147479039
+    if name == "B_NO_MORE_SEMS":
+        return -2147479551
+    if name == "B_NO_MORE_TEAMS":
+        return -2147479292
+    if name == "B_NO_MORE_THREADS":
+        return -2147479295
+    if name == "B_NO_PRINT_SERVER":
+        return -2147446784
+    if name == "B_NO_TRANSLATOR":
+        return -2147465215
+    if name == "B_OK":
+        return 0
+    if name == "B_OS_ERROR_BASE":
+        return -2147479552
+    if name == "B_PARTIAL_READ":
+        return -2147459056
+    if name == "B_PARTIAL_WRITE":
+        return -2147459055
+    if name == "B_PARTITION_TOO_SMALL":
+        return -2147459057
+    if name == "B_PERMISSION_DENIED":
+        return -2147483646
+    if name == "B_POSIX_ENOMEM":
+        return -2147454976
+    if name == "B_POSIX_ERROR_BASE":
+        return -2147454976
+    if name == "B_PRINT_ERROR_BASE":
+        return -2147446784
+    if name == "B_READ_ONLY_DEVICE":
+        return -2147459064
+    if name == "B_RESOURCE_NOT_FOUND":
+        return -2147467262
+    if name == "B_RESOURCE_UNAVAILABLE":
+        return -2147467261
+    if name == "B_RESULT_NOT_REPRESENTABLE":
+        return -2147454959
+    if name == "B_SERVER_NOT_FOUND":
+        return -2147467263
+    if name == "B_SHUTDOWN_CANCELLED":
+        return -2147475439
+    if name == "B_SHUTTING_DOWN":
+        return -2147475438
+    if name == "B_STORAGE_ERROR_BASE":
+        return -2147459072
+    if name == "B_STREAM_NOT_FOUND":
+        return -2147467264
+    if name == "B_SUBSCRIBER_NOT_ENTERED":
+        return -2147467259
+    if name == "B_TIMED_OUT":
+        return -2147483639
+    if name == "B_TOO_MANY_ARGS":
+        return -2147454975
+    if name == "B_TRANSLATION_BASE_ERROR":
+        return -2147465216
+    if name == "B_TRANSLATION_ERROR_BASE":
+        return -2147465216
+    if name == "B_UNKNOWN_EXECUTABLE":
+        return -2147478779
+    if name == "B_UNKNOWN_MIME_TYPE":
+        return -2147475449
+    if name == "B_UNSUPPORTED":
+        return -2147459058
+    if name == "B_WOULD_BLOCK":
+        return -2147483637
+    return B_ERROR

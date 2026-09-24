@@ -19,7 +19,7 @@ from haiku import BPoint, BRect
 from haiku import BView, fourcc, rgb
 from haiku import B_ANY_TYPE, B_DOCUMENT_WINDOW, B_INT32_TYPE
 from haiku import B_TITLED_WINDOW, B_WILL_DRAW
-from haiku import window_type
+from haiku import B_ERROR, B_NAME_NOT_FOUND, status_of, window_type
 from haiku.hooks import LooperMessageReceived
 
 
@@ -125,6 +125,14 @@ def main() raises:
             String(e).startswith("BMessage::FindInt32: "),
             String(e),
         )
+        checks.check(
+            "the error names its status, and status_of() reads it",
+            String(e).endswith("(B_NAME_NOT_FOUND)")
+            and status_of(e) == B_NAME_NOT_FOUND,
+            String(status_of(e)),
+        )
+    checks.check("status_of() an error that names none: B_ERROR",
+                 status_of(Error("plain")) == B_ERROR)
 
     message.MakeEmpty()
     checks.check("MakeEmpty", message.IsEmpty())

@@ -20,6 +20,8 @@ from std.memory.alloc import unsafe_alloc
 from std.os import abort
 from std.reflection import reflect
 
+from ._constants import _status_name
+
 comptime _Ptr = OpaquePointer[MutUntrackedOrigin]
 """A `void*` that is not NULL."""
 
@@ -86,11 +88,15 @@ def _string_from_char(character: c_char) -> String:
 
 def _check(status: Int32, what: StaticString) raises:
     """Raises when a method's `status_t` is not `B_OK`, with its
-    `strerror()` text."""
+    `strerror()` text and its name: `BMessage::FindInt32: Name not found
+    (B_NAME_NOT_FOUND)`, which `status_of()` reads back."""
     if status == 0:
         return
-    var text = external_call["strerror", Int](status)
-    raise Error(what, ": ", _string_from(text))
+    var text = _string_from(external_call["strerror", Int](status))
+    var name = _status_name(status)
+    if name:
+        raise Error(what, ": ", text, " (", name, ")")
+    raise Error(what, ": ", text, " (status ", status, ")")
 
 
 def _fn_ptr[F: TrivialRegisterPassable](func: F) -> _Ptr:

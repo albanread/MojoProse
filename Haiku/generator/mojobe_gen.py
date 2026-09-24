@@ -2422,6 +2422,49 @@ def mojo_int(value, kind):
     return t, value
 
 
+def status_names(bridge):
+    """`_status_name()` and `status_of()`: between a status_t and its name in
+    Errors.h. A value with several names gets the shortest."""
+    statuses = {}
+    for name, (value, kind) in bridge.constants.items():
+        if name in bridge.error_names and kind == -4 and value <= 0:
+            statuses[name] = value
+    by_value = {}
+    for name in sorted(statuses, key=lambda n: (len(n), n)):
+        by_value.setdefault(statuses[name], name)
+    out = ["", "",
+           "def _status_name(status: Int32) -> StaticString:",
+           '    """The name Errors.h gives a `status_t`; "" when it gives none."""']
+    for value, name in sorted(by_value.items()):
+        out.append("    if status == %d:" % value)
+        out.append('        return "%s"' % name)
+    out.append('    return ""')
+    out += ["", "",
+            "def status_of(error: Error) -> Int32:",
+            '    """The `status_t` an error the bridge raised stands for, as its',
+            "    message ends by naming it: `BMessage::FindInt32: Name not found",
+            "    (B_NAME_NOT_FOUND)`. B_ERROR for an error that names none.",
+            "",
+            "    The bridge raises plain `Error`s rather than a typed error, so that",
+            "    one `try` block can call it and anything else (design section",
+            '    18.4)."""',
+            "    var text = String(error)",
+            '    var start = text.rfind(" (")',
+            '    if start < 0 or not text.endswith(")"):',
+            "        return B_ERROR",
+            "    var name = String(text[byte = start + 2 : text.byte_length() - 1])",
+            '    if name.startswith("status "):',
+            "        try:",
+            "            return Int32(atol(name[byte=7:]))",
+            "        except:",
+            "            return B_ERROR"]
+    for name, value in sorted(statuses.items()):
+        out.append('    if name == "%s":' % name)
+        out.append("        return %d" % value)
+    out.append("    return B_ERROR")
+    return out
+
+
 def write_constants(bridge, names):
     out = [LICENSE_MOJO.rstrip("\n"),
            '"""The Haiku headers\' constants, as clang evaluates them for the Haiku',
@@ -2451,6 +2494,7 @@ def write_constants(bridge, names):
             out.append("comptime %s = %s(%s)" % (name, enum, literal))
         else:
             out.append("comptime %s: %s = %s" % (name, t, literal))
+    out.extend(status_names(bridge))
     (BRIDGE / "haiku" / "_constants.mojo").write_text("\n".join(out) + "\n")
     return sorted(bridge.typed_enums)
 
@@ -2521,6 +2565,7 @@ def write_init(emitter, bridge, constants):
             out.append("    %sRef," % cls)
     out.append("    LooperLock,")
     out.append(")")
+    out.append("from ._constants import status_of")
     out.append("from ._constants import (")
     out.extend("    %s," % n for n in constants)
     out.append(")")
@@ -2591,6 +2636,9 @@ def main():
     constants, layouts = probe(clang, includes, sorted(found), values)
 
     bridge = Bridge(model, config, constants, layouts)
+    # Errors.h defines its statuses as macros, which carry no file
+    errors_h = Path(arguments.sysroot) / "boot/system/develop/headers/os/support/Errors.h"
+    bridge.error_names = set(re.findall(r"#\s*define\s+(B_\w+)", errors_h.read_text()))
     emitter = Emitter(bridge)
     emitter.signatures = {}
     emitter.shadow_parts = {}

@@ -10,14 +10,14 @@ struct LooperLock(Movable):
     var _looper: Int
 
     def __init__(out self, messenger: BMessenger, timeout: Int64) raises:
+        var status = Int32(-1)
         self._looper = external_call["mojobe_BMessenger_LockedTarget", Int](
-            _address_of(messenger), timeout
+            _address_of(messenger), timeout, Pointer(to=status)
         )
         if self._looper == 0:
-            raise Error(
-                "BMessenger::Locked: the looper has gone, or the timeout"
-                " passed"
-            )
+            # B_BAD_VALUE when the looper has gone (no target), B_TIMED_OUT
+            # when the timeout passed first (BMessenger.cpp)
+            _check(status if status != 0 else -1, "BMessenger::Locked")
 
     def __enter__(ref self) -> BLooperRef[origin_of(self)]:
         """The locked looper, borrowed from the lock."""

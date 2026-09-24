@@ -2,9 +2,11 @@
 
 
 BLooper*
-mojobe_BMessenger_LockedTarget(const BMessenger* self, bigtime_t timeout)
+mojobe_BMessenger_LockedTarget(const BMessenger* self, bigtime_t timeout,
+	status_t* _status)
 {
-	if (self->LockTargetWithTimeout(timeout) != B_OK)
+	*_status = self->LockTargetWithTimeout(timeout);
+	if (*_status != B_OK)
 		return NULL;
 
 	// Locked, the target cannot go away until it is unlocked.

@@ -20,7 +20,9 @@ from std.ffi import external_call
 from std.time import sleep
 
 from haiku import BLooper, BLooperRef, BMessage, BMessageRef, BMessenger
-from haiku import B_INFINITE_TIMEOUT, B_QUIT_REQUESTED, fourcc
+from haiku import B_BAD_PORT_ID, B_BAD_VALUE, B_INFINITE_TIMEOUT
+from haiku import B_QUIT_REQUESTED
+from haiku import fourcc, status_of
 from haiku.hooks import LooperMessageReceived
 
 comptime MSG_TICK = fourcc("tick")
@@ -137,7 +139,8 @@ def main() raises:
         checks.check("SendMessage to a looper that has gone raises", False)
     except e:
         print("  raised:", e)
-        checks.check("SendMessage to a looper that has gone raises", True)
+        checks.check("SendMessage to a looper that has gone raises",
+                     status_of(e) == B_BAD_PORT_ID, String(status_of(e)))
 
     try:
         with messenger.Locked() as locked:
@@ -145,7 +148,8 @@ def main() raises:
         checks.check("Locked() of a looper that has gone raises", False)
     except e:
         print("  raised:", e)
-        checks.check("Locked() of a looper that has gone raises", True)
+        checks.check("Locked() of a looper that has gone raises B_BAD_VALUE",
+                     status_of(e) == B_BAD_VALUE, String(status_of(e)))
 
     var total = checks.passed + checks.failed
     if checks.failed:
