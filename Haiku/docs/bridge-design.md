@@ -404,11 +404,14 @@ Haiku's rules, stated once:
 4. Touching a looper's objects from another thread takes its lock:
 
    ```mojo
-   with window.Locked() as w:          # BLooper::Lock / Unlock
-       w.FindView("canvas").Invalidate()
+   with messenger.Locked() as looper:  # BMessenger::LockTarget / Unlock
+       looper.as_BWindow().FindView("canvas").Invalidate()
    ```
 
-   `Locked` fails, and raises, if the window has gone.
+   `Locked` fails, and raises, if the window has gone. *As built (§18.3):*
+   on a `BMessenger`, which a program keeps for a window it has handed over
+   (`BMessenger(window)` before `window^.Show()`); `looper` is borrowed
+   from the lock and cannot outlive the block.
 5. Mojo's own parallelism (`parallelize`) is fine inside a hook, for
    computation. Worker threads must not touch Be objects: they do not hold the
    lock.
@@ -528,8 +531,8 @@ annotations in `Haiku/generator/bridge.toml`. It runs in about 4 s.
 | ABI oracle | Mojo and the C++ compiler agree on every value type by value and by return, and on every hook signature |
 | value types | Mojo's `BRect.InsetBy` and friends match the C++ inline ones |
 | pixels | drawing through the bridge, read back through app_server, is exact — as `tools/blittest` does for app_server itself |
-| lifetime | a window quits while Mojo holds a messenger: sends fail cleanly, nothing is freed twice; a view's Mojo state is destroyed exactly once |
-| threads | hooks run on the right thread; `Locked` from another thread works, and fails cleanly after `Quit()` |
+| lifetime | a window quits while Mojo holds a messenger: sends fail cleanly, nothing is freed twice; a view's Mojo state is destroyed exactly once *(P2: `threads_check` for a looper; both checks also under the guarded heap)* |
+| threads | hooks run on the right thread; `Locked` from another thread works, and fails cleanly after `Quit()` *(P2: `threads_check`, 16/16)* |
 | re-entrancy | a hook that resizes its own view gets the base `FrameResized`, and says so in a debug build |
 | examples | Dots (§2), a menu and controls application, and Galaxigans Deluxe on the game pane |
 
@@ -731,4 +734,87 @@ by hand (it aborted without origins, §17.6); `Haiku/tests/must_not_compile.sh`
 'BViewRef[view.origin]' …"), returning a child reference past its parent
 ("… 'BViewRef[origin_of(parent)]' …"), and using a window's view after
 `window^.Show()` ("use of uninitialized value 'window'"); Dots 5/5.
+
+### 18.2 BHandler and BLooper; what a Mojo type stands behind
+
+`BHandler` (owned: a looper borrows its handlers, and `~BHandler` leaves its
+looper) and `BLooper` (self-owning: `Run` and `Quit` hand it over) are
+bridged, with shadows; their methods reach `BWindow` and `BApplication`
+through their traits. Three generator bugs showed on the way, each now with
+a test:
+
+- **A shadow constructor's state was any type.** With every parameter
+  defaulted, `BLooper("worker")` chose the shadow constructor, with the
+  string as its Mojo state and no name. State types must now implement the
+  class's marker trait (`ViewHooks`, `LooperHooks`, …), which each hook
+  trait inherits: a type standing behind a class implements one of its
+  hooks, and a name or a number is never taken for state.
+- **Owned upcasts across endings.** An owned `BWindow` could become an owned
+  `BHandler`, which Mojo deletes rather than quits. Owned values now convert
+  only between classes that end the same way.
+- **A hand-over method counted as inherited**, so `BApplication`'s own `Run`
+  was left out as an override of `BLooper::Run`.
+
+### 18.3 Value classes, BMessenger, and Locked
+
+A class whose copy constructor and destructor only copy bytes can be held in
+a Mojo value (kind `value`): C++ constructs it in the value's bytes by
+placement `new`, its methods take the value's address (`const` ones `self`,
+the rest `mut self`), `operator==` is `__eq__`. It crosses by address as a
+parameter, and as a result C++ constructs it in a value the caller provides
+— which also keeps 24-byte `BMessenger` clear of AAPCS64's rule for
+composites over 16 bytes. Its layout is clang's, asserted in each
+constructor.
+
+`with messenger.Locked() as looper:` locks the target's looper
+(`LockTargetWithTimeout`, then `Target`), from any thread, and unlocks it
+when the block ends, by error or not. `looper` is borrowed from the `with`
+statement's context manager: "cannot implicitly convert
+'BLooperRef[origin_of($CONTEXTMGR)]' …" when a program tries to keep it.
+References have checked downcasts to the bridged classes below them
+(`as_BWindow()`: `dynamic_cast`, NULL when it is not one).
+
+`Haiku/tests/threads_check.mojo`, 16/16: a Mojo type behind a running
+`BLooper` gets five messages from the main thread, in order, on the
+looper's thread, with the looper locked, and answers a synchronous
+`SendMessage`; under `Locked()` the main thread holds the lock and reads the
+Mojo state; after the block the looper answers again; after
+`B_QUIT_REQUESTED`, `SendMessage` raises `B_BAD_PORT_ID` and `Locked()`
+`B_BAD_VALUE` (`LockTargetWithTimeout` finds no target — measured; I had
+expected `B_BAD_PORT_ID`).
+
+### 18.4 Errors: plain, and naming their status
+
+A failed `status_t` raises `Error("BMessage::FindInt32: Name not found
+(B_NAME_NOT_FOUND)")`, and `status_of(e)` reads the status back (`B_ERROR`
+for an error that names none). The names are Errors.h's, which defines them
+as macros; the generator reads the names from the header and the values
+from its probe.
+
+Typed errors were measured and not taken. `raises HaikuError` works, and a
+typed error converts to `Error` through a plain `raises` function; but a
+`try` block's error type is fixed by its first raising call, so a block that
+called the bridge first could not then call anything raising `Error` —
+most Mojo code — "cannot call function that may raise 'Error' in context
+that supports an error type of 'HaikuError'".
+
+### 18.5 Exceptions, and adoptions that fail
+
+Every entry point that can throw catches (§7.1): `bad_alloc` becomes
+`B_NO_MEMORY`, NULL or a zero result; anything else is a bridge bug for
+`debugger()`, which names the entry point. Casts, field access and deletes
+cannot throw and are left bare. (The library grew from 367 to 527 KB.)
+
+An adopting method whose `bool` result says it did not take the object —
+`BMenu::AddItem` at an index out of range, after which the caller keeps the
+item — deletes it: Mojo had already given it up, so it leaked (§17.7).
+
+`bridge_check` (38/38) and `threads_check` also run under libroot's guarded
+heap, where a use after free or a double delete faults; both pass.
+`Haiku/tests/run.sh` builds and runs all of it on Prose.
+
+One fact for programs, measured on the way: a menu needs an app_server
+connection, so a `BApplication`, and Mojo ends a `BApplication` at its last
+use like any value. A program's last use of it should come after everything
+that needs it — `app.Run()` at the end of `main`, as Dots does.
 
