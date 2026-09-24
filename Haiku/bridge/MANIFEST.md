@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 1247 included, 354 overrides reached through a base, 320 left out.
+In all: 1307 included, 384 overrides reached through a base, 339 left out.
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 
@@ -1502,6 +1502,130 @@ In all: 1247 included, 354 overrides reached through a base, 320 left out.
 | `BScrollView::BScrollView(BMessage* archive)` | skipped | archive constructor |
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 resizingMode, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style |
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style |
+
+## BListView: 39 included, 27 overrides reached through a base, 12 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BListView::Instantiate(BMessage* data)` | skipped | static |
+| `bool BListView::AddList(BList* newItems)` | skipped | parameter newItems: BList * is not bridged |
+| `bool BListView::AddList(BList* newItems, int32 atIndex)` | skipped | parameter newItems: BList * is not bridged |
+| `bool BListView::RemoveItem(BListItem* item)` | skipped | leaves the item to no one: RemoveItem(index) gives it back |
+| `bool BListView::RemoveItems(int32 index, int32 count)` | skipped | leaves the items to no one: RemoveItem(index) gives each back |
+| `void BListView::MakeEmpty()` | skipped | leaves the items to no one: RemoveItem(index) gives each back |
+| `void BListView::DoForEach(bool (*)(BListItem*) func)` | skipped | parameter func: bool (*)(BListItem *) is not bridged |
+| `void BListView::DoForEach(bool (*)(BListItem*, void*) func, void* arg)` | skipped | parameter func: bool (*)(BListItem *, void *) is not bridged |
+| `const BListItem** BListView::Items() const` | skipped | result: const BListItem ** is not bridged |
+| `void BListView::SortItems(int (*)(const void*, const void*) cmp)` | skipped | parameter cmp: int (*)(const void *, const void *) is not bridged |
+| `status_t BListView::Perform(perform_code code, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `status_t BListView::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
+| `void BListView::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
+| `void BListView::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
+| `void BListView::DetachedFromWindow()` | skipped | reached through BView's DetachedFromWindow |
+| `void BListView::AllAttached()` | skipped | reached through BView's AllAttached |
+| `void BListView::AllDetached()` | skipped | reached through BView's AllDetached |
+| `void BListView::FrameResized(float newWidth, float newHeight)` | skipped | reached through BView's FrameResized |
+| `void BListView::FrameMoved(BPoint newPosition)` | skipped | reached through BView's FrameMoved |
+| `void BListView::TargetedByScrollView(BScrollView* view)` | skipped | reached through BView's TargetedByScrollView |
+| `void BListView::WindowActivated(bool active)` | skipped | reached through BView's WindowActivated |
+| `void BListView::MessageReceived(BMessage* message)` | skipped | reached through BHandler's MessageReceived |
+| `void BListView::KeyDown(const char* bytes, int32 numBytes)` | skipped | reached through BView's KeyDown |
+| `void BListView::MouseDown(BPoint where)` | skipped | reached through BView's MouseDown |
+| `void BListView::MouseUp(BPoint where)` | skipped | reached through BView's MouseUp |
+| `void BListView::MouseMoved(BPoint where, uint32 code, const BMessage* dragMessage)` | skipped | reached through BView's MouseMoved |
+| `void BListView::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
+| `void BListView::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
+| `BSize BListView::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BListView::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BListView::PreferredSize()` | skipped | reached through BView's PreferredSize |
+| `void BListView::MakeFocus(bool state)` | skipped | reached through BView's MakeFocus |
+| `void BListView::SetFont(const BFont* font, uint32 mask)` | skipped | reached through BView's SetFont |
+| `void BListView::ScrollTo(BPoint where)` | skipped | reached through BView's ScrollTo |
+| `void BListView::ScrollTo(float x, float y)` | skipped | reached through BView's ScrollTo |
+| `void BListView::ScrollTo(int32 index)` | included | mojobe_BListView_ScrollTo__int32 |
+| `bool BListView::AddItem(BListItem* item)` | included | mojobe_BListView_AddItem__BListItemP |
+| `bool BListView::AddItem(BListItem* item, int32 atIndex)` | included | mojobe_BListView_AddItem__BListItemP_int32 |
+| `BListItem* BListView::RemoveItem(int32 index)` | included | mojobe_BListView_RemoveItem |
+| `void BListView::SetSelectionMessage(BMessage* message)` | included | mojobe_BListView_SetSelectionMessage |
+| `void BListView::SetInvocationMessage(BMessage* message)` | included | mojobe_BListView_SetInvocationMessage |
+| `BMessage* BListView::SelectionMessage() const` | included | mojobe_BListView_SelectionMessage |
+| `uint32 BListView::SelectionCommand() const` | included | mojobe_BListView_SelectionCommand |
+| `BMessage* BListView::InvocationMessage() const` | included | mojobe_BListView_InvocationMessage |
+| `uint32 BListView::InvocationCommand() const` | included | mojobe_BListView_InvocationCommand |
+| `void BListView::SetListType(list_view_type type)` | included | mojobe_BListView_SetListType |
+| `list_view_type BListView::ListType() const` | included | mojobe_BListView_ListType |
+| `BListItem* BListView::ItemAt(int32 index) const` | included | mojobe_BListView_ItemAt |
+| `int32 BListView::IndexOf(BPoint point) const` | included | mojobe_BListView_IndexOf__BPoint |
+| `int32 BListView::IndexOf(BListItem* item) const` | included | mojobe_BListView_IndexOf__BListItemP |
+| `BListItem* BListView::FirstItem() const` | included | mojobe_BListView_FirstItem |
+| `BListItem* BListView::LastItem() const` | included | mojobe_BListView_LastItem |
+| `bool BListView::HasItem(BListItem* item) const` | included | mojobe_BListView_HasItem |
+| `int32 BListView::CountItems() const` | included | mojobe_BListView_CountItems |
+| `bool BListView::IsEmpty() const` | included | mojobe_BListView_IsEmpty |
+| `void BListView::InvalidateItem(int32 index)` | included | mojobe_BListView_InvalidateItem |
+| `void BListView::ScrollToSelection()` | included | mojobe_BListView_ScrollToSelection |
+| `void BListView::Select(int32 index, bool extend)` | included | mojobe_BListView_Select__int32_bool |
+| `void BListView::Select(int32 from, int32 to, bool extend)` | included | mojobe_BListView_Select__int32_int32_bool |
+| `bool BListView::IsItemSelected(int32 index) const` | included | mojobe_BListView_IsItemSelected |
+| `int32 BListView::CurrentSelection(int32 index) const` | included | mojobe_BListView_CurrentSelection |
+| `status_t BListView::Invoke(BMessage* message)` | skipped | reached through BInvoker's Invoke |
+| `void BListView::DeselectAll()` | included | mojobe_BListView_DeselectAll |
+| `void BListView::DeselectExcept(int32 exceptFrom, int32 exceptTo)` | included | mojobe_BListView_DeselectExcept |
+| `void BListView::Deselect(int32 index)` | included | mojobe_BListView_Deselect |
+| `void BListView::SelectionChanged()` | included | mojobe_BListView_SelectionChanged |
+| `bool BListView::InitiateDrag(BPoint where, int32 index, bool wasSelected)` | included | mojobe_BListView_InitiateDrag |
+| `bool BListView::SwapItems(int32 a, int32 b)` | included | mojobe_BListView_SwapItems |
+| `bool BListView::MoveItem(int32 from, int32 to)` | included | mojobe_BListView_MoveItem |
+| `bool BListView::ReplaceItem(int32 index, BListItem* item)` | included | mojobe_BListView_ReplaceItem |
+| `BRect BListView::ItemFrame(int32 index)` | included | mojobe_BListView_ItemFrame |
+| `BHandler* BListView::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
+| `status_t BListView::GetSupportedSuites(BMessage* data)` | skipped | reached through BHandler's GetSupportedSuites |
+| `BListView::BListView(BMessage* data)` | skipped | archive constructor |
+| `BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags)` | included | mojobe_BListView_new__BRect_charP_list_view_type_uint32_uint32 |
+| `BListView::BListView(const char* name, list_view_type type, uint32 flags)` | included | mojobe_BListView_new__charP_list_view_type_uint32 |
+| `BListView::BListView(list_view_type type)` | included | mojobe_BListView_new__list_view_type |
+| `hook void BListView::SelectionChanged()` | included | ListViewSelectionChanged |
+
+## BListItem: 18 included, 0 overrides reached through a base, 4 left out
+
+| C++ | | |
+|---|---|---|
+| `status_t BListItem::Perform(perform_code code, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
+| `status_t BListItem::Archive(BMessage* archive, bool deep) const` | included | mojobe_BListItem_Archive |
+| `float BListItem::Height() const` | included | mojobe_BListItem_Height |
+| `float BListItem::Width() const` | included | mojobe_BListItem_Width |
+| `bool BListItem::IsSelected() const` | included | mojobe_BListItem_IsSelected |
+| `void BListItem::Select()` | included | mojobe_BListItem_Select |
+| `void BListItem::Deselect()` | included | mojobe_BListItem_Deselect |
+| `void BListItem::SetEnabled(bool enabled)` | included | mojobe_BListItem_SetEnabled |
+| `bool BListItem::IsEnabled() const` | included | mojobe_BListItem_IsEnabled |
+| `void BListItem::SetHeight(float height)` | included | mojobe_BListItem_SetHeight |
+| `void BListItem::SetWidth(float width)` | included | mojobe_BListItem_SetWidth |
+| `void BListItem::DrawItem(BView* owner, BRect frame, bool complete)` | included | mojobe_BListItem_DrawItem |
+| `void BListItem::Update(BView* owner, const BFont* font)` | included | mojobe_BListItem_Update |
+| `bool BListItem::IsExpanded() const` | included | mojobe_BListItem_IsExpanded |
+| `void BListItem::SetExpanded(bool expanded)` | included | mojobe_BListItem_SetExpanded |
+| `uint32 BListItem::OutlineLevel() const` | included | mojobe_BListItem_OutlineLevel |
+| `void BListItem::SetOutlineLevel(uint32 level)` | included | mojobe_BListItem_SetOutlineLevel |
+| `status_t BArchivable::AllUnarchived(const BMessage* archive)` | included | mojobe_BListItem_AllUnarchived |
+| `status_t BArchivable::AllArchived(BMessage* archive) const` | included | mojobe_BListItem_AllArchived |
+| `BListItem::BListItem(uint32 outlineLevel, bool expanded)` | skipped | abstract: pure virtual methods |
+| `BListItem::BListItem(BMessage* archive)` | skipped | abstract: pure virtual methods |
+
+## BStringItem: 3 included, 3 overrides reached through a base, 3 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BStringItem::Instantiate(BMessage* archive)` | skipped | static |
+| `status_t BStringItem::Perform(perform_code code, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `status_t BStringItem::Archive(BMessage* archive, bool deep) const` | skipped | reached through BListItem's Archive |
+| `void BStringItem::DrawItem(BView* owner, BRect frame, bool complete)` | skipped | reached through BListItem's DrawItem |
+| `void BStringItem::SetText(const char* text)` | included | mojobe_BStringItem_SetText |
+| `const char* BStringItem::Text() const` | included | mojobe_BStringItem_Text |
+| `void BStringItem::Update(BView* owner, const BFont* font)` | skipped | reached through BListItem's Update |
+| `BStringItem::BStringItem(BMessage* archive)` | skipped | archive constructor |
+| `BStringItem::BStringItem(const char* text, uint32 outlineLevel, bool expanded)` | included | mojobe_BStringItem_new |
 
 ## BAlert: 17 included, 8 overrides reached through a base, 4 left out
 

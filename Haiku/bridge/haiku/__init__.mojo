@@ -10,7 +10,7 @@
 """The Haiku API for Mojo programs on Prose, through libmojobe
 (Haiku/docs/bridge-design.md). Link programs with `-lmojobe -lbe`.
 
-Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BAlert, BRegion, BBitmap, BScreen, BLayoutItem, BLayout, BGroupLayout, BGridLayout, BSpaceLayoutItem, BGroupView, BGridView, entry_ref, BEntry, BPath, BFilePanel, BGamePane, BChipPlayer, BMessageRunner.
+Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BListView, BListItem, BStringItem, BAlert, BRegion, BBitmap, BScreen, BLayoutItem, BLayout, BGroupLayout, BGridLayout, BSpaceLayoutItem, BGroupView, BGridView, entry_ref, BEntry, BPath, BFilePanel, BGamePane, BChipPlayer, BMessageRunner.
 Haiku/bridge/MANIFEST.md lists every method, and what is left out and why."""
 
 from ._core import fourcc
@@ -56,6 +56,12 @@ from ._api import (
     BStringViewRef,
     BScrollView,
     BScrollViewRef,
+    BListView,
+    BListViewRef,
+    BListItem,
+    BListItemRef,
+    BStringItem,
+    BStringItemRef,
     BAlert,
     BAlertRef,
     BRegion,
@@ -133,6 +139,7 @@ from ._constants import (
     hash_mark_location,
     image_type,
     join_mode,
+    list_view_type,
     menu_bar_border,
     menu_layout,
     mode_focus_follows_mouse,
@@ -881,6 +888,7 @@ from ._constants import (
     B_MOUSE_WHEEL_CHANGED,
     B_MOVE_IF_PARTIALLY_OFFSCREEN,
     B_MOVE_TARGET,
+    B_MULTIPLE_SELECTION_LIST,
     B_NAME_IN_USE,
     B_NAME_NOT_FOUND,
     B_NAME_SPECIFIER,
@@ -1110,6 +1118,7 @@ from ._constants import (
     B_SHUTTING_DOWN,
     B_SILENT_RELAUNCH,
     B_SIMPLE_DATA,
+    B_SINGLE_SELECTION_LIST,
     B_SIZE_TYPE,
     B_SIZE_T_TYPE,
     B_SIZE_UNLIMITED,

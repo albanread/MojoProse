@@ -275,6 +275,19 @@ mojobe_oracle_BView(const mojobe_BView_hooks* hooks, void* context)
 }
 
 int32
+mojobe_oracle_BListView(const mojobe_BListView_hooks* hooks, void* context)
+{
+	int32 failures = 0;
+	{
+		if (hooks->SelectionChanged == NULL)
+			failures++;
+		else
+			hooks->SelectionChanged(context, reinterpret_cast<BListView*>(0x10000));
+	}
+	return failures;
+}
+
+int32
 mojobe_oracle_BGamePane(const mojobe_BGamePane_hooks* hooks, void* context)
 {
 	int32 failures = 0;
@@ -816,6 +829,18 @@ mojobe_oracle_echo_join_mode(int8 before, join_mode value, double after,
 	*seenAfter = after;
 	join_mode result = value;
 	result = (join_mode)(result + 1);
+	return result;
+}
+
+list_view_type
+mojobe_oracle_echo_list_view_type(int8 before, list_view_type value, double after,
+	list_view_type* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	list_view_type result = value;
+	result = (list_view_type)(result + 1);
 	return result;
 }
 

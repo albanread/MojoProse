@@ -808,6 +808,9 @@ class Bridge:
         key = "%s::%s" % (method.owner, method.name) if method.owner else method.name
         if key in self.skips:
             raise Unbridged(self.skips[key])
+        overload = "%s(%s)" % (key, ", ".join(spelled(p.type) for p in method.params))
+        if overload in self.skips:  # one overload: "BListView::RemoveItem(BListItem*)"
+            raise Unbridged(self.skips[overload])
         if method.variadic:
             raise Unbridged("variadic")
         if not self.defined(method):
@@ -1895,7 +1898,14 @@ class Emitter:
             status = ["status_t* _status"] if check and check.endswith("()") else []
             # plain
             name = "mojobe_%s_new%s" % (cls, tag)
-            body = self.ctor_body(cls, cls, c_args, check, [])
+            if conf.get("owns_items"):
+                # always the bridge's subclass, whose destructor deletes the
+                # items: with no hooks when there is no Mojo state
+                body = self.ctor_body(cls, "Mojo" + cls, c_args, check,
+                                      ["&kNoHooks", "NULL"])
+                body.insert(0, "static const mojobe_%s_hooks kNoHooks = {};" % cls)
+            else:
+                body = self.ctor_body(cls, cls, c_args, check, [])
             self.add_entry("%s*" % cls, name, c_params + status, body, m.cxx())
             plain.append(self.mojo_ctor(cls, info, name, False))
             manifest.append((m.cxx(), "included", name))
@@ -2341,6 +2351,13 @@ class Emitter:
         for lines in owned_extra:
             out.append("")
             out.extend("    " + l for l in lines)
+        for d in descendants:
+            out.append("")
+            out.append("    def as_%s(ref self) -> %sRef[origin_of(self)]:" % (d, d))
+            out.append('        """This `%s` as a `%s`, borrowed: NULL if it is not one."""'
+                       % (cls, d))
+            out.append("        return %sRef[origin_of(self)](_ptr_from(external_call["
+                       '"mojobe_%s_to_%s", Int](_addr(self._ptr))))' % (d, cls, d))
         if hooks:
             out.append("")
             out.append("    def state[T: Movable & Deinitable](ref self) raises -> ref["
@@ -2682,10 +2699,19 @@ def write_c(emitter, bridge, includes):
             c.append("")
         c.append("\tvirtual ~Mojo%s()" % cls)
         c.append("\t{")
-        c.append("\t\t// While ~%s runs this is a %s, so no hook can reach the" % (cls, cls))
-        c.append("\t\t// Mojo state after it is gone.")
-        c.append("\t\tif (fHooks.destroy != NULL)")
-        c.append("\t\t\tfHooks.destroy(fContext);")
+        c.append("\t\t// From here on no hook reaches Mojo: what the destruction")
+        c.append("\t\t// does may call hooks (removing a selected item calls")
+        c.append("\t\t// SelectionChanged), and the Mojo state is about to go. While")
+        c.append("\t\t// ~%s runs this is a %s anyway." % (cls, cls))
+        c.append("\t\tmojobe_%s_hooks hooks = fHooks;" % cls)
+        c.append("\t\tfHooks = mojobe_%s_hooks();" % cls)
+        owned = bridge.classes[cls].get("owns_items")
+        if owned:
+            c.append("\t\t// %s does not delete its items; Mojo gave them to this one." % cls)
+            c.append("\t\tfor (int32 i = CountItems() - 1; i >= 0; i--)")
+            c.append("\t\t\tdelete RemoveItem(i);")
+        c.append("\t\tif (hooks.destroy != NULL)")
+        c.append("\t\t\thooks.destroy(fContext);")
         c.append("\t}")
         c.append("")
         c.extend(parts["shadow_methods"])

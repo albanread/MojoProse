@@ -272,10 +272,14 @@ public:
 
 	virtual ~MojoBHandler()
 	{
-		// While ~BHandler runs this is a BHandler, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BHandler runs this is a BHandler anyway.
+		mojobe_BHandler_hooks hooks = fHooks;
+		fHooks = mojobe_BHandler_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void MessageReceived(BMessage * message)
@@ -313,10 +317,14 @@ public:
 
 	virtual ~MojoBLooper()
 	{
-		// While ~BLooper runs this is a BLooper, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BLooper runs this is a BLooper anyway.
+		mojobe_BLooper_hooks hooks = fHooks;
+		fHooks = mojobe_BLooper_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void MessageReceived(BMessage * message)
@@ -363,10 +371,14 @@ public:
 
 	virtual ~MojoBApplication()
 	{
-		// While ~BApplication runs this is a BApplication, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BApplication runs this is a BApplication anyway.
+		mojobe_BApplication_hooks hooks = fHooks;
+		fHooks = mojobe_BApplication_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void ReadyToRun()
@@ -461,10 +473,14 @@ public:
 
 	virtual ~MojoBWindow()
 	{
-		// While ~BWindow runs this is a BWindow, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BWindow runs this is a BWindow anyway.
+		mojobe_BWindow_hooks hooks = fHooks;
+		fHooks = mojobe_BWindow_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void MessageReceived(BMessage * message)
@@ -599,10 +615,14 @@ public:
 
 	virtual ~MojoBView()
 	{
-		// While ~BView runs this is a BView, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BView runs this is a BView anyway.
+		mojobe_BView_hooks hooks = fHooks;
+		fHooks = mojobe_BView_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void Draw(BRect updateRect)
@@ -778,6 +798,70 @@ private:
 };
 
 
+class MojoBListView : public BListView {
+public:
+	MojoBListView(BRect frame, const char * name, list_view_type type, uint32 resizeMask, uint32 flags, const mojobe_BListView_hooks* hooks, void* context)
+		:
+		BListView(frame, name, type, resizeMask, flags),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	MojoBListView(const char * name, list_view_type type, uint32 flags, const mojobe_BListView_hooks* hooks, void* context)
+		:
+		BListView(name, type, flags),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	MojoBListView(list_view_type type, const mojobe_BListView_hooks* hooks, void* context)
+		:
+		BListView(type),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	virtual ~MojoBListView()
+	{
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BListView runs this is a BListView anyway.
+		mojobe_BListView_hooks hooks = fHooks;
+		fHooks = mojobe_BListView_hooks();
+		// BListView does not delete its items; Mojo gave them to this one.
+		for (int32 i = CountItems() - 1; i >= 0; i--)
+			delete RemoveItem(i);
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
+	}
+
+	virtual void SelectionChanged()
+	{
+		if (fHooks.SelectionChanged == NULL || !fDepth.Enter("SelectionChanged")) {
+			BListView::SelectionChanged();
+			return;
+		}
+		fHooks.SelectionChanged(fContext, this);
+		fDepth.Leave();
+	}
+
+	//! The Mojo state, if it is of the type tagged.
+	void* Context(uint64 type) const
+	{
+		return fHooks.type == type ? fContext : NULL;
+	}
+
+private:
+	mojobe_BListView_hooks	fHooks;
+	void*			fContext;
+	HookDepth		fDepth;
+};
+
+
 class MojoBGamePane : public BGamePane {
 public:
 	MojoBGamePane(BRect frame, const char * title, uint32 worldWidth, uint32 worldHeight, uint32 buffers, uint32 flags, size_t spriteBytes, const mojobe_BGamePane_hooks* hooks, void* context)
@@ -790,10 +874,14 @@ public:
 
 	virtual ~MojoBGamePane()
 	{
-		// While ~BGamePane runs this is a BGamePane, so no hook can reach the
-		// Mojo state after it is gone.
-		if (fHooks.destroy != NULL)
-			fHooks.destroy(fContext);
+		// From here on no hook reaches Mojo: what the destruction
+		// does may call hooks (removing a selected item calls
+		// SelectionChanged), and the Mojo state is about to go. While
+		// ~BGamePane runs this is a BGamePane anyway.
+		mojobe_BGamePane_hooks hooks = fHooks;
+		fHooks = mojobe_BGamePane_hooks();
+		if (hooks.destroy != NULL)
+			hooks.destroy(fContext);
 	}
 
 	virtual void MessageReceived(BMessage * message)
@@ -880,6 +968,14 @@ void*
 mojobe_MojoBView_context(BView* self, uint64 type)
 {
 	MojoBView* object = dynamic_cast<MojoBView*>(self);
+	return object != NULL ? object->Context(type) : NULL;
+}
+
+
+void*
+mojobe_MojoBListView_context(BListView* self, uint64 type)
+{
+	MojoBListView* object = dynamic_cast<MojoBListView*>(self);
 	return object != NULL ? object->Context(type) : NULL;
 }
 
@@ -2324,6 +2420,14 @@ BScrollView*
 mojobe_BHandler_to_BScrollView(BHandler* self)
 {
 	return dynamic_cast<BScrollView*>(self);
+}
+
+
+// BHandler* as BListView*, or NULL
+BListView*
+mojobe_BHandler_to_BListView(BHandler* self)
+{
+	return dynamic_cast<BListView*>(self);
 }
 
 
@@ -8568,6 +8672,14 @@ mojobe_BView_to_BScrollView(BView* self)
 }
 
 
+// BView* as BListView*, or NULL
+BListView*
+mojobe_BView_to_BListView(BView* self)
+{
+	return dynamic_cast<BListView*>(self);
+}
+
+
 // BView* as BGroupView*, or NULL
 BGroupView*
 mojobe_BView_to_BGroupView(BView* self)
@@ -13644,6 +13756,14 @@ mojobe_BInvoker_to_BSlider(BInvoker* self)
 }
 
 
+// BInvoker* as BListView*, or NULL
+BListView*
+mojobe_BInvoker_to_BListView(BInvoker* self)
+{
+	return dynamic_cast<BListView*>(self);
+}
+
+
 // BInvoker::BInvoker()
 BInvoker*
 mojobe_BInvoker_new__void()
@@ -16094,6 +16214,1050 @@ mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style(const char* a
 // ~BScrollView()
 void
 mojobe_BScrollView_delete(BScrollView* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BListView
+
+
+// void BListView::ScrollTo(int32 index)
+void
+mojobe_BListView_ScrollTo__int32(BListView* self, int32 a_index)
+{
+	try {
+		self->ScrollTo(a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ScrollTo__int32");
+	}
+}
+
+
+// bool BListView::AddItem(BListItem* item)
+bool
+mojobe_BListView_AddItem__BListItemP(BListView* self, BListItem* a_item)
+{
+	try {
+		bool result = self->AddItem(a_item);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_AddItem__BListItemP");
+	}
+	return {};
+}
+
+
+// bool BListView::AddItem(BListItem* item, int32 atIndex)
+bool
+mojobe_BListView_AddItem__BListItemP_int32(BListView* self,
+	BListItem* a_item,
+	int32 a_atIndex)
+{
+	try {
+		bool result = self->AddItem(a_item, a_atIndex);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_AddItem__BListItemP_int32");
+	}
+	return {};
+}
+
+
+// BListItem* BListView::RemoveItem(int32 index)
+BListItem*
+mojobe_BListView_RemoveItem(BListView* self, int32 a_index)
+{
+	try {
+		return self->RemoveItem(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_RemoveItem");
+	}
+	return {};
+}
+
+
+// void BListView::SetSelectionMessage(BMessage* message)
+void
+mojobe_BListView_SetSelectionMessage(BListView* self, BMessage* a_message)
+{
+	try {
+		self->SetSelectionMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SetSelectionMessage");
+	}
+}
+
+
+// void BListView::SetInvocationMessage(BMessage* message)
+void
+mojobe_BListView_SetInvocationMessage(BListView* self, BMessage* a_message)
+{
+	try {
+		self->SetInvocationMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SetInvocationMessage");
+	}
+}
+
+
+// BMessage* BListView::SelectionMessage() const
+BMessage*
+mojobe_BListView_SelectionMessage(BListView* self)
+{
+	try {
+		return self->SelectionMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SelectionMessage");
+	}
+	return {};
+}
+
+
+// uint32 BListView::SelectionCommand() const
+uint32
+mojobe_BListView_SelectionCommand(BListView* self)
+{
+	try {
+		return self->SelectionCommand();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SelectionCommand");
+	}
+	return {};
+}
+
+
+// BMessage* BListView::InvocationMessage() const
+BMessage*
+mojobe_BListView_InvocationMessage(BListView* self)
+{
+	try {
+		return self->InvocationMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_InvocationMessage");
+	}
+	return {};
+}
+
+
+// uint32 BListView::InvocationCommand() const
+uint32
+mojobe_BListView_InvocationCommand(BListView* self)
+{
+	try {
+		return self->InvocationCommand();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_InvocationCommand");
+	}
+	return {};
+}
+
+
+// void BListView::SetListType(list_view_type type)
+void
+mojobe_BListView_SetListType(BListView* self, list_view_type a_type)
+{
+	try {
+		self->SetListType(a_type);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SetListType");
+	}
+}
+
+
+// list_view_type BListView::ListType() const
+list_view_type
+mojobe_BListView_ListType(BListView* self)
+{
+	try {
+		return self->ListType();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ListType");
+	}
+	return {};
+}
+
+
+// BListItem* BListView::ItemAt(int32 index) const
+BListItem*
+mojobe_BListView_ItemAt(BListView* self, int32 a_index)
+{
+	try {
+		return self->ItemAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ItemAt");
+	}
+	return {};
+}
+
+
+// int32 BListView::IndexOf(BPoint point) const
+int32
+mojobe_BListView_IndexOf__BPoint(BListView* self, mojobe_BPoint a_point)
+{
+	try {
+		return self->IndexOf(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_IndexOf__BPoint");
+	}
+	return {};
+}
+
+
+// int32 BListView::IndexOf(BListItem* item) const
+int32
+mojobe_BListView_IndexOf__BListItemP(BListView* self, BListItem* a_item)
+{
+	try {
+		return self->IndexOf(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_IndexOf__BListItemP");
+	}
+	return {};
+}
+
+
+// BListItem* BListView::FirstItem() const
+BListItem*
+mojobe_BListView_FirstItem(BListView* self)
+{
+	try {
+		return self->FirstItem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_FirstItem");
+	}
+	return {};
+}
+
+
+// BListItem* BListView::LastItem() const
+BListItem*
+mojobe_BListView_LastItem(BListView* self)
+{
+	try {
+		return self->LastItem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_LastItem");
+	}
+	return {};
+}
+
+
+// bool BListView::HasItem(BListItem* item) const
+bool
+mojobe_BListView_HasItem(BListView* self, BListItem* a_item)
+{
+	try {
+		return self->HasItem(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_HasItem");
+	}
+	return {};
+}
+
+
+// int32 BListView::CountItems() const
+int32
+mojobe_BListView_CountItems(BListView* self)
+{
+	try {
+		return self->CountItems();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_CountItems");
+	}
+	return {};
+}
+
+
+// bool BListView::IsEmpty() const
+bool
+mojobe_BListView_IsEmpty(BListView* self)
+{
+	try {
+		return self->IsEmpty();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_IsEmpty");
+	}
+	return {};
+}
+
+
+// void BListView::InvalidateItem(int32 index)
+void
+mojobe_BListView_InvalidateItem(BListView* self, int32 a_index)
+{
+	try {
+		self->InvalidateItem(a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_InvalidateItem");
+	}
+}
+
+
+// void BListView::ScrollToSelection()
+void
+mojobe_BListView_ScrollToSelection(BListView* self)
+{
+	try {
+		self->ScrollToSelection();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ScrollToSelection");
+	}
+}
+
+
+// void BListView::Select(int32 index, bool extend)
+void
+mojobe_BListView_Select__int32_bool(BListView* self,
+	int32 a_index,
+	bool a_extend)
+{
+	try {
+		self->Select(a_index, a_extend);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_Select__int32_bool");
+	}
+}
+
+
+// void BListView::Select(int32 from, int32 to, bool extend)
+void
+mojobe_BListView_Select__int32_int32_bool(BListView* self,
+	int32 a_from,
+	int32 a_to,
+	bool a_extend)
+{
+	try {
+		self->Select(a_from, a_to, a_extend);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_Select__int32_int32_bool");
+	}
+}
+
+
+// bool BListView::IsItemSelected(int32 index) const
+bool
+mojobe_BListView_IsItemSelected(BListView* self, int32 a_index)
+{
+	try {
+		return self->IsItemSelected(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_IsItemSelected");
+	}
+	return {};
+}
+
+
+// int32 BListView::CurrentSelection(int32 index) const
+int32
+mojobe_BListView_CurrentSelection(BListView* self, int32 a_index)
+{
+	try {
+		return self->CurrentSelection(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_CurrentSelection");
+	}
+	return {};
+}
+
+
+// void BListView::DeselectAll()
+void
+mojobe_BListView_DeselectAll(BListView* self)
+{
+	try {
+		self->DeselectAll();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_DeselectAll");
+	}
+}
+
+
+// void BListView::DeselectExcept(int32 exceptFrom, int32 exceptTo)
+void
+mojobe_BListView_DeselectExcept(BListView* self,
+	int32 a_exceptFrom,
+	int32 a_exceptTo)
+{
+	try {
+		self->DeselectExcept(a_exceptFrom, a_exceptTo);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_DeselectExcept");
+	}
+}
+
+
+// void BListView::Deselect(int32 index)
+void
+mojobe_BListView_Deselect(BListView* self, int32 a_index)
+{
+	try {
+		self->Deselect(a_index);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_Deselect");
+	}
+}
+
+
+// void BListView::SelectionChanged()
+void
+mojobe_BListView_SelectionChanged(BListView* self)
+{
+	try {
+		self->SelectionChanged();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SelectionChanged");
+	}
+}
+
+
+// bool BListView::InitiateDrag(BPoint where, int32 index, bool wasSelected)
+bool
+mojobe_BListView_InitiateDrag(BListView* self,
+	mojobe_BPoint a_where,
+	int32 a_index,
+	bool a_wasSelected)
+{
+	try {
+		return self->InitiateDrag(mojobe_from_c(a_where), a_index, a_wasSelected);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_InitiateDrag");
+	}
+	return {};
+}
+
+
+// bool BListView::SwapItems(int32 a, int32 b)
+bool
+mojobe_BListView_SwapItems(BListView* self, int32 a_a, int32 a_b)
+{
+	try {
+		return self->SwapItems(a_a, a_b);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_SwapItems");
+	}
+	return {};
+}
+
+
+// bool BListView::MoveItem(int32 from, int32 to)
+bool
+mojobe_BListView_MoveItem(BListView* self, int32 a_from, int32 a_to)
+{
+	try {
+		return self->MoveItem(a_from, a_to);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_MoveItem");
+	}
+	return {};
+}
+
+
+// bool BListView::ReplaceItem(int32 index, BListItem* item)
+bool
+mojobe_BListView_ReplaceItem(BListView* self, int32 a_index, BListItem* a_item)
+{
+	try {
+		return self->ReplaceItem(a_index, a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ReplaceItem");
+	}
+	return {};
+}
+
+
+// BRect BListView::ItemFrame(int32 index)
+mojobe_BRect
+mojobe_BListView_ItemFrame(BListView* self, int32 a_index)
+{
+	try {
+		return mojobe_to_c(self->ItemFrame(a_index));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_ItemFrame");
+	}
+	return {};
+}
+
+
+// BListView* as BView*
+BView*
+mojobe_BListView_as_BView(BListView* self)
+{
+	return self;
+}
+
+
+// BListView* as BInvoker*
+BInvoker*
+mojobe_BListView_as_BInvoker(BListView* self)
+{
+	return self;
+}
+
+
+// BListView* as BHandler*
+BHandler*
+mojobe_BListView_as_BHandler(BListView* self)
+{
+	return self;
+}
+
+
+// BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags)
+BListView*
+mojobe_BListView_new__BRect_charP_list_view_type_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	list_view_type a_type,
+	uint32 a_resizeMask,
+	uint32 a_flags)
+{
+	try {
+		static const mojobe_BListView_hooks kNoHooks = {};
+		return new(std::nothrow) MojoBListView(mojobe_from_c(a_frame), a_name, a_type, a_resizeMask, a_flags, &kNoHooks, NULL);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_new__BRect_charP_list_view_type_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags), as a MojoBListView
+BListView*
+mojobe_MojoBListView_new__BRect_charP_list_view_type_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	list_view_type a_type,
+	uint32 a_resizeMask,
+	uint32 a_flags,
+	const mojobe_BListView_hooks* hooks,
+	void* context)
+{
+	try {
+		return new(std::nothrow) MojoBListView(mojobe_from_c(a_frame), a_name, a_type, a_resizeMask, a_flags, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBListView_new__BRect_charP_list_view_type_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BListView::BListView(const char* name, list_view_type type, uint32 flags)
+BListView*
+mojobe_BListView_new__charP_list_view_type_uint32(const char* a_name,
+	list_view_type a_type,
+	uint32 a_flags)
+{
+	try {
+		static const mojobe_BListView_hooks kNoHooks = {};
+		return new(std::nothrow) MojoBListView(a_name, a_type, a_flags, &kNoHooks, NULL);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_new__charP_list_view_type_uint32");
+	}
+	return {};
+}
+
+
+// BListView::BListView(const char* name, list_view_type type, uint32 flags), as a MojoBListView
+BListView*
+mojobe_MojoBListView_new__charP_list_view_type_uint32(const char* a_name,
+	list_view_type a_type,
+	uint32 a_flags,
+	const mojobe_BListView_hooks* hooks,
+	void* context)
+{
+	try {
+		return new(std::nothrow) MojoBListView(a_name, a_type, a_flags, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBListView_new__charP_list_view_type_uint32");
+	}
+	return {};
+}
+
+
+// BListView::BListView(list_view_type type)
+BListView*
+mojobe_BListView_new__list_view_type(list_view_type a_type)
+{
+	try {
+		static const mojobe_BListView_hooks kNoHooks = {};
+		return new(std::nothrow) MojoBListView(a_type, &kNoHooks, NULL);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_new__list_view_type");
+	}
+	return {};
+}
+
+
+// BListView::BListView(list_view_type type), as a MojoBListView
+BListView*
+mojobe_MojoBListView_new__list_view_type(list_view_type a_type,
+	const mojobe_BListView_hooks* hooks,
+	void* context)
+{
+	try {
+		return new(std::nothrow) MojoBListView(a_type, hooks, context);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_MojoBListView_new__list_view_type");
+	}
+	return {};
+}
+
+
+// ~BListView()
+void
+mojobe_BListView_delete(BListView* self)
+{
+	delete self;
+}
+
+
+// BListView's own SelectionChanged
+void
+mojobe_BListView_base_SelectionChanged(BListView* self)
+{
+	try {
+		self->BListView::SelectionChanged();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListView_base_SelectionChanged");
+	}
+}
+
+
+
+// #pragma mark - BListItem
+
+
+// status_t BListItem::Archive(BMessage* archive, bool deep) const
+status_t
+mojobe_BListItem_Archive(BListItem* self, BMessage* a_archive, bool a_deep)
+{
+	try {
+		return self->Archive(a_archive, a_deep);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Archive");
+	}
+	return B_ERROR;
+}
+
+
+// float BListItem::Height() const
+float
+mojobe_BListItem_Height(BListItem* self)
+{
+	try {
+		return self->Height();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Height");
+	}
+	return {};
+}
+
+
+// float BListItem::Width() const
+float
+mojobe_BListItem_Width(BListItem* self)
+{
+	try {
+		return self->Width();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Width");
+	}
+	return {};
+}
+
+
+// bool BListItem::IsSelected() const
+bool
+mojobe_BListItem_IsSelected(BListItem* self)
+{
+	try {
+		return self->IsSelected();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_IsSelected");
+	}
+	return {};
+}
+
+
+// void BListItem::Select()
+void
+mojobe_BListItem_Select(BListItem* self)
+{
+	try {
+		self->Select();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Select");
+	}
+}
+
+
+// void BListItem::Deselect()
+void
+mojobe_BListItem_Deselect(BListItem* self)
+{
+	try {
+		self->Deselect();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Deselect");
+	}
+}
+
+
+// void BListItem::SetEnabled(bool enabled)
+void
+mojobe_BListItem_SetEnabled(BListItem* self, bool a_enabled)
+{
+	try {
+		self->SetEnabled(a_enabled);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_SetEnabled");
+	}
+}
+
+
+// bool BListItem::IsEnabled() const
+bool
+mojobe_BListItem_IsEnabled(BListItem* self)
+{
+	try {
+		return self->IsEnabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_IsEnabled");
+	}
+	return {};
+}
+
+
+// void BListItem::SetHeight(float height)
+void
+mojobe_BListItem_SetHeight(BListItem* self, float a_height)
+{
+	try {
+		self->SetHeight(a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_SetHeight");
+	}
+}
+
+
+// void BListItem::SetWidth(float width)
+void
+mojobe_BListItem_SetWidth(BListItem* self, float a_width)
+{
+	try {
+		self->SetWidth(a_width);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_SetWidth");
+	}
+}
+
+
+// void BListItem::DrawItem(BView* owner, BRect frame, bool complete)
+void
+mojobe_BListItem_DrawItem(BListItem* self,
+	BView* a_owner,
+	mojobe_BRect a_frame,
+	bool a_complete)
+{
+	try {
+		self->DrawItem(a_owner, mojobe_from_c(a_frame), a_complete);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_DrawItem");
+	}
+}
+
+
+// void BListItem::Update(BView* owner, const BFont* font)
+void
+mojobe_BListItem_Update(BListItem* self, BView* a_owner, const BFont* a_font)
+{
+	try {
+		self->Update(a_owner, a_font);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_Update");
+	}
+}
+
+
+// bool BListItem::IsExpanded() const
+bool
+mojobe_BListItem_IsExpanded(BListItem* self)
+{
+	try {
+		return self->IsExpanded();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_IsExpanded");
+	}
+	return {};
+}
+
+
+// void BListItem::SetExpanded(bool expanded)
+void
+mojobe_BListItem_SetExpanded(BListItem* self, bool a_expanded)
+{
+	try {
+		self->SetExpanded(a_expanded);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_SetExpanded");
+	}
+}
+
+
+// uint32 BListItem::OutlineLevel() const
+uint32
+mojobe_BListItem_OutlineLevel(BListItem* self)
+{
+	try {
+		return self->OutlineLevel();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_OutlineLevel");
+	}
+	return {};
+}
+
+
+// void BListItem::SetOutlineLevel(uint32 level)
+void
+mojobe_BListItem_SetOutlineLevel(BListItem* self, uint32 a_level)
+{
+	try {
+		self->SetOutlineLevel(a_level);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_SetOutlineLevel");
+	}
+}
+
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t
+mojobe_BListItem_AllUnarchived(BListItem* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_AllUnarchived");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t
+mojobe_BListItem_AllArchived(BListItem* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BListItem_AllArchived");
+	}
+	return B_ERROR;
+}
+
+
+// BListItem* as BStringItem*, or NULL
+BStringItem*
+mojobe_BListItem_to_BStringItem(BListItem* self)
+{
+	return dynamic_cast<BStringItem*>(self);
+}
+
+
+// ~BListItem()
+void
+mojobe_BListItem_delete(BListItem* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BStringItem
+
+
+// void BStringItem::SetText(const char* text)
+void
+mojobe_BStringItem_SetText(BStringItem* self, const char* a_text)
+{
+	try {
+		self->SetText(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringItem_SetText");
+	}
+}
+
+
+// const char* BStringItem::Text() const
+const char*
+mojobe_BStringItem_Text(BStringItem* self)
+{
+	try {
+		return self->Text();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringItem_Text");
+	}
+	return {};
+}
+
+
+// BStringItem* as BListItem*
+BListItem*
+mojobe_BStringItem_as_BListItem(BStringItem* self)
+{
+	return self;
+}
+
+
+// BStringItem::BStringItem(const char* text, uint32 outlineLevel, bool expanded)
+BStringItem*
+mojobe_BStringItem_new(const char* a_text,
+	uint32 a_outlineLevel,
+	bool a_expanded)
+{
+	try {
+		return new(std::nothrow) BStringItem(a_text, a_outlineLevel, a_expanded);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringItem_new");
+	}
+	return {};
+}
+
+
+// ~BStringItem()
+void
+mojobe_BStringItem_delete(BStringItem* self)
 {
 	delete self;
 }

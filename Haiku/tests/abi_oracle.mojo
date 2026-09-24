@@ -22,7 +22,7 @@ Build on Prose with liboracle.so (Haiku/bridge/oracle/oracle.cpp):
 from std.ffi import external_call
 
 from haiku import *
-from haiku._api import _BHandler_hooks, _BLooper_hooks, _BApplication_hooks, _BWindow_hooks, _BView_hooks, _BGamePane_hooks
+from haiku._api import _BHandler_hooks, _BLooper_hooks, _BApplication_hooks, _BWindow_hooks, _BView_hooks, _BListView_hooks, _BGamePane_hooks
 from haiku._core import _addr, _destroy, _to_heap
 from haiku.hooks import *
 
@@ -410,6 +410,29 @@ struct OracleBView(
         self.expect("Pulse view", _addr(view._ptr) == 0x10F00)
 
 
+struct OracleBListView(ListViewSelectionChanged, Movable):
+    """Every hook of `BListView`, checking its arguments."""
+
+    var calls: Int
+    var wrong: Int
+
+    def __init__(out self):
+        self.calls = 0
+        self.wrong = 0
+
+    def expect(mut self, what: String, ok: Bool):
+        if not ok:
+            self.wrong += 1
+            print("  wrong:", what)
+
+    def SelectionChanged(mut self, listView: BListViewRef[_]):
+        self.calls += 1
+        self.expect(
+            "SelectionChanged listView",
+            _addr(listView._ptr) == 0x10000,
+        )
+
+
 struct OracleBGamePane(
     GamePaneMessageReceived,
     GamePaneQuitRequested,
@@ -529,6 +552,22 @@ def main() raises:
         seenBView.calls == 16 and failuresBView == 0)
     checks.check("BView: every argument as C++ passed it", seenBView.wrong == 0)
     _destroy[OracleBView](contextBView)
+
+    # BListView's hooks, through its generated table and trampolines
+    var hooksBListView = _BListView_hooks[OracleBListView]()
+    var contextBListView = _to_heap(OracleBListView())
+    var failuresBListView = external_call["mojobe_oracle_BListView", Int32](
+        Pointer(to=hooksBListView),
+        contextBListView,
+    )
+    ref seenBListView = contextBListView.unsafe_bitcast[OracleBListView]()[]
+    checks.check("BListView: all 1 hooks called, their results seen by C++",
+        seenBListView.calls == 1 and failuresBListView == 0)
+    checks.check(
+        "BListView: every argument as C++ passed it",
+        seenBListView.wrong == 0,
+    )
+    _destroy[OracleBListView](contextBListView)
 
     # BGamePane's hooks, through its generated table and trampolines
     var hooksBGamePane = _BGamePane_hooks[OracleBGamePane]()
@@ -1136,6 +1175,22 @@ def main() raises:
     checks.check("join_mode by value, between an int8 and a double",
         seenjoin_mode == givenjoin_mode and beforejoin_mode == -5 and afterjoin_mode == 2.75)
     checks.check("join_mode returned", resultjoin_mode == join_mode(4))
+
+    var givenlist_view_type = list_view_type(3)
+    var seenlist_view_type = givenlist_view_type
+    var beforelist_view_type = Int8(0)
+    var afterlist_view_type = Float64(0)
+    var resultlist_view_type = external_call["mojobe_oracle_echo_list_view_type", list_view_type](
+        Int8(-5), givenlist_view_type, Float64(2.75), Pointer(
+            to=seenlist_view_type,
+        ),
+        Pointer(to=beforelist_view_type), Pointer(to=afterlist_view_type))
+    checks.check("list_view_type by value, between an int8 and a double",
+        seenlist_view_type == givenlist_view_type and beforelist_view_type == -5 and afterlist_view_type == 2.75)
+    checks.check(
+        "list_view_type returned",
+        resultlist_view_type == list_view_type(4),
+    )
 
     var givenmenu_bar_border = menu_bar_border(3)
     var seenmenu_bar_border = givenmenu_bar_border

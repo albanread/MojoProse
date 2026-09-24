@@ -36,6 +36,8 @@
 #include <Slider.h>
 #include <StringView.h>
 #include <ScrollView.h>
+#include <ListView.h>
+#include <ListItem.h>
 #include <Alert.h>
 #include <MessageRunner.h>
 #include <Font.h>
@@ -250,6 +252,15 @@ struct mojobe_BView_hooks {
 			float newHeight);
 	void	(*WindowActivated)(void* context, BView* self, bool active);
 	void	(*Pulse)(void* context, BView* self);
+};
+
+
+/*!	A Mojo type's hooks for a `BListView`: a NULL slot is a hook the type
+	does not implement. The type tag names the Mojo type. */
+struct mojobe_BListView_hooks {
+	uint64	type;
+	void	(*destroy)(void* context);
+	void	(*SelectionChanged)(void* context, BListView* self);
 };
 
 
@@ -648,6 +659,9 @@ BStringView* mojobe_BHandler_to_BStringView(BHandler* self);
 
 // BHandler* as BScrollView*, or NULL
 BScrollView* mojobe_BHandler_to_BScrollView(BHandler* self);
+
+// BHandler* as BListView*, or NULL
+BListView* mojobe_BHandler_to_BListView(BHandler* self);
 
 // BHandler* as BAlert*, or NULL
 BAlert* mojobe_BHandler_to_BAlert(BHandler* self);
@@ -2262,6 +2276,9 @@ BStringView* mojobe_BView_to_BStringView(BView* self);
 // BView* as BScrollView*, or NULL
 BScrollView* mojobe_BView_to_BScrollView(BView* self);
 
+// BView* as BListView*, or NULL
+BListView* mojobe_BView_to_BListView(BView* self);
+
 // BView* as BGroupView*, or NULL
 BGroupView* mojobe_BView_to_BGroupView(BView* self);
 
@@ -3704,6 +3721,9 @@ BTextControl* mojobe_BInvoker_to_BTextControl(BInvoker* self);
 // BInvoker* as BSlider*, or NULL
 BSlider* mojobe_BInvoker_to_BSlider(BInvoker* self);
 
+// BInvoker* as BListView*, or NULL
+BListView* mojobe_BInvoker_to_BListView(BInvoker* self);
+
 // BInvoker::BInvoker()
 BInvoker* mojobe_BInvoker_new__void();
 
@@ -4405,6 +4425,273 @@ BScrollView* mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style(
 
 // ~BScrollView()
 void mojobe_BScrollView_delete(BScrollView* self);
+
+
+// #pragma mark - BListView
+
+
+// void BListView::ScrollTo(int32 index)
+void mojobe_BListView_ScrollTo__int32(BListView* self, int32 a_index);
+
+// bool BListView::AddItem(BListItem* item)
+bool mojobe_BListView_AddItem__BListItemP(BListView* self, BListItem* a_item);
+
+// bool BListView::AddItem(BListItem* item, int32 atIndex)
+bool mojobe_BListView_AddItem__BListItemP_int32(BListView* self,
+	BListItem* a_item,
+	int32 a_atIndex);
+
+// BListItem* BListView::RemoveItem(int32 index)
+BListItem* mojobe_BListView_RemoveItem(BListView* self, int32 a_index);
+
+// void BListView::SetSelectionMessage(BMessage* message)
+void mojobe_BListView_SetSelectionMessage(BListView* self, BMessage* a_message);
+
+// void BListView::SetInvocationMessage(BMessage* message)
+void mojobe_BListView_SetInvocationMessage(BListView* self,
+	BMessage* a_message);
+
+// BMessage* BListView::SelectionMessage() const
+BMessage* mojobe_BListView_SelectionMessage(BListView* self);
+
+// uint32 BListView::SelectionCommand() const
+uint32 mojobe_BListView_SelectionCommand(BListView* self);
+
+// BMessage* BListView::InvocationMessage() const
+BMessage* mojobe_BListView_InvocationMessage(BListView* self);
+
+// uint32 BListView::InvocationCommand() const
+uint32 mojobe_BListView_InvocationCommand(BListView* self);
+
+// void BListView::SetListType(list_view_type type)
+void mojobe_BListView_SetListType(BListView* self, list_view_type a_type);
+
+// list_view_type BListView::ListType() const
+list_view_type mojobe_BListView_ListType(BListView* self);
+
+// BListItem* BListView::ItemAt(int32 index) const
+BListItem* mojobe_BListView_ItemAt(BListView* self, int32 a_index);
+
+// int32 BListView::IndexOf(BPoint point) const
+int32 mojobe_BListView_IndexOf__BPoint(BListView* self, mojobe_BPoint a_point);
+
+// int32 BListView::IndexOf(BListItem* item) const
+int32 mojobe_BListView_IndexOf__BListItemP(BListView* self, BListItem* a_item);
+
+// BListItem* BListView::FirstItem() const
+BListItem* mojobe_BListView_FirstItem(BListView* self);
+
+// BListItem* BListView::LastItem() const
+BListItem* mojobe_BListView_LastItem(BListView* self);
+
+// bool BListView::HasItem(BListItem* item) const
+bool mojobe_BListView_HasItem(BListView* self, BListItem* a_item);
+
+// int32 BListView::CountItems() const
+int32 mojobe_BListView_CountItems(BListView* self);
+
+// bool BListView::IsEmpty() const
+bool mojobe_BListView_IsEmpty(BListView* self);
+
+// void BListView::InvalidateItem(int32 index)
+void mojobe_BListView_InvalidateItem(BListView* self, int32 a_index);
+
+// void BListView::ScrollToSelection()
+void mojobe_BListView_ScrollToSelection(BListView* self);
+
+// void BListView::Select(int32 index, bool extend)
+void mojobe_BListView_Select__int32_bool(BListView* self,
+	int32 a_index,
+	bool a_extend);
+
+// void BListView::Select(int32 from, int32 to, bool extend)
+void mojobe_BListView_Select__int32_int32_bool(BListView* self,
+	int32 a_from,
+	int32 a_to,
+	bool a_extend);
+
+// bool BListView::IsItemSelected(int32 index) const
+bool mojobe_BListView_IsItemSelected(BListView* self, int32 a_index);
+
+// int32 BListView::CurrentSelection(int32 index) const
+int32 mojobe_BListView_CurrentSelection(BListView* self, int32 a_index);
+
+// void BListView::DeselectAll()
+void mojobe_BListView_DeselectAll(BListView* self);
+
+// void BListView::DeselectExcept(int32 exceptFrom, int32 exceptTo)
+void mojobe_BListView_DeselectExcept(BListView* self,
+	int32 a_exceptFrom,
+	int32 a_exceptTo);
+
+// void BListView::Deselect(int32 index)
+void mojobe_BListView_Deselect(BListView* self, int32 a_index);
+
+// void BListView::SelectionChanged()
+void mojobe_BListView_SelectionChanged(BListView* self);
+
+// bool BListView::InitiateDrag(BPoint where, int32 index, bool wasSelected)
+bool mojobe_BListView_InitiateDrag(BListView* self,
+	mojobe_BPoint a_where,
+	int32 a_index,
+	bool a_wasSelected);
+
+// bool BListView::SwapItems(int32 a, int32 b)
+bool mojobe_BListView_SwapItems(BListView* self, int32 a_a, int32 a_b);
+
+// bool BListView::MoveItem(int32 from, int32 to)
+bool mojobe_BListView_MoveItem(BListView* self, int32 a_from, int32 a_to);
+
+// bool BListView::ReplaceItem(int32 index, BListItem* item)
+bool mojobe_BListView_ReplaceItem(BListView* self,
+	int32 a_index,
+	BListItem* a_item);
+
+// BRect BListView::ItemFrame(int32 index)
+mojobe_BRect mojobe_BListView_ItemFrame(BListView* self, int32 a_index);
+
+// BListView* as BView*
+BView* mojobe_BListView_as_BView(BListView* self);
+
+// BListView* as BInvoker*
+BInvoker* mojobe_BListView_as_BInvoker(BListView* self);
+
+// BListView* as BHandler*
+BHandler* mojobe_BListView_as_BHandler(BListView* self);
+
+// BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags)
+BListView* mojobe_BListView_new__BRect_charP_list_view_type_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	list_view_type a_type,
+	uint32 a_resizeMask,
+	uint32 a_flags);
+
+// BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags), as a MojoBListView
+BListView* mojobe_MojoBListView_new__BRect_charP_list_view_type_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	list_view_type a_type,
+	uint32 a_resizeMask,
+	uint32 a_flags,
+	const mojobe_BListView_hooks* hooks,
+	void* context);
+
+// BListView::BListView(const char* name, list_view_type type, uint32 flags)
+BListView* mojobe_BListView_new__charP_list_view_type_uint32(const char* a_name,
+	list_view_type a_type,
+	uint32 a_flags);
+
+// BListView::BListView(const char* name, list_view_type type, uint32 flags), as a MojoBListView
+BListView* mojobe_MojoBListView_new__charP_list_view_type_uint32(const char* a_name,
+	list_view_type a_type,
+	uint32 a_flags,
+	const mojobe_BListView_hooks* hooks,
+	void* context);
+
+// BListView::BListView(list_view_type type)
+BListView* mojobe_BListView_new__list_view_type(list_view_type a_type);
+
+// BListView::BListView(list_view_type type), as a MojoBListView
+BListView* mojobe_MojoBListView_new__list_view_type(list_view_type a_type,
+	const mojobe_BListView_hooks* hooks,
+	void* context);
+
+// ~BListView()
+void mojobe_BListView_delete(BListView* self);
+
+// BListView's own SelectionChanged
+void mojobe_BListView_base_SelectionChanged(BListView* self);
+
+
+// #pragma mark - BListItem
+
+
+// status_t BListItem::Archive(BMessage* archive, bool deep) const
+status_t mojobe_BListItem_Archive(BListItem* self,
+	BMessage* a_archive,
+	bool a_deep);
+
+// float BListItem::Height() const
+float mojobe_BListItem_Height(BListItem* self);
+
+// float BListItem::Width() const
+float mojobe_BListItem_Width(BListItem* self);
+
+// bool BListItem::IsSelected() const
+bool mojobe_BListItem_IsSelected(BListItem* self);
+
+// void BListItem::Select()
+void mojobe_BListItem_Select(BListItem* self);
+
+// void BListItem::Deselect()
+void mojobe_BListItem_Deselect(BListItem* self);
+
+// void BListItem::SetEnabled(bool enabled)
+void mojobe_BListItem_SetEnabled(BListItem* self, bool a_enabled);
+
+// bool BListItem::IsEnabled() const
+bool mojobe_BListItem_IsEnabled(BListItem* self);
+
+// void BListItem::SetHeight(float height)
+void mojobe_BListItem_SetHeight(BListItem* self, float a_height);
+
+// void BListItem::SetWidth(float width)
+void mojobe_BListItem_SetWidth(BListItem* self, float a_width);
+
+// void BListItem::DrawItem(BView* owner, BRect frame, bool complete)
+void mojobe_BListItem_DrawItem(BListItem* self,
+	BView* a_owner,
+	mojobe_BRect a_frame,
+	bool a_complete);
+
+// void BListItem::Update(BView* owner, const BFont* font)
+void mojobe_BListItem_Update(BListItem* self,
+	BView* a_owner,
+	const BFont* a_font);
+
+// bool BListItem::IsExpanded() const
+bool mojobe_BListItem_IsExpanded(BListItem* self);
+
+// void BListItem::SetExpanded(bool expanded)
+void mojobe_BListItem_SetExpanded(BListItem* self, bool a_expanded);
+
+// uint32 BListItem::OutlineLevel() const
+uint32 mojobe_BListItem_OutlineLevel(BListItem* self);
+
+// void BListItem::SetOutlineLevel(uint32 level)
+void mojobe_BListItem_SetOutlineLevel(BListItem* self, uint32 a_level);
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t mojobe_BListItem_AllUnarchived(BListItem* self, BMessage* a_archive);
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t mojobe_BListItem_AllArchived(BListItem* self, BMessage* a_archive);
+
+// BListItem* as BStringItem*, or NULL
+BStringItem* mojobe_BListItem_to_BStringItem(BListItem* self);
+
+// ~BListItem()
+void mojobe_BListItem_delete(BListItem* self);
+
+
+// #pragma mark - BStringItem
+
+
+// void BStringItem::SetText(const char* text)
+void mojobe_BStringItem_SetText(BStringItem* self, const char* a_text);
+
+// const char* BStringItem::Text() const
+const char* mojobe_BStringItem_Text(BStringItem* self);
+
+// BStringItem* as BListItem*
+BListItem* mojobe_BStringItem_as_BListItem(BStringItem* self);
+
+// BStringItem::BStringItem(const char* text, uint32 outlineLevel, bool expanded)
+BStringItem* mojobe_BStringItem_new(const char* a_text,
+	uint32 a_outlineLevel,
+	bool a_expanded);
+
+// ~BStringItem()
+void mojobe_BStringItem_delete(BStringItem* self);
 
 
 // #pragma mark - BAlert
@@ -5981,6 +6268,7 @@ void* mojobe_MojoBLooper_context(BLooper* self, uint64 type);
 void* mojobe_MojoBApplication_context(BApplication* self, uint64 type);
 void* mojobe_MojoBWindow_context(BWindow* self, uint64 type);
 void* mojobe_MojoBView_context(BView* self, uint64 type);
+void* mojobe_MojoBListView_context(BListView* self, uint64 type);
 void* mojobe_MojoBGamePane_context(BGamePane* self, uint64 type);
 
 

@@ -25,6 +25,8 @@ headers = [
 	"Slider.h",
 	"StringView.h",
 	"ScrollView.h",
+	"ListView.h",
+	"ListItem.h",
 	"Alert.h",
 	"MessageRunner.h",
 	"Font.h",
@@ -56,6 +58,7 @@ functions = ["find_directory"]
 
 # Static methods that make an object the caller owns.
 factories = [
+	"BListView::RemoveItem",  # the item the list gave up, now the caller's
 	"BSpaceLayoutItem::CreateGlue",
 	"BSpaceLayoutItem::CreateHorizontalStrut",
 	"BSpaceLayoutItem::CreateVerticalStrut",
@@ -184,6 +187,21 @@ kind = "owned"
 [classes.BScrollView]
 kind = "owned"
 
+# A BListView does not delete its items. The bridge's does: every list view
+# Mojo makes is the bridge's subclass (owns_items), which deletes the items
+# left in it; AddItem adopts, and RemoveItem(index) gives the item back.
+[classes.BListView]
+kind = "owned"
+shadow = true
+hooks = ["SelectionChanged"]
+owns_items = true
+
+[classes.BListItem]
+kind = "owned"
+
+[classes.BStringItem]
+kind = "owned"
+
 [classes.BAlert]
 kind = "self-owning"
 hands_over = ["Go"]        # runs it, and it quits (deletes itself)
@@ -270,6 +288,7 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 "BSlider::BSlider" = ["message"]
 "BSlider::SetModificationMessage" = ["message"]
 "BScrollView::BScrollView" = ["target"]
+"BListView::AddItem" = ["item"]
 "BBitmap::AddChild" = ["view"]     # ~BBitmap deletes its window, and its views
 "BView::SetLayout" = ["layout"]
 "BWindow::SetLayout" = ["layout"]
@@ -297,6 +316,9 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 "BMenuItem::Perform" = "binary compatibility hook"
 "BWindow::Run" = "Show() runs the window"
 "BHandler::SetLooper" = "the looper sets it"
+"BListView::RemoveItem(BListItem*)" = "leaves the item to no one: RemoveItem(index) gives it back"
+"BListView::RemoveItems" = "leaves the items to no one: RemoveItem(index) gives each back"
+"BListView::MakeEmpty" = "leaves the items to no one: RemoveItem(index) gives each back"
 
 # Pointer parameters that are read and written (the rest are results).
 [inout]

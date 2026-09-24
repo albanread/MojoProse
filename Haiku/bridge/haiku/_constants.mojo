@@ -343,6 +343,16 @@ struct join_mode(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct list_view_type(Equatable, TrivialRegisterPassable):
+    """`enum list_view_type`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct menu_bar_border(Equatable, TrivialRegisterPassable):
     """`enum menu_bar_border`."""
 
@@ -1279,6 +1289,7 @@ comptime B_MOUSE_UP: UInt32 = 0x5f4d5550
 comptime B_MOUSE_WHEEL_CHANGED: UInt32 = 0x5f4d5743
 comptime B_MOVE_IF_PARTIALLY_OFFSCREEN: UInt32 = 2
 comptime B_MOVE_TARGET = command_code(0x44444d56)
+comptime B_MULTIPLE_SELECTION_LIST = list_view_type(1)
 comptime B_NAME_IN_USE: Int32 = -2147483640
 comptime B_NAME_NOT_FOUND: Int32 = -2147483641
 comptime B_NAME_SPECIFIER: UInt32 = 6
@@ -1508,6 +1519,7 @@ comptime B_SHUTDOWN_CANCELLED: Int32 = -2147475439
 comptime B_SHUTTING_DOWN: Int32 = -2147475438
 comptime B_SILENT_RELAUNCH = command_code(0x4152454c)
 comptime B_SIMPLE_DATA = command_code(0x44415441)
+comptime B_SINGLE_SELECTION_LIST = list_view_type(0)
 comptime B_SIZE_TYPE: UInt32 = 0x53495a45
 comptime B_SIZE_T_TYPE: UInt32 = 0x53495a54
 comptime B_SIZE_UNLIMITED: Float32 = 1073741824.0

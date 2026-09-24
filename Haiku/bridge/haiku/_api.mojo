@@ -72,6 +72,7 @@ from ._constants import (
     hash_mark_location,
     image_type,
     join_mode,
+    list_view_type,
     menu_bar_border,
     menu_layout,
     mode_focus_follows_mouse,
@@ -116,6 +117,7 @@ from ._constants import (
     B_NORMAL_PRIORITY,
     B_NO_TINT,
     B_OPEN_PANEL,
+    B_SINGLE_SELECTION_LIST,
     B_TILE_BITMAP,
     B_TRACK_WHOLE_RECT,
     B_USE_DEFAULT_SPACING,
@@ -1082,6 +1084,11 @@ struct BHandlerRef[origin: ImmOrigin](
         self = BHandlerRef[Self.origin](other._as_BHandler())
 
     @implicit
+    def __init__(out self, other: BListViewRef[Self.origin]):
+        """A `BListView` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
     def __init__(out self, other: BAlertRef[Self.origin]):
         """A `BAlert` is a `BHandler`."""
         self = BHandlerRef[Self.origin](other._as_BHandler())
@@ -1256,6 +1263,16 @@ struct BHandlerRef[origin: ImmOrigin](
         return BScrollViewRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BHandler_to_BScrollView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BHandler` as a `BListView`: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BListView", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -1472,6 +1489,13 @@ struct BHandler(Movable, _BHandlerMethods):
         )
 
     @implicit
+    def __init__(out self, var other: BListView):
+        """A `BListView` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BListView_as_BHandler", Int](other^._adopt()),
+        )
+
+    @implicit
     def __init__(out self, var other: BGroupView):
         """A `BGroupView` is a `BHandler`: this one takes it over."""
         self._ptr = _ptr_from(
@@ -1500,6 +1524,206 @@ struct BHandler(Movable, _BHandlerMethods):
 
     def _as_BHandler(self) -> _NPtr:
         return self._ptr
+
+    def as_BLooper(ref self) -> BLooperRef[origin_of(self)]:
+        """This `BHandler` as a `BLooper`, borrowed: NULL if it is not one."""
+        return BLooperRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BLooper", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BApplication(ref self) -> BApplicationRef[origin_of(self)]:
+        """This `BHandler` as a `BApplication`, borrowed: NULL if it is not one."""
+        return BApplicationRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BApplication", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BWindow(ref self) -> BWindowRef[origin_of(self)]:
+        """This `BHandler` as a `BWindow`, borrowed: NULL if it is not one."""
+        return BWindowRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BWindow", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BView(ref self) -> BViewRef[origin_of(self)]:
+        """This `BHandler` as a `BView`, borrowed: NULL if it is not one."""
+        return BViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BMenu(ref self) -> BMenuRef[origin_of(self)]:
+        """This `BHandler` as a `BMenu`, borrowed: NULL if it is not one."""
+        return BMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BMenu", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BHandler` as a `BMenuBar`, borrowed: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BPopUpMenu(ref self) -> BPopUpMenuRef[origin_of(self)]:
+        """This `BHandler` as a `BPopUpMenu`, borrowed: NULL if it is not one."""
+        return BPopUpMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BPopUpMenu", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BControl(ref self) -> BControlRef[origin_of(self)]:
+        """This `BHandler` as a `BControl`, borrowed: NULL if it is not one."""
+        return BControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BButton(ref self) -> BButtonRef[origin_of(self)]:
+        """This `BHandler` as a `BButton`, borrowed: NULL if it is not one."""
+        return BButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BCheckBox(ref self) -> BCheckBoxRef[origin_of(self)]:
+        """This `BHandler` as a `BCheckBox`, borrowed: NULL if it is not one."""
+        return BCheckBoxRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BCheckBox", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BRadioButton(ref self) -> BRadioButtonRef[origin_of(self)]:
+        """This `BHandler` as a `BRadioButton`, borrowed: NULL if it is not one."""
+        return BRadioButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BRadioButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BTextControl(ref self) -> BTextControlRef[origin_of(self)]:
+        """This `BHandler` as a `BTextControl`, borrowed: NULL if it is not one."""
+        return BTextControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BTextControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSlider(ref self) -> BSliderRef[origin_of(self)]:
+        """This `BHandler` as a `BSlider`, borrowed: NULL if it is not one."""
+        return BSliderRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BSlider", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BStringView(ref self) -> BStringViewRef[origin_of(self)]:
+        """This `BHandler` as a `BStringView`, borrowed: NULL if it is not one."""
+        return BStringViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BStringView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BScrollView(ref self) -> BScrollViewRef[origin_of(self)]:
+        """This `BHandler` as a `BScrollView`, borrowed: NULL if it is not one."""
+        return BScrollViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BScrollView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BHandler` as a `BListView`, borrowed: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BListView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BAlert(ref self) -> BAlertRef[origin_of(self)]:
+        """This `BHandler` as a `BAlert`, borrowed: NULL if it is not one."""
+        return BAlertRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupView(ref self) -> BGroupViewRef[origin_of(self)]:
+        """This `BHandler` as a `BGroupView`, borrowed: NULL if it is not one."""
+        return BGroupViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGroupView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridView(ref self) -> BGridViewRef[origin_of(self)]:
+        """This `BHandler` as a `BGridView`, borrowed: NULL if it is not one."""
+        return BGridViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGridView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BHandler` as a `BGamePane`, borrowed: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGamePane", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
 
     def state[T: Movable & Deinitable](
         ref self,
@@ -2072,6 +2296,46 @@ struct BLooper(Movable, _BLooperMethods):
         """`void BLooper::Quit()`."""
         external_call["mojobe_BLooper_Quit", NoneType](
             _nonnull(self._ptr, "BLooper::Quit"),
+        )
+
+    def as_BApplication(ref self) -> BApplicationRef[origin_of(self)]:
+        """This `BLooper` as a `BApplication`, borrowed: NULL if it is not one."""
+        return BApplicationRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BApplication", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BWindow(ref self) -> BWindowRef[origin_of(self)]:
+        """This `BLooper` as a `BWindow`, borrowed: NULL if it is not one."""
+        return BWindowRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BWindow", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BAlert(ref self) -> BAlertRef[origin_of(self)]:
+        """This `BLooper` as a `BAlert`, borrowed: NULL if it is not one."""
+        return BAlertRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BLooper` as a `BGamePane`, borrowed: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLooper_to_BGamePane", Int](
+                    _addr(self._ptr),
+                ),
+            ),
         )
 
     def state[T: Movable & Deinitable](
@@ -3817,6 +4081,26 @@ struct BWindow(Movable, _BWindowMethods):
         """`void BWindow::Show()`."""
         external_call["mojobe_BWindow_Show", NoneType](
             _nonnull(self._ptr, "BWindow::Show"),
+        )
+
+    def as_BAlert(ref self) -> BAlertRef[origin_of(self)]:
+        """This `BWindow` as a `BAlert`, borrowed: NULL if it is not one."""
+        return BAlertRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BWindow_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGamePane(ref self) -> BGamePaneRef[origin_of(self)]:
+        """This `BWindow` as a `BGamePane`, borrowed: NULL if it is not one."""
+        return BGamePaneRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BWindow_to_BGamePane", Int](
+                    _addr(self._ptr),
+                ),
+            ),
         )
 
     def state[T: Movable & Deinitable](
@@ -6140,6 +6424,11 @@ struct BViewRef[origin: ImmOrigin](
         self = BViewRef[Self.origin](other._as_BView())
 
     @implicit
+    def __init__(out self, other: BListViewRef[Self.origin]):
+        """A `BListView` is a `BView`."""
+        self = BViewRef[Self.origin](other._as_BView())
+
+    @implicit
     def __init__(out self, other: BGroupViewRef[Self.origin]):
         """A `BGroupView` is a `BView`."""
         self = BViewRef[Self.origin](other._as_BView())
@@ -6258,6 +6547,16 @@ struct BViewRef[origin: ImmOrigin](
         return BScrollViewRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BView_to_BScrollView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BView` as a `BListView`: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BListView", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -6594,6 +6893,13 @@ struct BView(Movable, _BViewMethods):
         )
 
     @implicit
+    def __init__(out self, var other: BListView):
+        """A `BListView` is a `BView`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BListView_as_BView", Int](other^._adopt()),
+        )
+
+    @implicit
     def __init__(out self, var other: BGroupView):
         """A `BGroupView` is a `BView`: this one takes it over."""
         self._ptr = _ptr_from(
@@ -6624,6 +6930,140 @@ struct BView(Movable, _BViewMethods):
     def _as_BHandler(self) -> _NPtr:
         return _ptr_from(
             external_call["mojobe_BView_as_BHandler", Int](_addr(self._ptr)),
+        )
+
+    def as_BMenu(ref self) -> BMenuRef[origin_of(self)]:
+        """This `BView` as a `BMenu`, borrowed: NULL if it is not one."""
+        return BMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BMenu", Int](_addr(self._ptr)),
+            ),
+        )
+
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BView` as a `BMenuBar`, borrowed: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BPopUpMenu(ref self) -> BPopUpMenuRef[origin_of(self)]:
+        """This `BView` as a `BPopUpMenu`, borrowed: NULL if it is not one."""
+        return BPopUpMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BPopUpMenu", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BControl(ref self) -> BControlRef[origin_of(self)]:
+        """This `BView` as a `BControl`, borrowed: NULL if it is not one."""
+        return BControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BButton(ref self) -> BButtonRef[origin_of(self)]:
+        """This `BView` as a `BButton`, borrowed: NULL if it is not one."""
+        return BButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BButton", Int](_addr(self._ptr)),
+            ),
+        )
+
+    def as_BCheckBox(ref self) -> BCheckBoxRef[origin_of(self)]:
+        """This `BView` as a `BCheckBox`, borrowed: NULL if it is not one."""
+        return BCheckBoxRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BCheckBox", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BRadioButton(ref self) -> BRadioButtonRef[origin_of(self)]:
+        """This `BView` as a `BRadioButton`, borrowed: NULL if it is not one."""
+        return BRadioButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BRadioButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BTextControl(ref self) -> BTextControlRef[origin_of(self)]:
+        """This `BView` as a `BTextControl`, borrowed: NULL if it is not one."""
+        return BTextControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BTextControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSlider(ref self) -> BSliderRef[origin_of(self)]:
+        """This `BView` as a `BSlider`, borrowed: NULL if it is not one."""
+        return BSliderRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BSlider", Int](_addr(self._ptr)),
+            ),
+        )
+
+    def as_BStringView(ref self) -> BStringViewRef[origin_of(self)]:
+        """This `BView` as a `BStringView`, borrowed: NULL if it is not one."""
+        return BStringViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BStringView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BScrollView(ref self) -> BScrollViewRef[origin_of(self)]:
+        """This `BView` as a `BScrollView`, borrowed: NULL if it is not one."""
+        return BScrollViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BScrollView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BView` as a `BListView`, borrowed: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BListView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupView(ref self) -> BGroupViewRef[origin_of(self)]:
+        """This `BView` as a `BGroupView`, borrowed: NULL if it is not one."""
+        return BGroupViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BGroupView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridView(ref self) -> BGridViewRef[origin_of(self)]:
+        """This `BView` as a `BGridView`, borrowed: NULL if it is not one."""
+        return BGridViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BGridView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
         )
 
     def state[T: Movable & Deinitable](
@@ -10127,6 +10567,26 @@ struct BMenu(Movable, _BMenuMethods):
             external_call["mojobe_BMenu_as_BHandler", Int](_addr(self._ptr)),
         )
 
+    def as_BMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
+        """This `BMenu` as a `BMenuBar`, borrowed: NULL if it is not one."""
+        return BMenuBarRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BMenu_to_BMenuBar", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BPopUpMenu(ref self) -> BPopUpMenuRef[origin_of(self)]:
+        """This `BMenu` as a `BPopUpMenu`, borrowed: NULL if it is not one."""
+        return BPopUpMenuRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BMenu_to_BPopUpMenu", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
 # ========================================================================== #
 # BMenuBar
 # ========================================================================== #
@@ -10481,6 +10941,11 @@ struct BInvokerRef[origin: ImmOrigin](
         """A `BSlider` is a `BInvoker`."""
         self = BInvokerRef[Self.origin](other._as_BInvoker())
 
+    @implicit
+    def __init__(out self, other: BListViewRef[Self.origin]):
+        """A `BListView` is a `BInvoker`."""
+        self = BInvokerRef[Self.origin](other._as_BInvoker())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -10556,6 +11021,16 @@ struct BInvokerRef[origin: ImmOrigin](
         return BSliderRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BInvoker_to_BSlider", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BInvoker` as a `BListView`: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BListView", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -10656,6 +11131,13 @@ struct BInvoker(Movable, _BInvokerMethods):
             external_call["mojobe_BSlider_as_BInvoker", Int](other^._adopt()),
         )
 
+    @implicit
+    def __init__(out self, var other: BListView):
+        """A `BListView` is a `BInvoker`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BListView_as_BInvoker", Int](other^._adopt()),
+        )
+
     def __deinit__(deinit self):
         external_call["mojobe_BInvoker_delete", NoneType](_addr(self._ptr))
 
@@ -10669,6 +11151,86 @@ struct BInvoker(Movable, _BInvokerMethods):
 
     def _as_BInvoker(self) -> _NPtr:
         return self._ptr
+
+    def as_BMenuItem(ref self) -> BMenuItemRef[origin_of(self)]:
+        """This `BInvoker` as a `BMenuItem`, borrowed: NULL if it is not one."""
+        return BMenuItemRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BMenuItem", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BControl(ref self) -> BControlRef[origin_of(self)]:
+        """This `BInvoker` as a `BControl`, borrowed: NULL if it is not one."""
+        return BControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BButton(ref self) -> BButtonRef[origin_of(self)]:
+        """This `BInvoker` as a `BButton`, borrowed: NULL if it is not one."""
+        return BButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BCheckBox(ref self) -> BCheckBoxRef[origin_of(self)]:
+        """This `BInvoker` as a `BCheckBox`, borrowed: NULL if it is not one."""
+        return BCheckBoxRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BCheckBox", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BRadioButton(ref self) -> BRadioButtonRef[origin_of(self)]:
+        """This `BInvoker` as a `BRadioButton`, borrowed: NULL if it is not one."""
+        return BRadioButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BRadioButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BTextControl(ref self) -> BTextControlRef[origin_of(self)]:
+        """This `BInvoker` as a `BTextControl`, borrowed: NULL if it is not one."""
+        return BTextControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BTextControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSlider(ref self) -> BSliderRef[origin_of(self)]:
+        """This `BInvoker` as a `BSlider`, borrowed: NULL if it is not one."""
+        return BSliderRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BSlider", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BListView(ref self) -> BListViewRef[origin_of(self)]:
+        """This `BInvoker` as a `BListView`, borrowed: NULL if it is not one."""
+        return BListViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BInvoker_to_BListView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
 
 # ========================================================================== #
 # BMenuItem
@@ -11401,6 +11963,56 @@ struct BControl(Movable, _BControlMethods):
     def _as_BHandler(self) -> _NPtr:
         return _ptr_from(
             external_call["mojobe_BControl_as_BHandler", Int](_addr(self._ptr)),
+        )
+
+    def as_BButton(ref self) -> BButtonRef[origin_of(self)]:
+        """This `BControl` as a `BButton`, borrowed: NULL if it is not one."""
+        return BButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BControl_to_BButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BCheckBox(ref self) -> BCheckBoxRef[origin_of(self)]:
+        """This `BControl` as a `BCheckBox`, borrowed: NULL if it is not one."""
+        return BCheckBoxRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BControl_to_BCheckBox", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BRadioButton(ref self) -> BRadioButtonRef[origin_of(self)]:
+        """This `BControl` as a `BRadioButton`, borrowed: NULL if it is not one."""
+        return BRadioButtonRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BControl_to_BRadioButton", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BTextControl(ref self) -> BTextControlRef[origin_of(self)]:
+        """This `BControl` as a `BTextControl`, borrowed: NULL if it is not one."""
+        return BTextControlRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BControl_to_BTextControl", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSlider(ref self) -> BSliderRef[origin_of(self)]:
+        """This `BControl` as a `BSlider`, borrowed: NULL if it is not one."""
+        return BSliderRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BControl_to_BSlider", Int](
+                    _addr(self._ptr),
+                ),
+            ),
         )
 
 # ========================================================================== #
@@ -13140,6 +13752,948 @@ struct BScrollView(Movable, _BScrollViewMethods):
         )
 
 # ========================================================================== #
+# BListView
+# ========================================================================== #
+
+
+trait _AsBListView(_AsBView, _AsBInvoker):
+    """Has a `BListView*` for libmojobe."""
+
+    def _as_BListView(self) -> _NPtr:
+        ...
+
+
+trait _BListViewMethods(_AsBListView, _BViewMethods, _BInvokerMethods):
+    """`BListView`'s methods, for its references and the values Mojo owns."""
+
+    def ScrollTo(self, index: Int32):
+        """`void BListView::ScrollTo(int32 index)`."""
+        external_call["mojobe_BListView_ScrollTo__int32", NoneType](
+            _nonnull(self._as_BListView(), "BListView::ScrollTo"),
+            index,
+        )
+
+    def AddItem(self, var item: BListItem) -> Bool:
+        """`bool BListView::AddItem(BListItem* item)`."""
+        var _result = external_call["mojobe_BListView_AddItem__BListItemP", Bool](
+            _nonnull(self._as_BListView(), "BListView::AddItem"),
+            item^._adopt(),
+        )
+        return _result
+
+    def AddItem(self, var item: BListItem, atIndex: Int32) -> Bool:
+        """`bool BListView::AddItem(BListItem* item, int32 atIndex)`."""
+        var _result = external_call["mojobe_BListView_AddItem__BListItemP_int32", Bool](
+            _nonnull(self._as_BListView(), "BListView::AddItem"),
+            item^._adopt(),
+            atIndex,
+        )
+        return _result
+
+    def RemoveItem(self, index: Int32) raises -> BListItem:
+        """`BListItem* BListView::RemoveItem(int32 index)`."""
+        var _result = external_call["mojobe_BListView_RemoveItem", Int](
+            _nonnull(self._as_BListView(), "BListView::RemoveItem"),
+            index,
+        )
+        if _result == 0:
+            raise Error("BListView::RemoveItem made nothing")
+        return BListItem(_adopting=_result)
+
+    def SetSelectionMessage(self, message: Some[_AsBMessage]):
+        """`void BListView::SetSelectionMessage(BMessage* message)`."""
+        external_call["mojobe_BListView_SetSelectionMessage", NoneType](
+            _nonnull(self._as_BListView(), "BListView::SetSelectionMessage"),
+            _addr(message._as_BMessage()),
+        )
+
+    def SetInvocationMessage(self, message: Some[_AsBMessage]):
+        """`void BListView::SetInvocationMessage(BMessage* message)`."""
+        external_call["mojobe_BListView_SetInvocationMessage", NoneType](
+            _nonnull(self._as_BListView(), "BListView::SetInvocationMessage"),
+            _addr(message._as_BMessage()),
+        )
+
+    def SelectionMessage(ref self) -> BMessageRef[origin_of(self)]:
+        """`BMessage* BListView::SelectionMessage() const`."""
+        var _result = external_call["mojobe_BListView_SelectionMessage", Int](
+            _nonnull(self._as_BListView(), "BListView::SelectionMessage"),
+        )
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
+
+    def SelectionCommand(self) -> UInt32:
+        """`uint32 BListView::SelectionCommand() const`."""
+        var _result = external_call["mojobe_BListView_SelectionCommand", UInt32](
+            _nonnull(self._as_BListView(), "BListView::SelectionCommand"),
+        )
+        return _result
+
+    def InvocationMessage(ref self) -> BMessageRef[origin_of(self)]:
+        """`BMessage* BListView::InvocationMessage() const`."""
+        var _result = external_call["mojobe_BListView_InvocationMessage", Int](
+            _nonnull(self._as_BListView(), "BListView::InvocationMessage"),
+        )
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
+
+    def InvocationCommand(self) -> UInt32:
+        """`uint32 BListView::InvocationCommand() const`."""
+        var _result = external_call["mojobe_BListView_InvocationCommand", UInt32](
+            _nonnull(self._as_BListView(), "BListView::InvocationCommand"),
+        )
+        return _result
+
+    def SetListType(self, type: list_view_type):
+        """`void BListView::SetListType(list_view_type type)`."""
+        external_call["mojobe_BListView_SetListType", NoneType](
+            _nonnull(self._as_BListView(), "BListView::SetListType"),
+            type,
+        )
+
+    def ListType(self) -> list_view_type:
+        """`list_view_type BListView::ListType() const`."""
+        var _result = external_call["mojobe_BListView_ListType", list_view_type](
+            _nonnull(self._as_BListView(), "BListView::ListType"),
+        )
+        return _result
+
+    def ItemAt(ref self, index: Int32) -> BListItemRef[origin_of(self)]:
+        """`BListItem* BListView::ItemAt(int32 index) const`."""
+        var _result = external_call["mojobe_BListView_ItemAt", Int](
+            _nonnull(self._as_BListView(), "BListView::ItemAt"),
+            index,
+        )
+        return BListItemRef[origin_of(self)](_ptr_from(_result))
+
+    def IndexOf(self, point: BPoint) -> Int32:
+        """`int32 BListView::IndexOf(BPoint point) const`."""
+        var _result = external_call["mojobe_BListView_IndexOf__BPoint", Int32](
+            _nonnull(self._as_BListView(), "BListView::IndexOf"),
+            point,
+        )
+        return _result
+
+    def IndexOf(self, item: Some[_AsBListItem]) -> Int32:
+        """`int32 BListView::IndexOf(BListItem* item) const`."""
+        var _result = external_call["mojobe_BListView_IndexOf__BListItemP", Int32](
+            _nonnull(self._as_BListView(), "BListView::IndexOf"),
+            _addr(item._as_BListItem()),
+        )
+        return _result
+
+    def FirstItem(ref self) -> BListItemRef[origin_of(self)]:
+        """`BListItem* BListView::FirstItem() const`."""
+        var _result = external_call["mojobe_BListView_FirstItem", Int](
+            _nonnull(self._as_BListView(), "BListView::FirstItem"),
+        )
+        return BListItemRef[origin_of(self)](_ptr_from(_result))
+
+    def LastItem(ref self) -> BListItemRef[origin_of(self)]:
+        """`BListItem* BListView::LastItem() const`."""
+        var _result = external_call["mojobe_BListView_LastItem", Int](
+            _nonnull(self._as_BListView(), "BListView::LastItem"),
+        )
+        return BListItemRef[origin_of(self)](_ptr_from(_result))
+
+    def HasItem(self, item: Some[_AsBListItem]) -> Bool:
+        """`bool BListView::HasItem(BListItem* item) const`."""
+        var _result = external_call["mojobe_BListView_HasItem", Bool](
+            _nonnull(self._as_BListView(), "BListView::HasItem"),
+            _addr(item._as_BListItem()),
+        )
+        return _result
+
+    def CountItems(self) -> Int32:
+        """`int32 BListView::CountItems() const`."""
+        var _result = external_call["mojobe_BListView_CountItems", Int32](
+            _nonnull(self._as_BListView(), "BListView::CountItems"),
+        )
+        return _result
+
+    def IsEmpty(self) -> Bool:
+        """`bool BListView::IsEmpty() const`."""
+        var _result = external_call["mojobe_BListView_IsEmpty", Bool](
+            _nonnull(self._as_BListView(), "BListView::IsEmpty"),
+        )
+        return _result
+
+    def InvalidateItem(self, index: Int32):
+        """`void BListView::InvalidateItem(int32 index)`."""
+        external_call["mojobe_BListView_InvalidateItem", NoneType](
+            _nonnull(self._as_BListView(), "BListView::InvalidateItem"),
+            index,
+        )
+
+    def ScrollToSelection(self):
+        """`void BListView::ScrollToSelection()`."""
+        external_call["mojobe_BListView_ScrollToSelection", NoneType](
+            _nonnull(self._as_BListView(), "BListView::ScrollToSelection"),
+        )
+
+    def Select(self, index: Int32, extend: Bool = False):
+        """`void BListView::Select(int32 index, bool extend)`."""
+        external_call["mojobe_BListView_Select__int32_bool", NoneType](
+            _nonnull(self._as_BListView(), "BListView::Select"),
+            index,
+            extend,
+        )
+
+    def Select(self, from_: Int32, to: Int32, extend: Bool = False):
+        """`void BListView::Select(int32 from, int32 to, bool extend)`."""
+        external_call["mojobe_BListView_Select__int32_int32_bool", NoneType](
+            _nonnull(self._as_BListView(), "BListView::Select"),
+            from_,
+            to,
+            extend,
+        )
+
+    def IsItemSelected(self, index: Int32) -> Bool:
+        """`bool BListView::IsItemSelected(int32 index) const`."""
+        var _result = external_call["mojobe_BListView_IsItemSelected", Bool](
+            _nonnull(self._as_BListView(), "BListView::IsItemSelected"),
+            index,
+        )
+        return _result
+
+    def CurrentSelection(self, index: Int32 = 0) -> Int32:
+        """`int32 BListView::CurrentSelection(int32 index) const`."""
+        var _result = external_call["mojobe_BListView_CurrentSelection", Int32](
+            _nonnull(self._as_BListView(), "BListView::CurrentSelection"),
+            index,
+        )
+        return _result
+
+    def DeselectAll(self):
+        """`void BListView::DeselectAll()`."""
+        external_call["mojobe_BListView_DeselectAll", NoneType](
+            _nonnull(self._as_BListView(), "BListView::DeselectAll"),
+        )
+
+    def DeselectExcept(self, exceptFrom: Int32, exceptTo: Int32):
+        """`void BListView::DeselectExcept(int32 exceptFrom, int32 exceptTo)`."""
+        external_call["mojobe_BListView_DeselectExcept", NoneType](
+            _nonnull(self._as_BListView(), "BListView::DeselectExcept"),
+            exceptFrom,
+            exceptTo,
+        )
+
+    def Deselect(self, index: Int32):
+        """`void BListView::Deselect(int32 index)`."""
+        external_call["mojobe_BListView_Deselect", NoneType](
+            _nonnull(self._as_BListView(), "BListView::Deselect"),
+            index,
+        )
+
+    def SelectionChanged(self):
+        """`void BListView::SelectionChanged()`."""
+        external_call["mojobe_BListView_SelectionChanged", NoneType](
+            _nonnull(self._as_BListView(), "BListView::SelectionChanged"),
+        )
+
+    def InitiateDrag(
+        self,
+        where: BPoint,
+        index: Int32,
+        wasSelected: Bool,
+    ) -> Bool:
+        """`bool BListView::InitiateDrag(BPoint where, int32 index, bool wasSelected)`."""
+        var _result = external_call["mojobe_BListView_InitiateDrag", Bool](
+            _nonnull(self._as_BListView(), "BListView::InitiateDrag"),
+            where,
+            index,
+            wasSelected,
+        )
+        return _result
+
+    def SwapItems(self, a: Int32, b: Int32) -> Bool:
+        """`bool BListView::SwapItems(int32 a, int32 b)`."""
+        var _result = external_call["mojobe_BListView_SwapItems", Bool](
+            _nonnull(self._as_BListView(), "BListView::SwapItems"),
+            a,
+            b,
+        )
+        return _result
+
+    def MoveItem(self, from_: Int32, to: Int32) -> Bool:
+        """`bool BListView::MoveItem(int32 from, int32 to)`."""
+        var _result = external_call["mojobe_BListView_MoveItem", Bool](
+            _nonnull(self._as_BListView(), "BListView::MoveItem"),
+            from_,
+            to,
+        )
+        return _result
+
+    def ReplaceItem(self, index: Int32, item: Some[_AsBListItem]) -> Bool:
+        """`bool BListView::ReplaceItem(int32 index, BListItem* item)`."""
+        var _result = external_call["mojobe_BListView_ReplaceItem", Bool](
+            _nonnull(self._as_BListView(), "BListView::ReplaceItem"),
+            index,
+            _addr(item._as_BListItem()),
+        )
+        return _result
+
+    def ItemFrame(self, index: Int32) -> BRect:
+        """`BRect BListView::ItemFrame(int32 index)`."""
+        var _result = external_call["mojobe_BListView_ItemFrame", BRect](
+            _nonnull(self._as_BListView(), "BListView::ItemFrame"),
+            index,
+        )
+        return _result
+
+
+struct BListViewRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BListViewMethods,
+):
+    """A `BListView` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BListViewRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BListViewRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BListViewRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BListView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BInvoker(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BInvoker", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    def state[T: Movable & Deinitable](
+        self,
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BListView was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBListView_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BListView",
+        )
+
+    def base_SelectionChanged(self):
+        """`BListView::SelectionChanged`, the class's own."""
+        external_call["mojobe_BListView_base_SelectionChanged", NoneType](
+            _nonnull(self._ptr, "BListView::SelectionChanged"),
+        )
+
+
+struct BListView(Movable, _BListViewMethods):
+    """A `BListView` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        frame: BRect,
+        var name: String,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+        resizeMask: UInt32 = B_FOLLOW_LEFT_TOP,
+        flags: UInt32 = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE,
+    ) raises:
+        """`BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags)`."""
+        var address = external_call["mojobe_BListView_new__BRect_charP_list_view_type_uint32_uint32", Int](
+            frame,
+            name.as_c_string_span(),
+            type,
+            resizeMask,
+            flags,
+        )
+        _ = name^
+        if address == 0:
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        var name: String,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+        flags: UInt32 = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE,
+    ) raises:
+        """`BListView::BListView(const char* name, list_view_type type, uint32 flags)`."""
+        var address = external_call["mojobe_BListView_new__charP_list_view_type_uint32", Int](
+            name.as_c_string_span(),
+            type,
+            flags,
+        )
+        _ = name^
+        if address == 0:
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+    ) raises:
+        """`BListView::BListView(list_view_type type)`."""
+        var address = external_call["mojobe_BListView_new__list_view_type", Int](
+            type,
+        )
+        if address == 0:
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: ListViewHooks & Movable & Deinitable](
+        out self,
+        frame: BRect,
+        var name: String,
+        var state: T,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+        resizeMask: UInt32 = B_FOLLOW_LEFT_TOP,
+        flags: UInt32 = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE,
+    ) raises:
+        """`BListView::BListView(BRect frame, const char* name, list_view_type type, uint32 resizeMask, uint32 flags)`, its hooks those of `state`."""
+        var hooks = _BListView_hooks[T]()
+        var context = _to_heap(state^)
+        var address = external_call["mojobe_MojoBListView_new__BRect_charP_list_view_type_uint32_uint32", Int](
+            frame,
+            name.as_c_string_span(),
+            type,
+            resizeMask,
+            flags,
+            Pointer(to=hooks),
+            context,
+        )
+        _ = name^
+        if address == 0:
+            _destroy[T](context)
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: ListViewHooks & Movable & Deinitable](
+        out self,
+        var name: String,
+        var state: T,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+        flags: UInt32 = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE,
+    ) raises:
+        """`BListView::BListView(const char* name, list_view_type type, uint32 flags)`, its hooks those of `state`."""
+        var hooks = _BListView_hooks[T]()
+        var context = _to_heap(state^)
+        var address = external_call["mojobe_MojoBListView_new__charP_list_view_type_uint32", Int](
+            name.as_c_string_span(),
+            type,
+            flags,
+            Pointer(to=hooks),
+            context,
+        )
+        _ = name^
+        if address == 0:
+            _destroy[T](context)
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: ListViewHooks & Movable & Deinitable](
+        out self,
+        var state: T,
+        type: list_view_type = B_SINGLE_SELECTION_LIST,
+    ) raises:
+        """`BListView::BListView(list_view_type type)`, its hooks those of `state`."""
+        var hooks = _BListView_hooks[T]()
+        var context = _to_heap(state^)
+        var address = external_call["mojobe_MojoBListView_new__list_view_type", Int](
+            type,
+            Pointer(to=hooks),
+            context,
+        )
+        if address == 0:
+            _destroy[T](context)
+            raise Error("BListView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BListView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BListView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BInvoker(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BInvoker", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BListView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BListView was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBListView_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BListView",
+        )
+
+
+trait ListViewHooks:
+    """A Mojo type that stands behind a `BListView`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BListView` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait ListViewSelectionChanged(ListViewHooks):
+    """`void BListView::SelectionChanged()`: a hook of BListView."""
+
+    def SelectionChanged(mut self, listView: BListViewRef[_]):
+        ...
+
+
+struct _BListViewHooks(ImplicitlyCopyable, RegisterPassable):
+    """`mojobe_BListView_hooks`, laid out as C's."""
+
+    var type: UInt64
+    var destroy: _FnPtr
+    var SelectionChanged: _FnPtr
+
+    def __init__(out self):
+        self.type = 0
+        self.destroy = {}
+        self.SelectionChanged = {}
+
+
+def _BListView_SelectionChanged[T: ListViewSelectionChanged](
+    context: _Ptr,
+    listView: Int,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].SelectionChanged(
+        BListViewRef[origin_of(call)](_ptr_from(listView)),
+    )
+    _ = call^
+
+
+def _BListView_hooks[T: Movable & Deinitable]() -> _BListViewHooks:
+    """`T`'s hooks for a `BListView`: a slot for each hook it implements, NULL for the rest, decided at compile time."""
+    var hooks = _BListViewHooks()
+    hooks.type = _type_tag[T]()
+    hooks.destroy = _fn_ptr(_destroy[T])
+    comptime if conforms_to(T, ListViewSelectionChanged):
+        hooks.SelectionChanged = _fn_ptr(
+            _BListView_SelectionChanged[downcast[T, ListViewSelectionChanged]],
+        )
+    return hooks
+
+# ========================================================================== #
+# BListItem
+# ========================================================================== #
+
+
+trait _AsBListItem:
+    """Has a `BListItem*` for libmojobe."""
+
+    def _as_BListItem(self) -> _NPtr:
+        ...
+
+
+trait _BListItemMethods(_AsBListItem):
+    """`BListItem`'s methods, for its references and the values Mojo owns."""
+
+    def Archive(self, archive: Some[_AsBMessage], deep: Bool = True) raises:
+        """`status_t BListItem::Archive(BMessage* archive, bool deep) const`."""
+        var _result = external_call["mojobe_BListItem_Archive", Int32](
+            _nonnull(self._as_BListItem(), "BListItem::Archive"),
+            _addr(archive._as_BMessage()),
+            deep,
+        )
+        _check(_result, "BListItem::Archive")
+
+    def Height(self) -> Float32:
+        """`float BListItem::Height() const`."""
+        var _result = external_call["mojobe_BListItem_Height", Float32](
+            _nonnull(self._as_BListItem(), "BListItem::Height"),
+        )
+        return _result
+
+    def Width(self) -> Float32:
+        """`float BListItem::Width() const`."""
+        var _result = external_call["mojobe_BListItem_Width", Float32](
+            _nonnull(self._as_BListItem(), "BListItem::Width"),
+        )
+        return _result
+
+    def IsSelected(self) -> Bool:
+        """`bool BListItem::IsSelected() const`."""
+        var _result = external_call["mojobe_BListItem_IsSelected", Bool](
+            _nonnull(self._as_BListItem(), "BListItem::IsSelected"),
+        )
+        return _result
+
+    def Select(self):
+        """`void BListItem::Select()`."""
+        external_call["mojobe_BListItem_Select", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::Select"),
+        )
+
+    def Deselect(self):
+        """`void BListItem::Deselect()`."""
+        external_call["mojobe_BListItem_Deselect", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::Deselect"),
+        )
+
+    def SetEnabled(self, enabled: Bool):
+        """`void BListItem::SetEnabled(bool enabled)`."""
+        external_call["mojobe_BListItem_SetEnabled", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::SetEnabled"),
+            enabled,
+        )
+
+    def IsEnabled(self) -> Bool:
+        """`bool BListItem::IsEnabled() const`."""
+        var _result = external_call["mojobe_BListItem_IsEnabled", Bool](
+            _nonnull(self._as_BListItem(), "BListItem::IsEnabled"),
+        )
+        return _result
+
+    def SetHeight(self, height: Float32):
+        """`void BListItem::SetHeight(float height)`."""
+        external_call["mojobe_BListItem_SetHeight", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::SetHeight"),
+            height,
+        )
+
+    def SetWidth(self, width: Float32):
+        """`void BListItem::SetWidth(float width)`."""
+        external_call["mojobe_BListItem_SetWidth", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::SetWidth"),
+            width,
+        )
+
+    def DrawItem(
+        self,
+        owner: Some[_AsBView],
+        frame: BRect,
+        complete: Bool = False,
+    ):
+        """`void BListItem::DrawItem(BView* owner, BRect frame, bool complete)`."""
+        external_call["mojobe_BListItem_DrawItem", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::DrawItem"),
+            _addr(owner._as_BView()),
+            frame,
+            complete,
+        )
+
+    def Update(self, owner: Some[_AsBView], font: BFont):
+        """`void BListItem::Update(BView* owner, const BFont* font)`."""
+        external_call["mojobe_BListItem_Update", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::Update"),
+            _addr(owner._as_BView()),
+            _address_of(font),
+        )
+
+    def IsExpanded(self) -> Bool:
+        """`bool BListItem::IsExpanded() const`."""
+        var _result = external_call["mojobe_BListItem_IsExpanded", Bool](
+            _nonnull(self._as_BListItem(), "BListItem::IsExpanded"),
+        )
+        return _result
+
+    def SetExpanded(self, expanded: Bool):
+        """`void BListItem::SetExpanded(bool expanded)`."""
+        external_call["mojobe_BListItem_SetExpanded", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::SetExpanded"),
+            expanded,
+        )
+
+    def OutlineLevel(self) -> UInt32:
+        """`uint32 BListItem::OutlineLevel() const`."""
+        var _result = external_call["mojobe_BListItem_OutlineLevel", UInt32](
+            _nonnull(self._as_BListItem(), "BListItem::OutlineLevel"),
+        )
+        return _result
+
+    def SetOutlineLevel(self, level: UInt32):
+        """`void BListItem::SetOutlineLevel(uint32 level)`."""
+        external_call["mojobe_BListItem_SetOutlineLevel", NoneType](
+            _nonnull(self._as_BListItem(), "BListItem::SetOutlineLevel"),
+            level,
+        )
+
+    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
+        var _result = external_call["mojobe_BListItem_AllUnarchived", Int32](
+            _nonnull(self._as_BListItem(), "BListItem::AllUnarchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllUnarchived")
+
+    def AllArchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
+        var _result = external_call["mojobe_BListItem_AllArchived", Int32](
+            _nonnull(self._as_BListItem(), "BListItem::AllArchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllArchived")
+
+
+struct BListItemRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BListItemMethods,
+):
+    """A `BListItem` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BListItemRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    @implicit
+    def __init__(out self, other: BStringItemRef[Self.origin]):
+        """A `BStringItem` is a `BListItem`."""
+        self = BListItemRef[Self.origin](other._as_BListItem())
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BListItemRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BListItemRef[ImmUntrackedOrigin](self._ptr)
+
+    def as_BStringItem(ref self) -> BStringItemRef[origin_of(self)]:
+        """This `BListItem` as a `BStringItem`: NULL if it is not one."""
+        return BStringItemRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BListItem_to_BStringItem", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def _as_BListItem(self) -> _NPtr:
+        return self._ptr
+
+
+struct BListItem(Movable, _BListItemMethods):
+    """A `BListItem` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    @implicit
+    def __init__(out self, var other: BStringItem):
+        """A `BStringItem` is a `BListItem`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BStringItem_as_BListItem", Int](
+                other^._adopt(),
+            ),
+        )
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BListItem_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BListItem(self) -> _NPtr:
+        return self._ptr
+
+    def as_BStringItem(ref self) -> BStringItemRef[origin_of(self)]:
+        """This `BListItem` as a `BStringItem`, borrowed: NULL if it is not one."""
+        return BStringItemRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BListItem_to_BStringItem", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+# ========================================================================== #
+# BStringItem
+# ========================================================================== #
+
+
+trait _AsBStringItem(_AsBListItem):
+    """Has a `BStringItem*` for libmojobe."""
+
+    def _as_BStringItem(self) -> _NPtr:
+        ...
+
+
+trait _BStringItemMethods(_AsBStringItem, _BListItemMethods):
+    """`BStringItem`'s methods, for its references and the values Mojo owns."""
+
+    def SetText(self, var text: String):
+        """`void BStringItem::SetText(const char* text)`."""
+        external_call["mojobe_BStringItem_SetText", NoneType](
+            _nonnull(self._as_BStringItem(), "BStringItem::SetText"),
+            text.as_c_string_span(),
+        )
+        _ = text^
+
+    def Text(self) -> String:
+        """`const char* BStringItem::Text() const`."""
+        var _result = external_call["mojobe_BStringItem_Text", Int](
+            _nonnull(self._as_BStringItem(), "BStringItem::Text"),
+        )
+        return _string_from(_result)
+
+
+struct BStringItemRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BStringItemMethods,
+):
+    """A `BStringItem` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BStringItemRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BStringItemRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BStringItemRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BStringItem(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BListItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BStringItem_as_BListItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BStringItem(Movable, _BStringItemMethods):
+    """A `BStringItem` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        var text: String,
+        outlineLevel: UInt32 = 0,
+        expanded: Bool = True,
+    ) raises:
+        """`BStringItem::BStringItem(const char* text, uint32 outlineLevel, bool expanded)`."""
+        var address = external_call["mojobe_BStringItem_new", Int](
+            text.as_c_string_span(),
+            outlineLevel,
+            expanded,
+        )
+        _ = text^
+        if address == 0:
+            raise Error("BStringItem could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BStringItem_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BStringItem(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BListItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BStringItem_as_BListItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+# ========================================================================== #
 # BAlert
 # ========================================================================== #
 
@@ -14738,6 +16292,46 @@ struct BLayoutItem(Movable, _BLayoutItemMethods):
     def _as_BLayoutItem(self) -> _NPtr:
         return self._ptr
 
+    def as_BLayout(ref self) -> BLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BLayout`, borrowed: NULL if it is not one."""
+        return BLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupLayout(ref self) -> BGroupLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BGroupLayout`, borrowed: NULL if it is not one."""
+        return BGroupLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BGroupLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridLayout(ref self) -> BGridLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BGridLayout`, borrowed: NULL if it is not one."""
+        return BGridLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BGridLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSpaceLayoutItem(ref self) -> BSpaceLayoutItemRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BSpaceLayoutItem`, borrowed: NULL if it is not one."""
+        return BSpaceLayoutItemRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BSpaceLayoutItem", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
 # ========================================================================== #
 # BLayout
 # ========================================================================== #
@@ -15018,6 +16612,26 @@ struct BLayout(Movable, _BLayoutMethods):
         return _ptr_from(
             external_call["mojobe_BLayout_as_BLayoutItem", Int](
                 _addr(self._ptr),
+            ),
+        )
+
+    def as_BGroupLayout(ref self) -> BGroupLayoutRef[origin_of(self)]:
+        """This `BLayout` as a `BGroupLayout`, borrowed: NULL if it is not one."""
+        return BGroupLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayout_to_BGroupLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridLayout(ref self) -> BGridLayoutRef[origin_of(self)]:
+        """This `BLayout` as a `BGridLayout`, borrowed: NULL if it is not one."""
+        return BGridLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayout_to_BGridLayout", Int](
+                    _addr(self._ptr),
+                ),
             ),
         )
 
