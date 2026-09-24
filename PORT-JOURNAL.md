@@ -636,3 +636,36 @@ mojo build -I . dots.mojo -o dots -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
 # on the Mac, with the machine running and automation allowed:
 python3 Haiku/tests/dots_smoke.py --run RUNNER --app …/Prose.app --dir DIR
 ```
+
+## G7 — The bridge: P2, first half (2026-09-24)
+
+P2 is "the v1 scope, the ABI oracle, the tests". Done so far, each step with
+its tests (bridge-design.md §18 has the measured detail):
+
+- **References carry origins.** `BViewRef[origin]` keeps alive what it was
+  got from and cannot outlive it; a hook's references are borrowed from its
+  call. This fixes P1's measured hazard (Mojo ending a parent view under its
+  child's reference), and the compiler refuses keeping a hook's reference,
+  returning one past its owner, or using one after `window^.Show()`.
+- **BHandler, BLooper; BMessenger and `Locked`.** A new kind of class, held
+  in a Mojo value (BMessenger); `with messenger.Locked() as looper:` from any
+  thread; checked downcasts (`as_BWindow()`).
+- **Errors name their status** (`… (B_NAME_NOT_FOUND)`, `status_of(e)`);
+  typed raises were measured and set aside (a `try` block's error type is
+  fixed by its first call).
+- **No C++ exception reaches Mojo**, and an adoption that fails no longer
+  leaks.
+- **The ABI oracle**, generated: every hook through the real trampolines,
+  value types and enums both ways, a call on the stack; two mutants show it
+  failing.
+
+On Prose, `Haiku/tests/run.sh`: abi_oracle 87/87, bridge_check 38/38,
+threads_check 16/16 (all three also under the guarded heap),
+must_not_compile 5/5; `dots_smoke.py` 5/5. Found and fixed on the way: a
+shadow constructor taking any argument as its Mojo state (`BLooper("x")`),
+owned upcasts from self-owning classes, hand-over methods counted as
+inherited, and `[inout]` leaving out by-value twins.
+
+Next in P2: the rest of the v1 classes (§13) — controls and alerts, fonts,
+bitmaps, screens and regions, message runners, the storage kit's paths and
+file panels, layouts, list and scroll views.
