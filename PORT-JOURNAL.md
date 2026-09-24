@@ -484,12 +484,9 @@ Of the 195 tests that can run on Prose, 191 pass.
   left suspended until something kills them (the span tests' harness, after
   60 s; `os/test_stat`'s team was still there an hour later, deaf to
   `kill -9`). Later crashes in the same run are killed. Not yet understood.
-- **The compiler spends most of its time in the kernel on Prose**: a cold
-  `mojo build` of the stdlib check takes 1.0 s user and 3.4 s system even
-  with `-j 1`. Not malloc (`MALLOC_OPTIONS` pools change nothing), not
-  syscalls (under 0.3 s of them), not HostFS (the same from the guest's
-  disk). First-touch faults cost 2.2 µs a page here; page faults are the
-  next suspect. `-j 1` is the fastest setting (4.4 s against 6.3 s).
+- ~~The compiler spends most of its time in the kernel on Prose~~ — it
+  does not: arm64 Haiku charged user time as kernel time. See "Where the
+  compiler's time goes" below.
 - On a machine without Python, the stdlib's libpython discovery passes an
   unterminated empty path to `dlopen`.
 
@@ -509,3 +506,39 @@ mojo build -I Haiku/bridge Haiku/examples/dots/dots.mojo -o dots \
 
 Owed for P0: `MouseDown`, by hand (the scripted guest delivers no mouse
 events to windows). Next: P1, the generator.
+
+## Where the compiler's time goes (2026-09-24)
+
+The "three quarters in the kernel" of G6 was Haiku's arm64 time accounting:
+an interrupt or fault from user mode never recorded the entry into the
+kernel, so the return charged the user stretch as kernel time (2 s of pure
+arithmetic read 0.004 s user). And the profiler could not see on arm64 at
+all. Fixed in HaikuArmQemu, patches 0135 (accounting), 0136 (stack traces
+for the profilers) and 0137 (syscall stubs' symbol sizes); tests
+`tools/cputime` 3/3 and `tools/proftest` 5/5. Then, measured with
+`tools/bench/teamstat` and `profile -k`, for `mojo build stdlib_check.mojo`:
+
+| | wall | user | kernel | page faults |
+|---|---|---|---|---|
+| `-j 1` | 3.8 s | 3.2 s | 0.5 s | 199,000 |
+| default (8 threads) | 6.1 s | 5.3 s | 3.0 s | 222,000 |
+
+- **One thread:** the compiler's own work 65% (MLIR uniquing, hash maps,
+  KGEN), libroot's malloc ~15%, the kernel 13% (page faults at ~2.7 µs
+  each), the TLS descriptor resolver of patch 0132 ~4%.
+- **Eight threads are 60% slower than one**, for 2.2 times the CPU.
+  `malloc()` and `free()` are in 36% of the samples; libroot malloc's
+  mutexes -- `free()`, `malloc()`, and `findpool()`, which a free of another
+  thread's block runs, locking each pool it searches -- make 71% of all
+  contended-mutex traffic, ~16% of the compile's CPU on their own (the
+  kernel lock and unblock calls and the condition-variable wake-ups under
+  them). Page faults 7.5%, the address-space lock ~5%; LLVM's pass
+  registry and MLIR's uniquer take the other contended locks.
+- **Memory churn:** the heap is returned to the kernel and faulted back
+  ~21,000 times a compile (11,855 unmaps, 9,247 resizes); libroot's
+  PagesAllocator unmaps from the middle of its areas, which splits them:
+  2,414 "heap area" areas at once, most of them 4-32 KB.
+
+Upstream links tcmalloc into the compiler on Linux; here it was aliased
+away (G4). The compiler wants a scalable allocator, or libroot's needs to
+scale. Until then `-j 1` is the faster setting on Prose.
