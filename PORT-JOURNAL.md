@@ -669,3 +669,21 @@ inherited, and `[inout]` leaving out by-value twins.
 Next in P2: the rest of the v1 classes (§13) — controls and alerts, fonts,
 bitmaps, screens and regions, message runners, the storage kit's paths and
 file panels, layouts, list and scroll views.
+
+## G7 — The bridge: P2 done (2026-09-24)
+
+Every class of the v1 scope (bridge-design.md §13) is bridged — 42 classes,
+1,358 methods, 1,201 constants, generated in about 5 s — and every kind of
+test §12 asks for passes on Prose: `Haiku/tests/run.sh` (the ABI oracle
+143/143, bridge_check 48/48, threads 17, graphics 17, storage 12, layout 10,
+game 12, lists 9, the controls example's self-test 8, all but the last also
+under the guarded heap; five programs refused by the compiler) and
+`dots_smoke.py` 5/5. bridge-design.md §18 records what the scope taught the
+generator and the bugs the tests found: an unimplemented method Haiku
+declares (`BBitmap::SetDrawingFlags`) that stopped libmojobe loading; a
+shadow's destructor calling hooks into freed Mojo state; const methods of
+register-passable values reading through a temporary's address; an alert's
+invoker freed under it; BGroupLayout without BLayout's methods.
+
+Next: P3, Galaxigans Deluxe on the game pane, and the guide to writing a
+Mojo application for Prose.

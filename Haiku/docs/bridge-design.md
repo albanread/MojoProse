@@ -3,8 +3,8 @@
 *MojoProse, 2026-09-23. Gate G7 of `PORT-JOURNAL.md`. P0 and P1 are built
 and run on Prose (Dots): the bridge is now generated from the headers.
 Sections 16 and 17 record what building them measured, including corrections
-to sections 3, 7 and 8; section 18 records P2 as it goes (references carry
-origins now).*
+to sections 3, 7 and 8; section 18 records P2, done: the v1 classes of
+section 13 are bridged and section 12's tests pass on Prose.*
 
 How Mojo programs on Prose use the Haiku API — open windows, draw, take the
 mouse and the keyboard, send messages, show menus and alerts — as real Haiku
@@ -528,13 +528,13 @@ annotations in `Haiku/generator/bridge.toml`. It runs in about 4 s.
 
 | test | proves |
 |---|---|
-| ABI oracle | Mojo and the C++ compiler agree on every value type by value and by return, and on every hook signature |
-| value types | Mojo's `BRect.InsetBy` and friends match the C++ inline ones |
-| pixels | drawing through the bridge, read back through app_server, is exact — as `tools/blittest` does for app_server itself |
+| ABI oracle | Mojo and the C++ compiler agree on every value type by value and by return, and on every hook signature *(P2: `abi_oracle`, generated, 143/143)* |
+| value types | Mojo's `BRect.InsetBy` and friends match the C++ inline ones *(P2: they are the C++ inline ones, compiled into libmojobe; `bridge_check`)* |
+| pixels | drawing through the bridge, read back through app_server, is exact — as `tools/blittest` does for app_server itself *(P2: `graphics_check`, an offscreen bitmap read back; `dots_smoke.py`, the screen)* |
 | lifetime | a window quits while Mojo holds a messenger: sends fail cleanly, nothing is freed twice; a view's Mojo state is destroyed exactly once *(P2: `threads_check` for a looper; both checks also under the guarded heap)* |
 | threads | hooks run on the right thread; `Locked` from another thread works, and fails cleanly after `Quit()` *(P2: `threads_check`, 16/16)* |
-| re-entrancy | a hook that resizes its own view gets the base `FrameResized`, and says so in a debug build |
-| examples | Dots (§2), a menu and controls application, and Galaxigans Deluxe on the game pane |
+| re-entrancy | a hook that resizes its own view gets the base `FrameResized`, and says so in a debug build *(P2: a `MessageReceived` that calls its own view's; `bridge_check`)* |
+| examples | Dots (§2), a menu and controls application, and Galaxigans Deluxe on the game pane *(P2: Dots and `Haiku/examples/controls`, which has a `--selftest`; Galaxigans is P3)* |
 
 ## 13. Scope of v1
 
@@ -549,13 +549,19 @@ annotations in `Haiku/generator/bridge.toml`. It runs in about 4 s.
 - Everything else waits until a program needs it; the generator makes adding
   a class a line in the allowlist and its annotations.
 
+*As built in P2: every class above, and BInvoker, BControl, BLayoutItem,
+BLayout, BSpaceLayoutItem, BGroupView, BGridView, BListItem, BStringItem and
+entry_ref with them — 42 classes, 1,358 methods, `find_directory`, 1,201
+constants (`Haiku/bridge/MANIFEST.md` lists what is left out, and why). Not
+bridged: BLayoutBuilder (templates, as planned).*
+
 ## 14. Phasing
 
 | step | what | done when |
 |---|---|---|
 | P0 | By hand, what the generator will write, for `BApplication`, `BWindow`, `BView` and `BMessage` with three hooks | Dots runs on Prose. It answers the Mojo questions with running code: per-type tables, adoption by consuming parameters, `Ref` origins |
 | P1 | The generator, for the same classes | its output replaces P0's, and Dots still runs — **done 2026-09-24** (§17) |
-| P2 | The v1 scope, the ABI oracle, the tests | §12 passes on Prose |
+| P2 | The v1 scope, the ABI oracle, the tests | §12 passes on Prose — **done 2026-09-24** (§18) |
 | P3 | Galaxigans Deluxe and a document | the game plays on Prose; `writing-a-mojo-app.md` |
 
 P0 needs a Mojo compiler that targets Haiku (G4 onwards, or the host compiler
@@ -817,4 +823,69 @@ One fact for programs, measured on the way: a menu needs an app_server
 connection, so a `BApplication`, and Mojo ends a `BApplication` at its last
 use like any value. A program's last use of it should come after everything
 that needs it — `app.Run()` at the end of `main`, as Dots does.
+
+### 18.6 The v1 scope
+
+All of §13's classes are bridged: 42 classes with those they need, 1,358
+methods, 1,201 constants, in about 5 s of generation. What the scope taught
+the generator, each with a test (the commits say more):
+
+- **Kinds of object.** Held values (BMessenger, BFont: C++ constructs them in
+  a Mojo value). Abstract classes have no constructors (clang's
+  `isAbstract`). Statics are `@staticmethod`s, and a factory's result is an
+  owned value (`BSpaceLayoutItem.CreateGlue()`). A class reporting failure
+  only through `InitCheck()` raises from its constructor (BMessageRunner,
+  BBitmap, BGamePane, BChipPlayer).
+- **Ownership, from the Be Book and Haiku's sources.** A container that
+  does not delete its items gets the bridge's subclass, which does
+  (BListView's `owns_items`), and the methods that would orphan items are
+  left out. `BAlert::Go(invoker)` adopts the invoker (the alert keeps it and
+  never deletes it). An adopting method that reports failure — a false
+  `bool`, a NULL pointer — has not taken the object, and the bridge deletes
+  it. Owned values convert to a base only if both end the same way.
+- **Buffers are spans.** `BBitmap::Bits()` and `BGamePane::World()` are
+  spans borrowed from their objects; a `const T*` with its count is one
+  span argument; one whose length the other arguments give is checked
+  against it first (`Blit`), so C++ never reads past what Mojo gave.
+- **What links.** A method neither virtual nor defined in its header must be
+  in the libraries by its mangled name: Haiku declares
+  `BBitmap::SetDrawingFlags` and never wrote it. Tracker's and the game
+  kit's libraries count too.
+- **Value types' methods are C++'s own** (BRect, BPoint), compiled in. A
+  register-passable read `self` is a copy: a const method takes the value,
+  since the address of `self` was a temporary's.
+- **C++ as written.** Anonymous records and enums named by typedefs;
+  inherited bridged bases found through unbridged ones (BGroupLayout's
+  BLayout); overload sets by signature; Mojo's keywords escaped; integer
+  arithmetic in defaults evaluated.
+- **Shadows die quietly.** A shadow's destructor clears its hook table
+  first: destroying a list deletes its items, which calls
+  `SelectionChanged` — into Mojo state already freed, until the guarded
+  heap caught it.
+
+### 18.7 P2's tests
+
+`Haiku/tests/run.sh` builds the bridge and runs these on Prose, the checks
+also under libroot's guarded heap (a use after free or a double delete
+faults there); `dots_smoke.py` drives Dots from the Mac.
+
+| test | checks | what |
+|---|---|---|
+| `abi_oracle` | 143 | every hook through the real trampolines; value types and enums by value; a call on the stack |
+| `bridge_check` | 48 | constants, value types and their methods, messages, errors, references, adoption, re-entrancy |
+| `threads_check` | 17 | a looper's hooks on its thread, messengers, replies, `Locked`, a message runner, a looper gone |
+| `graphics_check` | 17 | drawing into a bitmap, read back; spans; fonts; regions; the screen |
+| `storage_check` | 12 | `find_directory`, paths, entries, refs in messages, a file panel |
+| `layout_check` | 10 | a window laid out by a group layout: insets, spacing, explicit sizes, glue |
+| `game_check` | 12 | the game pane's world as a span, drawn both ways; blits; palettes; the chip player |
+| `list_check` | 9 | items adopted, given back and deleted with the list; selection hooks; a scroll view |
+| `controls --selftest` | 8 | an application's controls and an alert driven from its own thread |
+| `must_not_compile.sh` | 5 | keeping a hook's reference, outliving an owner, using a window after `Show()`, a lock's reference kept, a window as an owned handler |
+| `dots_smoke.py` | 5 | Dots on the machine's screen |
+
+Still owed after P2: `const` results as mutable references (§17.8); a Mojo
+state type behind every class with hooks worth having (controls, list items
+— only the classes with `shadow` have them); `MouseDown` and the other
+pointer hooks, which want a person with a mouse; BLayoutBuilder; and P3,
+Galaxigans Deluxe on the game pane.
 
