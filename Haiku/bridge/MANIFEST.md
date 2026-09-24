@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 953 included, 252 overrides reached through a base, 337 left out.
+In all: 1036 included, 252 overrides reached through a base, 365 left out.
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 
@@ -187,7 +187,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `hook void BLooper::MessageReceived(BMessage* message)` | included | LooperMessageReceived |
 | `hook bool BLooper::QuitRequested()` | included | LooperQuitRequested |
 
-## BApplication: 27 included, 6 overrides reached through a base, 9 left out
+## BApplication: 28 included, 6 overrides reached through a base, 9 left out
 
 | C++ | | |
 |---|---|---|
@@ -233,6 +233,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `hook bool BApplication::QuitRequested()` | included | ApplicationQuitRequested |
 | `hook void BApplication::AboutRequested()` | included | ApplicationAboutRequested |
 | `hook void BApplication::Pulse()` | included | ApplicationPulse |
+| `hook void BApplication::RefsReceived(BMessage* message)` | included | ApplicationRefsReceived |
 
 ## BWindow: 104 included, 6 overrides reached through a base, 12 left out
 
@@ -361,7 +362,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `hook void BWindow::Zoom(BPoint origin, float width, float height)` | included | WindowZoom |
 | `hook void BWindow::Minimize(bool minimize)` | included | WindowMinimize |
 
-## BView: 216 included, 6 overrides reached through a base, 89 left out
+## BView: 215 included, 6 overrides reached through a base, 90 left out
 
 | C++ | | |
 |---|---|---|
@@ -425,6 +426,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `void BView::DrawString(const char* string, int32 length, const BPoint* locations, int32 locationCount)` | skipped | parameter locations: const BPoint * is not bridged |
 | `void BView::TruncateString(BString* in_out, uint32 mode, float width) const` | skipped | parameter in_out: BString * is not bridged |
 | `void BView::GetStringWidths(char** stringArray, int32* lengthArray, int32 numStrings, float* widthArray) const` | skipped | parameter stringArray: char ** is not bridged |
+| `void BView::SetDiskMode(char* filename, long offset)` | skipped | parameter filename: char * is not bridged |
 | `void BView::BeginPicture(BPicture* a_picture)` | skipped | parameter a_picture: BPicture * is not bridged |
 | `void BView::AppendToPicture(BPicture* a_picture)` | skipped | parameter a_picture: BPicture * is not bridged |
 | `BPicture* BView::EndPicture()` | skipped | result: BPicture * is not bridged |
@@ -608,7 +610,6 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `void BView::Invalidate()` | included | mojobe_BView_Invalidate__void |
 | `void BView::DelayedInvalidate(bigtime_t delay)` | included | mojobe_BView_DelayedInvalidate__bigtime_t |
 | `void BView::DelayedInvalidate(bigtime_t delay, BRect invalRect)` | included | mojobe_BView_DelayedInvalidate__bigtime_t_BRect |
-| `void BView::SetDiskMode(char* filename, long offset)` | included | mojobe_BView_SetDiskMode |
 | `void BView::DrawPicture(const char* filename, long offset, BPoint where)` | included | mojobe_BView_DrawPicture |
 | `void BView::DrawPictureAsync(const char* filename, long offset, BPoint where)` | included | mojobe_BView_DrawPictureAsync |
 | `void BView::BeginLayer(uint8 opacity)` | included | mojobe_BView_BeginLayer |
@@ -677,12 +678,13 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `hook void BView::WindowActivated(bool active)` | included | ViewWindowActivated |
 | `hook void BView::Pulse()` | included | ViewPulse |
 
-## BMessage: 196 included, 0 overrides reached through a base, 73 left out
+## BMessage: 200 included, 0 overrides reached through a base, 69 left out
 
 | C++ | | |
 |---|---|---|
 | `BMessage& BMessage::operator=(const BMessage& other)` | skipped | operator |
 | `status_t BMessage::GetInfo(type_code typeRequested, int32 index, char** nameFound, type_code* typeFound, int32* countFound) const` | skipped | parameter nameFound: char ** is not bridged |
+| `status_t BMessage::Flatten(char* buffer, ssize_t size) const` | skipped | parameter buffer: char * is not bridged |
 | `status_t BMessage::Flatten(BDataIO* stream, ssize_t* size) const` | skipped | parameter stream: BDataIO * is not bridged |
 | `status_t BMessage::Unflatten(BDataIO* stream)` | skipped | parameter stream: BDataIO * is not bridged |
 | `status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)` | skipped | parameter alignment: const BAlignment & is not bridged |
@@ -690,7 +692,6 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::AddString(const char* name, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::AddStrings(const char* name, const BStringList& list)` | skipped | parameter list: const BStringList & is not bridged |
 | `status_t BMessage::AddPointer(const char* name, const void* pointer)` | skipped | parameter pointer: const void * is not bridged |
-| `status_t BMessage::AddRef(const char* name, const entry_ref* ref)` | skipped | parameter ref: const entry_ref * is not bridged |
 | `status_t BMessage::AddNodeRef(const char* name, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, BFlattenable* object, int32 count)` | skipped | parameter object: BFlattenable * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, const BFlattenable* object, int32 count)` | skipped | parameter object: const BFlattenable * is not bridged |
@@ -703,8 +704,6 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::FindStrings(const char* name, BStringList* list) const` | skipped | parameter list: BStringList * is not bridged |
 | `status_t BMessage::FindPointer(const char* name, void** pointer) const` | skipped | parameter pointer: void ** is not bridged |
 | `status_t BMessage::FindPointer(const char* name, int32 index, void** pointer) const` | skipped | parameter pointer: void ** is not bridged |
-| `status_t BMessage::FindRef(const char* name, entry_ref* ref) const` | skipped | parameter ref: entry_ref * is not bridged |
-| `status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const` | skipped | parameter ref: entry_ref * is not bridged |
 | `status_t BMessage::FindNodeRef(const char* name, node_ref* ref) const` | skipped | parameter ref: node_ref * is not bridged |
 | `status_t BMessage::FindNodeRef(const char* name, int32 index, node_ref* ref) const` | skipped | parameter ref: node_ref * is not bridged |
 | `status_t BMessage::FindFlat(const char* name, BFlattenable* object) const` | skipped | parameter object: BFlattenable * is not bridged |
@@ -719,8 +718,6 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::ReplaceString(const char* name, int32 index, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::ReplacePointer(const char* name, const void* pointer)` | skipped | parameter pointer: const void * is not bridged |
 | `status_t BMessage::ReplacePointer(const char* name, int32 index, const void* pointer)` | skipped | parameter pointer: const void * is not bridged |
-| `status_t BMessage::ReplaceRef(const char* name, const entry_ref* ref)` | skipped | parameter ref: const entry_ref * is not bridged |
-| `status_t BMessage::ReplaceRef(const char* name, int32 index, const entry_ref* ref)` | skipped | parameter ref: const entry_ref * is not bridged |
 | `status_t BMessage::ReplaceNodeRef(const char* name, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::ReplaceNodeRef(const char* name, int32 index, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::ReplaceFlat(const char* name, BFlattenable* object)` | skipped | parameter object: BFlattenable * is not bridged |
@@ -763,7 +760,6 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::SendReply(uint32 command, BMessage* replyToReply)` | included | mojobe_BMessage_SendReply__uint32_BMessageP |
 | `status_t BMessage::SendReply(BMessage* reply, BMessage* replyToReply, bigtime_t sendTimeout, bigtime_t replyTimeout)` | included | mojobe_BMessage_SendReply__BMessageP_BMessageP_bigtime_t_bigtime_t |
 | `ssize_t BMessage::FlattenedSize() const` | included | mojobe_BMessage_FlattenedSize |
-| `status_t BMessage::Flatten(char* buffer, ssize_t size) const` | included | mojobe_BMessage_Flatten |
 | `status_t BMessage::Unflatten(const char* flatBuffer)` | included | mojobe_BMessage_Unflatten |
 | `status_t BMessage::AddSpecifier(const char* property)` | included | mojobe_BMessage_AddSpecifier__charP |
 | `status_t BMessage::AddSpecifier(const char* property, int32 index)` | included | mojobe_BMessage_AddSpecifier__charP_int32 |
@@ -790,6 +786,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::AddDouble(const char* name, double value)` | included | mojobe_BMessage_AddDouble |
 | `status_t BMessage::AddColor(const char* name, rgb_color value)` | included | mojobe_BMessage_AddColor |
 | `status_t BMessage::AddMessenger(const char* name, BMessenger messenger)` | included | mojobe_BMessage_AddMessenger |
+| `status_t BMessage::AddRef(const char* name, const entry_ref* ref)` | included | mojobe_BMessage_AddRef |
 | `status_t BMessage::AddMessage(const char* name, const BMessage* message)` | included | mojobe_BMessage_AddMessage |
 | `status_t BMessage::AddData(const char* name, type_code type, const void* data, ssize_t numBytes, bool isFixedSize, int32 count)` | included | mojobe_BMessage_AddData |
 | `status_t BMessage::Append(const BMessage& message)` | included | mojobe_BMessage_Append |
@@ -838,6 +835,8 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::FindColor(const char* name, int32 index, rgb_color* value) const` | included | mojobe_BMessage_FindColor__charP_int32_rgb_colorP |
 | `status_t BMessage::FindMessenger(const char* name, BMessenger* messenger) const` | included | mojobe_BMessage_FindMessenger__charP_BMessengerP |
 | `status_t BMessage::FindMessenger(const char* name, int32 index, BMessenger* messenger) const` | included | mojobe_BMessage_FindMessenger__charP_int32_BMessengerP |
+| `status_t BMessage::FindRef(const char* name, entry_ref* ref) const` | included | mojobe_BMessage_FindRef__charP_entry_refP |
+| `status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const` | included | mojobe_BMessage_FindRef__charP_int32_entry_refP |
 | `status_t BMessage::FindMessage(const char* name, BMessage* message) const` | included | mojobe_BMessage_FindMessage__charP_BMessageP |
 | `status_t BMessage::FindMessage(const char* name, int32 index, BMessage* message) const` | included | mojobe_BMessage_FindMessage__charP_int32_BMessageP |
 | `status_t BMessage::ReplaceRect(const char* name, BRect rect)` | included | mojobe_BMessage_ReplaceRect__charP_BRect |
@@ -872,6 +871,8 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `status_t BMessage::ReplaceColor(const char* name, int32 index, rgb_color value)` | included | mojobe_BMessage_ReplaceColor__charP_int32_rgb_color |
 | `status_t BMessage::ReplaceMessenger(const char* name, BMessenger messenger)` | included | mojobe_BMessage_ReplaceMessenger__charP_BMessenger |
 | `status_t BMessage::ReplaceMessenger(const char* name, int32 index, BMessenger messenger)` | included | mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger |
+| `status_t BMessage::ReplaceRef(const char* name, const entry_ref* ref)` | included | mojobe_BMessage_ReplaceRef__charP_entry_refP |
+| `status_t BMessage::ReplaceRef(const char* name, int32 index, const entry_ref* ref)` | included | mojobe_BMessage_ReplaceRef__charP_int32_entry_refP |
 | `status_t BMessage::ReplaceMessage(const char* name, const BMessage* message)` | included | mojobe_BMessage_ReplaceMessage__charP_BMessageP |
 | `status_t BMessage::ReplaceMessage(const char* name, int32 index, const BMessage* message)` | included | mojobe_BMessage_ReplaceMessage__charP_int32_BMessageP |
 | `status_t BMessage::ReplaceData(const char* name, type_code type, const void* data, ssize_t numBytes)` | included | mojobe_BMessage_ReplaceData__charP_type_code_voidP_ssize_t |
@@ -1583,7 +1584,7 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | C++ | | |
 |---|---|---|
 | `BArchivable* BBitmap::Instantiate(BMessage* data)` | skipped | static |
-| `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so |
+| `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so, libtracker.so |
 | `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
 | `status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
 | `status_t BBitmap::GetOverlayRestrictions(overlay_restrictions* restrictions) const` | skipped | parameter restrictions: overlay_restrictions * is not bridged |
@@ -1664,6 +1665,134 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `BScreen::BScreen(screen_id id)` | included | mojobe_BScreen_new__screen_id |
 | `BScreen::BScreen(BWindow* window)` | included | mojobe_BScreen_new__BWindowP |
 
+## entry_ref: 5 included, 0 overrides reached through a base, 5 left out
+
+| C++ | | |
+|---|---|---|
+| `bool entry_ref::operator==(const entry_ref& ref) const` | skipped | operator |
+| `bool entry_ref::operator!=(const entry_ref& ref) const` | skipped | operator |
+| `entry_ref& entry_ref::operator=(const entry_ref& ref)` | skipped | operator |
+| `status_t entry_ref::set_name(const char* name)` | included | mojobe_entry_ref_set_name |
+| `entry_ref::device (field)` | included | get_device, set_device |
+| `entry_ref::directory (field)` | included | get_directory, set_directory |
+| `entry_ref::name (field)` | skipped | field type char * |
+| `entry_ref::entry_ref(const entry_ref& ref)` | skipped | copy constructor |
+| `entry_ref::entry_ref()` | included | mojobe_entry_ref_new__void |
+| `entry_ref::entry_ref(dev_t dev, ino_t dir, const char* name)` | included | mojobe_entry_ref_new__dev_t_ino_t_charP |
+
+## BEntry: 30 included, 0 overrides reached through a base, 12 left out
+
+| C++ | | |
+|---|---|---|
+| `status_t BEntry::GetStat(struct stat* stat) const` | skipped | parameter stat: struct stat * is not bridged |
+| `status_t BEntry::SetTo(const BDirectory* dir, const char* path, bool traverse)` | skipped | parameter dir: const BDirectory * is not bridged |
+| `status_t BEntry::GetParent(BDirectory* dir) const` | skipped | parameter dir: BDirectory * is not bridged |
+| `status_t BEntry::GetName(char* buffer) const` | skipped | parameter buffer: char * is not bridged |
+| `status_t BEntry::MoveTo(BDirectory* dir, const char* path, bool clobber)` | skipped | parameter dir: BDirectory * is not bridged |
+| `bool BEntry::operator==(const BEntry& item) const` | skipped | operator |
+| `bool BEntry::operator!=(const BEntry& item) const` | skipped | operator |
+| `BEntry& BEntry::operator=(const BEntry& item)` | skipped | operator |
+| `status_t BStatable::GetNodeRef(node_ref* ref) const` | skipped | parameter ref: node_ref * is not bridged |
+| `status_t BStatable::GetVolume(BVolume* volume) const` | skipped | parameter volume: BVolume * is not bridged |
+| `status_t BEntry::InitCheck() const` | included | mojobe_BEntry_InitCheck |
+| `bool BEntry::Exists() const` | included | mojobe_BEntry_Exists |
+| `const char* BEntry::Name() const` | included | mojobe_BEntry_Name |
+| `status_t BEntry::SetTo(const entry_ref* ref, bool traverse)` | included | mojobe_BEntry_SetTo__entry_refP_bool |
+| `status_t BEntry::SetTo(const char* path, bool traverse)` | included | mojobe_BEntry_SetTo__charP_bool |
+| `void BEntry::Unset()` | included | mojobe_BEntry_Unset |
+| `status_t BEntry::GetRef(entry_ref* ref) const` | included | mojobe_BEntry_GetRef |
+| `status_t BEntry::GetPath(BPath* path) const` | included | mojobe_BEntry_GetPath |
+| `status_t BEntry::GetParent(BEntry* entry) const` | included | mojobe_BEntry_GetParent |
+| `status_t BEntry::Rename(const char* path, bool clobber)` | included | mojobe_BEntry_Rename |
+| `status_t BEntry::Remove()` | included | mojobe_BEntry_Remove |
+| `bool BStatable::IsFile() const` | included | mojobe_BEntry_IsFile |
+| `bool BStatable::IsDirectory() const` | included | mojobe_BEntry_IsDirectory |
+| `bool BStatable::IsSymLink() const` | included | mojobe_BEntry_IsSymLink |
+| `status_t BStatable::GetOwner(uid_t* owner) const` | included | mojobe_BEntry_GetOwner |
+| `status_t BStatable::SetOwner(uid_t owner)` | included | mojobe_BEntry_SetOwner |
+| `status_t BStatable::GetGroup(gid_t* group) const` | included | mojobe_BEntry_GetGroup |
+| `status_t BStatable::SetGroup(gid_t group)` | included | mojobe_BEntry_SetGroup |
+| `status_t BStatable::GetPermissions(mode_t* permissions) const` | included | mojobe_BEntry_GetPermissions |
+| `status_t BStatable::SetPermissions(mode_t permissions)` | included | mojobe_BEntry_SetPermissions |
+| `status_t BStatable::GetSize(off_t* size) const` | included | mojobe_BEntry_GetSize |
+| `status_t BStatable::GetModificationTime(time_t* mtime) const` | included | mojobe_BEntry_GetModificationTime |
+| `status_t BStatable::SetModificationTime(time_t mtime)` | included | mojobe_BEntry_SetModificationTime |
+| `status_t BStatable::GetCreationTime(time_t* ctime) const` | included | mojobe_BEntry_GetCreationTime |
+| `status_t BStatable::SetCreationTime(time_t ctime)` | included | mojobe_BEntry_SetCreationTime |
+| `status_t BStatable::GetAccessTime(time_t* atime) const` | included | mojobe_BEntry_GetAccessTime |
+| `status_t BStatable::SetAccessTime(time_t atime)` | included | mojobe_BEntry_SetAccessTime |
+| `BEntry::BEntry(const BDirectory* dir, const char* path, bool traverse)` | skipped | parameter dir: const BDirectory * is not bridged |
+| `BEntry::BEntry(const BEntry& entry)` | skipped | copy constructor |
+| `BEntry::BEntry()` | included | mojobe_BEntry_new__void |
+| `BEntry::BEntry(const entry_ref* ref, bool traverse)` | included | mojobe_BEntry_new__entry_refP_bool |
+| `BEntry::BEntry(const char* path, bool traverse)` | included | mojobe_BEntry_new__charP_bool |
+
+## BPath: 19 included, 0 overrides reached through a base, 10 left out
+
+| C++ | | |
+|---|---|---|
+| `status_t BPath::SetTo(const BDirectory* dir, const char* leaf, bool normalize)` | skipped | parameter dir: const BDirectory * is not bridged |
+| `bool BPath::operator==(const BPath& item) const` | skipped | operator |
+| `bool BPath::operator==(const char* path) const` | skipped | operator |
+| `bool BPath::operator!=(const BPath& item) const` | skipped | operator |
+| `bool BPath::operator!=(const char* path) const` | skipped | operator |
+| `BPath& BPath::operator=(const BPath& item)` | skipped | operator |
+| `BPath& BPath::operator=(const char* path)` | skipped | operator |
+| `status_t BPath::Flatten(void* buffer, ssize_t size) const` | skipped | parameter buffer: void * is not bridged |
+| `status_t BPath::InitCheck() const` | included | mojobe_BPath_InitCheck |
+| `status_t BPath::SetTo(const entry_ref* ref)` | included | mojobe_BPath_SetTo__entry_refP |
+| `status_t BPath::SetTo(const BEntry* entry)` | included | mojobe_BPath_SetTo__BEntryP |
+| `status_t BPath::SetTo(const char* path, const char* leaf, bool normalize)` | included | mojobe_BPath_SetTo__charP_charP_bool |
+| `void BPath::Unset()` | included | mojobe_BPath_Unset |
+| `status_t BPath::Append(const char* path, bool normalize)` | included | mojobe_BPath_Append |
+| `const char* BPath::Path() const` | included | mojobe_BPath_Path |
+| `const char* BPath::Leaf() const` | included | mojobe_BPath_Leaf |
+| `status_t BPath::GetParent(BPath* path) const` | included | mojobe_BPath_GetParent |
+| `bool BPath::IsAbsolute() const` | included | mojobe_BPath_IsAbsolute |
+| `bool BPath::IsFixedSize() const` | included | mojobe_BPath_IsFixedSize |
+| `type_code BPath::TypeCode() const` | included | mojobe_BPath_TypeCode |
+| `ssize_t BPath::FlattenedSize() const` | included | mojobe_BPath_FlattenedSize |
+| `bool BPath::AllowsTypeCode(type_code code) const` | included | mojobe_BPath_AllowsTypeCode |
+| `status_t BPath::Unflatten(type_code code, const void* buffer, ssize_t size)` | included | mojobe_BPath_Unflatten |
+| `BPath::BPath(const BPath& path)` | skipped | copy constructor |
+| `BPath::BPath(const BDirectory* dir, const char* leaf, bool normalize)` | skipped | parameter dir: const BDirectory * is not bridged |
+| `BPath::BPath()` | included | mojobe_BPath_new__void |
+| `BPath::BPath(const entry_ref* ref)` | included | mojobe_BPath_new__entry_refP |
+| `BPath::BPath(const BEntry* entry)` | included | mojobe_BPath_new__BEntryP |
+| `BPath::BPath(const char* dir, const char* leaf, bool normalize)` | included | mojobe_BPath_new__charP_charP_bool |
+
+## BFilePanel: 24 included, 0 overrides reached through a base, 3 left out
+
+| C++ | | |
+|---|---|---|
+| `BRefFilter* BFilePanel::RefFilter() const` | skipped | result: BRefFilter * is not bridged |
+| `void BFilePanel::SetRefFilter(BRefFilter* filter)` | skipped | parameter filter: BRefFilter * is not bridged |
+| `void BFilePanel::SetPanelDirectory(const BDirectory* newDirectory)` | skipped | parameter newDirectory: const BDirectory * is not bridged |
+| `void BFilePanel::Show()` | included | mojobe_BFilePanel_Show |
+| `void BFilePanel::Hide()` | included | mojobe_BFilePanel_Hide |
+| `bool BFilePanel::IsShowing() const` | included | mojobe_BFilePanel_IsShowing |
+| `void BFilePanel::WasHidden()` | included | mojobe_BFilePanel_WasHidden |
+| `void BFilePanel::SelectionChanged()` | included | mojobe_BFilePanel_SelectionChanged |
+| `void BFilePanel::SendMessage(const BMessenger* target, BMessage* message)` | included | mojobe_BFilePanel_SendMessage |
+| `BWindow* BFilePanel::Window() const` | included | mojobe_BFilePanel_Window |
+| `BMessenger BFilePanel::Messenger() const` | included | mojobe_BFilePanel_Messenger |
+| `file_panel_mode BFilePanel::PanelMode() const` | included | mojobe_BFilePanel_PanelMode |
+| `void BFilePanel::SetTarget(BMessenger target)` | included | mojobe_BFilePanel_SetTarget |
+| `void BFilePanel::SetMessage(BMessage* message)` | included | mojobe_BFilePanel_SetMessage |
+| `void BFilePanel::SetSaveText(const char* text)` | included | mojobe_BFilePanel_SetSaveText |
+| `void BFilePanel::SetButtonLabel(file_panel_button button, const char* label)` | included | mojobe_BFilePanel_SetButtonLabel |
+| `void BFilePanel::SetNodeFlavors(uint32 flavors)` | included | mojobe_BFilePanel_SetNodeFlavors |
+| `void BFilePanel::SetPanelDirectory(const BEntry* newDirectory)` | included | mojobe_BFilePanel_SetPanelDirectory__BEntryP |
+| `void BFilePanel::SetPanelDirectory(const entry_ref* newDirectory)` | included | mojobe_BFilePanel_SetPanelDirectory__entry_refP |
+| `void BFilePanel::SetPanelDirectory(const char* newDirectory)` | included | mojobe_BFilePanel_SetPanelDirectory__charP |
+| `void BFilePanel::GetPanelDirectory(entry_ref* ref) const` | included | mojobe_BFilePanel_GetPanelDirectory |
+| `void BFilePanel::SetHideWhenDone(bool hideWhenDone)` | included | mojobe_BFilePanel_SetHideWhenDone |
+| `bool BFilePanel::HidesWhenDone() const` | included | mojobe_BFilePanel_HidesWhenDone |
+| `void BFilePanel::Refresh()` | included | mojobe_BFilePanel_Refresh |
+| `void BFilePanel::Rewind()` | included | mojobe_BFilePanel_Rewind |
+| `status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)` | included | mojobe_BFilePanel_GetNextSelectedRef |
+| `BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)` | included | mojobe_BFilePanel_new |
+
 ## BMessageRunner: 6 included, 0 overrides reached through a base, 4 left out
 
 | C++ | | |
@@ -1678,4 +1807,11 @@ In all: 953 included, 252 overrides reached through a base, 337 left out.
 | `BMessageRunner::BMessageRunner(BMessenger target, const BMessage& message, bigtime_t interval, int32 count, BMessenger replyTo)` | skipped | a call would match another constructor too |
 | `BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)` | included | mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32 |
 | `BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)` | included | mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_BMessenger |
+
+## Functions: 1 included, 0 overrides reached through a base, 1 left out
+
+| C++ | | |
+|---|---|---|
+| `status_t find_directory(directory_which which, dev_t volume, bool createIt, char* pathString, int32 length)` | skipped | parameter pathString: char * is not bridged |
+| `status_t find_directory(directory_which which, BPath* path, bool createIt, BVolume* volume)` | included | mojobe_find_directory |
 

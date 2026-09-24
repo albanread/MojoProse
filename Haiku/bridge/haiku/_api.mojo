@@ -57,7 +57,10 @@ from ._constants import (
     coordinate_space,
     cpu_platform,
     cpu_vendor,
+    directory_which,
     drawing_mode,
+    file_panel_button,
+    file_panel_mode,
     font_direction,
     font_file_format,
     font_metric_mode,
@@ -68,8 +71,10 @@ from ._constants import (
     menu_layout,
     mode_focus_follows_mouse,
     mode_mouse,
+    node_flavor,
     orientation,
     overlay_options,
+    path_base_directory,
     rect_tracking_style,
     set_font_mask,
     source_alpha,
@@ -103,6 +108,7 @@ from ._constants import (
     B_NAVIGABLE,
     B_NORMAL_PRIORITY,
     B_NO_TINT,
+    B_OPEN_PANEL,
     B_TILE_BITMAP,
     B_TRACK_WHOLE_RECT,
     B_WIDTH_AS_USUAL,
@@ -2316,6 +2322,13 @@ struct BApplicationRef[origin: ImmOrigin](
             _nonnull(self._ptr, "BApplication::Pulse"),
         )
 
+    def base_RefsReceived(self, message: BMessageRef[_]):
+        """`BApplication::RefsReceived`, the class's own."""
+        external_call["mojobe_BApplication_base_RefsReceived", NoneType](
+            _nonnull(self._ptr, "BApplication::RefsReceived"),
+            _addr(message._ptr),
+        )
+
 
 struct BApplication(Movable, _BApplicationMethods):
     """A `BApplication` Mojo owns, until something adopts it."""
@@ -2449,6 +2462,17 @@ trait ApplicationPulse(ApplicationHooks):
         ...
 
 
+trait ApplicationRefsReceived(ApplicationHooks):
+    """`void BApplication::RefsReceived(BMessage* message)`: a hook of BApplication."""
+
+    def RefsReceived(
+        mut self,
+        application: BApplicationRef[_],
+        message: BMessageRef[_],
+    ):
+        ...
+
+
 struct _BApplicationHooks(ImplicitlyCopyable, RegisterPassable):
     """`mojobe_BApplication_hooks`, laid out as C's."""
 
@@ -2459,6 +2483,7 @@ struct _BApplicationHooks(ImplicitlyCopyable, RegisterPassable):
     var QuitRequested: _FnPtr
     var AboutRequested: _FnPtr
     var Pulse: _FnPtr
+    var RefsReceived: _FnPtr
 
     def __init__(out self):
         self.type = 0
@@ -2468,6 +2493,7 @@ struct _BApplicationHooks(ImplicitlyCopyable, RegisterPassable):
         self.QuitRequested = {}
         self.AboutRequested = {}
         self.Pulse = {}
+        self.RefsReceived = {}
 
 
 def _BApplication_ReadyToRun[T: ApplicationReadyToRun](
@@ -2528,6 +2554,19 @@ def _BApplication_Pulse[T: ApplicationPulse](
     _ = call^
 
 
+def _BApplication_RefsReceived[T: ApplicationRefsReceived](
+    context: _Ptr,
+    application: Int,
+    message: Int,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].RefsReceived(
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
+    )
+    _ = call^
+
+
 def _BApplication_hooks[T: Movable & Deinitable]() -> _BApplicationHooks:
     """`T`'s hooks for a `BApplication`: a slot for each hook it implements, NULL for the rest, decided at compile time."""
     var hooks = _BApplicationHooks()
@@ -2552,6 +2591,10 @@ def _BApplication_hooks[T: Movable & Deinitable]() -> _BApplicationHooks:
     comptime if conforms_to(T, ApplicationPulse):
         hooks.Pulse = _fn_ptr(
             _BApplication_Pulse[downcast[T, ApplicationPulse]],
+        )
+    comptime if conforms_to(T, ApplicationRefsReceived):
+        hooks.RefsReceived = _fn_ptr(
+            _BApplication_RefsReceived[downcast[T, ApplicationRefsReceived]],
         )
     return hooks
 
@@ -5373,16 +5416,6 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             invalRect,
         )
 
-    def SetDiskMode(self, offset: Int64) -> Int8:
-        """`void BView::SetDiskMode(char* filename, long offset)`."""
-        var filename = Int8(0)
-        external_call["mojobe_BView_SetDiskMode", NoneType](
-            _nonnull(self._as_BView(), "BView::SetDiskMode"),
-            Pointer(to=filename),
-            offset,
-        )
-        return filename
-
     def DrawPicture(self, var filename: String, offset: Int64, where: BPoint):
         """`void BView::DrawPicture(const char* filename, long offset, BPoint where)`."""
         external_call["mojobe_BView_DrawPicture", NoneType](
@@ -6895,17 +6928,6 @@ trait _BMessageMethods(_AsBMessage):
         )
         return _result
 
-    def Flatten(self, size: Int64) raises -> Int8:
-        """`status_t BMessage::Flatten(char* buffer, ssize_t size) const`."""
-        var buffer = Int8(0)
-        var _result = external_call["mojobe_BMessage_Flatten", Int32](
-            _nonnull(self._as_BMessage(), "BMessage::Flatten"),
-            Pointer(to=buffer),
-            size,
-        )
-        _check(_result, "BMessage::Flatten")
-        return buffer
-
     def Unflatten(self, var flatBuffer: String) raises:
         """`status_t BMessage::Unflatten(const char* flatBuffer)`."""
         var _result = external_call["mojobe_BMessage_Unflatten", Int32](
@@ -7169,6 +7191,16 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::AddMessenger")
+
+    def AddRef(self, var name: String, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BMessage::AddRef(const char* name, const entry_ref* ref)`."""
+        var _result = external_call["mojobe_BMessage_AddRef", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::AddRef"),
+            name.as_c_string_span(),
+            _addr(ref_._as_entry_ref()),
+        )
+        _ = name^
+        _check(_result, "BMessage::AddRef")
 
     def AddMessage(self, var name: String, message: Some[_AsBMessage]) raises:
         """`status_t BMessage::AddMessage(const char* name, const BMessage* message)`."""
@@ -7639,6 +7671,32 @@ trait _BMessageMethods(_AsBMessage):
         _check(_result, "BMessage::FindMessenger")
         return messenger
 
+    def FindRef(self, var name: String, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BMessage::FindRef(const char* name, entry_ref* ref) const`."""
+        var _result = external_call["mojobe_BMessage_FindRef__charP_entry_refP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindRef"),
+            name.as_c_string_span(),
+            _addr(ref_._as_entry_ref()),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindRef")
+
+    def FindRef(
+        self,
+        var name: String,
+        index: Int32,
+        ref_: Some[_Asentry_ref],
+    ) raises:
+        """`status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const`."""
+        var _result = external_call["mojobe_BMessage_FindRef__charP_int32_entry_refP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindRef"),
+            name.as_c_string_span(),
+            index,
+            _addr(ref_._as_entry_ref()),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindRef")
+
     def FindMessage(self, var name: String, message: Some[_AsBMessage]) raises:
         """`status_t BMessage::FindMessage(const char* name, BMessage* message) const`."""
         var _result = external_call["mojobe_BMessage_FindMessage__charP_BMessageP", Int32](
@@ -8047,6 +8105,32 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::ReplaceMessenger")
+
+    def ReplaceRef(self, var name: String, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BMessage::ReplaceRef(const char* name, const entry_ref* ref)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceRef__charP_entry_refP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceRef"),
+            name.as_c_string_span(),
+            _addr(ref_._as_entry_ref()),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceRef")
+
+    def ReplaceRef(
+        self,
+        var name: String,
+        index: Int32,
+        ref_: Some[_Asentry_ref],
+    ) raises:
+        """`status_t BMessage::ReplaceRef(const char* name, int32 index, const entry_ref* ref)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceRef__charP_int32_entry_refP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceRef"),
+            name.as_c_string_span(),
+            index,
+            _addr(ref_._as_entry_ref()),
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceRef")
 
     def ReplaceMessage(
         self,
@@ -13602,6 +13686,940 @@ struct BScreen(Movable, _BScreenMethods):
         return self._ptr
 
 # ========================================================================== #
+# entry_ref
+# ========================================================================== #
+
+
+trait _Asentry_ref:
+    """Has a `entry_ref*` for libmojobe."""
+
+    def _as_entry_ref(self) -> _NPtr:
+        ...
+
+
+trait _entry_refMethods(_Asentry_ref):
+    """`entry_ref`'s methods, for its references and the values Mojo owns."""
+
+    def set_name(self, var name: String) raises:
+        """`status_t entry_ref::set_name(const char* name)`."""
+        var _result = external_call["mojobe_entry_ref_set_name", Int32](
+            _nonnull(self._as_entry_ref(), "entry_ref::set_name"),
+            name.as_c_string_span(),
+        )
+        _ = name^
+        _check(_result, "entry_ref::set_name")
+
+    def get_device(self) -> Int32:
+        """`entry_ref::device`."""
+        return external_call["mojobe_entry_ref_get_device", Int32](
+            _nonnull(self._as_entry_ref(), "entry_ref::device"),
+        )
+
+    def set_device(self, value: Int32):
+        """`entry_ref::device`."""
+        external_call["mojobe_entry_ref_set_device", NoneType](
+            _nonnull(self._as_entry_ref(), "entry_ref::device"),
+            value,
+        )
+
+    def get_directory(self) -> Int64:
+        """`entry_ref::directory`."""
+        return external_call["mojobe_entry_ref_get_directory", Int64](
+            _nonnull(self._as_entry_ref(), "entry_ref::directory"),
+        )
+
+    def set_directory(self, value: Int64):
+        """`entry_ref::directory`."""
+        external_call["mojobe_entry_ref_set_directory", NoneType](
+            _nonnull(self._as_entry_ref(), "entry_ref::directory"),
+            value,
+        )
+
+
+struct entry_refRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _entry_refMethods,
+):
+    """A `entry_ref` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `entry_refRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> entry_refRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return entry_refRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_entry_ref(self) -> _NPtr:
+        return self._ptr
+
+
+struct entry_ref(Movable, _entry_refMethods):
+    """A `entry_ref` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self) raises:
+        """`entry_ref::entry_ref()`."""
+        var address = external_call["mojobe_entry_ref_new__void", Int]()
+        if address == 0:
+            raise Error("entry_ref could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, dev: Int32, dir: Int64, var name: String) raises:
+        """`entry_ref::entry_ref(dev_t dev, ino_t dir, const char* name)`."""
+        var address = external_call["mojobe_entry_ref_new__dev_t_ino_t_charP", Int](
+            dev,
+            dir,
+            name.as_c_string_span(),
+        )
+        _ = name^
+        if address == 0:
+            raise Error("entry_ref could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_entry_ref_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_entry_ref(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BEntry
+# ========================================================================== #
+
+
+trait _AsBEntry:
+    """Has a `BEntry*` for libmojobe."""
+
+    def _as_BEntry(self) -> _NPtr:
+        ...
+
+
+trait _BEntryMethods(_AsBEntry):
+    """`BEntry`'s methods, for its references and the values Mojo owns."""
+
+    def InitCheck(self) raises:
+        """`status_t BEntry::InitCheck() const`."""
+        var _result = external_call["mojobe_BEntry_InitCheck", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::InitCheck"),
+        )
+        _check(_result, "BEntry::InitCheck")
+
+    def Exists(self) -> Bool:
+        """`bool BEntry::Exists() const`."""
+        var _result = external_call["mojobe_BEntry_Exists", Bool](
+            _nonnull(self._as_BEntry(), "BEntry::Exists"),
+        )
+        return _result
+
+    def Name(self) -> String:
+        """`const char* BEntry::Name() const`."""
+        var _result = external_call["mojobe_BEntry_Name", Int](
+            _nonnull(self._as_BEntry(), "BEntry::Name"),
+        )
+        return _string_from(_result)
+
+    def SetTo(self, ref_: Some[_Asentry_ref], traverse: Bool = False) raises:
+        """`status_t BEntry::SetTo(const entry_ref* ref, bool traverse)`."""
+        var _result = external_call["mojobe_BEntry_SetTo__entry_refP_bool", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetTo"),
+            _addr(ref_._as_entry_ref()),
+            traverse,
+        )
+        _check(_result, "BEntry::SetTo")
+
+    def SetTo(self, var path: String, traverse: Bool = False) raises:
+        """`status_t BEntry::SetTo(const char* path, bool traverse)`."""
+        var _result = external_call["mojobe_BEntry_SetTo__charP_bool", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetTo"),
+            path.as_c_string_span(),
+            traverse,
+        )
+        _ = path^
+        _check(_result, "BEntry::SetTo")
+
+    def Unset(self):
+        """`void BEntry::Unset()`."""
+        external_call["mojobe_BEntry_Unset", NoneType](
+            _nonnull(self._as_BEntry(), "BEntry::Unset"),
+        )
+
+    def GetRef(self, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BEntry::GetRef(entry_ref* ref) const`."""
+        var _result = external_call["mojobe_BEntry_GetRef", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetRef"),
+            _addr(ref_._as_entry_ref()),
+        )
+        _check(_result, "BEntry::GetRef")
+
+    def GetPath(self, path: Some[_AsBPath]) raises:
+        """`status_t BEntry::GetPath(BPath* path) const`."""
+        var _result = external_call["mojobe_BEntry_GetPath", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetPath"),
+            _addr(path._as_BPath()),
+        )
+        _check(_result, "BEntry::GetPath")
+
+    def GetParent(self, entry: Some[_AsBEntry]) raises:
+        """`status_t BEntry::GetParent(BEntry* entry) const`."""
+        var _result = external_call["mojobe_BEntry_GetParent", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetParent"),
+            _addr(entry._as_BEntry()),
+        )
+        _check(_result, "BEntry::GetParent")
+
+    def Rename(self, var path: String, clobber: Bool = False) raises:
+        """`status_t BEntry::Rename(const char* path, bool clobber)`."""
+        var _result = external_call["mojobe_BEntry_Rename", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::Rename"),
+            path.as_c_string_span(),
+            clobber,
+        )
+        _ = path^
+        _check(_result, "BEntry::Rename")
+
+    def Remove(self) raises:
+        """`status_t BEntry::Remove()`."""
+        var _result = external_call["mojobe_BEntry_Remove", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::Remove"),
+        )
+        _check(_result, "BEntry::Remove")
+
+    def IsFile(self) -> Bool:
+        """`bool BStatable::IsFile() const`."""
+        var _result = external_call["mojobe_BEntry_IsFile", Bool](
+            _nonnull(self._as_BEntry(), "BEntry::IsFile"),
+        )
+        return _result
+
+    def IsDirectory(self) -> Bool:
+        """`bool BStatable::IsDirectory() const`."""
+        var _result = external_call["mojobe_BEntry_IsDirectory", Bool](
+            _nonnull(self._as_BEntry(), "BEntry::IsDirectory"),
+        )
+        return _result
+
+    def IsSymLink(self) -> Bool:
+        """`bool BStatable::IsSymLink() const`."""
+        var _result = external_call["mojobe_BEntry_IsSymLink", Bool](
+            _nonnull(self._as_BEntry(), "BEntry::IsSymLink"),
+        )
+        return _result
+
+    def GetOwner(self) raises -> UInt32:
+        """`status_t BStatable::GetOwner(uid_t* owner) const`."""
+        var owner = UInt32(0)
+        var _result = external_call["mojobe_BEntry_GetOwner", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetOwner"),
+            Pointer(to=owner),
+        )
+        _check(_result, "BStatable::GetOwner")
+        return owner
+
+    def SetOwner(self, owner: UInt32) raises:
+        """`status_t BStatable::SetOwner(uid_t owner)`."""
+        var _result = external_call["mojobe_BEntry_SetOwner", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetOwner"),
+            owner,
+        )
+        _check(_result, "BStatable::SetOwner")
+
+    def GetGroup(self) raises -> UInt32:
+        """`status_t BStatable::GetGroup(gid_t* group) const`."""
+        var group = UInt32(0)
+        var _result = external_call["mojobe_BEntry_GetGroup", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetGroup"),
+            Pointer(to=group),
+        )
+        _check(_result, "BStatable::GetGroup")
+        return group
+
+    def SetGroup(self, group: UInt32) raises:
+        """`status_t BStatable::SetGroup(gid_t group)`."""
+        var _result = external_call["mojobe_BEntry_SetGroup", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetGroup"),
+            group,
+        )
+        _check(_result, "BStatable::SetGroup")
+
+    def GetPermissions(self) raises -> UInt32:
+        """`status_t BStatable::GetPermissions(mode_t* permissions) const`."""
+        var permissions = UInt32(0)
+        var _result = external_call["mojobe_BEntry_GetPermissions", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetPermissions"),
+            Pointer(to=permissions),
+        )
+        _check(_result, "BStatable::GetPermissions")
+        return permissions
+
+    def SetPermissions(self, permissions: UInt32) raises:
+        """`status_t BStatable::SetPermissions(mode_t permissions)`."""
+        var _result = external_call["mojobe_BEntry_SetPermissions", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetPermissions"),
+            permissions,
+        )
+        _check(_result, "BStatable::SetPermissions")
+
+    def GetSize(self) raises -> Int64:
+        """`status_t BStatable::GetSize(off_t* size) const`."""
+        var size = Int64(0)
+        var _result = external_call["mojobe_BEntry_GetSize", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetSize"),
+            Pointer(to=size),
+        )
+        _check(_result, "BStatable::GetSize")
+        return size
+
+    def GetModificationTime(self) raises -> Int64:
+        """`status_t BStatable::GetModificationTime(time_t* mtime) const`."""
+        var mtime = Int64(0)
+        var _result = external_call["mojobe_BEntry_GetModificationTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetModificationTime"),
+            Pointer(to=mtime),
+        )
+        _check(_result, "BStatable::GetModificationTime")
+        return mtime
+
+    def SetModificationTime(self, mtime: Int64) raises:
+        """`status_t BStatable::SetModificationTime(time_t mtime)`."""
+        var _result = external_call["mojobe_BEntry_SetModificationTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetModificationTime"),
+            mtime,
+        )
+        _check(_result, "BStatable::SetModificationTime")
+
+    def GetCreationTime(self) raises -> Int64:
+        """`status_t BStatable::GetCreationTime(time_t* ctime) const`."""
+        var ctime = Int64(0)
+        var _result = external_call["mojobe_BEntry_GetCreationTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetCreationTime"),
+            Pointer(to=ctime),
+        )
+        _check(_result, "BStatable::GetCreationTime")
+        return ctime
+
+    def SetCreationTime(self, ctime: Int64) raises:
+        """`status_t BStatable::SetCreationTime(time_t ctime)`."""
+        var _result = external_call["mojobe_BEntry_SetCreationTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetCreationTime"),
+            ctime,
+        )
+        _check(_result, "BStatable::SetCreationTime")
+
+    def GetAccessTime(self) raises -> Int64:
+        """`status_t BStatable::GetAccessTime(time_t* atime) const`."""
+        var atime = Int64(0)
+        var _result = external_call["mojobe_BEntry_GetAccessTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::GetAccessTime"),
+            Pointer(to=atime),
+        )
+        _check(_result, "BStatable::GetAccessTime")
+        return atime
+
+    def SetAccessTime(self, atime: Int64) raises:
+        """`status_t BStatable::SetAccessTime(time_t atime)`."""
+        var _result = external_call["mojobe_BEntry_SetAccessTime", Int32](
+            _nonnull(self._as_BEntry(), "BEntry::SetAccessTime"),
+            atime,
+        )
+        _check(_result, "BStatable::SetAccessTime")
+
+
+struct BEntryRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BEntryMethods,
+):
+    """A `BEntry` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BEntryRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BEntryRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BEntryRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BEntry(self) -> _NPtr:
+        return self._ptr
+
+
+struct BEntry(Movable, _BEntryMethods):
+    """A `BEntry` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self) raises:
+        """`BEntry::BEntry()`."""
+        var address = external_call["mojobe_BEntry_new__void", Int]()
+        if address == 0:
+            raise Error("BEntry could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        ref_: Some[_Asentry_ref],
+        traverse: Bool = False,
+    ) raises:
+        """`BEntry::BEntry(const entry_ref* ref, bool traverse)`."""
+        var address = external_call["mojobe_BEntry_new__entry_refP_bool", Int](
+            _addr(ref_._as_entry_ref()),
+            traverse,
+        )
+        if address == 0:
+            raise Error("BEntry could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, var path: String, traverse: Bool = False) raises:
+        """`BEntry::BEntry(const char* path, bool traverse)`."""
+        var address = external_call["mojobe_BEntry_new__charP_bool", Int](
+            path.as_c_string_span(),
+            traverse,
+        )
+        _ = path^
+        if address == 0:
+            raise Error("BEntry could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BEntry_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BEntry(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BPath
+# ========================================================================== #
+
+
+trait _AsBPath:
+    """Has a `BPath*` for libmojobe."""
+
+    def _as_BPath(self) -> _NPtr:
+        ...
+
+
+trait _BPathMethods(_AsBPath):
+    """`BPath`'s methods, for its references and the values Mojo owns."""
+
+    def InitCheck(self) raises:
+        """`status_t BPath::InitCheck() const`."""
+        var _result = external_call["mojobe_BPath_InitCheck", Int32](
+            _nonnull(self._as_BPath(), "BPath::InitCheck"),
+        )
+        _check(_result, "BPath::InitCheck")
+
+    def SetTo(self, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BPath::SetTo(const entry_ref* ref)`."""
+        var _result = external_call["mojobe_BPath_SetTo__entry_refP", Int32](
+            _nonnull(self._as_BPath(), "BPath::SetTo"),
+            _addr(ref_._as_entry_ref()),
+        )
+        _check(_result, "BPath::SetTo")
+
+    def SetTo(self, entry: Some[_AsBEntry]) raises:
+        """`status_t BPath::SetTo(const BEntry* entry)`."""
+        var _result = external_call["mojobe_BPath_SetTo__BEntryP", Int32](
+            _nonnull(self._as_BPath(), "BPath::SetTo"),
+            _addr(entry._as_BEntry()),
+        )
+        _check(_result, "BPath::SetTo")
+
+    def SetTo(
+        self,
+        var path: String,
+        var leaf: Optional[String] = None,
+        normalize: Bool = False,
+    ) raises:
+        """`status_t BPath::SetTo(const char* path, const char* leaf, bool normalize)`."""
+        var leaf_address = 0
+        if leaf:
+            leaf_address = Int(leaf.value().as_c_string_span().ptr())
+        var _result = external_call["mojobe_BPath_SetTo__charP_charP_bool", Int32](
+            _nonnull(self._as_BPath(), "BPath::SetTo"),
+            path.as_c_string_span(),
+            leaf_address,
+            normalize,
+        )
+        _ = path^
+        _ = leaf^
+        _check(_result, "BPath::SetTo")
+
+    def Unset(self):
+        """`void BPath::Unset()`."""
+        external_call["mojobe_BPath_Unset", NoneType](
+            _nonnull(self._as_BPath(), "BPath::Unset"),
+        )
+
+    def Append(self, var path: String, normalize: Bool = False) raises:
+        """`status_t BPath::Append(const char* path, bool normalize)`."""
+        var _result = external_call["mojobe_BPath_Append", Int32](
+            _nonnull(self._as_BPath(), "BPath::Append"),
+            path.as_c_string_span(),
+            normalize,
+        )
+        _ = path^
+        _check(_result, "BPath::Append")
+
+    def Path(self) -> String:
+        """`const char* BPath::Path() const`."""
+        var _result = external_call["mojobe_BPath_Path", Int](
+            _nonnull(self._as_BPath(), "BPath::Path"),
+        )
+        return _string_from(_result)
+
+    def Leaf(self) -> String:
+        """`const char* BPath::Leaf() const`."""
+        var _result = external_call["mojobe_BPath_Leaf", Int](
+            _nonnull(self._as_BPath(), "BPath::Leaf"),
+        )
+        return _string_from(_result)
+
+    def GetParent(self, path: Some[_AsBPath]) raises:
+        """`status_t BPath::GetParent(BPath* path) const`."""
+        var _result = external_call["mojobe_BPath_GetParent", Int32](
+            _nonnull(self._as_BPath(), "BPath::GetParent"),
+            _addr(path._as_BPath()),
+        )
+        _check(_result, "BPath::GetParent")
+
+    def IsAbsolute(self) -> Bool:
+        """`bool BPath::IsAbsolute() const`."""
+        var _result = external_call["mojobe_BPath_IsAbsolute", Bool](
+            _nonnull(self._as_BPath(), "BPath::IsAbsolute"),
+        )
+        return _result
+
+    def IsFixedSize(self) -> Bool:
+        """`bool BPath::IsFixedSize() const`."""
+        var _result = external_call["mojobe_BPath_IsFixedSize", Bool](
+            _nonnull(self._as_BPath(), "BPath::IsFixedSize"),
+        )
+        return _result
+
+    def TypeCode(self) -> UInt32:
+        """`type_code BPath::TypeCode() const`."""
+        var _result = external_call["mojobe_BPath_TypeCode", UInt32](
+            _nonnull(self._as_BPath(), "BPath::TypeCode"),
+        )
+        return _result
+
+    def FlattenedSize(self) -> Int64:
+        """`ssize_t BPath::FlattenedSize() const`."""
+        var _result = external_call["mojobe_BPath_FlattenedSize", Int64](
+            _nonnull(self._as_BPath(), "BPath::FlattenedSize"),
+        )
+        return _result
+
+    def AllowsTypeCode(self, code: UInt32) -> Bool:
+        """`bool BPath::AllowsTypeCode(type_code code) const`."""
+        var _result = external_call["mojobe_BPath_AllowsTypeCode", Bool](
+            _nonnull(self._as_BPath(), "BPath::AllowsTypeCode"),
+            code,
+        )
+        return _result
+
+    def Unflatten(self, code: UInt32, buffer: Span[UInt8, _]) raises:
+        """`status_t BPath::Unflatten(type_code code, const void* buffer, ssize_t size)`."""
+        var _result = external_call["mojobe_BPath_Unflatten", Int32](
+            _nonnull(self._as_BPath(), "BPath::Unflatten"),
+            code,
+            Int(buffer.unsafe_ptr()),
+            Int64(len(buffer)),
+        )
+        _check(_result, "BPath::Unflatten")
+
+
+struct BPathRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BPathMethods,
+):
+    """A `BPath` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BPathRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BPathRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BPathRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BPath(self) -> _NPtr:
+        return self._ptr
+
+
+struct BPath(Movable, _BPathMethods):
+    """A `BPath` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self) raises:
+        """`BPath::BPath()`."""
+        var address = external_call["mojobe_BPath_new__void", Int]()
+        if address == 0:
+            raise Error("BPath could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, ref_: Some[_Asentry_ref]) raises:
+        """`BPath::BPath(const entry_ref* ref)`."""
+        var address = external_call["mojobe_BPath_new__entry_refP", Int](
+            _addr(ref_._as_entry_ref()),
+        )
+        if address == 0:
+            raise Error("BPath could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(out self, entry: Some[_AsBEntry]) raises:
+        """`BPath::BPath(const BEntry* entry)`."""
+        var address = external_call["mojobe_BPath_new__BEntryP", Int](
+            _addr(entry._as_BEntry()),
+        )
+        if address == 0:
+            raise Error("BPath could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        var dir: String,
+        var leaf: Optional[String] = None,
+        normalize: Bool = False,
+    ) raises:
+        """`BPath::BPath(const char* dir, const char* leaf, bool normalize)`."""
+        var leaf_address = 0
+        if leaf:
+            leaf_address = Int(leaf.value().as_c_string_span().ptr())
+        var address = external_call["mojobe_BPath_new__charP_charP_bool", Int](
+            dir.as_c_string_span(),
+            leaf_address,
+            normalize,
+        )
+        _ = dir^
+        _ = leaf^
+        if address == 0:
+            raise Error("BPath could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BPath_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BPath(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BFilePanel
+# ========================================================================== #
+
+
+trait _AsBFilePanel:
+    """Has a `BFilePanel*` for libmojobe."""
+
+    def _as_BFilePanel(self) -> _NPtr:
+        ...
+
+
+trait _BFilePanelMethods(_AsBFilePanel):
+    """`BFilePanel`'s methods, for its references and the values Mojo owns."""
+
+    def Show(self):
+        """`void BFilePanel::Show()`."""
+        external_call["mojobe_BFilePanel_Show", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Show"),
+        )
+
+    def Hide(self):
+        """`void BFilePanel::Hide()`."""
+        external_call["mojobe_BFilePanel_Hide", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Hide"),
+        )
+
+    def IsShowing(self) -> Bool:
+        """`bool BFilePanel::IsShowing() const`."""
+        var _result = external_call["mojobe_BFilePanel_IsShowing", Bool](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::IsShowing"),
+        )
+        return _result
+
+    def WasHidden(self):
+        """`void BFilePanel::WasHidden()`."""
+        external_call["mojobe_BFilePanel_WasHidden", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::WasHidden"),
+        )
+
+    def SelectionChanged(self):
+        """`void BFilePanel::SelectionChanged()`."""
+        external_call["mojobe_BFilePanel_SelectionChanged", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SelectionChanged"),
+        )
+
+    def SendMessage(self, target: BMessenger, message: Some[_AsBMessage]):
+        """`void BFilePanel::SendMessage(const BMessenger* target, BMessage* message)`."""
+        external_call["mojobe_BFilePanel_SendMessage", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SendMessage"),
+            _address_of(target),
+            _addr(message._as_BMessage()),
+        )
+
+    def Window(ref self) -> BWindowRef[origin_of(self)]:
+        """`BWindow* BFilePanel::Window() const`."""
+        var _result = external_call["mojobe_BFilePanel_Window", Int](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Window"),
+        )
+        return BWindowRef[origin_of(self)](_ptr_from(_result))
+
+    def Messenger(self) -> BMessenger:
+        """`BMessenger BFilePanel::Messenger() const`."""
+        var _result = BMessenger._zeroed()
+        external_call["mojobe_BFilePanel_Messenger", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Messenger"),
+            _address_of(_result),
+        )
+        return _result
+
+    def PanelMode(self) -> file_panel_mode:
+        """`file_panel_mode BFilePanel::PanelMode() const`."""
+        var _result = external_call["mojobe_BFilePanel_PanelMode", file_panel_mode](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::PanelMode"),
+        )
+        return _result
+
+    def SetTarget(self, target: BMessenger):
+        """`void BFilePanel::SetTarget(BMessenger target)`."""
+        external_call["mojobe_BFilePanel_SetTarget", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetTarget"),
+            _address_of(target),
+        )
+
+    def SetMessage(self, message: Some[_AsBMessage]):
+        """`void BFilePanel::SetMessage(BMessage* message)`."""
+        external_call["mojobe_BFilePanel_SetMessage", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetMessage"),
+            _addr(message._as_BMessage()),
+        )
+
+    def SetSaveText(self, var text: String):
+        """`void BFilePanel::SetSaveText(const char* text)`."""
+        external_call["mojobe_BFilePanel_SetSaveText", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetSaveText"),
+            text.as_c_string_span(),
+        )
+        _ = text^
+
+    def SetButtonLabel(self, button: file_panel_button, var label: String):
+        """`void BFilePanel::SetButtonLabel(file_panel_button button, const char* label)`."""
+        external_call["mojobe_BFilePanel_SetButtonLabel", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetButtonLabel"),
+            button,
+            label.as_c_string_span(),
+        )
+        _ = label^
+
+    def SetNodeFlavors(self, flavors: UInt32):
+        """`void BFilePanel::SetNodeFlavors(uint32 flavors)`."""
+        external_call["mojobe_BFilePanel_SetNodeFlavors", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetNodeFlavors"),
+            flavors,
+        )
+
+    def SetPanelDirectory(self, newDirectory: Some[_AsBEntry]):
+        """`void BFilePanel::SetPanelDirectory(const BEntry* newDirectory)`."""
+        external_call["mojobe_BFilePanel_SetPanelDirectory__BEntryP", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetPanelDirectory"),
+            _addr(newDirectory._as_BEntry()),
+        )
+
+    def SetPanelDirectory(self, newDirectory: Some[_Asentry_ref]):
+        """`void BFilePanel::SetPanelDirectory(const entry_ref* newDirectory)`."""
+        external_call["mojobe_BFilePanel_SetPanelDirectory__entry_refP", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetPanelDirectory"),
+            _addr(newDirectory._as_entry_ref()),
+        )
+
+    def SetPanelDirectory(self, var newDirectory: String):
+        """`void BFilePanel::SetPanelDirectory(const char* newDirectory)`."""
+        external_call["mojobe_BFilePanel_SetPanelDirectory__charP", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetPanelDirectory"),
+            newDirectory.as_c_string_span(),
+        )
+        _ = newDirectory^
+
+    def GetPanelDirectory(self, ref_: Some[_Asentry_ref]):
+        """`void BFilePanel::GetPanelDirectory(entry_ref* ref) const`."""
+        external_call["mojobe_BFilePanel_GetPanelDirectory", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::GetPanelDirectory"),
+            _addr(ref_._as_entry_ref()),
+        )
+
+    def SetHideWhenDone(self, hideWhenDone: Bool):
+        """`void BFilePanel::SetHideWhenDone(bool hideWhenDone)`."""
+        external_call["mojobe_BFilePanel_SetHideWhenDone", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::SetHideWhenDone"),
+            hideWhenDone,
+        )
+
+    def HidesWhenDone(self) -> Bool:
+        """`bool BFilePanel::HidesWhenDone() const`."""
+        var _result = external_call["mojobe_BFilePanel_HidesWhenDone", Bool](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::HidesWhenDone"),
+        )
+        return _result
+
+    def Refresh(self):
+        """`void BFilePanel::Refresh()`."""
+        external_call["mojobe_BFilePanel_Refresh", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Refresh"),
+        )
+
+    def Rewind(self):
+        """`void BFilePanel::Rewind()`."""
+        external_call["mojobe_BFilePanel_Rewind", NoneType](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::Rewind"),
+        )
+
+    def GetNextSelectedRef(self, ref_: Some[_Asentry_ref]) raises:
+        """`status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)`."""
+        var _result = external_call["mojobe_BFilePanel_GetNextSelectedRef", Int32](
+            _nonnull(self._as_BFilePanel(), "BFilePanel::GetNextSelectedRef"),
+            _addr(ref_._as_entry_ref()),
+        )
+        _check(_result, "BFilePanel::GetNextSelectedRef")
+
+
+struct BFilePanelRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BFilePanelMethods,
+):
+    """A `BFilePanel` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BFilePanelRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BFilePanelRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BFilePanelRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BFilePanel(self) -> _NPtr:
+        return self._ptr
+
+
+struct BFilePanel(Movable, _BFilePanelMethods):
+    """A `BFilePanel` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        mode: file_panel_mode = B_OPEN_PANEL,
+        var target: Optional[BMessenger] = None,
+        directory: entry_refRef[_] = entry_refRef[ImmUntrackedOrigin](),
+        nodeFlavors: UInt32 = 0,
+        allowMultipleSelection: Bool = True,
+        message: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+        modal: Bool = False,
+        hideWhenDone: Bool = True,
+    ) raises:
+        """`BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)`."""
+        var target_address = 0
+        if target:
+            target_address = _address_of(target.value())
+        var address = external_call["mojobe_BFilePanel_new", Int](
+            mode,
+            target_address,
+            _addr(directory._as_entry_ref()),
+            nodeFlavors,
+            allowMultipleSelection,
+            _addr(message._as_BMessage()),
+            modal,
+            hideWhenDone,
+        )
+        _ = target^
+        if address == 0:
+            raise Error("BFilePanel could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BFilePanel_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BFilePanel(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
 # BMessageRunner
 # ========================================================================== #
 
@@ -13745,6 +14763,24 @@ struct BMessageRunner(Movable, _BMessageRunnerMethods):
 
     def _as_BMessageRunner(self) -> _NPtr:
         return self._ptr
+
+# ========================================================================== #
+# Functions
+# ========================================================================== #
+
+
+def find_directory(
+    which: directory_which,
+    path: Some[_AsBPath],
+    createIt: Bool = False,
+) raises:
+    """`status_t find_directory(directory_which which, BPath* path, bool createIt, BVolume* volume)`."""
+    var _result = external_call["mojobe_find_directory", Int32](
+        which,
+        _addr(path._as_BPath()),
+        createIt,
+    )
+    _check(_result, "find_directory")
 
 
 # ===----------------------------------------------------------------------=== #

@@ -31,8 +31,19 @@ headers = [
 	"Region.h",
 	"Bitmap.h",
 	"Screen.h",
+	"Entry.h",
+	"Path.h",
+	"FilePanel.h",
+	"FindDirectory.h",
 ]
-constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
+constant_dirs = ["os/app", "os/interface", "os/kernel", "os/storage", "os/support"]
+
+# Free functions.
+functions = ["find_directory"]
+
+# The libraries libmojobe links, where every method it calls that is neither
+# virtual nor defined in a header must be defined (BFilePanel is Tracker's).
+libraries = ["libbe.so", "libroot.so", "libtracker.so"]
 
 # Value types: copied, laid out in Mojo as in C++. A type that C++ cannot
 # pass in registers (a user-declared copy constructor makes BRect and BPoint
@@ -82,7 +93,7 @@ init_check = "error"       # the constructors' status_t* out-parameter raises
 shadow = true
 hooks = [
 	"ReadyToRun", "MessageReceived", "QuitRequested", "AboutRequested",
-	"Pulse",
+	"Pulse", "RefsReceived",
 ]
 
 [classes.BWindow]
@@ -166,6 +177,19 @@ init_check = "InitCheck()"
 [classes.BScreen]
 kind = "owned"
 
+# The storage kit: paths, entries, file panels.
+[classes.entry_ref]
+kind = "owned"             # its name is a string it owns: not a value class
+
+[classes.BEntry]
+kind = "owned"
+
+[classes.BPath]
+kind = "owned"
+
+[classes.BFilePanel]
+kind = "owned"
+
 [classes.BMessageRunner]
 kind = "owned"
 init_check = "InitCheck()" # the constructors report only through InitCheck()
@@ -219,3 +243,8 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 # a Span of its bytes, borrowed from the object.
 [spans]
 "BBitmap::Bits" = "BitsLength"
+
+# Pointers to values held in Mojo (BMessenger) that the method reads; the
+# rest are results.
+[in]
+"BFilePanel::BFilePanel" = ["target"]

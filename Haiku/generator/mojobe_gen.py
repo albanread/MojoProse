@@ -253,7 +253,7 @@ class Method:
         result = re.match(r"^(.*?)\s*\(", signature)
         self.result = (
             CType({"qualType": result.group(1)})
-            if result and self.kind == "CXXMethodDecl"
+            if result and self.kind in ("CXXMethodDecl", "FunctionDecl")
             else None
         )
         self.result_node = None
@@ -261,7 +261,8 @@ class Method:
     def cxx(self):
         """The declaration, for comments and the manifest."""
         args = ", ".join("%s %s" % (spelled(p.type), p.name) for p in self.params)
-        head = "%s::%s(%s)" % (self.owner, self.name, args)
+        head = ("%s::%s(%s)" % (self.owner, self.name, args) if self.owner
+                else "%s(%s)" % (self.name, args))
         if self.result is not None:
             head = "%s %s" % (spelled(self.result), head)
         return head + (" const" if self.const else "")
@@ -313,6 +314,7 @@ class Model:
         self.typedef_enums = {}  # typedef name -> enum name
         self.anonymous = {}  # id -> an anonymous record's node, or enum's constants
         self.header_defined = set()  # mangled names of methods defined after their class
+        self.functions = {}  # name -> [Method], free functions
         for node in ast.get("inner", []):
             self._top(node)
 
@@ -346,6 +348,9 @@ class Model:
         if kind == "LinkageSpecDecl":
             for child in node.get("inner", []):
                 self._top(child)
+        elif kind == "FunctionDecl" and node.get("name"):
+            self.functions.setdefault(node["name"], []).append(
+                Method(node, "", "public"))
         elif kind == "CXXRecordDecl" and node.get("completeDefinition"):
             if node.get("name"):
                 self.records[node["name"]] = Record(node)
@@ -669,8 +674,10 @@ class Bridge:
             if ctype.base in self.classes or base in self.classes:
                 return "objectptr", ctype.base if ctype.base in self.classes else base
             if not ctype.const:
-                if base in PRIMITIVES or base == "char":
-                    return "outprim", PRIMITIVES.get(base, "Int8")
+                if base == "char":
+                    return "unknown", None  # a buffer, not one character
+                if base in PRIMITIVES:
+                    return "outprim", PRIMITIVES[base]
                 enum = self.enum_name(ctype)
                 if enum:
                     return "outenum", enum
@@ -728,6 +735,8 @@ class Bridge:
             if text in ("NULL", "nullptr", "0"):
                 return "%sRef[ImmUntrackedOrigin]()" % detail
             return None
+        if kind in ("valueobjptr", "valueobjmutptr"):
+            return "None" if text in ("NULL", "nullptr", "0") else None
         if kind == "cstring":
             if text in ("NULL", "nullptr", "0"):
                 return "None"
@@ -778,7 +787,7 @@ class Bridge:
     def map_method(self, method, cls, is_ctor=False):
         """Maps a method (or constructor) for class `cls`: returns a dict
         describing its C and Mojo sides, or raises Unbridged."""
-        key = "%s::%s" % (method.owner, method.name)
+        key = "%s::%s" % (method.owner, method.name) if method.owner else method.name
         if key in self.skips:
             raise Unbridged(self.skips[key])
         if method.variadic:
@@ -828,6 +837,8 @@ class Bridge:
                 else:
                     raise Unbridged("parameter %s: %s by value"
                                     % (param.name, param.type.qual))
+            if kind == "outvalueobj" and param.name in self.config.get("in", {}).get(key, []):
+                kind = "valueobjmutptr"  # a pointer the method reads
             if param.name in inout and param.type.pointers:
                 raise Unbridged("changes %s in place; the overload that returns"
                                 " the result is bridged" % param.name)
@@ -969,6 +980,8 @@ class Emitter:
             return "const %s* %s" % (detail, name), "*" + name
         if kind == "valueobjptr":
             return "const %s* %s" % (detail, name), name
+        if kind == "valueobjmutptr":
+            return "%s* %s" % (detail, name), name
         if kind == "outvalueobj":
             return "%s* %s" % (detail, name), name
         raise AssertionError(kind)
@@ -1033,7 +1046,14 @@ class Emitter:
                         ["var %s = %s._zeroed()" % (name, detail)], [])
         if kind in ("prim", "enum", "value"):
             return "%s: %s%s" % (name, self.b.mojo_scalar(kind, detail), suffix), name, [], []
-        if kind in ("valueobj", "valueobjptr"):
+        if kind in ("valueobjptr", "valueobjmutptr") and p.default in ("NULL", "nullptr", "0"):
+            # a pointer C++ lets be NULL: an Optional value
+            return ("var %s: Optional[%s] = None" % (name, detail), "%s_address" % name,
+                    ["var %s_address = 0" % name,
+                     "if %s:" % name,
+                     "    %s_address = _address_of(%s.value())" % (name, name)],
+                    ["_ = %s^" % name])
+        if kind in ("valueobj", "valueobjptr", "valueobjmutptr"):
             return "%s: %s" % (name, detail), "_address_of(%s)" % name, [], []
         if kind == "char":
             return "%s: String%s" % (name, suffix), "_char(%s)" % name, [], []
@@ -1107,7 +1127,7 @@ class Emitter:
         self`."""
         method = info["method"]
         params = info["params"]
-        c_params = ["%s* self" % cls]
+        c_params = ["%s* self" % cls] if cls else []
         c_args = []
         pre_c = []
         post_c = []
@@ -1123,7 +1143,9 @@ class Emitter:
                               % (entry["p"].name, entry["p"].name, entry["p"].name))
         result = info["result"]
         c_ret = self.c_result(result)
-        if method.owner == cls:
+        if cls is None:
+            call = "::%s(%s)" % (method.name, ", ".join(c_args))
+        elif method.owner == cls:
             call = "self->%s(%s)" % (method.name, ", ".join(c_args))
         else:
             # inherited from a class the bridge does not carry
@@ -1161,7 +1183,7 @@ class Emitter:
         self.add_entry(c_ret, entry_name, c_params, body, method.cxx())
         # Mojo
         m_params = []
-        m_args = [self_expr]
+        m_args = [self_expr] if cls else []
         pre = []
         post = []
         outs = []
@@ -1204,7 +1226,7 @@ class Emitter:
             self_decl = "mut self"
         head = "def %s(%s)%s%s:" % (
             mojo_name(method.name),
-            ", ".join([self_decl] + m_params),
+            ", ".join(([self_decl] if cls else []) + m_params),
             " raises" if raises else "",
             signature_ret,
         )
@@ -1218,7 +1240,8 @@ class Emitter:
             lines.append("    var _result = " + call_text)
         lines.extend("    " + l for l in post)
         if raises:
-            lines.append('    _check(_result, "%s::%s")' % (method.owner, method.name))
+            lines.append('    _check(_result, "%s")' % (
+                "%s::%s" % (method.owner, method.name) if method.owner else method.name))
         values = []
         if convert and convert.startswith("span:"):
             lines.append("    if _result == 0:")
@@ -1334,6 +1357,37 @@ class Emitter:
             if types[:count] == other_types[:count]:
                 return True
         return False
+
+    def emit_functions(self):
+        """The free functions bridge.toml names (find_directory)."""
+        names = self.b.config.get("functions", [])
+        if not names:
+            return
+        self.mark("Functions")
+        manifest = self.manifest.setdefault("Functions", [])
+        for name in names:
+            infos = []
+            for f in self.model.functions.get(name, []):
+                try:
+                    infos.append(self.b.map_method(f, None))
+                except Unbridged as why:
+                    manifest.append((f.cxx(), "skipped", str(why)))
+            kept = []
+            for info in infos:
+                signature = self.signature(info)
+                if any(self.ambiguous(signature, other) for other in kept):
+                    manifest.append((info["method"].cxx(), "skipped",
+                                     "a call would match another overload too"))
+                    continue
+                kept.append(signature)
+                tag = ""
+                if len(infos) > 1:
+                    tag = "__" + type_tag([e for e in info["params"]
+                                           if e["role"] not in ("null",)])
+                entry = "mojobe_%s%s" % (name, tag)
+                lines, _ = self.emit_method(info, None, entry, None, "")
+                self.functions.append(lines)
+                manifest.append((info["method"].cxx(), "included", entry))
 
     def emit_value_class(self, cls):
         """A class held in a Mojo value (kind "value"): C++ constructs it in
@@ -2715,6 +2769,10 @@ def write_api(emitter, bridge):
         out.extend("    %s," % n for n in consts)
         out.append(")")
     out.extend(emitter.mojo)
+    if emitter.functions:
+        out += ["", "# " + "=" * 74 + " #", "# Functions", "# " + "=" * 74 + " #"]
+        for lines in emitter.functions:
+            out += ["", ""] + lines
     extra = SNIPPETS / "_api.mojo"
     if extra.exists():
         out.append("")
@@ -2753,6 +2811,7 @@ def write_init(emitter, bridge, constants):
         if bridge.classes[cls].get("kind") != "value":
             out.append("    %sRef," % cls)
     out.extend("    %s," % n for n in hand_written("_api.mojo", "def"))
+    out.extend("    %s," % n for n in bridge.config.get("functions", []))
     out.append(")")
     out.append("from ._constants import status_of")
     out.append("from ._constants import (")
@@ -3148,8 +3207,10 @@ def main():
         order.append(cls)
     for cls in bridge.classes:
         visit(cls)
+    emitter.functions = []
     for cls in order:
         emitter.emit_class(cls)
+    emitter.emit_functions()
         # remember the shadow constructors for the C++ class
     write_c(emitter, bridge, includes)
     write_values(emitter, bridge)

@@ -378,6 +378,16 @@ public:
 		fDepth.Leave();
 	}
 
+	virtual void RefsReceived(BMessage * message)
+	{
+		if (fHooks.RefsReceived == NULL || !fDepth.Enter("RefsReceived")) {
+			BApplication::RefsReceived(message);
+			return;
+		}
+		fHooks.RefsReceived(fContext, this, message);
+		fDepth.Leave();
+	}
+
 	//! The Mojo state, if it is of the type tagged.
 	void* Context(uint64 type) const
 	{
@@ -3288,6 +3298,20 @@ mojobe_BApplication_base_Pulse(BApplication* self)
 		return;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BApplication_base_Pulse");
+	}
+}
+
+
+// BApplication's own RefsReceived
+void
+mojobe_BApplication_base_RefsReceived(BApplication* self, BMessage* message)
+{
+	try {
+		self->BApplication::RefsReceived(message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BApplication_base_RefsReceived");
 	}
 }
 
@@ -7286,20 +7310,6 @@ mojobe_BView_DelayedInvalidate__bigtime_t_BRect(BView* self,
 }
 
 
-// void BView::SetDiskMode(char* filename, long offset)
-void
-mojobe_BView_SetDiskMode(BView* self, char * a_filename, long a_offset)
-{
-	try {
-		self->SetDiskMode(a_filename, a_offset);
-	} catch (const std::bad_alloc&) {
-		return;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BView_SetDiskMode");
-	}
-}
-
-
 // void BView::DrawPicture(const char* filename, long offset, BPoint where)
 void
 mojobe_BView_DrawPicture(BView* self,
@@ -8694,21 +8704,6 @@ mojobe_BMessage_FlattenedSize(BMessage* self)
 }
 
 
-// status_t BMessage::Flatten(char* buffer, ssize_t size) const
-status_t
-mojobe_BMessage_Flatten(BMessage* self, char * a_buffer, ssize_t a_size)
-{
-	try {
-		return self->Flatten(a_buffer, a_size);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMessage_Flatten");
-	}
-	return B_ERROR;
-}
-
-
 // status_t BMessage::Unflatten(const char* flatBuffer)
 status_t
 mojobe_BMessage_Unflatten(BMessage* self, const char* a_flatBuffer)
@@ -9113,6 +9108,21 @@ mojobe_BMessage_AddMessenger(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_AddMessenger");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::AddRef(const char* name, const entry_ref* ref)
+status_t
+mojobe_BMessage_AddRef(BMessage* self, const char* a_name, entry_ref* a_ref)
+{
+	try {
+		return self->AddRef(a_name, a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddRef");
 	}
 	return B_ERROR;
 }
@@ -9800,6 +9810,41 @@ mojobe_BMessage_FindMessenger__charP_int32_BMessengerP(BMessage* self,
 }
 
 
+// status_t BMessage::FindRef(const char* name, entry_ref* ref) const
+status_t
+mojobe_BMessage_FindRef__charP_entry_refP(BMessage* self,
+	const char* a_name,
+	entry_ref* a_ref)
+{
+	try {
+		return self->FindRef(a_name, a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindRef__charP_entry_refP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const
+status_t
+mojobe_BMessage_FindRef__charP_int32_entry_refP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	entry_ref* a_ref)
+{
+	try {
+		return self->FindRef(a_name, a_index, a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindRef__charP_int32_entry_refP");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::FindMessage(const char* name, BMessage* message) const
 status_t
 mojobe_BMessage_FindMessage__charP_BMessageP(BMessage* self,
@@ -10390,6 +10435,41 @@ mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceRef(const char* name, const entry_ref* ref)
+status_t
+mojobe_BMessage_ReplaceRef__charP_entry_refP(BMessage* self,
+	const char* a_name,
+	entry_ref* a_ref)
+{
+	try {
+		return self->ReplaceRef(a_name, a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceRef__charP_entry_refP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceRef(const char* name, int32 index, const entry_ref* ref)
+status_t
+mojobe_BMessage_ReplaceRef__charP_int32_entry_refP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	entry_ref* a_ref)
+{
+	try {
+		return self->ReplaceRef(a_name, a_index, a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceRef__charP_int32_entry_refP");
 	}
 	return B_ERROR;
 }
@@ -16774,6 +16854,1234 @@ mojobe_BScreen_delete(BScreen* self)
 
 
 
+// #pragma mark - entry_ref
+
+
+// status_t entry_ref::set_name(const char* name)
+status_t
+mojobe_entry_ref_set_name(entry_ref* self, const char* a_name)
+{
+	try {
+		return self->set_name(a_name);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_entry_ref_set_name");
+	}
+	return B_ERROR;
+}
+
+
+// entry_ref::device (read)
+dev_t
+mojobe_entry_ref_get_device(entry_ref* self)
+{
+	return self->device;
+}
+
+
+// entry_ref::device (write)
+void
+mojobe_entry_ref_set_device(entry_ref* self, dev_t value)
+{
+	self->device = value;
+}
+
+
+// entry_ref::directory (read)
+ino_t
+mojobe_entry_ref_get_directory(entry_ref* self)
+{
+	return self->directory;
+}
+
+
+// entry_ref::directory (write)
+void
+mojobe_entry_ref_set_directory(entry_ref* self, ino_t value)
+{
+	self->directory = value;
+}
+
+
+// entry_ref::entry_ref()
+entry_ref*
+mojobe_entry_ref_new__void()
+{
+	try {
+		return new(std::nothrow) entry_ref();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_entry_ref_new__void");
+	}
+	return {};
+}
+
+
+// entry_ref::entry_ref(dev_t dev, ino_t dir, const char* name)
+entry_ref*
+mojobe_entry_ref_new__dev_t_ino_t_charP(dev_t a_dev,
+	ino_t a_dir,
+	const char* a_name)
+{
+	try {
+		return new(std::nothrow) entry_ref(a_dev, a_dir, a_name);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_entry_ref_new__dev_t_ino_t_charP");
+	}
+	return {};
+}
+
+
+// ~entry_ref()
+void
+mojobe_entry_ref_delete(entry_ref* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BEntry
+
+
+// status_t BEntry::InitCheck() const
+status_t
+mojobe_BEntry_InitCheck(BEntry* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// bool BEntry::Exists() const
+bool
+mojobe_BEntry_Exists(BEntry* self)
+{
+	try {
+		return self->Exists();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_Exists");
+	}
+	return {};
+}
+
+
+// const char* BEntry::Name() const
+const char*
+mojobe_BEntry_Name(BEntry* self)
+{
+	try {
+		return self->Name();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_Name");
+	}
+	return {};
+}
+
+
+// status_t BEntry::SetTo(const entry_ref* ref, bool traverse)
+status_t
+mojobe_BEntry_SetTo__entry_refP_bool(BEntry* self,
+	entry_ref* a_ref,
+	bool a_traverse)
+{
+	try {
+		return self->SetTo(a_ref, a_traverse);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetTo__entry_refP_bool");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BEntry::SetTo(const char* path, bool traverse)
+status_t
+mojobe_BEntry_SetTo__charP_bool(BEntry* self,
+	const char* a_path,
+	bool a_traverse)
+{
+	try {
+		return self->SetTo(a_path, a_traverse);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetTo__charP_bool");
+	}
+	return B_ERROR;
+}
+
+
+// void BEntry::Unset()
+void
+mojobe_BEntry_Unset(BEntry* self)
+{
+	try {
+		self->Unset();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_Unset");
+	}
+}
+
+
+// status_t BEntry::GetRef(entry_ref* ref) const
+status_t
+mojobe_BEntry_GetRef(BEntry* self, entry_ref* a_ref)
+{
+	try {
+		return self->GetRef(a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetRef");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BEntry::GetPath(BPath* path) const
+status_t
+mojobe_BEntry_GetPath(BEntry* self, BPath* a_path)
+{
+	try {
+		return self->GetPath(a_path);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetPath");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BEntry::GetParent(BEntry* entry) const
+status_t
+mojobe_BEntry_GetParent(BEntry* self, BEntry* a_entry)
+{
+	try {
+		return self->GetParent(a_entry);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetParent");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BEntry::Rename(const char* path, bool clobber)
+status_t
+mojobe_BEntry_Rename(BEntry* self, const char* a_path, bool a_clobber)
+{
+	try {
+		return self->Rename(a_path, a_clobber);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_Rename");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BEntry::Remove()
+status_t
+mojobe_BEntry_Remove(BEntry* self)
+{
+	try {
+		return self->Remove();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_Remove");
+	}
+	return B_ERROR;
+}
+
+
+// bool BStatable::IsFile() const
+bool
+mojobe_BEntry_IsFile(BEntry* self)
+{
+	try {
+		return static_cast<BStatable*>(self)->IsFile();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_IsFile");
+	}
+	return {};
+}
+
+
+// bool BStatable::IsDirectory() const
+bool
+mojobe_BEntry_IsDirectory(BEntry* self)
+{
+	try {
+		return static_cast<BStatable*>(self)->IsDirectory();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_IsDirectory");
+	}
+	return {};
+}
+
+
+// bool BStatable::IsSymLink() const
+bool
+mojobe_BEntry_IsSymLink(BEntry* self)
+{
+	try {
+		return static_cast<BStatable*>(self)->IsSymLink();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_IsSymLink");
+	}
+	return {};
+}
+
+
+// status_t BStatable::GetOwner(uid_t* owner) const
+status_t
+mojobe_BEntry_GetOwner(BEntry* self, uid_t * a_owner)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetOwner(a_owner);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetOwner");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetOwner(uid_t owner)
+status_t
+mojobe_BEntry_SetOwner(BEntry* self, uid_t a_owner)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetOwner(a_owner);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetOwner");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetGroup(gid_t* group) const
+status_t
+mojobe_BEntry_GetGroup(BEntry* self, gid_t * a_group)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetGroup(a_group);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetGroup");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetGroup(gid_t group)
+status_t
+mojobe_BEntry_SetGroup(BEntry* self, gid_t a_group)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetGroup(a_group);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetGroup");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetPermissions(mode_t* permissions) const
+status_t
+mojobe_BEntry_GetPermissions(BEntry* self, mode_t * a_permissions)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetPermissions(a_permissions);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetPermissions");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetPermissions(mode_t permissions)
+status_t
+mojobe_BEntry_SetPermissions(BEntry* self, mode_t a_permissions)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetPermissions(a_permissions);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetPermissions");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetSize(off_t* size) const
+status_t
+mojobe_BEntry_GetSize(BEntry* self, off_t * a_size)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetSize(a_size);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetSize");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetModificationTime(time_t* mtime) const
+status_t
+mojobe_BEntry_GetModificationTime(BEntry* self, time_t * a_mtime)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetModificationTime(a_mtime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetModificationTime");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetModificationTime(time_t mtime)
+status_t
+mojobe_BEntry_SetModificationTime(BEntry* self, time_t a_mtime)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetModificationTime(a_mtime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetModificationTime");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetCreationTime(time_t* ctime) const
+status_t
+mojobe_BEntry_GetCreationTime(BEntry* self, time_t * a_ctime)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetCreationTime(a_ctime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetCreationTime");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetCreationTime(time_t ctime)
+status_t
+mojobe_BEntry_SetCreationTime(BEntry* self, time_t a_ctime)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetCreationTime(a_ctime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetCreationTime");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::GetAccessTime(time_t* atime) const
+status_t
+mojobe_BEntry_GetAccessTime(BEntry* self, time_t * a_atime)
+{
+	try {
+		return static_cast<BStatable*>(self)->GetAccessTime(a_atime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_GetAccessTime");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BStatable::SetAccessTime(time_t atime)
+status_t
+mojobe_BEntry_SetAccessTime(BEntry* self, time_t a_atime)
+{
+	try {
+		return static_cast<BStatable*>(self)->SetAccessTime(a_atime);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_SetAccessTime");
+	}
+	return B_ERROR;
+}
+
+
+// BEntry::BEntry()
+BEntry*
+mojobe_BEntry_new__void()
+{
+	try {
+		return new(std::nothrow) BEntry();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_new__void");
+	}
+	return {};
+}
+
+
+// BEntry::BEntry(const entry_ref* ref, bool traverse)
+BEntry*
+mojobe_BEntry_new__entry_refP_bool(entry_ref* a_ref, bool a_traverse)
+{
+	try {
+		return new(std::nothrow) BEntry(a_ref, a_traverse);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_new__entry_refP_bool");
+	}
+	return {};
+}
+
+
+// BEntry::BEntry(const char* path, bool traverse)
+BEntry*
+mojobe_BEntry_new__charP_bool(const char* a_path, bool a_traverse)
+{
+	try {
+		return new(std::nothrow) BEntry(a_path, a_traverse);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BEntry_new__charP_bool");
+	}
+	return {};
+}
+
+
+// ~BEntry()
+void
+mojobe_BEntry_delete(BEntry* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BPath
+
+
+// status_t BPath::InitCheck() const
+status_t
+mojobe_BPath_InitCheck(BPath* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BPath::SetTo(const entry_ref* ref)
+status_t
+mojobe_BPath_SetTo__entry_refP(BPath* self, entry_ref* a_ref)
+{
+	try {
+		return self->SetTo(a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_SetTo__entry_refP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BPath::SetTo(const BEntry* entry)
+status_t
+mojobe_BPath_SetTo__BEntryP(BPath* self, BEntry* a_entry)
+{
+	try {
+		return self->SetTo(a_entry);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_SetTo__BEntryP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BPath::SetTo(const char* path, const char* leaf, bool normalize)
+status_t
+mojobe_BPath_SetTo__charP_charP_bool(BPath* self,
+	const char* a_path,
+	const char* a_leaf,
+	bool a_normalize)
+{
+	try {
+		return self->SetTo(a_path, a_leaf, a_normalize);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_SetTo__charP_charP_bool");
+	}
+	return B_ERROR;
+}
+
+
+// void BPath::Unset()
+void
+mojobe_BPath_Unset(BPath* self)
+{
+	try {
+		self->Unset();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_Unset");
+	}
+}
+
+
+// status_t BPath::Append(const char* path, bool normalize)
+status_t
+mojobe_BPath_Append(BPath* self, const char* a_path, bool a_normalize)
+{
+	try {
+		return self->Append(a_path, a_normalize);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_Append");
+	}
+	return B_ERROR;
+}
+
+
+// const char* BPath::Path() const
+const char*
+mojobe_BPath_Path(BPath* self)
+{
+	try {
+		return self->Path();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_Path");
+	}
+	return {};
+}
+
+
+// const char* BPath::Leaf() const
+const char*
+mojobe_BPath_Leaf(BPath* self)
+{
+	try {
+		return self->Leaf();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_Leaf");
+	}
+	return {};
+}
+
+
+// status_t BPath::GetParent(BPath* path) const
+status_t
+mojobe_BPath_GetParent(BPath* self, BPath* a_path)
+{
+	try {
+		return self->GetParent(a_path);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_GetParent");
+	}
+	return B_ERROR;
+}
+
+
+// bool BPath::IsAbsolute() const
+bool
+mojobe_BPath_IsAbsolute(BPath* self)
+{
+	try {
+		return self->IsAbsolute();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_IsAbsolute");
+	}
+	return {};
+}
+
+
+// bool BPath::IsFixedSize() const
+bool
+mojobe_BPath_IsFixedSize(BPath* self)
+{
+	try {
+		return self->IsFixedSize();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_IsFixedSize");
+	}
+	return {};
+}
+
+
+// type_code BPath::TypeCode() const
+uint32
+mojobe_BPath_TypeCode(BPath* self)
+{
+	try {
+		return self->TypeCode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_TypeCode");
+	}
+	return {};
+}
+
+
+// ssize_t BPath::FlattenedSize() const
+int64
+mojobe_BPath_FlattenedSize(BPath* self)
+{
+	try {
+		return self->FlattenedSize();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_FlattenedSize");
+	}
+	return {};
+}
+
+
+// bool BPath::AllowsTypeCode(type_code code) const
+bool
+mojobe_BPath_AllowsTypeCode(BPath* self, type_code a_code)
+{
+	try {
+		return self->AllowsTypeCode(a_code);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_AllowsTypeCode");
+	}
+	return {};
+}
+
+
+// status_t BPath::Unflatten(type_code code, const void* buffer, ssize_t size)
+status_t
+mojobe_BPath_Unflatten(BPath* self,
+	type_code a_code,
+	const void* a_buffer,
+	ssize_t a_size)
+{
+	try {
+		return self->Unflatten(a_code, a_buffer, a_size);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_Unflatten");
+	}
+	return B_ERROR;
+}
+
+
+// BPath::BPath()
+BPath*
+mojobe_BPath_new__void()
+{
+	try {
+		return new(std::nothrow) BPath();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_new__void");
+	}
+	return {};
+}
+
+
+// BPath::BPath(const entry_ref* ref)
+BPath*
+mojobe_BPath_new__entry_refP(entry_ref* a_ref)
+{
+	try {
+		return new(std::nothrow) BPath(a_ref);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_new__entry_refP");
+	}
+	return {};
+}
+
+
+// BPath::BPath(const BEntry* entry)
+BPath*
+mojobe_BPath_new__BEntryP(BEntry* a_entry)
+{
+	try {
+		return new(std::nothrow) BPath(a_entry);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_new__BEntryP");
+	}
+	return {};
+}
+
+
+// BPath::BPath(const char* dir, const char* leaf, bool normalize)
+BPath*
+mojobe_BPath_new__charP_charP_bool(const char* a_dir,
+	const char* a_leaf,
+	bool a_normalize)
+{
+	try {
+		return new(std::nothrow) BPath(a_dir, a_leaf, a_normalize);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPath_new__charP_charP_bool");
+	}
+	return {};
+}
+
+
+// ~BPath()
+void
+mojobe_BPath_delete(BPath* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BFilePanel
+
+
+// void BFilePanel::Show()
+void
+mojobe_BFilePanel_Show(BFilePanel* self)
+{
+	try {
+		self->Show();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Show");
+	}
+}
+
+
+// void BFilePanel::Hide()
+void
+mojobe_BFilePanel_Hide(BFilePanel* self)
+{
+	try {
+		self->Hide();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Hide");
+	}
+}
+
+
+// bool BFilePanel::IsShowing() const
+bool
+mojobe_BFilePanel_IsShowing(BFilePanel* self)
+{
+	try {
+		return self->IsShowing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_IsShowing");
+	}
+	return {};
+}
+
+
+// void BFilePanel::WasHidden()
+void
+mojobe_BFilePanel_WasHidden(BFilePanel* self)
+{
+	try {
+		self->WasHidden();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_WasHidden");
+	}
+}
+
+
+// void BFilePanel::SelectionChanged()
+void
+mojobe_BFilePanel_SelectionChanged(BFilePanel* self)
+{
+	try {
+		self->SelectionChanged();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SelectionChanged");
+	}
+}
+
+
+// void BFilePanel::SendMessage(const BMessenger* target, BMessage* message)
+void
+mojobe_BFilePanel_SendMessage(BFilePanel* self,
+	const BMessenger* a_target,
+	BMessage* a_message)
+{
+	try {
+		self->SendMessage(a_target, a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SendMessage");
+	}
+}
+
+
+// BWindow* BFilePanel::Window() const
+BWindow*
+mojobe_BFilePanel_Window(BFilePanel* self)
+{
+	try {
+		return self->Window();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Window");
+	}
+	return {};
+}
+
+
+// BMessenger BFilePanel::Messenger() const
+void
+mojobe_BFilePanel_Messenger(BFilePanel* self, BMessenger* a_result)
+{
+	try {
+		new(a_result) BMessenger(self->Messenger());
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Messenger");
+	}
+}
+
+
+// file_panel_mode BFilePanel::PanelMode() const
+file_panel_mode
+mojobe_BFilePanel_PanelMode(BFilePanel* self)
+{
+	try {
+		return self->PanelMode();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_PanelMode");
+	}
+	return {};
+}
+
+
+// void BFilePanel::SetTarget(BMessenger target)
+void
+mojobe_BFilePanel_SetTarget(BFilePanel* self, const BMessenger* a_target)
+{
+	try {
+		self->SetTarget(*a_target);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetTarget");
+	}
+}
+
+
+// void BFilePanel::SetMessage(BMessage* message)
+void
+mojobe_BFilePanel_SetMessage(BFilePanel* self, BMessage* a_message)
+{
+	try {
+		self->SetMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetMessage");
+	}
+}
+
+
+// void BFilePanel::SetSaveText(const char* text)
+void
+mojobe_BFilePanel_SetSaveText(BFilePanel* self, const char* a_text)
+{
+	try {
+		self->SetSaveText(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetSaveText");
+	}
+}
+
+
+// void BFilePanel::SetButtonLabel(file_panel_button button, const char* label)
+void
+mojobe_BFilePanel_SetButtonLabel(BFilePanel* self,
+	file_panel_button a_button,
+	const char* a_label)
+{
+	try {
+		self->SetButtonLabel(a_button, a_label);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetButtonLabel");
+	}
+}
+
+
+// void BFilePanel::SetNodeFlavors(uint32 flavors)
+void
+mojobe_BFilePanel_SetNodeFlavors(BFilePanel* self, uint32 a_flavors)
+{
+	try {
+		self->SetNodeFlavors(a_flavors);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetNodeFlavors");
+	}
+}
+
+
+// void BFilePanel::SetPanelDirectory(const BEntry* newDirectory)
+void
+mojobe_BFilePanel_SetPanelDirectory__BEntryP(BFilePanel* self,
+	BEntry* a_newDirectory)
+{
+	try {
+		self->SetPanelDirectory(a_newDirectory);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetPanelDirectory__BEntryP");
+	}
+}
+
+
+// void BFilePanel::SetPanelDirectory(const entry_ref* newDirectory)
+void
+mojobe_BFilePanel_SetPanelDirectory__entry_refP(BFilePanel* self,
+	entry_ref* a_newDirectory)
+{
+	try {
+		self->SetPanelDirectory(a_newDirectory);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetPanelDirectory__entry_refP");
+	}
+}
+
+
+// void BFilePanel::SetPanelDirectory(const char* newDirectory)
+void
+mojobe_BFilePanel_SetPanelDirectory__charP(BFilePanel* self,
+	const char* a_newDirectory)
+{
+	try {
+		self->SetPanelDirectory(a_newDirectory);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetPanelDirectory__charP");
+	}
+}
+
+
+// void BFilePanel::GetPanelDirectory(entry_ref* ref) const
+void
+mojobe_BFilePanel_GetPanelDirectory(BFilePanel* self, entry_ref* a_ref)
+{
+	try {
+		self->GetPanelDirectory(a_ref);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_GetPanelDirectory");
+	}
+}
+
+
+// void BFilePanel::SetHideWhenDone(bool hideWhenDone)
+void
+mojobe_BFilePanel_SetHideWhenDone(BFilePanel* self, bool a_hideWhenDone)
+{
+	try {
+		self->SetHideWhenDone(a_hideWhenDone);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_SetHideWhenDone");
+	}
+}
+
+
+// bool BFilePanel::HidesWhenDone() const
+bool
+mojobe_BFilePanel_HidesWhenDone(BFilePanel* self)
+{
+	try {
+		return self->HidesWhenDone();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_HidesWhenDone");
+	}
+	return {};
+}
+
+
+// void BFilePanel::Refresh()
+void
+mojobe_BFilePanel_Refresh(BFilePanel* self)
+{
+	try {
+		self->Refresh();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Refresh");
+	}
+}
+
+
+// void BFilePanel::Rewind()
+void
+mojobe_BFilePanel_Rewind(BFilePanel* self)
+{
+	try {
+		self->Rewind();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_Rewind");
+	}
+}
+
+
+// status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)
+status_t
+mojobe_BFilePanel_GetNextSelectedRef(BFilePanel* self, entry_ref* a_ref)
+{
+	try {
+		return self->GetNextSelectedRef(a_ref);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_GetNextSelectedRef");
+	}
+	return B_ERROR;
+}
+
+
+// BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)
+BFilePanel*
+mojobe_BFilePanel_new(file_panel_mode a_mode,
+	BMessenger* a_target,
+	entry_ref* a_directory,
+	uint32 a_nodeFlavors,
+	bool a_allowMultipleSelection,
+	BMessage* a_message,
+	bool a_modal,
+	bool a_hideWhenDone)
+{
+	try {
+		return new(std::nothrow) BFilePanel(a_mode, a_target, a_directory, a_nodeFlavors, a_allowMultipleSelection, a_message, static_cast<BRefFilter *>(NULL), a_modal, a_hideWhenDone);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BFilePanel_new");
+	}
+	return {};
+}
+
+
+// ~BFilePanel()
+void
+mojobe_BFilePanel_delete(BFilePanel* self)
+{
+	delete self;
+}
+
+
+
 // #pragma mark - BMessageRunner
 
 
@@ -16903,6 +18211,25 @@ void
 mojobe_BMessageRunner_delete(BMessageRunner* self)
 {
 	delete self;
+}
+
+
+
+// #pragma mark - Functions
+
+
+// status_t find_directory(directory_which which, BPath* path, bool createIt, BVolume* volume)
+status_t
+mojobe_find_directory(directory_which a_which, BPath* a_path, bool a_createIt)
+{
+	try {
+		return ::find_directory(a_which, a_path, a_createIt, static_cast<BVolume *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_find_directory");
+	}
+	return B_ERROR;
 }
 
 

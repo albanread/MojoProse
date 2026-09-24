@@ -42,6 +42,10 @@
 #include <Region.h>
 #include <Bitmap.h>
 #include <Screen.h>
+#include <Entry.h>
+#include <Path.h>
+#include <FilePanel.h>
+#include <FindDirectory.h>
 
 
 extern "C" {
@@ -143,6 +147,9 @@ struct mojobe_BApplication_hooks {
 	bool	(*QuitRequested)(void* context, BApplication* self);
 	void	(*AboutRequested)(void* context, BApplication* self);
 	void	(*Pulse)(void* context, BApplication* self);
+	void	(*RefsReceived)(void* context,
+			BApplication* self,
+			BMessage* message);
 };
 
 
@@ -859,6 +866,10 @@ void mojobe_BApplication_base_AboutRequested(BApplication* self);
 
 // BApplication's own Pulse
 void mojobe_BApplication_base_Pulse(BApplication* self);
+
+// BApplication's own RefsReceived
+void mojobe_BApplication_base_RefsReceived(BApplication* self,
+	BMessage* message);
 
 
 // #pragma mark - BWindow
@@ -1924,9 +1935,6 @@ void mojobe_BView_DelayedInvalidate__bigtime_t_BRect(BView* self,
 	bigtime_t a_delay,
 	mojobe_BRect a_invalRect);
 
-// void BView::SetDiskMode(char* filename, long offset)
-void mojobe_BView_SetDiskMode(BView* self, char * a_filename, long a_offset);
-
 // void BView::DrawPicture(const char* filename, long offset, BPoint where)
 void mojobe_BView_DrawPicture(BView* self,
 	const char* a_filename,
@@ -2280,11 +2288,6 @@ status_t mojobe_BMessage_SendReply__BMessageP_BMessageP_bigtime_t_bigtime_t(BMes
 // ssize_t BMessage::FlattenedSize() const
 int64 mojobe_BMessage_FlattenedSize(BMessage* self);
 
-// status_t BMessage::Flatten(char* buffer, ssize_t size) const
-status_t mojobe_BMessage_Flatten(BMessage* self,
-	char * a_buffer,
-	ssize_t a_size);
-
 // status_t BMessage::Unflatten(const char* flatBuffer)
 status_t mojobe_BMessage_Unflatten(BMessage* self, const char* a_flatBuffer);
 
@@ -2407,6 +2410,11 @@ status_t mojobe_BMessage_AddColor(BMessage* self,
 status_t mojobe_BMessage_AddMessenger(BMessage* self,
 	const char* a_name,
 	const BMessenger* a_messenger);
+
+// status_t BMessage::AddRef(const char* name, const entry_ref* ref)
+status_t mojobe_BMessage_AddRef(BMessage* self,
+	const char* a_name,
+	entry_ref* a_ref);
 
 // status_t BMessage::AddMessage(const char* name, const BMessage* message)
 status_t mojobe_BMessage_AddMessage(BMessage* self,
@@ -2612,6 +2620,17 @@ status_t mojobe_BMessage_FindMessenger__charP_int32_BMessengerP(BMessage* self,
 	int32 a_index,
 	BMessenger* a_messenger);
 
+// status_t BMessage::FindRef(const char* name, entry_ref* ref) const
+status_t mojobe_BMessage_FindRef__charP_entry_refP(BMessage* self,
+	const char* a_name,
+	entry_ref* a_ref);
+
+// status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const
+status_t mojobe_BMessage_FindRef__charP_int32_entry_refP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	entry_ref* a_ref);
+
 // status_t BMessage::FindMessage(const char* name, BMessage* message) const
 status_t mojobe_BMessage_FindMessage__charP_BMessageP(BMessage* self,
 	const char* a_name,
@@ -2798,6 +2817,17 @@ status_t mojobe_BMessage_ReplaceMessenger__charP_int32_BMessenger(BMessage* self
 	const char* a_name,
 	int32 a_index,
 	const BMessenger* a_messenger);
+
+// status_t BMessage::ReplaceRef(const char* name, const entry_ref* ref)
+status_t mojobe_BMessage_ReplaceRef__charP_entry_refP(BMessage* self,
+	const char* a_name,
+	entry_ref* a_ref);
+
+// status_t BMessage::ReplaceRef(const char* name, int32 index, const entry_ref* ref)
+status_t mojobe_BMessage_ReplaceRef__charP_int32_entry_refP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	entry_ref* a_ref);
 
 // status_t BMessage::ReplaceMessage(const char* name, const BMessage* message)
 status_t mojobe_BMessage_ReplaceMessage__charP_BMessageP(BMessage* self,
@@ -4525,6 +4555,303 @@ BScreen* mojobe_BScreen_new__BWindowP(BWindow* a_window);
 void mojobe_BScreen_delete(BScreen* self);
 
 
+// #pragma mark - entry_ref
+
+
+// status_t entry_ref::set_name(const char* name)
+status_t mojobe_entry_ref_set_name(entry_ref* self, const char* a_name);
+
+// entry_ref::device (read)
+dev_t mojobe_entry_ref_get_device(entry_ref* self);
+
+// entry_ref::device (write)
+void mojobe_entry_ref_set_device(entry_ref* self, dev_t value);
+
+// entry_ref::directory (read)
+ino_t mojobe_entry_ref_get_directory(entry_ref* self);
+
+// entry_ref::directory (write)
+void mojobe_entry_ref_set_directory(entry_ref* self, ino_t value);
+
+// entry_ref::entry_ref()
+entry_ref* mojobe_entry_ref_new__void();
+
+// entry_ref::entry_ref(dev_t dev, ino_t dir, const char* name)
+entry_ref* mojobe_entry_ref_new__dev_t_ino_t_charP(dev_t a_dev,
+	ino_t a_dir,
+	const char* a_name);
+
+// ~entry_ref()
+void mojobe_entry_ref_delete(entry_ref* self);
+
+
+// #pragma mark - BEntry
+
+
+// status_t BEntry::InitCheck() const
+status_t mojobe_BEntry_InitCheck(BEntry* self);
+
+// bool BEntry::Exists() const
+bool mojobe_BEntry_Exists(BEntry* self);
+
+// const char* BEntry::Name() const
+const char* mojobe_BEntry_Name(BEntry* self);
+
+// status_t BEntry::SetTo(const entry_ref* ref, bool traverse)
+status_t mojobe_BEntry_SetTo__entry_refP_bool(BEntry* self,
+	entry_ref* a_ref,
+	bool a_traverse);
+
+// status_t BEntry::SetTo(const char* path, bool traverse)
+status_t mojobe_BEntry_SetTo__charP_bool(BEntry* self,
+	const char* a_path,
+	bool a_traverse);
+
+// void BEntry::Unset()
+void mojobe_BEntry_Unset(BEntry* self);
+
+// status_t BEntry::GetRef(entry_ref* ref) const
+status_t mojobe_BEntry_GetRef(BEntry* self, entry_ref* a_ref);
+
+// status_t BEntry::GetPath(BPath* path) const
+status_t mojobe_BEntry_GetPath(BEntry* self, BPath* a_path);
+
+// status_t BEntry::GetParent(BEntry* entry) const
+status_t mojobe_BEntry_GetParent(BEntry* self, BEntry* a_entry);
+
+// status_t BEntry::Rename(const char* path, bool clobber)
+status_t mojobe_BEntry_Rename(BEntry* self, const char* a_path, bool a_clobber);
+
+// status_t BEntry::Remove()
+status_t mojobe_BEntry_Remove(BEntry* self);
+
+// bool BStatable::IsFile() const
+bool mojobe_BEntry_IsFile(BEntry* self);
+
+// bool BStatable::IsDirectory() const
+bool mojobe_BEntry_IsDirectory(BEntry* self);
+
+// bool BStatable::IsSymLink() const
+bool mojobe_BEntry_IsSymLink(BEntry* self);
+
+// status_t BStatable::GetOwner(uid_t* owner) const
+status_t mojobe_BEntry_GetOwner(BEntry* self, uid_t * a_owner);
+
+// status_t BStatable::SetOwner(uid_t owner)
+status_t mojobe_BEntry_SetOwner(BEntry* self, uid_t a_owner);
+
+// status_t BStatable::GetGroup(gid_t* group) const
+status_t mojobe_BEntry_GetGroup(BEntry* self, gid_t * a_group);
+
+// status_t BStatable::SetGroup(gid_t group)
+status_t mojobe_BEntry_SetGroup(BEntry* self, gid_t a_group);
+
+// status_t BStatable::GetPermissions(mode_t* permissions) const
+status_t mojobe_BEntry_GetPermissions(BEntry* self, mode_t * a_permissions);
+
+// status_t BStatable::SetPermissions(mode_t permissions)
+status_t mojobe_BEntry_SetPermissions(BEntry* self, mode_t a_permissions);
+
+// status_t BStatable::GetSize(off_t* size) const
+status_t mojobe_BEntry_GetSize(BEntry* self, off_t * a_size);
+
+// status_t BStatable::GetModificationTime(time_t* mtime) const
+status_t mojobe_BEntry_GetModificationTime(BEntry* self, time_t * a_mtime);
+
+// status_t BStatable::SetModificationTime(time_t mtime)
+status_t mojobe_BEntry_SetModificationTime(BEntry* self, time_t a_mtime);
+
+// status_t BStatable::GetCreationTime(time_t* ctime) const
+status_t mojobe_BEntry_GetCreationTime(BEntry* self, time_t * a_ctime);
+
+// status_t BStatable::SetCreationTime(time_t ctime)
+status_t mojobe_BEntry_SetCreationTime(BEntry* self, time_t a_ctime);
+
+// status_t BStatable::GetAccessTime(time_t* atime) const
+status_t mojobe_BEntry_GetAccessTime(BEntry* self, time_t * a_atime);
+
+// status_t BStatable::SetAccessTime(time_t atime)
+status_t mojobe_BEntry_SetAccessTime(BEntry* self, time_t a_atime);
+
+// BEntry::BEntry()
+BEntry* mojobe_BEntry_new__void();
+
+// BEntry::BEntry(const entry_ref* ref, bool traverse)
+BEntry* mojobe_BEntry_new__entry_refP_bool(entry_ref* a_ref, bool a_traverse);
+
+// BEntry::BEntry(const char* path, bool traverse)
+BEntry* mojobe_BEntry_new__charP_bool(const char* a_path, bool a_traverse);
+
+// ~BEntry()
+void mojobe_BEntry_delete(BEntry* self);
+
+
+// #pragma mark - BPath
+
+
+// status_t BPath::InitCheck() const
+status_t mojobe_BPath_InitCheck(BPath* self);
+
+// status_t BPath::SetTo(const entry_ref* ref)
+status_t mojobe_BPath_SetTo__entry_refP(BPath* self, entry_ref* a_ref);
+
+// status_t BPath::SetTo(const BEntry* entry)
+status_t mojobe_BPath_SetTo__BEntryP(BPath* self, BEntry* a_entry);
+
+// status_t BPath::SetTo(const char* path, const char* leaf, bool normalize)
+status_t mojobe_BPath_SetTo__charP_charP_bool(BPath* self,
+	const char* a_path,
+	const char* a_leaf,
+	bool a_normalize);
+
+// void BPath::Unset()
+void mojobe_BPath_Unset(BPath* self);
+
+// status_t BPath::Append(const char* path, bool normalize)
+status_t mojobe_BPath_Append(BPath* self, const char* a_path, bool a_normalize);
+
+// const char* BPath::Path() const
+const char* mojobe_BPath_Path(BPath* self);
+
+// const char* BPath::Leaf() const
+const char* mojobe_BPath_Leaf(BPath* self);
+
+// status_t BPath::GetParent(BPath* path) const
+status_t mojobe_BPath_GetParent(BPath* self, BPath* a_path);
+
+// bool BPath::IsAbsolute() const
+bool mojobe_BPath_IsAbsolute(BPath* self);
+
+// bool BPath::IsFixedSize() const
+bool mojobe_BPath_IsFixedSize(BPath* self);
+
+// type_code BPath::TypeCode() const
+uint32 mojobe_BPath_TypeCode(BPath* self);
+
+// ssize_t BPath::FlattenedSize() const
+int64 mojobe_BPath_FlattenedSize(BPath* self);
+
+// bool BPath::AllowsTypeCode(type_code code) const
+bool mojobe_BPath_AllowsTypeCode(BPath* self, type_code a_code);
+
+// status_t BPath::Unflatten(type_code code, const void* buffer, ssize_t size)
+status_t mojobe_BPath_Unflatten(BPath* self,
+	type_code a_code,
+	const void* a_buffer,
+	ssize_t a_size);
+
+// BPath::BPath()
+BPath* mojobe_BPath_new__void();
+
+// BPath::BPath(const entry_ref* ref)
+BPath* mojobe_BPath_new__entry_refP(entry_ref* a_ref);
+
+// BPath::BPath(const BEntry* entry)
+BPath* mojobe_BPath_new__BEntryP(BEntry* a_entry);
+
+// BPath::BPath(const char* dir, const char* leaf, bool normalize)
+BPath* mojobe_BPath_new__charP_charP_bool(const char* a_dir,
+	const char* a_leaf,
+	bool a_normalize);
+
+// ~BPath()
+void mojobe_BPath_delete(BPath* self);
+
+
+// #pragma mark - BFilePanel
+
+
+// void BFilePanel::Show()
+void mojobe_BFilePanel_Show(BFilePanel* self);
+
+// void BFilePanel::Hide()
+void mojobe_BFilePanel_Hide(BFilePanel* self);
+
+// bool BFilePanel::IsShowing() const
+bool mojobe_BFilePanel_IsShowing(BFilePanel* self);
+
+// void BFilePanel::WasHidden()
+void mojobe_BFilePanel_WasHidden(BFilePanel* self);
+
+// void BFilePanel::SelectionChanged()
+void mojobe_BFilePanel_SelectionChanged(BFilePanel* self);
+
+// void BFilePanel::SendMessage(const BMessenger* target, BMessage* message)
+void mojobe_BFilePanel_SendMessage(BFilePanel* self,
+	const BMessenger* a_target,
+	BMessage* a_message);
+
+// BWindow* BFilePanel::Window() const
+BWindow* mojobe_BFilePanel_Window(BFilePanel* self);
+
+// BMessenger BFilePanel::Messenger() const
+void mojobe_BFilePanel_Messenger(BFilePanel* self, BMessenger* a_result);
+
+// file_panel_mode BFilePanel::PanelMode() const
+file_panel_mode mojobe_BFilePanel_PanelMode(BFilePanel* self);
+
+// void BFilePanel::SetTarget(BMessenger target)
+void mojobe_BFilePanel_SetTarget(BFilePanel* self, const BMessenger* a_target);
+
+// void BFilePanel::SetMessage(BMessage* message)
+void mojobe_BFilePanel_SetMessage(BFilePanel* self, BMessage* a_message);
+
+// void BFilePanel::SetSaveText(const char* text)
+void mojobe_BFilePanel_SetSaveText(BFilePanel* self, const char* a_text);
+
+// void BFilePanel::SetButtonLabel(file_panel_button button, const char* label)
+void mojobe_BFilePanel_SetButtonLabel(BFilePanel* self,
+	file_panel_button a_button,
+	const char* a_label);
+
+// void BFilePanel::SetNodeFlavors(uint32 flavors)
+void mojobe_BFilePanel_SetNodeFlavors(BFilePanel* self, uint32 a_flavors);
+
+// void BFilePanel::SetPanelDirectory(const BEntry* newDirectory)
+void mojobe_BFilePanel_SetPanelDirectory__BEntryP(BFilePanel* self,
+	BEntry* a_newDirectory);
+
+// void BFilePanel::SetPanelDirectory(const entry_ref* newDirectory)
+void mojobe_BFilePanel_SetPanelDirectory__entry_refP(BFilePanel* self,
+	entry_ref* a_newDirectory);
+
+// void BFilePanel::SetPanelDirectory(const char* newDirectory)
+void mojobe_BFilePanel_SetPanelDirectory__charP(BFilePanel* self,
+	const char* a_newDirectory);
+
+// void BFilePanel::GetPanelDirectory(entry_ref* ref) const
+void mojobe_BFilePanel_GetPanelDirectory(BFilePanel* self, entry_ref* a_ref);
+
+// void BFilePanel::SetHideWhenDone(bool hideWhenDone)
+void mojobe_BFilePanel_SetHideWhenDone(BFilePanel* self, bool a_hideWhenDone);
+
+// bool BFilePanel::HidesWhenDone() const
+bool mojobe_BFilePanel_HidesWhenDone(BFilePanel* self);
+
+// void BFilePanel::Refresh()
+void mojobe_BFilePanel_Refresh(BFilePanel* self);
+
+// void BFilePanel::Rewind()
+void mojobe_BFilePanel_Rewind(BFilePanel* self);
+
+// status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)
+status_t mojobe_BFilePanel_GetNextSelectedRef(BFilePanel* self,
+	entry_ref* a_ref);
+
+// BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)
+BFilePanel* mojobe_BFilePanel_new(file_panel_mode a_mode,
+	BMessenger* a_target,
+	entry_ref* a_directory,
+	uint32 a_nodeFlavors,
+	bool a_allowMultipleSelection,
+	BMessage* a_message,
+	bool a_modal,
+	bool a_hideWhenDone);
+
+// ~BFilePanel()
+void mojobe_BFilePanel_delete(BFilePanel* self);
+
+
 // #pragma mark - BMessageRunner
 
 
@@ -4560,6 +4887,15 @@ BMessageRunner* mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_
 
 // ~BMessageRunner()
 void mojobe_BMessageRunner_delete(BMessageRunner* self);
+
+
+// #pragma mark - Functions
+
+
+// status_t find_directory(directory_which which, BPath* path, bool createIt, BVolume* volume)
+status_t mojobe_find_directory(directory_which a_which,
+	BPath* a_path,
+	bool a_createIt);
 
 
 // #pragma mark - Hand-written (Haiku/generator/snippets/mojobe.h)

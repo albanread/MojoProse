@@ -23,6 +23,7 @@ from ._api import (
     ApplicationQuitRequested,
     ApplicationAboutRequested,
     ApplicationPulse,
+    ApplicationRefsReceived,
     ApplicationHooks,
     WindowMessageReceived,
     WindowQuitRequested,

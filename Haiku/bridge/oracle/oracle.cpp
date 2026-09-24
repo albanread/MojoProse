@@ -91,6 +91,13 @@ mojobe_oracle_BApplication(const mojobe_BApplication_hooks* hooks, void* context
 		else
 			hooks->Pulse(context, reinterpret_cast<BApplication*>(0x10400));
 	}
+	{
+		BMessage message5_1(0x6F720051);
+		if (hooks->RefsReceived == NULL)
+			failures++;
+		else
+			hooks->RefsReceived(context, reinterpret_cast<BApplication*>(0x10500), &message5_1);
+	}
 	return failures;
 }
 
@@ -580,6 +587,18 @@ mojobe_oracle_echo_cpu_vendor(int8 before, cpu_vendor value, double after,
 	return result;
 }
 
+directory_which
+mojobe_oracle_echo_directory_which(int8 before, directory_which value, double after,
+	directory_which* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	directory_which result = value;
+	result = (directory_which)(result + 1);
+	return result;
+}
+
 drawing_mode
 mojobe_oracle_echo_drawing_mode(int8 before, drawing_mode value, double after,
 	drawing_mode* seen, int8* seenBefore, double* seenAfter)
@@ -589,6 +608,30 @@ mojobe_oracle_echo_drawing_mode(int8 before, drawing_mode value, double after,
 	*seenAfter = after;
 	drawing_mode result = value;
 	result = (drawing_mode)(result + 1);
+	return result;
+}
+
+file_panel_button
+mojobe_oracle_echo_file_panel_button(int8 before, file_panel_button value, double after,
+	file_panel_button* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	file_panel_button result = value;
+	result = (file_panel_button)(result + 1);
+	return result;
+}
+
+file_panel_mode
+mojobe_oracle_echo_file_panel_mode(int8 before, file_panel_mode value, double after,
+	file_panel_mode* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	file_panel_mode result = value;
+	result = (file_panel_mode)(result + 1);
 	return result;
 }
 
@@ -712,6 +755,18 @@ mojobe_oracle_echo_mode_mouse(int8 before, mode_mouse value, double after,
 	return result;
 }
 
+node_flavor
+mojobe_oracle_echo_node_flavor(int8 before, node_flavor value, double after,
+	node_flavor* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	node_flavor result = value;
+	result = (node_flavor)(result + 1);
+	return result;
+}
+
 orientation
 mojobe_oracle_echo_orientation(int8 before, orientation value, double after,
 	orientation* seen, int8* seenBefore, double* seenAfter)
@@ -733,6 +788,18 @@ mojobe_oracle_echo_overlay_options(int8 before, overlay_options value, double af
 	*seenAfter = after;
 	overlay_options result = value;
 	result = (overlay_options)(result + 1);
+	return result;
+}
+
+path_base_directory
+mojobe_oracle_echo_path_base_directory(int8 before, path_base_directory value, double after,
+	path_base_directory* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	path_base_directory result = value;
+	result = (path_base_directory)(result + 1);
 	return result;
 }
 

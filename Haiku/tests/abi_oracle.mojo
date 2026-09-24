@@ -105,6 +105,7 @@ struct OracleBApplication(
     ApplicationQuitRequested,
     ApplicationAboutRequested,
     ApplicationPulse,
+    ApplicationRefsReceived,
     Movable,
 ):
     """Every hook of `BApplication`, checking its arguments."""
@@ -158,6 +159,18 @@ struct OracleBApplication(
     def Pulse(mut self, application: BApplicationRef[_]):
         self.calls += 1
         self.expect("Pulse application", _addr(application._ptr) == 0x10400)
+
+    def RefsReceived(
+        mut self,
+        application: BApplicationRef[_],
+        message: BMessageRef[_],
+    ):
+        self.calls += 1
+        self.expect(
+            "RefsReceived application",
+            _addr(application._ptr) == 0x10500,
+        )
+        self.expect("RefsReceived message", message.what == 0x6F720051)
 
 
 struct OracleBWindow(
@@ -440,8 +453,8 @@ def main() raises:
         contextBApplication,
     )
     ref seenBApplication = contextBApplication.unsafe_bitcast[OracleBApplication]()[]
-    checks.check("BApplication: all 5 hooks called, their results seen by C++",
-        seenBApplication.calls == 5 and failuresBApplication == 0)
+    checks.check("BApplication: all 6 hooks called, their results seen by C++",
+        seenBApplication.calls == 6 and failuresBApplication == 0)
     checks.check(
         "BApplication: every argument as C++ passed it",
         seenBApplication.wrong == 0,
@@ -813,6 +826,22 @@ def main() raises:
         seencpu_vendor == givencpu_vendor and beforecpu_vendor == -5 and aftercpu_vendor == 2.75)
     checks.check("cpu_vendor returned", resultcpu_vendor == cpu_vendor(4))
 
+    var givendirectory_which = directory_which(3)
+    var seendirectory_which = givendirectory_which
+    var beforedirectory_which = Int8(0)
+    var afterdirectory_which = Float64(0)
+    var resultdirectory_which = external_call["mojobe_oracle_echo_directory_which", directory_which](
+        Int8(-5), givendirectory_which, Float64(2.75), Pointer(
+            to=seendirectory_which,
+        ),
+        Pointer(to=beforedirectory_which), Pointer(to=afterdirectory_which))
+    checks.check("directory_which by value, between an int8 and a double",
+        seendirectory_which == givendirectory_which and beforedirectory_which == -5 and afterdirectory_which == 2.75)
+    checks.check(
+        "directory_which returned",
+        resultdirectory_which == directory_which(4),
+    )
+
     var givendrawing_mode = drawing_mode(3)
     var seendrawing_mode = givendrawing_mode
     var beforedrawing_mode = Int8(0)
@@ -825,6 +854,38 @@ def main() raises:
     checks.check("drawing_mode by value, between an int8 and a double",
         seendrawing_mode == givendrawing_mode and beforedrawing_mode == -5 and afterdrawing_mode == 2.75)
     checks.check("drawing_mode returned", resultdrawing_mode == drawing_mode(4))
+
+    var givenfile_panel_button = file_panel_button(3)
+    var seenfile_panel_button = givenfile_panel_button
+    var beforefile_panel_button = Int8(0)
+    var afterfile_panel_button = Float64(0)
+    var resultfile_panel_button = external_call["mojobe_oracle_echo_file_panel_button", file_panel_button](
+        Int8(-5), givenfile_panel_button, Float64(2.75), Pointer(
+            to=seenfile_panel_button,
+        ),
+        Pointer(to=beforefile_panel_button), Pointer(to=afterfile_panel_button))
+    checks.check("file_panel_button by value, between an int8 and a double",
+        seenfile_panel_button == givenfile_panel_button and beforefile_panel_button == -5 and afterfile_panel_button == 2.75)
+    checks.check(
+        "file_panel_button returned",
+        resultfile_panel_button == file_panel_button(4),
+    )
+
+    var givenfile_panel_mode = file_panel_mode(3)
+    var seenfile_panel_mode = givenfile_panel_mode
+    var beforefile_panel_mode = Int8(0)
+    var afterfile_panel_mode = Float64(0)
+    var resultfile_panel_mode = external_call["mojobe_oracle_echo_file_panel_mode", file_panel_mode](
+        Int8(-5), givenfile_panel_mode, Float64(2.75), Pointer(
+            to=seenfile_panel_mode,
+        ),
+        Pointer(to=beforefile_panel_mode), Pointer(to=afterfile_panel_mode))
+    checks.check("file_panel_mode by value, between an int8 and a double",
+        seenfile_panel_mode == givenfile_panel_mode and beforefile_panel_mode == -5 and afterfile_panel_mode == 2.75)
+    checks.check(
+        "file_panel_mode returned",
+        resultfile_panel_mode == file_panel_mode(4),
+    )
 
     var givenfont_direction = font_direction(3)
     var seenfont_direction = givenfont_direction
@@ -970,6 +1031,17 @@ def main() raises:
         seenmode_mouse == givenmode_mouse and beforemode_mouse == -5 and aftermode_mouse == 2.75)
     checks.check("mode_mouse returned", resultmode_mouse == mode_mouse(-2))
 
+    var givennode_flavor = node_flavor(3)
+    var seennode_flavor = givennode_flavor
+    var beforenode_flavor = Int8(0)
+    var afternode_flavor = Float64(0)
+    var resultnode_flavor = external_call["mojobe_oracle_echo_node_flavor", node_flavor](
+        Int8(-5), givennode_flavor, Float64(2.75), Pointer(to=seennode_flavor),
+        Pointer(to=beforenode_flavor), Pointer(to=afternode_flavor))
+    checks.check("node_flavor by value, between an int8 and a double",
+        seennode_flavor == givennode_flavor and beforenode_flavor == -5 and afternode_flavor == 2.75)
+    checks.check("node_flavor returned", resultnode_flavor == node_flavor(4))
+
     var givenorientation = orientation(3)
     var seenorientation = givenorientation
     var beforeorientation = Int8(0)
@@ -995,6 +1067,24 @@ def main() raises:
     checks.check(
         "overlay_options returned",
         resultoverlay_options == overlay_options(4),
+    )
+
+    var givenpath_base_directory = path_base_directory(3)
+    var seenpath_base_directory = givenpath_base_directory
+    var beforepath_base_directory = Int8(0)
+    var afterpath_base_directory = Float64(0)
+    var resultpath_base_directory = external_call["mojobe_oracle_echo_path_base_directory", path_base_directory](
+        Int8(-5), givenpath_base_directory, Float64(2.75), Pointer(
+            to=seenpath_base_directory,
+        ),
+        Pointer(to=beforepath_base_directory), Pointer(
+            to=afterpath_base_directory,
+        ))
+    checks.check("path_base_directory by value, between an int8 and a double",
+        seenpath_base_directory == givenpath_base_directory and beforepath_base_directory == -5 and afterpath_base_directory == 2.75)
+    checks.check(
+        "path_base_directory returned",
+        resultpath_base_directory == path_base_directory(4),
     )
 
     var givenrect_tracking_style = rect_tracking_style(3)

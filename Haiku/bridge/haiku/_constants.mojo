@@ -193,8 +193,38 @@ struct cpu_vendor(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct directory_which(Equatable, TrivialRegisterPassable):
+    """`enum directory_which`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct drawing_mode(Equatable, TrivialRegisterPassable):
     """`enum drawing_mode`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct file_panel_button(Equatable, TrivialRegisterPassable):
+    """`enum file_panel_button`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct file_panel_mode(Equatable, TrivialRegisterPassable):
+    """`enum file_panel_mode`."""
 
     var value: UInt32
 
@@ -303,6 +333,16 @@ struct mode_mouse(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct node_flavor(Equatable, TrivialRegisterPassable):
+    """`enum node_flavor`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct orientation(Equatable, TrivialRegisterPassable):
     """`enum orientation`."""
 
@@ -315,6 +355,16 @@ struct orientation(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct overlay_options(Equatable, TrivialRegisterPassable):
     """`enum overlay_options`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct path_base_directory(Equatable, TrivialRegisterPassable):
+    """`enum path_base_directory`."""
 
     var value: UInt32
 
@@ -522,7 +572,9 @@ comptime B_AMBIGUOUS_APP_LAUNCH: Int32 = -2147475450
 comptime B_ANY_ADDRESS: Int32 = 0
 comptime B_ANY_BYTES_PER_ROW: Int32 = -1
 comptime B_ANY_KERNEL_ADDRESS: Int32 = 4
+comptime B_ANY_NODE = node_flavor(7)
 comptime B_ANY_TYPE: UInt32 = 0x414e5954
+comptime B_APPS_DIRECTORY = directory_which(0xfa0)
 comptime B_APP_ACTIVATED: UInt32 = 0x5f414354
 comptime B_APP_ERROR_BASE: Int32 = -2147475456
 comptime B_APP_IMAGE = image_type(1)
@@ -569,6 +621,21 @@ comptime B_BAD_THREAD_STATE: Int32 = -2147479294
 comptime B_BAD_TYPE: Int32 = -2147483644
 comptime B_BAD_VALUE: Int32 = -2147483643
 comptime B_BASE_ADDRESS: Int32 = 2
+comptime B_BEOS_ADDONS_DIRECTORY = directory_which(0x3ea)
+comptime B_BEOS_APPS_DIRECTORY = directory_which(0x3ef)
+comptime B_BEOS_BIN_DIRECTORY = directory_which(0x3f0)
+comptime B_BEOS_BOOT_DIRECTORY = directory_which(0x3eb)
+comptime B_BEOS_DIRECTORY = directory_which(0x3e8)
+comptime B_BEOS_DOCUMENTATION_DIRECTORY = directory_which(0x3f2)
+comptime B_BEOS_ETC_DIRECTORY = directory_which(0x3f1)
+comptime B_BEOS_FONTS_DIRECTORY = directory_which(0x3ec)
+comptime B_BEOS_LIB_DIRECTORY = directory_which(0x3ed)
+comptime B_BEOS_MEDIA_NODES_DIRECTORY = directory_which(0x3f5)
+comptime B_BEOS_PREFERENCES_DIRECTORY = directory_which(0x3f3)
+comptime B_BEOS_SERVERS_DIRECTORY = directory_which(0x3ee)
+comptime B_BEOS_SOUNDS_DIRECTORY = directory_which(0x3f6)
+comptime B_BEOS_SYSTEM_DIRECTORY = directory_which(0x3e9)
+comptime B_BEOS_TRANSLATORS_DIRECTORY = directory_which(0x3f4)
 comptime B_BEOS_VERSION: Int32 = 0x500
 comptime B_BEOS_VERSION_4: Int32 = 0x400
 comptime B_BEOS_VERSION_4_5: Int32 = 0x450
@@ -609,6 +676,7 @@ comptime B_BUTT_JOIN = join_mode(3)
 comptime B_BYTE_ALIGNMENT = window_alignment(0)
 comptime B_CANCEL: UInt32 = 0x5f434e43
 comptime B_CANCELED: Int32 = -2147483636
+comptime B_CANCEL_BUTTON = file_panel_button(0)
 comptime B_CAN_INTERRUPT: UInt32 = 1
 comptime B_CAPS_LOCK: UInt32 = 8
 comptime B_CAPS_LOCK_KEY: UInt32 = 0x3b
@@ -707,11 +775,13 @@ comptime B_DARKEN_3_TINT: Float32 = 1.406999945640564
 comptime B_DARKEN_4_TINT: Float32 = 1.5549999475479126
 comptime B_DARKEN_MAX_TINT: Float32 = 2.0
 comptime B_DEBUGGER_ALREADY_INSTALLED: Int32 = -2147478528
+comptime B_DEFAULT_BUTTON = file_panel_button(1)
 comptime B_DEFAULT_MITER_LIMIT: Float32 = 10.0
 comptime B_DELETE: UInt32 = 0x7f
 comptime B_DELETE_PROPERTY = command_code(0x5044454c)
 comptime B_DELETE_TRANSLATOR: UInt32 = 0x5f445254
 comptime B_DESKTOP_COLOR = color_which(5)
+comptime B_DESKTOP_DIRECTORY = directory_which(0)
 comptime B_DEVICE_CONTROL_2: UInt32 = 0x12
 comptime B_DEVICE_CONTROL_4: UInt32 = 0x14
 comptime B_DEVICE_ERROR_BASE: Int32 = -2147442688
@@ -749,6 +819,7 @@ comptime B_DEV_TOO_LATE: Int32 = -2147442658
 comptime B_DEV_UNEXPECTED_PID: Int32 = -2147442665
 comptime B_DEV_UNREADABLE: Int32 = -2147442684
 comptime B_DEV_WRITE_ERROR: Int32 = -2147442677
+comptime B_DIRECTORY_NODE = node_flavor(4)
 comptime B_DIRECTORY_NOT_EMPTY: Int32 = -2147459066
 comptime B_DIRECT_SPECIFIER: UInt32 = 1
 comptime B_DISABLED_ICON_BITMAP: UInt32 = 0x80
@@ -812,8 +883,40 @@ comptime B_FIELD_NAME_LENGTH: Int32 = 0xff
 comptime B_FILE_ERROR: Int32 = -2147459072
 comptime B_FILE_EXISTS: Int32 = -2147459070
 comptime B_FILE_NAME_LENGTH: Int32 = 0x100
+comptime B_FILE_NODE = node_flavor(1)
 comptime B_FILE_TOO_LARGE: Int32 = -2147454972
 comptime B_FILTER_BITMAP_BILINEAR = bitmap_drawing_options(0x100)
+comptime B_FIND_PATHS_SYSTEM_ONLY: UInt32 = 0x10
+comptime B_FIND_PATHS_USER_ONLY: UInt32 = 0x20
+comptime B_FIND_PATH_ADD_ONS_DIRECTORY = path_base_directory(1)
+comptime B_FIND_PATH_APPS_DIRECTORY = path_base_directory(2)
+comptime B_FIND_PATH_BIN_DIRECTORY = path_base_directory(3)
+comptime B_FIND_PATH_BOOT_DIRECTORY = path_base_directory(4)
+comptime B_FIND_PATH_CACHE_DIRECTORY = path_base_directory(5)
+comptime B_FIND_PATH_CREATE_DIRECTORY: UInt32 = 1
+comptime B_FIND_PATH_CREATE_PARENT_DIRECTORY: UInt32 = 2
+comptime B_FIND_PATH_DATA_DIRECTORY = path_base_directory(6)
+comptime B_FIND_PATH_DEVELOP_DIRECTORY = path_base_directory(7)
+comptime B_FIND_PATH_DEVELOP_LIB_DIRECTORY = path_base_directory(8)
+comptime B_FIND_PATH_DOCUMENTATION_DIRECTORY = path_base_directory(9)
+comptime B_FIND_PATH_ETC_DIRECTORY = path_base_directory(0xa)
+comptime B_FIND_PATH_EXISTING_ONLY: UInt32 = 4
+comptime B_FIND_PATH_FONTS_DIRECTORY = path_base_directory(0xb)
+comptime B_FIND_PATH_HEADERS_DIRECTORY = path_base_directory(0xc)
+comptime B_FIND_PATH_IMAGE_PATH = path_base_directory(0x3e8)
+comptime B_FIND_PATH_INSTALLATION_LOCATION_DIRECTORY = path_base_directory(0)
+comptime B_FIND_PATH_LIB_DIRECTORY = path_base_directory(0xd)
+comptime B_FIND_PATH_LOG_DIRECTORY = path_base_directory(0xe)
+comptime B_FIND_PATH_MEDIA_NODES_DIRECTORY = path_base_directory(0xf)
+comptime B_FIND_PATH_PACKAGES_DIRECTORY = path_base_directory(0x10)
+comptime B_FIND_PATH_PACKAGE_PATH = path_base_directory(0x3e9)
+comptime B_FIND_PATH_PREFERENCES_DIRECTORY = path_base_directory(0x11)
+comptime B_FIND_PATH_SERVERS_DIRECTORY = path_base_directory(0x12)
+comptime B_FIND_PATH_SETTINGS_DIRECTORY = path_base_directory(0x13)
+comptime B_FIND_PATH_SOUNDS_DIRECTORY = path_base_directory(0x14)
+comptime B_FIND_PATH_SPOOL_DIRECTORY = path_base_directory(0x15)
+comptime B_FIND_PATH_TRANSLATORS_DIRECTORY = path_base_directory(0x16)
+comptime B_FIND_PATH_VAR_DIRECTORY = path_base_directory(0x17)
 comptime B_FIRST_REAL_TIME_PRIORITY: Int32 = 0x64
 comptime B_FIXED_SPACING: UInt32 = 3
 comptime B_FLOATING_ALL_WINDOW_FEEL = window_feel(6)
@@ -1172,6 +1275,7 @@ comptime B_ONE_SHOT_ABSOLUTE_ALARM: UInt32 = 1
 comptime B_ONE_SHOT_RELATIVE_ALARM: UInt32 = 2
 comptime B_OPEN_AT_END: Int32 = 0x800
 comptime B_OPEN_IN_WORKSPACE: UInt32 = 0x5f4f5753
+comptime B_OPEN_PANEL = file_panel_mode(0)
 comptime B_OPTION_CAPS_SHIFT_TABLE: UInt32 = 2
 comptime B_OPTION_CAPS_TABLE: UInt32 = 4
 comptime B_OPTION_KEY: UInt32 = 0x40
@@ -1197,6 +1301,7 @@ comptime B_OVERLAY_FILTER_HORIZONTAL = overlay_options(0x10000)
 comptime B_OVERLAY_FILTER_VERTICAL = overlay_options(0x20000)
 comptime B_OVERLAY_MIRROR = overlay_options(0x40000)
 comptime B_OVERLAY_TRANSFER_CHANNEL = overlay_options(0x80000)
+comptime B_PACKAGE_LINKS_DIRECTORY = directory_which(0xfa3)
 comptime B_PACKAGE_UPDATE: UInt32 = 0x5f504b55
 comptime B_PAGE_DOWN: UInt32 = 0xc
 comptime B_PAGE_SIZE: Int32 = 0x1000
@@ -1224,6 +1329,7 @@ comptime B_POINT_TYPE: UInt32 = 0x42504e54
 comptime B_POSIX_ENOMEM: Int32 = -2147454976
 comptime B_POSIX_ERROR_BASE: Int32 = -2147454976
 comptime B_POSTSCRIPT_TYPE1_WINDOWS = font_file_format(1)
+comptime B_PREFERENCES_DIRECTORY = directory_which(0xfa1)
 comptime B_PREVIOUS_STATE_COORDINATES = coordinate_space(1)
 comptime B_PRIMARY_MOUSE_BUTTON: UInt32 = 1
 comptime B_PRINTER_CHANGED: UInt32 = 0x5f504348
@@ -1305,6 +1411,7 @@ comptime B_RIGHT_SHIFT_KEY: UInt32 = 0x200
 comptime B_ROUND_CAP = cap_mode(0)
 comptime B_ROUND_JOIN = join_mode(0)
 comptime B_SAME_POSITION_IN_ALL_WORKSPACES: UInt32 = 0x200000
+comptime B_SAVE_PANEL = file_panel_mode(1)
 comptime B_SAVE_REQUESTED = command_code(0x53415645)
 comptime B_SCREEN_CHANGED: UInt32 = 0x5f534348
 comptime B_SCREEN_COORDINATES = coordinate_space(6)
@@ -1358,9 +1465,47 @@ comptime B_SWAP_LENDIAN_TO_HOST = swap_action(2)
 comptime B_SYMBOL_TYPE_ANY: Int32 = 5
 comptime B_SYMBOL_TYPE_DATA: Int32 = 1
 comptime B_SYMBOL_TYPE_TEXT: Int32 = 2
+comptime B_SYMLINK_NODE = node_flavor(2)
+comptime B_SYSTEM_ADDONS_DIRECTORY = directory_which(0x3ea)
+comptime B_SYSTEM_APPS_DIRECTORY = directory_which(0x3ef)
+comptime B_SYSTEM_BIN_DIRECTORY = directory_which(0x3f0)
+comptime B_SYSTEM_BOOT_DIRECTORY = directory_which(0x3eb)
+comptime B_SYSTEM_CACHE_DIRECTORY = directory_which(0x7e4)
+comptime B_SYSTEM_DATA_DIRECTORY = directory_which(0x3f7)
+comptime B_SYSTEM_DESKBAR_DIRECTORY = directory_which(0x3fb)
+comptime B_SYSTEM_DEVELOP_DIRECTORY = directory_which(0x3f8)
+comptime B_SYSTEM_DIRECTORY = directory_which(0x3e8)
+comptime B_SYSTEM_DOCUMENTATION_DIRECTORY = directory_which(0x3f2)
+comptime B_SYSTEM_ETC_DIRECTORY = directory_which(0x7d8)
+comptime B_SYSTEM_FONTS_DIRECTORY = directory_which(0x3ec)
+comptime B_SYSTEM_HEADERS_DIRECTORY = directory_which(0x3fa)
 comptime B_SYSTEM_IMAGE = image_type(4)
+comptime B_SYSTEM_LIB_DIRECTORY = directory_which(0x3ed)
+comptime B_SYSTEM_LOG_DIRECTORY = directory_which(0x7dc)
+comptime B_SYSTEM_MEDIA_NODES_DIRECTORY = directory_which(0x3f5)
+comptime B_SYSTEM_NONPACKAGED_ADDONS_DIRECTORY = directory_which(0x7e8)
+comptime B_SYSTEM_NONPACKAGED_BIN_DIRECTORY = directory_which(0x7eb)
+comptime B_SYSTEM_NONPACKAGED_DATA_DIRECTORY = directory_which(0x7ec)
+comptime B_SYSTEM_NONPACKAGED_DEVELOP_DIRECTORY = directory_which(0x7f2)
+comptime B_SYSTEM_NONPACKAGED_DIRECTORY = directory_which(0x7e7)
+comptime B_SYSTEM_NONPACKAGED_DOCUMENTATION_DIRECTORY = directory_which(0x7ef)
+comptime B_SYSTEM_NONPACKAGED_FONTS_DIRECTORY = directory_which(0x7ed)
+comptime B_SYSTEM_NONPACKAGED_HEADERS_DIRECTORY = directory_which(0x7f1)
+comptime B_SYSTEM_NONPACKAGED_LIB_DIRECTORY = directory_which(0x7f0)
+comptime B_SYSTEM_NONPACKAGED_MEDIA_NODES_DIRECTORY = directory_which(0x7ea)
+comptime B_SYSTEM_NONPACKAGED_SOUNDS_DIRECTORY = directory_which(0x7ee)
+comptime B_SYSTEM_NONPACKAGED_TRANSLATORS_DIRECTORY = directory_which(0x7e9)
+comptime B_SYSTEM_PACKAGES_DIRECTORY = directory_which(0x3f9)
+comptime B_SYSTEM_PREFERENCES_DIRECTORY = directory_which(0x3f3)
+comptime B_SYSTEM_SERVERS_DIRECTORY = directory_which(0x3ee)
+comptime B_SYSTEM_SETTINGS_DIRECTORY = directory_which(0x7da)
+comptime B_SYSTEM_SOUNDS_DIRECTORY = directory_which(0x3f6)
+comptime B_SYSTEM_SPOOL_DIRECTORY = directory_which(0x7dd)
 comptime B_SYSTEM_TEAM: Int32 = 1
+comptime B_SYSTEM_TEMP_DIRECTORY = directory_which(0x7de)
 comptime B_SYSTEM_TIMEBASE: Int32 = 0
+comptime B_SYSTEM_TRANSLATORS_DIRECTORY = directory_which(0x3f4)
+comptime B_SYSTEM_VAR_DIRECTORY = directory_which(0x7df)
 comptime B_TAB: UInt32 = 9
 comptime B_TEAM_USAGE_CHILDREN: Int32 = -1
 comptime B_TEAM_USAGE_SELF: Int32 = 0
@@ -1396,6 +1541,7 @@ comptime B_TRANSLATION_ERROR_BASE: Int32 = -2147465216
 comptime B_TRANSLATOR_ADDED: UInt32 = 0x5f415254
 comptime B_TRANSLATOR_REMOVED: UInt32 = 0x5f525254
 comptime B_TRANSPARENT_BACKGROUND: UInt32 = 0x40000
+comptime B_TRASH_DIRECTORY = directory_which(1)
 comptime B_TRASH_TARGET = command_code(0x4444524d)
 comptime B_TRIANGLE_THUMB = thumb_style(1)
 comptime B_TRIM_ICON_BITMAP: UInt32 = 0x100
@@ -1428,6 +1574,44 @@ comptime B_UPDATE_STATUS_BAR = command_code(0x53425550)
 comptime B_UP_ARROW: UInt32 = 0x1e
 comptime B_URGENT_DISPLAY_PRIORITY: Int32 = 0x14
 comptime B_URGENT_PRIORITY: Int32 = 0x6e
+comptime B_USER_ADDONS_DIRECTORY = directory_which(0xbba)
+comptime B_USER_APPS_DIRECTORY = directory_which(0xbd7)
+comptime B_USER_BIN_DIRECTORY = directory_which(0xbd8)
+comptime B_USER_BOOT_DIRECTORY = directory_which(0xbbb)
+comptime B_USER_CACHE_DIRECTORY = directory_which(0xbc5)
+comptime B_USER_CONFIG_DIRECTORY = directory_which(0xbb9)
+comptime B_USER_DATA_DIRECTORY = directory_which(0xbc4)
+comptime B_USER_DESKBAR_DIRECTORY = directory_which(0xbbf)
+comptime B_USER_DEVELOP_DIRECTORY = directory_which(0xbd4)
+comptime B_USER_DIRECTORY = directory_which(0xbb8)
+comptime B_USER_DOCUMENTATION_DIRECTORY = directory_which(0xbd5)
+comptime B_USER_ETC_DIRECTORY = directory_which(0xbda)
+comptime B_USER_FONTS_DIRECTORY = directory_which(0xbbc)
+comptime B_USER_HEADERS_DIRECTORY = directory_which(0xbc7)
+comptime B_USER_LIB_DIRECTORY = directory_which(0xbbd)
+comptime B_USER_LOG_DIRECTORY = directory_which(0xbdb)
+comptime B_USER_MEDIA_NODES_DIRECTORY = directory_which(0xbc2)
+comptime B_USER_NONPACKAGED_ADDONS_DIRECTORY = directory_which(0xbc9)
+comptime B_USER_NONPACKAGED_BIN_DIRECTORY = directory_which(0xbcc)
+comptime B_USER_NONPACKAGED_DATA_DIRECTORY = directory_which(0xbcd)
+comptime B_USER_NONPACKAGED_DEVELOP_DIRECTORY = directory_which(0xbd3)
+comptime B_USER_NONPACKAGED_DIRECTORY = directory_which(0xbc8)
+comptime B_USER_NONPACKAGED_DOCUMENTATION_DIRECTORY = directory_which(0xbd0)
+comptime B_USER_NONPACKAGED_FONTS_DIRECTORY = directory_which(0xbce)
+comptime B_USER_NONPACKAGED_HEADERS_DIRECTORY = directory_which(0xbd2)
+comptime B_USER_NONPACKAGED_LIB_DIRECTORY = directory_which(0xbd1)
+comptime B_USER_NONPACKAGED_MEDIA_NODES_DIRECTORY = directory_which(0xbcb)
+comptime B_USER_NONPACKAGED_SOUNDS_DIRECTORY = directory_which(0xbcf)
+comptime B_USER_NONPACKAGED_TRANSLATORS_DIRECTORY = directory_which(0xbca)
+comptime B_USER_PACKAGES_DIRECTORY = directory_which(0xbc6)
+comptime B_USER_PREFERENCES_DIRECTORY = directory_which(0xbd9)
+comptime B_USER_PRINTERS_DIRECTORY = directory_which(0xbc0)
+comptime B_USER_SERVERS_DIRECTORY = directory_which(0xbd6)
+comptime B_USER_SETTINGS_DIRECTORY = directory_which(0xbbe)
+comptime B_USER_SOUNDS_DIRECTORY = directory_which(0xbc3)
+comptime B_USER_SPOOL_DIRECTORY = directory_which(0xbdc)
+comptime B_USER_TRANSLATORS_DIRECTORY = directory_which(0xbc1)
+comptime B_USER_VAR_DIRECTORY = directory_which(0xbdd)
 comptime B_USE_BIG_INSETS = BSpacing(-1008)
 comptime B_USE_BIG_SPACING = BSpacing(-1008)
 comptime B_USE_BORDER_INSETS = BSpacing(-1009)
@@ -1443,6 +1627,7 @@ comptime B_USE_SMALL_INSETS = BSpacing(-1006)
 comptime B_USE_SMALL_SPACING = BSpacing(-1006)
 comptime B_USE_WINDOW_INSETS = BSpacing(-1005)
 comptime B_USE_WINDOW_SPACING = BSpacing(-1005)
+comptime B_UTILITIES_DIRECTORY = directory_which(0xfa2)
 comptime B_UVL24 = color_space(0x4030)
 comptime B_UVL32 = color_space(0x4031)
 comptime B_UVLA32 = color_space(0x6031)
