@@ -455,6 +455,22 @@ void mojobe_BWindow_Activate(BWindow* self, bool a_arg0);
 // void BWindow::WindowActivated(bool focus)
 void mojobe_BWindow_WindowActivated(BWindow* self, bool a_focus);
 
+// BPoint BWindow::ConvertToScreen(BPoint point) const
+mojobe_BPoint mojobe_BWindow_ConvertToScreen__BPoint(BWindow* self,
+	mojobe_BPoint a_point);
+
+// BRect BWindow::ConvertToScreen(BRect rect) const
+mojobe_BRect mojobe_BWindow_ConvertToScreen__BRect(BWindow* self,
+	mojobe_BRect a_rect);
+
+// BPoint BWindow::ConvertFromScreen(BPoint point) const
+mojobe_BPoint mojobe_BWindow_ConvertFromScreen__BPoint(BWindow* self,
+	mojobe_BPoint a_point);
+
+// BRect BWindow::ConvertFromScreen(BRect rect) const
+mojobe_BRect mojobe_BWindow_ConvertFromScreen__BRect(BWindow* self,
+	mojobe_BRect a_rect);
+
 // void BWindow::MoveBy(float dx, float dy)
 void mojobe_BWindow_MoveBy(BWindow* self, float a_dx, float a_dy);
 
@@ -927,6 +943,38 @@ mojobe_BRect mojobe_BView_Bounds(BView* self);
 
 // BRect BView::Frame() const
 mojobe_BRect mojobe_BView_Frame(BView* self);
+
+// BPoint BView::ConvertToScreen(BPoint point) const
+mojobe_BPoint mojobe_BView_ConvertToScreen__BPoint(BView* self,
+	mojobe_BPoint a_point);
+
+// BRect BView::ConvertToScreen(BRect rect) const
+mojobe_BRect mojobe_BView_ConvertToScreen__BRect(BView* self,
+	mojobe_BRect a_rect);
+
+// BPoint BView::ConvertFromScreen(BPoint point) const
+mojobe_BPoint mojobe_BView_ConvertFromScreen__BPoint(BView* self,
+	mojobe_BPoint a_point);
+
+// BRect BView::ConvertFromScreen(BRect rect) const
+mojobe_BRect mojobe_BView_ConvertFromScreen__BRect(BView* self,
+	mojobe_BRect a_rect);
+
+// BPoint BView::ConvertToParent(BPoint point) const
+mojobe_BPoint mojobe_BView_ConvertToParent__BPoint(BView* self,
+	mojobe_BPoint a_point);
+
+// BRect BView::ConvertToParent(BRect rect) const
+mojobe_BRect mojobe_BView_ConvertToParent__BRect(BView* self,
+	mojobe_BRect a_rect);
+
+// BPoint BView::ConvertFromParent(BPoint point) const
+mojobe_BPoint mojobe_BView_ConvertFromParent__BPoint(BView* self,
+	mojobe_BPoint a_point);
+
+// BRect BView::ConvertFromParent(BRect rect) const
+mojobe_BRect mojobe_BView_ConvertFromParent__BRect(BView* self,
+	mojobe_BRect a_rect);
 
 // BPoint BView::LeftTop() const
 mojobe_BPoint mojobe_BView_LeftTop(BView* self);

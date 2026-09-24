@@ -448,6 +448,7 @@ trait _BApplicationMethods(_AsBApplication):
 
 
 struct BApplicationRef(
+    Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BApplicationMethods,
@@ -938,6 +939,38 @@ trait _BWindowMethods(_AsBWindow):
             _nonnull(self._as_BWindow(), "BWindow::WindowActivated"),
             focus,
         )
+
+    def ConvertToScreen(self, point: BPoint) -> BPoint:
+        """`BPoint BWindow::ConvertToScreen(BPoint point) const`."""
+        var _result = external_call["mojobe_BWindow_ConvertToScreen__BPoint", BPoint](
+            _nonnull(self._as_BWindow(), "BWindow::ConvertToScreen"),
+            point,
+        )
+        return _result
+
+    def ConvertToScreen(self, rect: BRect) -> BRect:
+        """`BRect BWindow::ConvertToScreen(BRect rect) const`."""
+        var _result = external_call["mojobe_BWindow_ConvertToScreen__BRect", BRect](
+            _nonnull(self._as_BWindow(), "BWindow::ConvertToScreen"),
+            rect,
+        )
+        return _result
+
+    def ConvertFromScreen(self, point: BPoint) -> BPoint:
+        """`BPoint BWindow::ConvertFromScreen(BPoint point) const`."""
+        var _result = external_call["mojobe_BWindow_ConvertFromScreen__BPoint", BPoint](
+            _nonnull(self._as_BWindow(), "BWindow::ConvertFromScreen"),
+            point,
+        )
+        return _result
+
+    def ConvertFromScreen(self, rect: BRect) -> BRect:
+        """`BRect BWindow::ConvertFromScreen(BRect rect) const`."""
+        var _result = external_call["mojobe_BWindow_ConvertFromScreen__BRect", BRect](
+            _nonnull(self._as_BWindow(), "BWindow::ConvertFromScreen"),
+            rect,
+        )
+        return _result
 
     def MoveBy(self, dx: Float32, dy: Float32):
         """`void BWindow::MoveBy(float dx, float dy)`."""
@@ -1592,7 +1625,12 @@ trait _BWindowMethods(_AsBWindow):
         _check(_result, "BArchivable::AllArchived")
 
 
-struct BWindowRef(ImplicitlyCopyable, RegisterPassable, _BWindowMethods):
+struct BWindowRef(
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BWindowMethods,
+):
     """A `BWindow` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
@@ -2382,6 +2420,70 @@ trait _BViewMethods(_AsBView):
         """`BRect BView::Frame() const`."""
         var _result = external_call["mojobe_BView_Frame", BRect](
             _nonnull(self._as_BView(), "BView::Frame"),
+        )
+        return _result
+
+    def ConvertToScreen(self, point: BPoint) -> BPoint:
+        """`BPoint BView::ConvertToScreen(BPoint point) const`."""
+        var _result = external_call["mojobe_BView_ConvertToScreen__BPoint", BPoint](
+            _nonnull(self._as_BView(), "BView::ConvertToScreen"),
+            point,
+        )
+        return _result
+
+    def ConvertToScreen(self, rect: BRect) -> BRect:
+        """`BRect BView::ConvertToScreen(BRect rect) const`."""
+        var _result = external_call["mojobe_BView_ConvertToScreen__BRect", BRect](
+            _nonnull(self._as_BView(), "BView::ConvertToScreen"),
+            rect,
+        )
+        return _result
+
+    def ConvertFromScreen(self, point: BPoint) -> BPoint:
+        """`BPoint BView::ConvertFromScreen(BPoint point) const`."""
+        var _result = external_call["mojobe_BView_ConvertFromScreen__BPoint", BPoint](
+            _nonnull(self._as_BView(), "BView::ConvertFromScreen"),
+            point,
+        )
+        return _result
+
+    def ConvertFromScreen(self, rect: BRect) -> BRect:
+        """`BRect BView::ConvertFromScreen(BRect rect) const`."""
+        var _result = external_call["mojobe_BView_ConvertFromScreen__BRect", BRect](
+            _nonnull(self._as_BView(), "BView::ConvertFromScreen"),
+            rect,
+        )
+        return _result
+
+    def ConvertToParent(self, point: BPoint) -> BPoint:
+        """`BPoint BView::ConvertToParent(BPoint point) const`."""
+        var _result = external_call["mojobe_BView_ConvertToParent__BPoint", BPoint](
+            _nonnull(self._as_BView(), "BView::ConvertToParent"),
+            point,
+        )
+        return _result
+
+    def ConvertToParent(self, rect: BRect) -> BRect:
+        """`BRect BView::ConvertToParent(BRect rect) const`."""
+        var _result = external_call["mojobe_BView_ConvertToParent__BRect", BRect](
+            _nonnull(self._as_BView(), "BView::ConvertToParent"),
+            rect,
+        )
+        return _result
+
+    def ConvertFromParent(self, point: BPoint) -> BPoint:
+        """`BPoint BView::ConvertFromParent(BPoint point) const`."""
+        var _result = external_call["mojobe_BView_ConvertFromParent__BPoint", BPoint](
+            _nonnull(self._as_BView(), "BView::ConvertFromParent"),
+            point,
+        )
+        return _result
+
+    def ConvertFromParent(self, rect: BRect) -> BRect:
+        """`BRect BView::ConvertFromParent(BRect rect) const`."""
+        var _result = external_call["mojobe_BView_ConvertFromParent__BRect", BRect](
+            _nonnull(self._as_BView(), "BView::ConvertFromParent"),
+            rect,
         )
         return _result
 
@@ -3613,7 +3715,7 @@ trait _BViewMethods(_AsBView):
         return _result
 
 
-struct BViewRef(ImplicitlyCopyable, RegisterPassable, _BViewMethods):
+struct BViewRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BViewMethods):
     """A `BView` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
@@ -6340,7 +6442,12 @@ trait _BMessageMethods(_AsBMessage):
         )
 
 
-struct BMessageRef(ImplicitlyCopyable, RegisterPassable, _BMessageMethods):
+struct BMessageRef(
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BMessageMethods,
+):
     """A `BMessage` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
@@ -6700,7 +6807,7 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         return _result
 
 
-struct BMenuRef(ImplicitlyCopyable, RegisterPassable, _BMenuMethods):
+struct BMenuRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BMenuMethods):
     """A `BMenu` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
@@ -6832,7 +6939,12 @@ trait _BMenuBarMethods(_AsBMenuBar, _BMenuMethods):
         return _result
 
 
-struct BMenuBarRef(ImplicitlyCopyable, RegisterPassable, _BMenuBarMethods):
+struct BMenuBarRef(
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BMenuBarMethods,
+):
     """A `BMenuBar` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
@@ -7125,7 +7237,12 @@ trait _BMenuItemMethods(_AsBMenuItem):
         return _result
 
 
-struct BMenuItemRef(ImplicitlyCopyable, RegisterPassable, _BMenuItemMethods):
+struct BMenuItemRef(
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BMenuItemMethods,
+):
     """A `BMenuItem` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
 
     var _ptr: _NPtr

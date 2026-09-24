@@ -727,7 +727,7 @@ class Bridge:
                 else:
                     raise Unbridged("parameter %s: %s by value"
                                     % (param.name, param.type.qual))
-            if param.name in inout:
+            if param.name in inout and param.type.pointers:
                 raise Unbridged("changes %s in place; the overload that returns"
                                 " the result is bridged" % param.name)
             role = "in"
@@ -1615,7 +1615,8 @@ class Emitter:
                          % (cls, ancestor))
         # the reference
         ref_fields = conf.get("ref_fields", [])
-        out.append("struct %sRef(ImplicitlyCopyable, RegisterPassable, _%sMethods):" % (cls, cls))
+        out.append("struct %sRef(Boolable, ImplicitlyCopyable, RegisterPassable, _%sMethods):"
+                   % (cls, cls))
         out.append('    """A `%s` the kit owns: valid in a hook, or while its looper is'
                    ' locked. It may be NULL: test it with `if`."""' % cls)
         out.append("")

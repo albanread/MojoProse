@@ -1319,6 +1319,38 @@ mojobe_BWindow_WindowActivated(BWindow* self, bool a_focus)
 }
 
 
+// BPoint BWindow::ConvertToScreen(BPoint point) const
+mojobe_BPoint
+mojobe_BWindow_ConvertToScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+}
+
+
+// BRect BWindow::ConvertToScreen(BRect rect) const
+mojobe_BRect
+mojobe_BWindow_ConvertToScreen__BRect(BWindow* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+}
+
+
+// BPoint BWindow::ConvertFromScreen(BPoint point) const
+mojobe_BPoint
+mojobe_BWindow_ConvertFromScreen__BPoint(BWindow* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+}
+
+
+// BRect BWindow::ConvertFromScreen(BRect rect) const
+mojobe_BRect
+mojobe_BWindow_ConvertFromScreen__BRect(BWindow* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+}
+
+
 // void BWindow::MoveBy(float dx, float dy)
 void
 mojobe_BWindow_MoveBy(BWindow* self, float a_dx, float a_dy)
@@ -2443,6 +2475,70 @@ mojobe_BRect
 mojobe_BView_Frame(BView* self)
 {
 	return mojobe_to_c(self->Frame());
+}
+
+
+// BPoint BView::ConvertToScreen(BPoint point) const
+mojobe_BPoint
+mojobe_BView_ConvertToScreen__BPoint(BView* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_point)));
+}
+
+
+// BRect BView::ConvertToScreen(BRect rect) const
+mojobe_BRect
+mojobe_BView_ConvertToScreen__BRect(BView* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertToScreen(mojobe_from_c(a_rect)));
+}
+
+
+// BPoint BView::ConvertFromScreen(BPoint point) const
+mojobe_BPoint
+mojobe_BView_ConvertFromScreen__BPoint(BView* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_point)));
+}
+
+
+// BRect BView::ConvertFromScreen(BRect rect) const
+mojobe_BRect
+mojobe_BView_ConvertFromScreen__BRect(BView* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertFromScreen(mojobe_from_c(a_rect)));
+}
+
+
+// BPoint BView::ConvertToParent(BPoint point) const
+mojobe_BPoint
+mojobe_BView_ConvertToParent__BPoint(BView* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_point)));
+}
+
+
+// BRect BView::ConvertToParent(BRect rect) const
+mojobe_BRect
+mojobe_BView_ConvertToParent__BRect(BView* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertToParent(mojobe_from_c(a_rect)));
+}
+
+
+// BPoint BView::ConvertFromParent(BPoint point) const
+mojobe_BPoint
+mojobe_BView_ConvertFromParent__BPoint(BView* self, mojobe_BPoint a_point)
+{
+	return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_point)));
+}
+
+
+// BRect BView::ConvertFromParent(BRect rect) const
+mojobe_BRect
+mojobe_BView_ConvertFromParent__BRect(BView* self, mojobe_BRect a_rect)
+{
+	return mojobe_to_c(self->ConvertFromParent(mojobe_from_c(a_rect)));
 }
 
 

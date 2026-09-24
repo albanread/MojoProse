@@ -123,6 +123,34 @@ def main() raises:
     checks.check("BView.Parent() of a lone view is NULL", not view.Parent())
     checks.check("BView.Window() of a lone view is NULL", not view.Window())
 
+    # Adoption into a view; a by-value overload whose pointer twin changes
+    # its argument in place (bridge.toml [inout]) -- once left out with it.
+    var parent = BView(BRect(0, 0, 199, 199), "parent", 0, 0)
+    parent.AddChild(BView(BRect(10, 20, 59, 69), "child", 0, 0))
+    var child = parent.FindView("child")
+    checks.check("FindView finds the adopted child", Bool(child))
+    checks.check(
+        "the child's Parent() is the parent",
+        child.Parent().Name() == "parent",
+    )
+    var converted = child.ConvertToParent(BPoint(1, 2))
+    checks.check(
+        "ConvertToParent(BPoint): by value",
+        converted.x == 11 and converted.y == 22,
+        String(converted),
+    )
+    var frame_in_parent = child.ConvertToParent(child.Bounds())
+    checks.check(
+        "ConvertToParent(BRect): by value",
+        frame_in_parent.left == 10 and frame_in_parent.bottom == 69,
+        String(frame_in_parent),
+    )
+
+    # A reference does not keep its owner alive (design section 15, question
+    # 1): without this, Mojo ends `parent` after FindView, its last use, and
+    # `child` points into a deleted view.
+    _ = parent^
+
     var total = checks.passed + checks.failed
     if checks.failed:
         print("SELFTEST FAIL", checks.passed, "/", total)
