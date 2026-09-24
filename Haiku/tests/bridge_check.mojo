@@ -113,7 +113,7 @@ def main() raises:
     checks.check("MakeEmpty", message.IsEmpty())
 
     # References: NULL is a value, tested with `if`.
-    var nothing = BMessageRef()
+    var nothing = BMessageRef[ImmUntrackedOrigin]()
     checks.check("a NULL reference is False", not nothing)
 
     # An object Mojo owns, and a reference the kit returns.
@@ -125,6 +125,9 @@ def main() raises:
 
     # Adoption into a view; a by-value overload whose pointer twin changes
     # its argument in place (bridge.toml [inout]) -- once left out with it.
+    # `child` is borrowed from `parent` and keeps it alive: `parent` is not
+    # used after FindView, and once Mojo ended it there, deleting the view
+    # `child` points into (design section 17.6).
     var parent = BView(BRect(0, 0, 199, 199), "parent", 0, 0)
     parent.AddChild(BView(BRect(10, 20, 59, 69), "child", 0, 0))
     var child = parent.FindView("child")
@@ -145,11 +148,6 @@ def main() raises:
         frame_in_parent.left == 10 and frame_in_parent.bottom == 69,
         String(frame_in_parent),
     )
-
-    # A reference does not keep its owner alive (design section 15, question
-    # 1): without this, Mojo ends `parent` after FindView, its last use, and
-    # `child` points into a deleted view.
-    _ = parent^
 
     var total = checks.passed + checks.failed
     if checks.failed:

@@ -123,12 +123,24 @@ def _to_heap[T: Movable & Deinitable](var value: T) -> _Ptr:
 
 
 def _state_at[
-    T: Movable & Deinitable
-](context: Int, what: StaticString) raises -> ref[MutUntrackedOrigin] T:
-    """The Mojo state at `context`, which libmojobe found for `T`'s tag."""
+    T: Movable & Deinitable, origin: MutOrigin
+](context: Int, what: StaticString) raises -> ref[origin] T:
+    """The Mojo state at `context`, which libmojobe found for `T`'s tag,
+    borrowed as `origin`: the reference it was asked through."""
     if context == 0:
         raise Error("the ", what, "'s Mojo state is not of the type asked for")
-    return Pointer[T, MutUntrackedOrigin](unsafe_from_address=context)[]
+    return Pointer[T, MutUntrackedOrigin](
+        unsafe_from_address=context
+    ).unsafe_origin_cast[origin]()[]
+
+
+struct _HookCall(Movable):
+    """What the references a hook receives are borrowed from: a local of the
+    hook's trampoline, which ends when the hook returns. A reference cannot
+    outlive it, so a hook cannot keep one."""
+
+    def __init__(out self):
+        pass
 
 
 def fourcc(code: StaticString) -> UInt32:

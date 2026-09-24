@@ -18,6 +18,7 @@ from std.ffi import c_char, external_call
 
 from ._core import (
     _FnPtr,
+    _HookCall,
     _NPtr,
     _Ptr,
     _addr,
@@ -203,13 +204,13 @@ trait _BApplicationMethods(_AsBApplication):
         )
         return _result
 
-    def WindowAt(self, index: Int32) -> BWindowRef:
+    def WindowAt(ref self, index: Int32) -> BWindowRef[origin_of(self)]:
         """`BWindow* BApplication::WindowAt(int32 index) const`."""
         var _result = external_call["mojobe_BApplication_WindowAt", Int](
             _nonnull(self._as_BApplication(), "BApplication::WindowAt"),
             index,
         )
-        return BWindowRef(_ptr_from(_result))
+        return BWindowRef[origin_of(self)](_ptr_from(_result))
 
     def CountLoopers(self) -> Int32:
         """`int32 BApplication::CountLoopers() const`."""
@@ -266,14 +267,14 @@ trait _BApplicationMethods(_AsBApplication):
         )
         _check(_result, "BLooper::PostMessage")
 
-    def CurrentMessage(self) -> BMessageRef:
+    def CurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
         """`BMessage* BLooper::CurrentMessage() const`."""
         var _result = external_call["mojobe_BApplication_CurrentMessage", Int](
             _nonnull(self._as_BApplication(), "BApplication::CurrentMessage"),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
-    def DetachCurrentMessage(self) -> BMessageRef:
+    def DetachCurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
         """`BMessage* BLooper::DetachCurrentMessage()`."""
         var _result = external_call["mojobe_BApplication_DetachCurrentMessage", Int](
             _nonnull(
@@ -281,7 +282,7 @@ trait _BApplicationMethods(_AsBApplication):
                 "BApplication::DetachCurrentMessage",
             ),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
     def IsMessageWaiting(self) -> Bool:
         """`bool BLooper::IsMessageWaiting() const`."""
@@ -415,7 +416,11 @@ trait _BApplicationMethods(_AsBApplication):
             _nonnull(self._as_BApplication(), "BApplication::UnlockLooper"),
         )
 
-    def SendNotices(self, what: UInt32, notice: BMessageRef = BMessageRef()):
+    def SendNotices(
+        self,
+        what: UInt32,
+        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+    ):
         """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
         external_call["mojobe_BApplication_SendNotices", NoneType](
             _nonnull(self._as_BApplication(), "BApplication::SendNotices"),
@@ -447,18 +452,20 @@ trait _BApplicationMethods(_AsBApplication):
         _check(_result, "BArchivable::AllArchived")
 
 
-struct BApplicationRef(
+struct BApplicationRef[origin: ImmOrigin](
     Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BApplicationMethods,
 ):
-    """A `BApplication` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+    """A `BApplication` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BApplicationRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
@@ -467,18 +474,27 @@ struct BApplicationRef(
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
+    def unsafe_untracked(self) -> BApplicationRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BApplicationRef[ImmUntrackedOrigin](self._ptr)
+
     def _as_BApplication(self) -> _NPtr:
         return self._ptr
 
     def state[T: Movable & Deinitable](
         self,
-    ) raises -> ref[MutUntrackedOrigin] T:
-        """The Mojo value the BApplication was made from.
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BApplication was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
 
         Raises:
             When it was not made from a `T`.
         """
-        return _state_at[T](
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
             external_call["mojobe_MojoBApplication_context", Int](
                 _addr(self._ptr),
                 _type_tag[T](),
@@ -492,7 +508,7 @@ struct BApplicationRef(
             _nonnull(self._ptr, "BApplication::ReadyToRun"),
         )
 
-    def base_MessageReceived(self, message: BMessageRef):
+    def base_MessageReceived(self, message: BMessageRef[_]):
         """`BApplication::MessageReceived`, the class's own."""
         external_call["mojobe_BApplication_base_MessageReceived", NoneType](
             _nonnull(self._ptr, "BApplication::MessageReceived"),
@@ -574,7 +590,7 @@ struct BApplication(Movable, _BApplicationMethods):
 trait ApplicationReadyToRun:
     """`void BApplication::ReadyToRun()`: a hook of BApplication."""
 
-    def ReadyToRun(mut self, application: BApplicationRef):
+    def ReadyToRun(mut self, application: BApplicationRef[_]):
         ...
 
 
@@ -583,8 +599,8 @@ trait ApplicationMessageReceived:
 
     def MessageReceived(
         mut self,
-        application: BApplicationRef,
-        message: BMessageRef,
+        application: BApplicationRef[_],
+        message: BMessageRef[_],
     ):
         ...
 
@@ -592,21 +608,21 @@ trait ApplicationMessageReceived:
 trait ApplicationQuitRequested:
     """`bool BApplication::QuitRequested()`: a hook of BApplication."""
 
-    def QuitRequested(mut self, application: BApplicationRef) -> Bool:
+    def QuitRequested(mut self, application: BApplicationRef[_]) -> Bool:
         ...
 
 
 trait ApplicationAboutRequested:
     """`void BApplication::AboutRequested()`: a hook of BApplication."""
 
-    def AboutRequested(mut self, application: BApplicationRef):
+    def AboutRequested(mut self, application: BApplicationRef[_]):
         ...
 
 
 trait ApplicationPulse:
     """`void BApplication::Pulse()`: a hook of BApplication."""
 
-    def Pulse(mut self, application: BApplicationRef):
+    def Pulse(mut self, application: BApplicationRef[_]):
         ...
 
 
@@ -635,9 +651,11 @@ def _BApplication_ReadyToRun[T: ApplicationReadyToRun](
     context: _Ptr,
     application: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].ReadyToRun(
-        BApplicationRef(_ptr_from(application)),
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
     )
+    _ = call^
 
 
 def _BApplication_MessageReceived[T: ApplicationMessageReceived](
@@ -645,35 +663,46 @@ def _BApplication_MessageReceived[T: ApplicationMessageReceived](
     application: Int,
     message: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].MessageReceived(
-        BApplicationRef(_ptr_from(application)),
-        BMessageRef(_ptr_from(message)),
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
     )
+    _ = call^
 
 
 def _BApplication_QuitRequested[T: ApplicationQuitRequested](
     context: _Ptr,
     application: Int,
 ) abi("C") -> Bool:
-    return context.unsafe_bitcast[T]()[].QuitRequested(
-        BApplicationRef(_ptr_from(application)),
+    var call = _HookCall()
+    var result = context.unsafe_bitcast[T]()[].QuitRequested(
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
     )
+    _ = call^
+    return result
 
 
 def _BApplication_AboutRequested[T: ApplicationAboutRequested](
     context: _Ptr,
     application: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].AboutRequested(
-        BApplicationRef(_ptr_from(application)),
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
     )
+    _ = call^
 
 
 def _BApplication_Pulse[T: ApplicationPulse](
     context: _Ptr,
     application: Int,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].Pulse(BApplicationRef(_ptr_from(application)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].Pulse(
+        BApplicationRef[origin_of(call)](_ptr_from(application)),
+    )
+    _ = call^
 
 
 def _BApplication_hooks[T: Movable & Deinitable]() -> _BApplicationHooks:
@@ -733,7 +762,11 @@ trait _BWindowMethods(_AsBWindow):
             _nonnull(self._as_BWindow(), "BWindow::Close"),
         )
 
-    def AddChild(self, var child: BView, before: BViewRef = BViewRef()):
+    def AddChild(
+        self,
+        var child: BView,
+        before: BViewRef[_] = BViewRef[ImmUntrackedOrigin](),
+    ):
         """`void BWindow::AddChild(BView* child, BView* before)`."""
         external_call["mojobe_BWindow_AddChild", NoneType](
             _nonnull(self._as_BWindow(), "BWindow::AddChild"),
@@ -756,13 +789,13 @@ trait _BWindowMethods(_AsBWindow):
         )
         return _result
 
-    def ChildAt(self, index: Int32) -> BViewRef:
+    def ChildAt(ref self, index: Int32) -> BViewRef[origin_of(self)]:
         """`BView* BWindow::ChildAt(int32 index) const`."""
         var _result = external_call["mojobe_BWindow_ChildAt", Int](
             _nonnull(self._as_BWindow(), "BWindow::ChildAt"),
             index,
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
     def MessageReceived(self, message: Some[_AsBMessage]):
         """`void BWindow::MessageReceived(BMessage* message)`."""
@@ -902,29 +935,29 @@ trait _BWindowMethods(_AsBWindow):
             _nonnull(self._as_BWindow(), "BWindow::UpdateIfNeeded"),
         )
 
-    def FindView(self, var viewName: String) -> BViewRef:
+    def FindView(ref self, var viewName: String) -> BViewRef[origin_of(self)]:
         """`BView* BWindow::FindView(const char* viewName) const`."""
         var _result = external_call["mojobe_BWindow_FindView__charP", Int](
             _nonnull(self._as_BWindow(), "BWindow::FindView"),
             viewName.as_c_string_span(),
         )
         _ = viewName^
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def FindView(self, arg0: BPoint) -> BViewRef:
+    def FindView(ref self, arg0: BPoint) -> BViewRef[origin_of(self)]:
         """`BView* BWindow::FindView(BPoint arg0) const`."""
         var _result = external_call["mojobe_BWindow_FindView__BPoint", Int](
             _nonnull(self._as_BWindow(), "BWindow::FindView"),
             arg0,
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def CurrentFocus(self) -> BViewRef:
+    def CurrentFocus(ref self) -> BViewRef[origin_of(self)]:
         """`BView* BWindow::CurrentFocus() const`."""
         var _result = external_call["mojobe_BWindow_CurrentFocus", Int](
             _nonnull(self._as_BWindow(), "BWindow::CurrentFocus"),
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
     def Activate(self, arg0: Bool = True):
         """`void BWindow::Activate(bool arg0)`."""
@@ -1165,12 +1198,12 @@ trait _BWindowMethods(_AsBWindow):
             _addr(bar._as_BMenuBar()),
         )
 
-    def KeyMenuBar(self) -> BMenuBarRef:
+    def KeyMenuBar(ref self) -> BMenuBarRef[origin_of(self)]:
         """`BMenuBar* BWindow::KeyMenuBar() const`."""
         var _result = external_call["mojobe_BWindow_KeyMenuBar", Int](
             _nonnull(self._as_BWindow(), "BWindow::KeyMenuBar"),
         )
-        return BMenuBarRef(_ptr_from(_result))
+        return BMenuBarRef[origin_of(self)](_ptr_from(_result))
 
     def SetSizeLimits(
         self,
@@ -1239,12 +1272,12 @@ trait _BWindowMethods(_AsBWindow):
             arg0,
         )
 
-    def LastMouseMovedView(self) -> BViewRef:
+    def LastMouseMovedView(ref self) -> BViewRef[origin_of(self)]:
         """`BView* BWindow::LastMouseMovedView() const`."""
         var _result = external_call["mojobe_BWindow_LastMouseMovedView", Int](
             _nonnull(self._as_BWindow(), "BWindow::LastMouseMovedView"),
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
     def GetSupportedSuites(self, data: Some[_AsBMessage]) raises:
         """`status_t BWindow::GetSupportedSuites(BMessage* data)`."""
@@ -1453,19 +1486,19 @@ trait _BWindowMethods(_AsBWindow):
         )
         _check(_result, "BLooper::PostMessage")
 
-    def CurrentMessage(self) -> BMessageRef:
+    def CurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
         """`BMessage* BLooper::CurrentMessage() const`."""
         var _result = external_call["mojobe_BWindow_CurrentMessage", Int](
             _nonnull(self._as_BWindow(), "BWindow::CurrentMessage"),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
-    def DetachCurrentMessage(self) -> BMessageRef:
+    def DetachCurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
         """`BMessage* BLooper::DetachCurrentMessage()`."""
         var _result = external_call["mojobe_BWindow_DetachCurrentMessage", Int](
             _nonnull(self._as_BWindow(), "BWindow::DetachCurrentMessage"),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
     def IsMessageWaiting(self) -> Bool:
         """`bool BLooper::IsMessageWaiting() const`."""
@@ -1593,7 +1626,11 @@ trait _BWindowMethods(_AsBWindow):
             _nonnull(self._as_BWindow(), "BWindow::UnlockLooper"),
         )
 
-    def SendNotices(self, what: UInt32, notice: BMessageRef = BMessageRef()):
+    def SendNotices(
+        self,
+        what: UInt32,
+        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+    ):
         """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
         external_call["mojobe_BWindow_SendNotices", NoneType](
             _nonnull(self._as_BWindow(), "BWindow::SendNotices"),
@@ -1625,18 +1662,20 @@ trait _BWindowMethods(_AsBWindow):
         _check(_result, "BArchivable::AllArchived")
 
 
-struct BWindowRef(
+struct BWindowRef[origin: ImmOrigin](
     Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BWindowMethods,
 ):
-    """A `BWindow` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+    """A `BWindow` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BWindowRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
@@ -1644,6 +1683,13 @@ struct BWindowRef(
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BWindowRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BWindowRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BWindow(self) -> _NPtr:
         return self._ptr
@@ -1662,13 +1708,15 @@ struct BWindowRef(
 
     def state[T: Movable & Deinitable](
         self,
-    ) raises -> ref[MutUntrackedOrigin] T:
-        """The Mojo value the BWindow was made from.
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BWindow was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
 
         Raises:
             When it was not made from a `T`.
         """
-        return _state_at[T](
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
             external_call["mojobe_MojoBWindow_context", Int](
                 _addr(self._ptr),
                 _type_tag[T](),
@@ -1676,7 +1724,7 @@ struct BWindowRef(
             "BWindow",
         )
 
-    def base_MessageReceived(self, message: BMessageRef):
+    def base_MessageReceived(self, message: BMessageRef[_]):
         """`BWindow::MessageReceived`, the class's own."""
         external_call["mojobe_BWindow_base_MessageReceived", NoneType](
             _nonnull(self._ptr, "BWindow::MessageReceived"),
@@ -1879,21 +1927,25 @@ struct BWindow(Movable, _BWindowMethods):
 trait WindowMessageReceived:
     """`void BWindow::MessageReceived(BMessage* message)`: a hook of BWindow."""
 
-    def MessageReceived(mut self, window: BWindowRef, message: BMessageRef):
+    def MessageReceived(
+        mut self,
+        window: BWindowRef[_],
+        message: BMessageRef[_],
+    ):
         ...
 
 
 trait WindowQuitRequested:
     """`bool BWindow::QuitRequested()`: a hook of BWindow."""
 
-    def QuitRequested(mut self, window: BWindowRef) -> Bool:
+    def QuitRequested(mut self, window: BWindowRef[_]) -> Bool:
         ...
 
 
 trait WindowFrameMoved:
     """`void BWindow::FrameMoved(BPoint newPosition)`: a hook of BWindow."""
 
-    def FrameMoved(mut self, window: BWindowRef, newPosition: BPoint):
+    def FrameMoved(mut self, window: BWindowRef[_], newPosition: BPoint):
         ...
 
 
@@ -1902,7 +1954,7 @@ trait WindowFrameResized:
 
     def FrameResized(
         mut self,
-        window: BWindowRef,
+        window: BWindowRef[_],
         newWidth: Float32,
         newHeight: Float32,
     ):
@@ -1912,7 +1964,7 @@ trait WindowFrameResized:
 trait WindowWindowActivated:
     """`void BWindow::WindowActivated(bool focus)`: a hook of BWindow."""
 
-    def WindowActivated(mut self, window: BWindowRef, focus: Bool):
+    def WindowActivated(mut self, window: BWindowRef[_], focus: Bool):
         ...
 
 
@@ -1921,7 +1973,7 @@ trait WindowWorkspaceActivated:
 
     def WorkspaceActivated(
         mut self,
-        window: BWindowRef,
+        window: BWindowRef[_],
         workspace: Int32,
         state: Bool,
     ):
@@ -1931,14 +1983,14 @@ trait WindowWorkspaceActivated:
 trait WindowMenusBeginning:
     """`void BWindow::MenusBeginning()`: a hook of BWindow."""
 
-    def MenusBeginning(mut self, window: BWindowRef):
+    def MenusBeginning(mut self, window: BWindowRef[_]):
         ...
 
 
 trait WindowMenusEnded:
     """`void BWindow::MenusEnded()`: a hook of BWindow."""
 
-    def MenusEnded(mut self, window: BWindowRef):
+    def MenusEnded(mut self, window: BWindowRef[_]):
         ...
 
 
@@ -1947,7 +1999,7 @@ trait WindowZoom:
 
     def Zoom(
         mut self,
-        window: BWindowRef,
+        window: BWindowRef[_],
         origin: BPoint,
         width: Float32,
         height: Float32,
@@ -1958,7 +2010,7 @@ trait WindowZoom:
 trait WindowMinimize:
     """`void BWindow::Minimize(bool minimize)`: a hook of BWindow."""
 
-    def Minimize(mut self, window: BWindowRef, minimize: Bool):
+    def Minimize(mut self, window: BWindowRef[_], minimize: Bool):
         ...
 
 
@@ -1998,19 +2050,24 @@ def _BWindow_MessageReceived[T: WindowMessageReceived](
     window: Int,
     message: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].MessageReceived(
-        BWindowRef(_ptr_from(window)),
-        BMessageRef(_ptr_from(message)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
     )
+    _ = call^
 
 
 def _BWindow_QuitRequested[T: WindowQuitRequested](
     context: _Ptr,
     window: Int,
 ) abi("C") -> Bool:
-    return context.unsafe_bitcast[T]()[].QuitRequested(
-        BWindowRef(_ptr_from(window)),
+    var call = _HookCall()
+    var result = context.unsafe_bitcast[T]()[].QuitRequested(
+        BWindowRef[origin_of(call)](_ptr_from(window)),
     )
+    _ = call^
+    return result
 
 
 def _BWindow_FrameMoved[T: WindowFrameMoved](
@@ -2018,10 +2075,12 @@ def _BWindow_FrameMoved[T: WindowFrameMoved](
     window: Int,
     newPosition: BPoint,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].FrameMoved(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         newPosition,
     )
+    _ = call^
 
 
 def _BWindow_FrameResized[T: WindowFrameResized](
@@ -2030,11 +2089,13 @@ def _BWindow_FrameResized[T: WindowFrameResized](
     newWidth: Float32,
     newHeight: Float32,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].FrameResized(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         newWidth,
         newHeight,
     )
+    _ = call^
 
 
 def _BWindow_WindowActivated[T: WindowWindowActivated](
@@ -2042,10 +2103,12 @@ def _BWindow_WindowActivated[T: WindowWindowActivated](
     window: Int,
     focus: Bool,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].WindowActivated(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         focus,
     )
+    _ = call^
 
 
 def _BWindow_WorkspaceActivated[T: WindowWorkspaceActivated](
@@ -2054,25 +2117,35 @@ def _BWindow_WorkspaceActivated[T: WindowWorkspaceActivated](
     workspace: Int32,
     state: Bool,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].WorkspaceActivated(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         workspace,
         state,
     )
+    _ = call^
 
 
 def _BWindow_MenusBeginning[T: WindowMenusBeginning](
     context: _Ptr,
     window: Int,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].MenusBeginning(BWindowRef(_ptr_from(window)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MenusBeginning(
+        BWindowRef[origin_of(call)](_ptr_from(window)),
+    )
+    _ = call^
 
 
 def _BWindow_MenusEnded[T: WindowMenusEnded](
     context: _Ptr,
     window: Int,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].MenusEnded(BWindowRef(_ptr_from(window)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MenusEnded(
+        BWindowRef[origin_of(call)](_ptr_from(window)),
+    )
+    _ = call^
 
 
 def _BWindow_Zoom[T: WindowZoom](
@@ -2082,12 +2155,14 @@ def _BWindow_Zoom[T: WindowZoom](
     width: Float32,
     height: Float32,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].Zoom(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         origin,
         width,
         height,
     )
+    _ = call^
 
 
 def _BWindow_Minimize[T: WindowMinimize](
@@ -2095,10 +2170,12 @@ def _BWindow_Minimize[T: WindowMinimize](
     window: Int,
     minimize: Bool,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].Minimize(
-        BWindowRef(_ptr_from(window)),
+        BWindowRef[origin_of(call)](_ptr_from(window)),
         minimize,
     )
+    _ = call^
 
 
 def _BWindow_hooks[T: Movable & Deinitable]() -> _BWindowHooks:
@@ -2215,7 +2292,11 @@ trait _BViewMethods(_AsBView):
             _addr(message._as_BMessage()),
         )
 
-    def AddChild(self, var child: BView, before: BViewRef = BViewRef()):
+    def AddChild(
+        self,
+        var child: BView,
+        before: BViewRef[_] = BViewRef[ImmUntrackedOrigin](),
+    ):
         """`void BView::AddChild(BView* child, BView* before)`."""
         external_call["mojobe_BView_AddChild", NoneType](
             _nonnull(self._as_BView(), "BView::AddChild"),
@@ -2238,27 +2319,27 @@ trait _BViewMethods(_AsBView):
         )
         return _result
 
-    def ChildAt(self, index: Int32) -> BViewRef:
+    def ChildAt(ref self, index: Int32) -> BViewRef[origin_of(self)]:
         """`BView* BView::ChildAt(int32 index) const`."""
         var _result = external_call["mojobe_BView_ChildAt", Int](
             _nonnull(self._as_BView(), "BView::ChildAt"),
             index,
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def NextSibling(self) -> BViewRef:
+    def NextSibling(ref self) -> BViewRef[origin_of(self)]:
         """`BView* BView::NextSibling() const`."""
         var _result = external_call["mojobe_BView_NextSibling", Int](
             _nonnull(self._as_BView(), "BView::NextSibling"),
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def PreviousSibling(self) -> BViewRef:
+    def PreviousSibling(ref self) -> BViewRef[origin_of(self)]:
         """`BView* BView::PreviousSibling() const`."""
         var _result = external_call["mojobe_BView_PreviousSibling", Int](
             _nonnull(self._as_BView(), "BView::PreviousSibling"),
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
     def RemoveSelf(self) -> Bool:
         """`bool BView::RemoveSelf()`."""
@@ -2267,12 +2348,12 @@ trait _BViewMethods(_AsBView):
         )
         return _result
 
-    def Window(self) -> BWindowRef:
+    def Window(ref self) -> BWindowRef[origin_of(self)]:
         """`BWindow* BView::Window() const`."""
         var _result = external_call["mojobe_BView_Window", Int](
             _nonnull(self._as_BView(), "BView::Window"),
         )
-        return BWindowRef(_ptr_from(_result))
+        return BWindowRef[origin_of(self)](_ptr_from(_result))
 
     def Draw(self, updateRect: BRect):
         """`void BView::Draw(BRect updateRect)`."""
@@ -2393,21 +2474,21 @@ trait _BViewMethods(_AsBView):
             dragRect,
         )
 
-    def FindView(self, var name: String) -> BViewRef:
+    def FindView(ref self, var name: String) -> BViewRef[origin_of(self)]:
         """`BView* BView::FindView(const char* name) const`."""
         var _result = external_call["mojobe_BView_FindView", Int](
             _nonnull(self._as_BView(), "BView::FindView"),
             name.as_c_string_span(),
         )
         _ = name^
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def Parent(self) -> BViewRef:
+    def Parent(ref self) -> BViewRef[origin_of(self)]:
         """`BView* BView::Parent() const`."""
         var _result = external_call["mojobe_BView_Parent", Int](
             _nonnull(self._as_BView(), "BView::Parent"),
         )
-        return BViewRef(_ptr_from(_result))
+        return BViewRef[origin_of(self)](_ptr_from(_result))
 
     def Bounds(self) -> BRect:
         """`BRect BView::Bounds() const`."""
@@ -3699,7 +3780,11 @@ trait _BViewMethods(_AsBView):
             _nonnull(self._as_BView(), "BView::UnlockLooper"),
         )
 
-    def SendNotices(self, what: UInt32, notice: BMessageRef = BMessageRef()):
+    def SendNotices(
+        self,
+        what: UInt32,
+        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+    ):
         """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
         external_call["mojobe_BView_SendNotices", NoneType](
             _nonnull(self._as_BView(), "BView::SendNotices"),
@@ -3715,43 +3800,59 @@ trait _BViewMethods(_AsBView):
         return _result
 
 
-struct BViewRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BViewMethods):
-    """A `BView` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+struct BViewRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BViewMethods,
+):
+    """A `BView` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BViewRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
         self._ptr = ptr
 
     @implicit
-    def __init__(out self, other: BMenuRef):
+    def __init__(out self, other: BMenuRef[Self.origin]):
         """A `BMenu` is a `BView`."""
-        self = BViewRef(other._as_BView())
+        self = BViewRef[Self.origin](other._as_BView())
 
     @implicit
-    def __init__(out self, other: BMenuBarRef):
+    def __init__(out self, other: BMenuBarRef[Self.origin]):
         """A `BMenuBar` is a `BView`."""
-        self = BViewRef(other._as_BView())
+        self = BViewRef[Self.origin](other._as_BView())
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BViewRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BViewRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BView(self) -> _NPtr:
         return self._ptr
 
     def state[T: Movable & Deinitable](
         self,
-    ) raises -> ref[MutUntrackedOrigin] T:
-        """The Mojo value the BView was made from.
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BView was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
 
         Raises:
             When it was not made from a `T`.
         """
-        return _state_at[T](
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
             external_call["mojobe_MojoBView_context", Int](
                 _addr(self._ptr),
                 _type_tag[T](),
@@ -3791,7 +3892,7 @@ struct BViewRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BViewMethods):
         self,
         where: BPoint,
         code: UInt32,
-        dragMessage: BMessageRef,
+        dragMessage: BMessageRef[_],
     ):
         """`BView::MouseMoved`, the class's own."""
         external_call["mojobe_BView_base_MouseMoved", NoneType](
@@ -3817,7 +3918,7 @@ struct BViewRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BViewMethods):
             numBytes,
         )
 
-    def base_MessageReceived(self, message: BMessageRef):
+    def base_MessageReceived(self, message: BMessageRef[_]):
         """`BView::MessageReceived`, the class's own."""
         external_call["mojobe_BView_base_MessageReceived", NoneType](
             _nonnull(self._ptr, "BView::MessageReceived"),
@@ -3986,28 +4087,28 @@ struct BView(Movable, _BViewMethods):
 trait ViewDraw:
     """`void BView::Draw(BRect updateRect)`: a hook of BView."""
 
-    def Draw(mut self, view: BViewRef, updateRect: BRect):
+    def Draw(mut self, view: BViewRef[_], updateRect: BRect):
         ...
 
 
 trait ViewDrawAfterChildren:
     """`void BView::DrawAfterChildren(BRect updateRect)`: a hook of BView."""
 
-    def DrawAfterChildren(mut self, view: BViewRef, updateRect: BRect):
+    def DrawAfterChildren(mut self, view: BViewRef[_], updateRect: BRect):
         ...
 
 
 trait ViewMouseDown:
     """`void BView::MouseDown(BPoint where)`: a hook of BView."""
 
-    def MouseDown(mut self, view: BViewRef, where: BPoint):
+    def MouseDown(mut self, view: BViewRef[_], where: BPoint):
         ...
 
 
 trait ViewMouseUp:
     """`void BView::MouseUp(BPoint where)`: a hook of BView."""
 
-    def MouseUp(mut self, view: BViewRef, where: BPoint):
+    def MouseUp(mut self, view: BViewRef[_], where: BPoint):
         ...
 
 
@@ -4016,10 +4117,10 @@ trait ViewMouseMoved:
 
     def MouseMoved(
         mut self,
-        view: BViewRef,
+        view: BViewRef[_],
         where: BPoint,
         code: UInt32,
-        dragMessage: BMessageRef,
+        dragMessage: BMessageRef[_],
     ):
         ...
 
@@ -4027,56 +4128,56 @@ trait ViewMouseMoved:
 trait ViewKeyDown:
     """`void BView::KeyDown(const char* bytes, int32 numBytes)`: a hook of BView."""
 
-    def KeyDown(mut self, view: BViewRef, bytes: String, numBytes: Int32):
+    def KeyDown(mut self, view: BViewRef[_], bytes: String, numBytes: Int32):
         ...
 
 
 trait ViewKeyUp:
     """`void BView::KeyUp(const char* bytes, int32 numBytes)`: a hook of BView."""
 
-    def KeyUp(mut self, view: BViewRef, bytes: String, numBytes: Int32):
+    def KeyUp(mut self, view: BViewRef[_], bytes: String, numBytes: Int32):
         ...
 
 
 trait ViewMessageReceived:
     """`void BView::MessageReceived(BMessage* message)`: a hook of BView."""
 
-    def MessageReceived(mut self, view: BViewRef, message: BMessageRef):
+    def MessageReceived(mut self, view: BViewRef[_], message: BMessageRef[_]):
         ...
 
 
 trait ViewAttachedToWindow:
     """`void BView::AttachedToWindow()`: a hook of BView."""
 
-    def AttachedToWindow(mut self, view: BViewRef):
+    def AttachedToWindow(mut self, view: BViewRef[_]):
         ...
 
 
 trait ViewAllAttached:
     """`void BView::AllAttached()`: a hook of BView."""
 
-    def AllAttached(mut self, view: BViewRef):
+    def AllAttached(mut self, view: BViewRef[_]):
         ...
 
 
 trait ViewDetachedFromWindow:
     """`void BView::DetachedFromWindow()`: a hook of BView."""
 
-    def DetachedFromWindow(mut self, view: BViewRef):
+    def DetachedFromWindow(mut self, view: BViewRef[_]):
         ...
 
 
 trait ViewAllDetached:
     """`void BView::AllDetached()`: a hook of BView."""
 
-    def AllDetached(mut self, view: BViewRef):
+    def AllDetached(mut self, view: BViewRef[_]):
         ...
 
 
 trait ViewFrameMoved:
     """`void BView::FrameMoved(BPoint newPosition)`: a hook of BView."""
 
-    def FrameMoved(mut self, view: BViewRef, newPosition: BPoint):
+    def FrameMoved(mut self, view: BViewRef[_], newPosition: BPoint):
         ...
 
 
@@ -4085,7 +4186,7 @@ trait ViewFrameResized:
 
     def FrameResized(
         mut self,
-        view: BViewRef,
+        view: BViewRef[_],
         newWidth: Float32,
         newHeight: Float32,
     ):
@@ -4095,14 +4196,14 @@ trait ViewFrameResized:
 trait ViewWindowActivated:
     """`void BView::WindowActivated(bool active)`: a hook of BView."""
 
-    def WindowActivated(mut self, view: BViewRef, active: Bool):
+    def WindowActivated(mut self, view: BViewRef[_], active: Bool):
         ...
 
 
 trait ViewPulse:
     """`void BView::Pulse()`: a hook of BView."""
 
-    def Pulse(mut self, view: BViewRef):
+    def Pulse(mut self, view: BViewRef[_]):
         ...
 
 
@@ -4154,7 +4255,12 @@ def _BView_Draw[T: ViewDraw](
     view: Int,
     updateRect: BRect,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].Draw(BViewRef(_ptr_from(view)), updateRect)
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].Draw(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+        updateRect,
+    )
+    _ = call^
 
 
 def _BView_DrawAfterChildren[T: ViewDrawAfterChildren](
@@ -4162,10 +4268,12 @@ def _BView_DrawAfterChildren[T: ViewDrawAfterChildren](
     view: Int,
     updateRect: BRect,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].DrawAfterChildren(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         updateRect,
     )
+    _ = call^
 
 
 def _BView_MouseDown[T: ViewMouseDown](
@@ -4173,7 +4281,12 @@ def _BView_MouseDown[T: ViewMouseDown](
     view: Int,
     where: BPoint,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].MouseDown(BViewRef(_ptr_from(view)), where)
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MouseDown(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+        where,
+    )
+    _ = call^
 
 
 def _BView_MouseUp[T: ViewMouseUp](
@@ -4181,7 +4294,12 @@ def _BView_MouseUp[T: ViewMouseUp](
     view: Int,
     where: BPoint,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].MouseUp(BViewRef(_ptr_from(view)), where)
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MouseUp(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+        where,
+    )
+    _ = call^
 
 
 def _BView_MouseMoved[T: ViewMouseMoved](
@@ -4191,12 +4309,14 @@ def _BView_MouseMoved[T: ViewMouseMoved](
     code: UInt32,
     dragMessage: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].MouseMoved(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         where,
         code,
-        BMessageRef(_ptr_from(dragMessage)),
+        BMessageRef[origin_of(call)](_ptr_from(dragMessage)),
     )
+    _ = call^
 
 
 def _BView_KeyDown[T: ViewKeyDown](
@@ -4205,11 +4325,13 @@ def _BView_KeyDown[T: ViewKeyDown](
     bytes: Int,
     numBytes: Int32,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].KeyDown(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         _string_from(bytes),
         numBytes,
     )
+    _ = call^
 
 
 def _BView_KeyUp[T: ViewKeyUp](
@@ -4218,11 +4340,13 @@ def _BView_KeyUp[T: ViewKeyUp](
     bytes: Int,
     numBytes: Int32,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].KeyUp(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         _string_from(bytes),
         numBytes,
     )
+    _ = call^
 
 
 def _BView_MessageReceived[T: ViewMessageReceived](
@@ -4230,32 +4354,50 @@ def _BView_MessageReceived[T: ViewMessageReceived](
     view: Int,
     message: Int,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].MessageReceived(
-        BViewRef(_ptr_from(view)),
-        BMessageRef(_ptr_from(message)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
     )
+    _ = call^
 
 
 def _BView_AttachedToWindow[T: ViewAttachedToWindow](
     context: _Ptr,
     view: Int,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].AttachedToWindow(BViewRef(_ptr_from(view)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].AttachedToWindow(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+    )
+    _ = call^
 
 
 def _BView_AllAttached[T: ViewAllAttached](context: _Ptr, view: Int) abi("C"):
-    context.unsafe_bitcast[T]()[].AllAttached(BViewRef(_ptr_from(view)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].AllAttached(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+    )
+    _ = call^
 
 
 def _BView_DetachedFromWindow[T: ViewDetachedFromWindow](
     context: _Ptr,
     view: Int,
 ) abi("C"):
-    context.unsafe_bitcast[T]()[].DetachedFromWindow(BViewRef(_ptr_from(view)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].DetachedFromWindow(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+    )
+    _ = call^
 
 
 def _BView_AllDetached[T: ViewAllDetached](context: _Ptr, view: Int) abi("C"):
-    context.unsafe_bitcast[T]()[].AllDetached(BViewRef(_ptr_from(view)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].AllDetached(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+    )
+    _ = call^
 
 
 def _BView_FrameMoved[T: ViewFrameMoved](
@@ -4263,10 +4405,12 @@ def _BView_FrameMoved[T: ViewFrameMoved](
     view: Int,
     newPosition: BPoint,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].FrameMoved(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         newPosition,
     )
+    _ = call^
 
 
 def _BView_FrameResized[T: ViewFrameResized](
@@ -4275,11 +4419,13 @@ def _BView_FrameResized[T: ViewFrameResized](
     newWidth: Float32,
     newHeight: Float32,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].FrameResized(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         newWidth,
         newHeight,
     )
+    _ = call^
 
 
 def _BView_WindowActivated[T: ViewWindowActivated](
@@ -4287,14 +4433,20 @@ def _BView_WindowActivated[T: ViewWindowActivated](
     view: Int,
     active: Bool,
 ) abi("C"):
+    var call = _HookCall()
     context.unsafe_bitcast[T]()[].WindowActivated(
-        BViewRef(_ptr_from(view)),
+        BViewRef[origin_of(call)](_ptr_from(view)),
         active,
     )
+    _ = call^
 
 
 def _BView_Pulse[T: ViewPulse](context: _Ptr, view: Int) abi("C"):
-    context.unsafe_bitcast[T]()[].Pulse(BViewRef(_ptr_from(view)))
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].Pulse(
+        BViewRef[origin_of(call)](_ptr_from(view)),
+    )
+    _ = call^
 
 
 def _BView_hooks[T: Movable & Deinitable]() -> _BViewHooks:
@@ -4452,12 +4604,12 @@ trait _BMessageMethods(_AsBMessage):
         )
         return _result
 
-    def Previous(self) -> BMessageRef:
+    def Previous(ref self) -> BMessageRef[origin_of(self)]:
         """`const BMessage* BMessage::Previous() const`."""
         var _result = external_call["mojobe_BMessage_Previous", Int](
             _nonnull(self._as_BMessage(), "BMessage::Previous"),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
     def WasDropped(self) -> Bool:
         """`bool BMessage::WasDropped() const`."""
@@ -4617,7 +4769,7 @@ trait _BMessageMethods(_AsBMessage):
 
     def GetCurrentSpecifier(
         self,
-        specifier: BMessageRef = BMessageRef(),
+        specifier: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
     ) raises -> Tuple[Int32, Int32, String]:
         """`status_t BMessage::GetCurrentSpecifier(int32* index, BMessage* specifier, int32* what, const char** property) const`."""
         var index = Int32(0)
@@ -6442,20 +6594,22 @@ trait _BMessageMethods(_AsBMessage):
         )
 
 
-struct BMessageRef(
+struct BMessageRef[origin: ImmOrigin](
     Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BMessageMethods,
 ):
-    """A `BMessage` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+    """A `BMessage` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
     var what: UInt32
     """`BMessage::what`, read when the reference was made."""
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BMessageRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
         self.what = 0
 
@@ -6467,6 +6621,13 @@ struct BMessageRef(
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BMessageRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BMessageRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BMessage(self) -> _NPtr:
         return self._ptr
@@ -6589,13 +6750,13 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         )
         return _result
 
-    def RemoveItem(self, index: Int32) -> BMenuItemRef:
+    def RemoveItem(ref self, index: Int32) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::RemoveItem(int32 index)`."""
         var _result = external_call["mojobe_BMenu_RemoveItem__int32", Int](
             _nonnull(self._as_BMenu(), "BMenu::RemoveItem"),
             index,
         )
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
     def RemoveItem(self, menu: Some[_AsBMenu]) -> Bool:
         """`bool BMenu::RemoveItem(BMenu* menu)`."""
@@ -6620,21 +6781,21 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         )
         return _result
 
-    def ItemAt(self, index: Int32) -> BMenuItemRef:
+    def ItemAt(ref self, index: Int32) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::ItemAt(int32 index) const`."""
         var _result = external_call["mojobe_BMenu_ItemAt", Int](
             _nonnull(self._as_BMenu(), "BMenu::ItemAt"),
             index,
         )
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
-    def SubmenuAt(self, index: Int32) -> BMenuRef:
+    def SubmenuAt(ref self, index: Int32) -> BMenuRef[origin_of(self)]:
         """`BMenu* BMenu::SubmenuAt(int32 index) const`."""
         var _result = external_call["mojobe_BMenu_SubmenuAt", Int](
             _nonnull(self._as_BMenu(), "BMenu::SubmenuAt"),
             index,
         )
-        return BMenuRef(_ptr_from(_result))
+        return BMenuRef[origin_of(self)](_ptr_from(_result))
 
     def CountItems(self) -> Int32:
         """`int32 BMenu::CountItems() const`."""
@@ -6659,22 +6820,22 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         )
         return _result
 
-    def FindItem(self, command: UInt32) -> BMenuItemRef:
+    def FindItem(ref self, command: UInt32) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::FindItem(uint32 command) const`."""
         var _result = external_call["mojobe_BMenu_FindItem__uint32", Int](
             _nonnull(self._as_BMenu(), "BMenu::FindItem"),
             command,
         )
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
-    def FindItem(self, var name: String) -> BMenuItemRef:
+    def FindItem(ref self, var name: String) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::FindItem(const char* name) const`."""
         var _result = external_call["mojobe_BMenu_FindItem__charP", Int](
             _nonnull(self._as_BMenu(), "BMenu::FindItem"),
             name.as_c_string_span(),
         )
         _ = name^
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
     def SetEnabled(self, enable: Bool):
         """`void BMenu::SetEnabled(bool enable)`."""
@@ -6753,12 +6914,12 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         )
         return _result
 
-    def FindMarked(self) -> BMenuItemRef:
+    def FindMarked(ref self) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::FindMarked()`."""
         var _result = external_call["mojobe_BMenu_FindMarked", Int](
             _nonnull(self._as_BMenu(), "BMenu::FindMarked"),
         )
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
     def FindMarkedIndex(self) -> Int32:
         """`int32 BMenu::FindMarkedIndex()`."""
@@ -6767,19 +6928,19 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         )
         return _result
 
-    def Supermenu(self) -> BMenuRef:
+    def Supermenu(ref self) -> BMenuRef[origin_of(self)]:
         """`BMenu* BMenu::Supermenu() const`."""
         var _result = external_call["mojobe_BMenu_Supermenu", Int](
             _nonnull(self._as_BMenu(), "BMenu::Supermenu"),
         )
-        return BMenuRef(_ptr_from(_result))
+        return BMenuRef[origin_of(self)](_ptr_from(_result))
 
-    def Superitem(self) -> BMenuItemRef:
+    def Superitem(ref self) -> BMenuItemRef[origin_of(self)]:
         """`BMenuItem* BMenu::Superitem() const`."""
         var _result = external_call["mojobe_BMenu_Superitem", Int](
             _nonnull(self._as_BMenu(), "BMenu::Superitem"),
         )
-        return BMenuItemRef(_ptr_from(_result))
+        return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
     def DrawBackground(self, updateRect: BRect):
         """`void BMenu::DrawBackground(BRect updateRect)`."""
@@ -6807,25 +6968,39 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         return _result
 
 
-struct BMenuRef(Boolable, ImplicitlyCopyable, RegisterPassable, _BMenuMethods):
-    """A `BMenu` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+struct BMenuRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BMenuMethods,
+):
+    """A `BMenu` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BMenuRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
         self._ptr = ptr
 
     @implicit
-    def __init__(out self, other: BMenuBarRef):
+    def __init__(out self, other: BMenuBarRef[Self.origin]):
         """A `BMenuBar` is a `BMenu`."""
-        self = BMenuRef(other._as_BMenu())
+        self = BMenuRef[Self.origin](other._as_BMenu())
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BMenuRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BMenuRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BMenu(self) -> _NPtr:
         return self._ptr
@@ -6939,18 +7114,20 @@ trait _BMenuBarMethods(_AsBMenuBar, _BMenuMethods):
         return _result
 
 
-struct BMenuBarRef(
+struct BMenuBarRef[origin: ImmOrigin](
     Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BMenuBarMethods,
 ):
-    """A `BMenuBar` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+    """A `BMenuBar` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BMenuBarRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
@@ -6958,6 +7135,13 @@ struct BMenuBarRef(
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BMenuBarRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BMenuBarRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BMenuBar(self) -> _NPtr:
         return self._ptr
@@ -7134,19 +7318,19 @@ trait _BMenuItemMethods(_AsBMenuItem):
         )
         return (_string_from_char(_result), _modifiers)
 
-    def Submenu(self) -> BMenuRef:
+    def Submenu(ref self) -> BMenuRef[origin_of(self)]:
         """`BMenu* BMenuItem::Submenu() const`."""
         var _result = external_call["mojobe_BMenuItem_Submenu", Int](
             _nonnull(self._as_BMenuItem(), "BMenuItem::Submenu"),
         )
-        return BMenuRef(_ptr_from(_result))
+        return BMenuRef[origin_of(self)](_ptr_from(_result))
 
-    def Menu(self) -> BMenuRef:
+    def Menu(ref self) -> BMenuRef[origin_of(self)]:
         """`BMenu* BMenuItem::Menu() const`."""
         var _result = external_call["mojobe_BMenuItem_Menu", Int](
             _nonnull(self._as_BMenuItem(), "BMenuItem::Menu"),
         )
-        return BMenuRef(_ptr_from(_result))
+        return BMenuRef[origin_of(self)](_ptr_from(_result))
 
     def Frame(self) -> BRect:
         """`BRect BMenuItem::Frame() const`."""
@@ -7179,12 +7363,12 @@ trait _BMenuItemMethods(_AsBMenuItem):
         )
         _check(_result, "BInvoker::SetMessage")
 
-    def Message(self) -> BMessageRef:
+    def Message(ref self) -> BMessageRef[origin_of(self)]:
         """`BMessage* BInvoker::Message() const`."""
         var _result = external_call["mojobe_BMenuItem_Message", Int](
             _nonnull(self._as_BMenuItem(), "BMenuItem::Message"),
         )
-        return BMessageRef(_ptr_from(_result))
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
 
     def Command(self) -> UInt32:
         """`uint32 BInvoker::Command() const`."""
@@ -7200,7 +7384,10 @@ trait _BMenuItemMethods(_AsBMenuItem):
         )
         return _result
 
-    def Invoke(self, message: BMessageRef = BMessageRef()) raises:
+    def Invoke(
+        self,
+        message: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+    ) raises:
         """`status_t BInvoker::Invoke(BMessage* message)`."""
         var _result = external_call["mojobe_BMenuItem_Invoke", Int32](
             _nonnull(self._as_BMenuItem(), "BMenuItem::Invoke"),
@@ -7237,18 +7424,20 @@ trait _BMenuItemMethods(_AsBMenuItem):
         return _result
 
 
-struct BMenuItemRef(
+struct BMenuItemRef[origin: ImmOrigin](
     Boolable,
     ImplicitlyCopyable,
     RegisterPassable,
     _BMenuItemMethods,
 ):
-    """A `BMenuItem` the kit owns: valid in a hook, or while its looper is locked. It may be NULL: test it with `if`."""
+    """A `BMenuItem` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
 
     var _ptr: _NPtr
 
     def __init__(out self):
-        """A NULL reference."""
+        """A NULL reference: `BMenuItemRef[ImmUntrackedOrigin]()`."""
         self._ptr = None
 
     def __init__(out self, ptr: _NPtr):
@@ -7256,6 +7445,13 @@ struct BMenuItemRef(
 
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BMenuItemRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BMenuItemRef[ImmUntrackedOrigin](self._ptr)
 
     def _as_BMenuItem(self) -> _NPtr:
         return self._ptr

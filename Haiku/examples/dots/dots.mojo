@@ -23,14 +23,14 @@ struct Canvas(Movable, ViewDraw, ViewMouseDown):
     def __init__(out self, var dots: List[BPoint]):
         self.dots = dots^
 
-    def Draw(mut self, view: BViewRef, updateRect: BRect):
+    def Draw(mut self, view: BViewRef[_], updateRect: BRect):
         view.SetHighColor(rgb(30, 30, 46))
         view.FillRect(view.Bounds())
         view.SetHighColor(rgb(255, 200, 0))
         for p in self.dots:
             view.FillEllipse(p, 4, 4)
 
-    def MouseDown(mut self, view: BViewRef, where: BPoint):
+    def MouseDown(mut self, view: BViewRef[_], where: BPoint):
         self.dots.append(where)
         view.Invalidate()
 
@@ -39,7 +39,9 @@ struct Main(Movable, WindowMessageReceived):
     def __init__(out self):
         pass
 
-    def MessageReceived(mut self, window: BWindowRef, message: BMessageRef):
+    def MessageReceived(
+        mut self, window: BWindowRef[_], message: BMessageRef[_]
+    ):
         if message.what == MSG_CLEAR:
             try:
                 var canvas = window.FindView("canvas")

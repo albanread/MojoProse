@@ -643,7 +643,7 @@ class Bridge:
         text = text.strip()
         if kind in ("objectptr",):
             if text in ("NULL", "nullptr", "0"):
-                return "%sRef()" % detail
+                return "%sRef[ImmUntrackedOrigin]()" % detail
             return None
         if kind == "cstring":
             if text in ("NULL", "nullptr", "0"):
@@ -903,7 +903,7 @@ class Emitter:
                     "%s.as_c_string_span()" % name, [], ["_ = %s^" % name])
         if kind == "objectptr":
             if default is not None:
-                return ("%s: %sRef%s" % (name, detail, suffix),
+                return ("%s: %sRef[_]%s" % (name, detail, suffix),
                         "_addr(%s._as_%s())" % (name, detail), [], [])
             return ("%s: Some[_As%s]" % (name, detail),
                     "_addr(%s._as_%s())" % (name, detail), [], [])
@@ -939,7 +939,9 @@ class Emitter:
         if kind == "char":
             return "String", "c_char", "_string_from_char(%s)"
         if kind == "objectptr":
-            return "%sRef" % detail, "Int", "%sRef(_ptr_from(%%s))" % detail
+            # borrowed from what it was got from, which it keeps alive
+            return ("%sRef[origin_of(self)]" % detail, "Int",
+                    "%sRef[origin_of(self)](_ptr_from(%%s))" % detail)
         raise AssertionError(kind)
 
     # ---- one method -------------------------------------------------------------
@@ -1021,7 +1023,9 @@ class Emitter:
             signature_ret = " -> " + returned[0][0]
         else:
             signature_ret = " -> Tuple[%s]" % ", ".join(t for t, _ in returned)
-        self_decl = "self"
+        # a reference result borrows from `self`, so `self` must be a
+        # reference too, even for a register-passable Self
+        self_decl = "ref self" if result[0] == "objectptr" else "self"
         head = "def %s(%s)%s%s:" % (
             mojo_name(method.name),
             ", ".join([self_decl] + m_params),
@@ -1438,7 +1442,8 @@ class Emitter:
             expr = "&%s" % p.name if p.type.reference else p.name
             if p.type.const:
                 expr = "const_cast<%s*>(%s)" % (detail, expr)
-            return "%sRef" % detail, "Int", "%sRef(_ptr_from(%%s))" % detail, "%s*" % detail, expr
+            return ("%sRef[_]" % detail, "Int",
+                    "%sRef[origin_of(call)](_ptr_from(%%s))" % detail, "%s*" % detail, expr)
         raise Unbridged("hook parameter %s: %s" % (p.name, p.type.qual))
 
     def emit_hooks(self, cls, hooks):
@@ -1517,7 +1522,7 @@ class Emitter:
             # Mojo: trait
             trait = "%s%s" % (prefix, hook)
             self.hook_traits.append(trait)
-            arg_decls = ["mut self", "%s: %sRef" % (subject, cls)] + [
+            arg_decls = ["mut self", "%s: %sRef[_]" % (subject, cls)] + [
                 "%s: %s" % (mojo_name(p.name), part[0]) for p, part in zip(m.params, parts)]
             mojo_traits.append([
                 "trait %s:" % trait,
@@ -1530,15 +1535,18 @@ class Emitter:
             mojo_table_fields.append(hook)
             tramp_params = ["context: _Ptr", "%s: Int" % subject] + [
                 "%s: %s" % (mojo_name(p.name), part[1]) for p, part in zip(m.params, parts)]
-            conv_args = ["%sRef(_ptr_from(%s))" % (cls, subject)] + [
+            conv_args = ["%sRef[origin_of(call)](_ptr_from(%s))" % (cls, subject)] + [
                 part[2] % mojo_name(p.name) for p, part in zip(m.params, parts)]
             call = "context.unsafe_bitcast[T]()[].%s(%s)" % (hook, ", ".join(conv_args))
+            # the references borrow from `call`, which ends with the hook
             trampolines.append([
                 "def _%s_%s[T: %s](%s) abi(\"C\")%s:" % (
                     cls, hook, trait, ", ".join(tramp_params),
                     " -> %s" % ret_m if ret_m else ""),
-                "    %s%s" % ("return " if ret_m else "", call),
-            ])
+                "    var call = _HookCall()",
+                "    %s%s" % ("var result = " if ret_m else "", call),
+                "    _ = call^",
+            ] + (["    return result"] if ret_m else []))
             builder.append("    comptime if conforms_to(T, %s):" % trait)
             builder.append("        hooks.%s = _fn_ptr(_%s_%s[downcast[T, %s]])"
                            % (hook, cls, hook, trait))
@@ -1547,7 +1555,7 @@ class Emitter:
                                     for p, part in zip(m.params, parts)]
             base_args_m = ['_nonnull(self._ptr, "%s::%s")' % (cls, hook)]
             for p, part in zip(m.params, parts):
-                if part[1] == "Int" and part[0].endswith("Ref"):
+                if part[1] == "Int" and part[0].endswith("Ref[_]"):
                     base_args_m.append("_addr(%s._ptr)" % mojo_name(p.name))
                 elif part[0] == "String":
                     base_args_m.append("%s.as_c_string_span()" % mojo_name(p.name))
@@ -1615,10 +1623,13 @@ class Emitter:
                          % (cls, ancestor))
         # the reference
         ref_fields = conf.get("ref_fields", [])
-        out.append("struct %sRef(Boolable, ImplicitlyCopyable, RegisterPassable, _%sMethods):"
+        out.append("struct %sRef[origin: ImmOrigin]("
+                   "Boolable, ImplicitlyCopyable, RegisterPassable, _%sMethods):"
                    % (cls, cls))
-        out.append('    """A `%s` the kit owns: valid in a hook, or while its looper is'
-                   ' locked. It may be NULL: test it with `if`."""' % cls)
+        out.append('    """A `%s` the kit owns, borrowed from `origin`: a hook\'s call, or'
+                   % cls)
+        out.append("    the value or reference it was got from, which it keeps alive. It")
+        out.append('    may be NULL: test it with `if`."""')
         out.append("")
         out.append("    var _ptr: _NPtr")
         for field in ref_fields:
@@ -1628,7 +1639,7 @@ class Emitter:
             out.append('    """`%s::%s`, read when the reference was made."""' % (cls, field))
         out.append("")
         out.append("    def __init__(out self):")
-        out.append('        """A NULL reference."""')
+        out.append('        """A NULL reference: `%sRef[ImmUntrackedOrigin]()`."""' % cls)
         out.append("        self._ptr = None")
         for field in ref_fields:
             ftype = [f for f in self.model.records[cls].fields if f[0] == field][0][1]
@@ -1646,12 +1657,19 @@ class Emitter:
         for d in descendants:
             out.append("")
             out.append("    @implicit")
-            out.append("    def __init__(out self, other: %sRef):" % d)
+            out.append("    def __init__(out self, other: %sRef[Self.origin]):" % d)
             out.append('        """A `%s` is a `%s`."""' % (d, cls))
-            out.append("        self = %sRef(other._as_%s())" % (cls, cls))
+            out.append("        self = %sRef[Self.origin](other._as_%s())" % (cls, cls))
         out.append("")
         out.append("    def __bool__(self) -> Bool:")
         out.append("        return Bool(self._ptr)")
+        out.append("")
+        out.append("    def unsafe_untracked(self) -> %sRef[ImmUntrackedOrigin]:" % cls)
+        out.append('        """The same reference, borrowed from nothing: the compiler no')
+        out.append("        longer keeps what it was got from alive, and it may be kept")
+        out.append("        anywhere. Use it only while the object exists, and in its")
+        out.append('        looper\'s hooks or with the looper locked."""')
+        out.append("        return %sRef[ImmUntrackedOrigin](self._ptr)" % cls)
         out.append("")
         out.extend("    " + l for l in casts)
         for lines in ref_extra:
@@ -1659,13 +1677,17 @@ class Emitter:
             out.extend("    " + l for l in lines)
         if hooks:
             out.append("")
-            out.append("    def state[T: Movable & Deinitable](self) raises -> ref[MutUntrackedOrigin] T:")
-            out.append('        """The Mojo value the %s was made from.' % cls)
+            out.append("    def state[T: Movable & Deinitable](self) raises -> ref["
+                       "Self.origin.unsafe_mut_cast[True]()] T:")
+            out.append('        """The Mojo value the %s was made from, borrowed as this' % cls)
+            out.append("        reference is (the C++ object owns it; nothing else in Mojo")
+            out.append("        does).")
             out.append("")
             out.append("        Raises:")
             out.append("            When it was not made from a `T`.")
             out.append('        """')
-            out.append('        return _state_at[T](external_call["mojobe_Mojo%s_context", Int]('
+            out.append('        return _state_at[T, Self.origin.unsafe_mut_cast[True]()]('
+                       'external_call["mojobe_Mojo%s_context", Int]('
                        '_addr(self._ptr), _type_tag[T]()), "%s")' % (cls, cls))
             for lines in hooks["ref_base"]:
                 out.append("")
@@ -2153,7 +2175,7 @@ def write_api(emitter, bridge):
            "from std.builtin.rebind import downcast",
            "from std.ffi import c_char, external_call", "",
            "from ._core import (",
-           "    _FnPtr,", "    _NPtr,", "    _Ptr,", "    _addr,", "    _char,", "    _check,",
+           "    _FnPtr,", "    _HookCall,", "    _NPtr,", "    _Ptr,", "    _addr,", "    _char,", "    _check,",
            "    _destroy,", "    _fn_ptr,", "    _nonnull,", "    _ptr_from,", "    _state_at,",
            "    _string_from,", "    _string_from_char,", "    _to_heap,", "    _type_tag,", ")",
            "from ._values import _check_layouts"]
