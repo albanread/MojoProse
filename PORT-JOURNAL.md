@@ -487,8 +487,9 @@ Of the 195 tests that can run on Prose, 191 pass.
 - ~~The compiler spends most of its time in the kernel on Prose~~ — it
   does not: arm64 Haiku charged user time as kernel time. See "Where the
   compiler's time goes" below.
-- On a machine without Python, the stdlib's libpython discovery passes an
-  unterminated empty path to `dlopen`.
+- ~~On a machine without Python, the stdlib's libpython discovery passes an
+  unterminated empty path to `dlopen`~~ -- a compiler bug in empty strings
+  made at compile time, fixed; see "The suite again" below.
 
 ## G7 — The bridge: P0 runs (2026-09-23)
 
@@ -542,3 +543,55 @@ for the profilers) and 0137 (syscall stubs' symbol sizes); tests
 Upstream links tcmalloc into the compiler on Linux; here it was aliased
 away (G4). The compiler wants a scalable allocator, or libroot's needs to
 scale. Until then `-j 1` is the faster setting on Prose.
+
+## The suite again, on Prose with its new allocator (2026-09-24)
+
+Prose now has HaikuArmQemu patches 0138-0140 -- libroot's malloc with
+per-thread caches, a page owner map and one overcommitting heap (see its
+`docs/malloc.md`) -- and 0141-0150 from a static analysis of the system.
+On that image (8 vCPUs), with the compiler of G6:
+
+`mojo build stdlib_check.mojo`, cold cache, measured with `teamstat`:
+
+| | before 0138 | now |
+|---|---|---|
+| `-j 1` | 3.8 s, 199,000 page faults, 0.5 s kernel | 3.0 s, ~73,000 faults, 0.2 s kernel |
+| default (8 threads) | 6.1 s, 222,000 page faults, 3.0 s kernel | 3.7 s, ~109,000 faults, 1.3 s kernel |
+| heap areas | ~2,400 | 37 (8 threads: 44) |
+| warm cache | 0.8 s | 0.6 s |
+| `mojo precompile std` | 14.7 s | 14.0 s |
+
+Eight threads are still slower than one, by 25% rather than 60%. The rest is
+not the allocator: LLVM's pass registry and MLIR's uniquer, Haiku's
+`pthread_rwlock` (its readers serialise), the kernel's user-mutex
+bookkeeping, the TLS resolver and Mojo's clock polling (the profile is in
+HaikuArmQemu's `docs/malloc.md`). `-j 1` is still the faster setting.
+
+The standard library's suite: **193 pass, 2 fail, 56 skipped**, in 511 s
+with four at a time. The same 191 tests that passed before took 3,248 s of
+build and run time then and 1,971 s now (39% less).
+
+- The span tests' aborts pass now: in this run and the next, every crash of
+  a burst was killed by the debug_server. Whether the burst problem of G6
+  is gone or simply did not happen twice is not proven.
+- The 2 failures need Python (`testing/test_assertion`, `os/test_stat`).
+
+### An empty string made at compile time had no terminator
+
+`test_assertion` aborts without Python, as it should, but the runtime
+loader logged what it had been asked to open: a file named " is out of
+bounds, valid range is 0 to ". `MOJO_PYTHON_LIBRARY` is unset, so
+`getenv()` returned its default -- the literal `""`, made at compile time --
+and `dlopen()` read the bytes of the next constant.
+
+A probe on Prose: `String("")` built at run time is an empty C string, but
+`getenv()` of an unset variable was a 7-byte one, starting at "Runtime". In
+the LLVM IR the compiler emits two empty strings: `[1 x i8]
+zeroinitializer`, and `[0 x i8]`, which occupies nothing -- the next global
+lies at its address -- while `String` flags it as nul terminated. Five of
+the six places that turn a string into interpreter memory special-cased ""
+with `str = "\0"`: StringRef's C-string constructor, so `strlen("\0")`,
+no bytes. The sixth wrote `StringRef("\0", 1)`. Fixed, with a test in
+`test_string`: a default argument of `""` as a C string, which fails with
+the old compiler and passes now; the suite is unchanged by the fix. Nothing
+here is Haiku's: every target has this.
