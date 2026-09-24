@@ -1,8 +1,9 @@
 # The Haiku bridge — design
 
-*MojoProse, 2026-09-23. Gate G7 of `PORT-JOURNAL.md`. P0 is built and runs
-on Prose (Dots); section 16 records what building it measured, including one
-correction to section 3.*
+*MojoProse, 2026-09-23. Gate G7 of `PORT-JOURNAL.md`. P0 and P1 are built
+and run on Prose (Dots): the bridge is now generated from the headers.
+Sections 16 and 17 record what building them measured, including corrections
+to sections 3, 7 and 8.*
 
 How Mojo programs on Prose use the Haiku API — open windows, draw, take the
 mouse and the keyboard, send messages, show menus and alerts — as real Haiku
@@ -28,34 +29,44 @@ programs, not as guests in a toolkit of their own.
 ```mojo
 from haiku import BApplication, BMenu, BMenuBar, BMenuItem, BMessage, BPoint
 from haiku import BRect, BView, BWindow, fourcc, rgb
-from haiku import B_FOLLOW_ALL, B_FOLLOW_LEFT_RIGHT, B_QUIT_ON_WINDOW_CLOSE
+from haiku import BMessageRef, BViewRef, BWindowRef
+from haiku import B_FOLLOW_ALL, B_QUIT_ON_WINDOW_CLOSE
 from haiku import B_QUIT_REQUESTED, B_TITLED_WINDOW, B_WILL_DRAW
 from haiku.hooks import ViewDraw, ViewMouseDown, WindowMessageReceived
 
 comptime MSG_CLEAR = fourcc("clr ")
 
 
-struct Canvas(ViewDraw, ViewMouseDown):
+struct Canvas(Movable, ViewDraw, ViewMouseDown):
     var dots: List[BPoint]
 
-    def Draw(mut self, view: BView.Ref, updateRect: BRect):
+    def __init__(out self, var dots: List[BPoint]):
+        self.dots = dots^
+
+    def Draw(mut self, view: BViewRef, updateRect: BRect):
         view.SetHighColor(rgb(30, 30, 46))
         view.FillRect(view.Bounds())
         view.SetHighColor(rgb(255, 200, 0))
         for p in self.dots:
             view.FillEllipse(p, 4, 4)
 
-    def MouseDown(mut self, view: BView.Ref, where: BPoint):
+    def MouseDown(mut self, view: BViewRef, where: BPoint):
         self.dots.append(where)
         view.Invalidate()
 
 
-struct Main(WindowMessageReceived):
-    def MessageReceived(mut self, window: BWindow.Ref, message: BMessage.Ref):
+struct Main(Movable, WindowMessageReceived):
+    def __init__(out self):
+        pass
+
+    def MessageReceived(mut self, window: BWindowRef, message: BMessageRef):
         if message.what == MSG_CLEAR:
-            var canvas = window.FindView("canvas")
-            canvas.state[Canvas]().dots.clear()     # the window is locked here
-            canvas.Invalidate()
+            try:
+                var canvas = window.FindView("canvas")
+                canvas.state[Canvas]().dots.clear()  # the window is locked
+                canvas.Invalidate()
+            except e:                   # hooks do not raise (section 8.6)
+                print("Dots:", e)
         else:
             window.base_MessageReceived(message)    # BWindow's own handling
 
@@ -66,10 +77,10 @@ def main() raises:
         B_TITLED_WINDOW, B_QUIT_ON_WINDOW_CLOSE, Main())
 
     var menu = BMenu("Dots")
-    menu.AddItem(BMenuItem("Clear", BMessage(MSG_CLEAR), "C"))
-    menu.AddItem(BMenuItem("Quit", BMessage(B_QUIT_REQUESTED), "Q"))
+    _ = menu.AddItem(BMenuItem("Clear", BMessage(MSG_CLEAR), "C"))
+    _ = menu.AddItem(BMenuItem("Quit", BMessage(B_QUIT_REQUESTED), "Q"))
     var bar = BMenuBar(BRect(0, 0, 400, 19), "menubar")
-    bar.AddItem(menu^)                  # the bar adopts the menu
+    _ = bar.AddItem(menu^)              # the bar adopts the menu
     window.AddChild(bar^)               # and the window the bar
 
     var frame = window.Bounds()
@@ -77,8 +88,12 @@ def main() raises:
     window.AddChild(BView(frame, "canvas", B_FOLLOW_ALL, B_WILL_DRAW,
         Canvas(List[BPoint]())))
     window^.Show()                      # the window runs, and owns itself
-    app.Run()
+    _ = app.Run()
 ```
+
+(`Haiku/examples/dots/dots.mojo`, which starts with three dots. The results
+C++ returns — `AddItem`'s `bool`, `Run`'s `thread_id` — are Mojo results
+too, and Mojo warns when one is dropped silently.)
 
 Every object here is the real thing: `BWindow` is a `BWindow` in the
 application's team, drawn by app_server under the user's decorator and theme,
@@ -148,8 +163,10 @@ bridge.
       │  import haiku
       ▼
   haiku (Mojo package)      value types, handles, hook traits, constants
-      │   generated: haiku/app.mojo, interface.mojo, …  (from the headers)
-      │   written:   haiku/_core.mojo (ownership, Locked, errors, trampolines)
+      │   generated: haiku/_api.mojo, _values.mojo, _constants.mojo,
+      │              hooks.mojo, __init__.mojo  (from the headers)
+      │   written:   haiku/_core.mojo (pointers, strings, errors, state),
+      │              Haiku/generator/snippets (value types' inline methods)
       │  external_call / abi("C") function pointers
       ▼
   libmojobe.so (C++)        mojobe_*  C entry points  +  Mojo* shadow classes
@@ -178,17 +195,19 @@ extern "C" BView* mojobe_BView_new(BRect frame, const char* name,
 extern "C" void mojobe_BView_delete(BView* self);   // virtual destructor
 ```
 
-- **Names:** `mojobe_<Class>_<Method>`; overloads get `__<n>` from the
-  annotation file, and every entry point carries its C++ signature as a
-  comment.
-- **Arguments:** `this` first. Trivially copyable value types (`BRect`,
-  `BPoint`, `rgb_color`, `pattern`, `BSize`, `BAlignment`) by value; all
+- **Names:** `mojobe_<Class>_<Method>`; overloads get a suffix spelled from
+  their parameter types (`mojobe_BView_new__BRect_charP_uint32_uint32`),
+  not from the annotation file, and every entry point carries its C++
+  signature as a comment. *(P1: the generator needs no overload names.)*
+- **Arguments:** `this` first. Value types by value, **each as a plain C
+  mirror struct** (`mojobe_BRect`) converted inside (section 16.1, 17.1); all
   other objects by pointer; strings as `const char*` (UTF-8, as Haiku is
-  throughout); results that are objects returned through an out-pointer.
+  throughout).
 - **Default arguments** become Mojo default arguments, not C overloads.
 - **Exceptions** never cross: every entry point is `noexcept`; `bad_alloc`
   becomes `NULL` or `B_NO_MEMORY`; anything else calls `debugger()` with the
-  entry point's name, because it is a bridge bug.
+  entry point's name, because it is a bridge bug. *(Owed: P1's entry points
+  are not yet `noexcept`; constructors use `new(std::nothrow)`.)*
 - **Locking** is never implicit. Haiku requires the looper's lock for most
   view and window calls; the bridge leaves that where Haiku puts it, and the
   Mojo half enforces it (§8.5).
@@ -202,6 +221,7 @@ but it is not a hook) to a table of Mojo function pointers:
 
 ```cpp
 struct mojobe_view_hooks {                 // one table per Mojo type, constant
+	uint64	type;                          // names the Mojo type (§16.2)
 	void	(*destroy)(void* context);
 	void	(*Draw)(void* context, BView* view, BRect updateRect);
 	void	(*MouseDown)(void* context, BView* view, BPoint where);
@@ -271,8 +291,8 @@ the C++ through the bridge.
 | kind | examples | who deletes | in Mojo |
 |---|---|---|---|
 | **value** | `BRect`, `BPoint`, `rgb_color`, `BMessenger` | nobody: copied | plain structs |
-| **owned** | `BMessage`, `BBitmap`, `BFont`, a `BView` not yet added | Mojo, in `__del__` | a struct holding the pointer; moved, never copied |
-| **reference** | `BView.Ref`, `BWindow.Ref`, `BMessage.Ref` | the kit | a non-owning pointer, valid in a hook or a `Locked` block |
+| **owned** | `BMessage`, `BBitmap`, `BFont`, a `BView` not yet added | Mojo, in `__deinit__` | a struct holding the pointer; moved, never copied |
+| **reference** | `BViewRef`, `BWindowRef`, `BMessageRef` | the kit | a non-owning pointer, valid in a hook or a `Locked` block; may be NULL |
 | **self-owning** | `BWindow`, `BApplication`, `BAlert` | itself (`Quit()`, `Go()`) | consumed by the call that hands it to the system: `window^.Show()` |
 
 **Adoption** is a consuming parameter. `BWindow.AddChild(var child: BView)`
@@ -289,6 +309,24 @@ BLooper::PostMessage(message)   copies           # the caller keeps it
 BAlert::Go()                    deletes self
 ```
 
+**Methods** are shared through a trait per class (P1): `_BViewMethods`
+holds every `BView` method, and both `BViewRef` and the owned `BView`
+conform, so a method is written once. A bridged base's trait is inherited
+(`_BMenuMethods` inherits `_BViewMethods`); an unbridged base's methods
+(`BHandler`'s, `BLooper`'s) are carried by the nearest bridged class. A class's
+methods take objects as `Some[_AsBView]`: any reference or owned value of
+`BView` or a subclass, borrowed. Upcasts are implicit (`bar^` passes where
+a `BView` is adopted; a `BMenuBarRef` is a `BViewRef`), through an entry
+point per base (`mojobe_BMenuBar_as_BView`) so C++ does any pointer
+adjustment.
+
+**References may be NULL.** A method returning an object pointer returns a
+reference, which is NULL when C++ returns NULL (`FindView` of a name that is
+not there, `Parent()` of a top view): test it with `if`. Calling a method
+through a NULL reference stops the program with the method's name
+(`haiku: BView::Name() called through a NULL reference`), rather than
+letting C++ dereference it.
+
 **Self-owning objects** are handed over, not kept: after `window^.Show()` the
 window runs its own thread and deletes itself when it quits, so Mojo holds no
 handle that could dangle. To reach it later, from any thread and safely even
@@ -300,10 +338,10 @@ One trait per hook, generated:
 
 ```mojo
 trait ViewDraw:
-    def Draw(mut self, view: BView.Ref, updateRect: BRect): ...
+    def Draw(mut self, view: BViewRef, updateRect: BRect): ...
 
 trait ViewMouseDown:
-    def MouseDown(mut self, view: BView.Ref, where: BPoint): ...
+    def MouseDown(mut self, view: BViewRef, where: BPoint): ...
 ```
 
 A type implements the hooks it wants — `struct Canvas(ViewDraw,
@@ -311,29 +349,28 @@ ViewMouseDown)` — and making a `BView` from it builds that type's table once,
 at compile time:
 
 ```mojo
-def _view_hooks[T: AnyType]() -> mojobe_view_hooks:
-    var hooks = mojobe_view_hooks()
-    hooks.destroy = _destroy_trampoline[T]
+def _BView_hooks[T: Movable & Deinitable]() -> _BViewHooks:
+    var hooks = _BViewHooks()
+    hooks.type = _type_tag[T]()
+    hooks.destroy = _fn_ptr(_destroy[T])
     comptime if conforms_to(T, ViewDraw):
-        hooks.Draw = _draw_trampoline[T]
+        hooks.Draw = _fn_ptr(_BView_Draw[downcast[T, ViewDraw]])
     comptime if conforms_to(T, ViewMouseDown):
-        hooks.MouseDown = _mouse_down_trampoline[T]
+        hooks.MouseDown = _fn_ptr(_BView_MouseDown[downcast[T, ViewMouseDown]])
     # …
     return hooks
 
-def _draw_trampoline[T: ViewDraw](
-    context: OpaquePointer, view: OpaquePointer, updateRect: BRect
-) abi("C"):
-    try:
-        context.bitcast[T]()[].Draw(BView.Ref(view), updateRect)
-    except e:
-        _report_hook_error["Draw"](e)       # §8.6
+def _BView_Draw[T: ViewDraw](context: _Ptr, view: Int, updateRect: BRect) abi("C"):
+    context.unsafe_bitcast[T]()[].Draw(BViewRef(_ptr_from(view)), updateRect)
 ```
+
+(As generated in P1. The hook traits' methods do not raise, so there is
+nothing for a trampoline to catch: §8.6.)
 
 Every mechanism here is one the standard library already uses: generic
 `abi("C")` functions and `comptime if conforms_to(T, Trait)`.
 
-Some hooks answer: `QuitRequested(mut self, window: BWindow.Ref) -> Bool`.
+Some hooks answer: `QuitRequested(mut self, window: BWindowRef) -> Bool`.
 Calling the base class is a method on the reference:
 `window.base_MessageReceived(message)`.
 
@@ -375,13 +412,17 @@ struct field is refused by the compiler.
 
 ### 8.6 Errors
 
-- A method that returns `status_t` raises `HaikuError(status)` when the
-  status is not `B_OK`; its message is `strerror(status)`. Constructors call
-  `InitCheck()` where the class has one.
-- Hooks cannot raise into C++. A trampoline catches the error, prints it once
-  with the hook's name and the Mojo type (to the terminal, and to the syslog),
-  and carries on as if the hook were absent. A bug in `Draw` leaves a blank
-  view and a message, not a dead application.
+- A method that returns `status_t` raises when the status is not `B_OK`,
+  with the method and `strerror(status)`: `BMessage::FindInt32: Name not
+  found`. *(P1 raises a plain `Error`; `HaikuError`, carrying the status,
+  is owed.)* A constructor with a `status_t*` parameter (`BApplication`'s,
+  named `init_check` in the annotations) raises with that status, and a
+  failed object is deleted; classes with only `InitCheck()` are owed.
+- Hooks cannot raise into C++. *As built:* the hook traits' methods are
+  declared without `raises`, so the compiler makes each hook handle its own
+  errors (Dots' `MessageReceived` wraps `FindView` in `try`), and no Mojo
+  error ever reaches a trampoline. The catch-and-report trampoline above is
+  what a raising hook trait would need; P1 did not need one.
 
 ### 8.7 Messages and strings
 
@@ -412,13 +453,35 @@ fine.
 
 ## 10. The generator
 
+`Haiku/generator/mojobe_gen.py` (Python, standard library only), with its
+annotations in `Haiku/generator/bridge.toml`. It runs in about 4 s.
+
 - **Input:** the Haiku headers from the Prose sysroot, parsed by clang for
-  `aarch64-unknown-haiku` (`-Xclang -ast-dump=json`, and
-  `-fdump-record-layouts` for value types); a class allowlist; the annotation
-  file.
-- **Annotations** carry what headers cannot: adoption and ownership, which
-  virtuals are hooks, overload names, `InitCheck` classes, and a skip list
-  with a reason for each entry.
+  `aarch64-unknown-haiku` (`-Xclang -ast-dump=json`); the class list and
+  annotations of `bridge.toml`. Constants and value-type layouts are not
+  computed by the generator: it writes a probe of `extern "C"` globals
+  (`(long long)(B_WILL_DRAW)`, `sizeof(BRect)`, `offsetof(BRect, top)`, the
+  type's size and signedness), has the same clang compile it to LLVM IR,
+  and reads the numbers back — clang's own evaluation, `_rule_()` macros
+  and all. A name that is not a number fails to compile in the probe and is
+  left out, found by halving.
+- **Annotations** carry what headers cannot: the value types; per class its
+  handle kind, its hooks, the methods that hand it over (`Show`), how to
+  delete one never handed over, and the constructor parameter that reports
+  its status; which parameters adopt (`[adopts]`, from the Be Book); which
+  pointer parameters are read as well as written (`[inout]`); a skip list
+  with a reason for each entry. No overload names and no signatures.
+- **Rules** it applies without annotations (P1, section 17): value types
+  cross as C mirror structs; named enums become Mojo types; `status_t`
+  results raise; non-const pointers to numbers, enums and value types, and
+  `const char**`, are results; `const char*` is a `String`, or
+  `Optional[String] = None` where C++ defaults it to `NULL`; object
+  pointers are references, or `Some[_As…]` parameters; C++ default
+  arguments become Mojo ones where they can be said (literals, constants,
+  `NULL`), and a parameter after one that cannot keeps none; archive
+  constructors, operators and statics are left out; an override already
+  reached through a bridged base is left out; an overload a call could not
+  tell from an earlier one is left out.
 - **Output:** `libmojobe` sources, the generated `haiku/*.mojo` modules, and a
   manifest of every method included, skipped, and why. Generated files are
   committed so every regeneration is a reviewable diff.
@@ -428,7 +491,9 @@ fine.
   function-pointer parameters (the few that matter, such as
   `BSoundPlayer`'s buffer callback, get hand-written trampolines).
 - It runs on the Mac with the build's own clang and the Prose sysroot, like
-  everything else in MojoProse.
+  everything else in MojoProse. The same clang, with `ld.lld`, also builds
+  and links `libmojobe.so` on the Mac against the sysroot's `libbe`;
+  P1's tests used the one Prose's own clang built, from the same sources.
 
 ## 11. Building, linking, shipping
 
@@ -475,7 +540,7 @@ fine.
 | step | what | done when |
 |---|---|---|
 | P0 | By hand, what the generator will write, for `BApplication`, `BWindow`, `BView` and `BMessage` with three hooks | Dots runs on Prose. It answers the Mojo questions with running code: per-type tables, adoption by consuming parameters, `Ref` origins |
-| P1 | The generator, for the same classes | its output replaces P0's, and Dots still runs |
+| P1 | The generator, for the same classes | its output replaces P0's, and Dots still runs — **done 2026-09-24** (§17) |
 | P2 | The v1 scope, the ABI oracle, the tests | §12 passes on Prose |
 | P3 | Galaxigans Deluxe and a document | the game plays on Prose; `writing-a-mojo-app.md` |
 
@@ -487,14 +552,20 @@ of G1 cross-compiling) and the standard library taught Haiku (G5).
 1. **`Ref` origins.** Tying a reference's lifetime to a hook call is what Mojo
    origins are for, but the exact spelling for a pointer handed in from C is
    for P0 to settle. The fallback is a run-time check: each shadow stamps a
-   generation number on the references it gives out.
+   generation number on the references it gives out. *Still open after P1,
+   and now with a measured case (§17.6): a reference got from an owned value
+   (`parent.FindView("child")`) does not keep the value alive, and Mojo ends
+   the value at its last use — deleting the view the reference points into.
+   A reference returned by a method of an owned value should carry that
+   value's origin; P2 decides how.*
 2. **Hook traits.** A trait per hook is precise but long to write out; a type
    that wants twelve hooks lists twelve traits. The alternative, one trait
    with default bodies and no per-hook tables, sends every hook through Mojo.
    P0 decides with real code.
 3. **Where the generator runs.** On the Mac with the Haiku sysroot, as above,
    or on Prose with its own clang against its own headers. Either produces
-   the same committed output.
+   the same committed output. *P1: on the Mac; its output is deterministic
+   (two runs, identical files).*
 4. **Signals and `debugger()`.** A crash in a hook should reach Haiku's debug
    server like any crash, with a useful Mojo stack. Whether Mojo's frames
    unwind cleanly there is for G6.
@@ -541,3 +612,81 @@ so it wants a person with a mouse.
    C must be owned (`var`), as `as_c_string_span()` may add the NUL;
    `unsafe_bitcast`; `OptionalPointer` for nullable function pointers, in
    `RegisterPassable` (not trivially) structs, as the stdlib's CPython slots.
+
+## 17. What P1 measured (2026-09-24)
+
+The generator (§10) writes both halves for P0's seven classes —
+`BApplication`, `BWindow`, `BView`, `BMessage`, `BMenu`, `BMenuBar`,
+`BMenuItem` — and its output replaces P0's hand-written bridge: 641 methods
+included and 379 left out, each with its reason in `Haiku/bridge/MANIFEST.md`,
+and 916 constants. Three quarters of what is left out (284) is left out for
+a type the bridge does not carry yet (`BHandler`, `BMessenger`, `BBitmap`,
+`BGradient`, `BSize`, …), which P2's scope brings in; the rest are overrides
+already reached through a base (33), statics (18), overloads a call could
+not tell apart (13), in/out pointers with by-value twins (12), and the
+annotated skips.
+
+Dots builds against the output unchanged but for two results it now
+discards, and passes on Prose: `Haiku/tests/dots_smoke.py`, 5/5 — the
+window, its menu bar, the canvas colour and the three dots, captured from
+the machine's screen; Dots ▸ Clear (`'clr '`, sent with `hey`) through
+`MessageReceived`, `FindView` and `state[Canvas]()` in Mojo; a quit request,
+exit status 0. `Haiku/tests/bridge_check.mojo` checks the other ways a
+signature is carried, against `libbe` itself: 28/28.
+
+1. **Every value type crosses as a mirror struct**, not only those with a
+   user-declared copy constructor (§16.1): `rgb_color` passes in registers,
+   but clang warns (`-Wreturn-type-c-linkage`) of an `extern "C"` function
+   returning one, because its member functions make it a C++ type to C.
+   Mirroring all of them is uniform and costs nothing.
+2. **Named enums are Mojo types.** `window_type` and `window_look` are both
+   32-bit; as `UInt32`, `BWindow`'s two constructors — `(frame, title, type,
+   flags)` and `(frame, title, look, feel, flags)` — could not be told apart
+   once `workspace`'s default is counted, and one had to go. As structs
+   (`B_TITLED_WINDOW = window_type(1)`, `Equatable`, with `|`) both work, and
+   a look where a type is wanted is a compile error. Anonymous enums and
+   `const` integers stay integers (`B_WILL_DRAW: UInt32`).
+3. **Out-parameters are results.** `status_t FindInt32(const char* name,
+   int32* value)` is `FindInt32(name) raises -> Int32`; `GetInfo(name,
+   type_code*, int32*)` returns a tuple. A pointer that is read too
+   (`ConvertToParent(BPoint*)`) is named in `[inout]` and left out; each has
+   a by-value twin, which stays (a first version left the twin out as well:
+   the annotation named a parameter, and both overloads have one of that
+   name; `bridge_check` now calls the twins).
+4. **Overloads that Mojo cannot tell apart are left out**, checked as calls:
+   two collide if, for some number of arguments both accept, their parameter
+   types agree that far. `BMessage`'s old `FindInt32(name, int32 n = 0)`
+   collides with the raising `FindInt32(name)` and `FindInt32(name, index)`,
+   declared before it, which stay. A constructor that reports its status is
+   tried first (`BApplication(signature, status_t*)` over
+   `BApplication(signature)`).
+5. **clang's JSON AST, as it is:** a location's file is written only when it
+   changes, so the generator follows the document in order; a
+   copy-initialised default's source range starts at its `=`; typedefs are
+   not desugared below the top level (`int32 *` has no `int *` form), so the
+   generator resolves them itself; a string macro converts to `long long`
+   without complaint, so the probe requires an arithmetic type; members'
+   access follows the `AccessSpecDecl`s in order, from the class's default.
+6. **A reference does not keep its owner alive.** `bridge_check`'s first run
+   stopped with `haiku: BView::Name() called through a NULL reference`:
+   after `var child = parent.FindView("child")`, Mojo ended `parent` at its
+   last use, deleting the child view `child` pointed into, and `Parent()`
+   read freed memory. The NULL check caught it by luck. This is §15's first
+   question, measured.
+7. **An adopting method that fails leaks.** `BMenu::AddItem` returns `false`
+   when it cannot add the item, and the caller keeps it; the Mojo value is
+   already consumed. Owed: an adopting method returning `bool` should hand
+   the value back, or delete it.
+8. **`const` results become mutable references** (`const BMessage*
+   BMessage::Previous()`). Owed.
+9. **Testing a headless machine:** the guest's `screenshot` and the host's
+   capture both gave black frames while the machine's screen was blanked; a
+   key press (Prose.app's `press "escape"`) wakes it, and `dots_smoke.py`
+   sends one before capturing.
+
+Still owed after P1, besides 6–8: `HaikuError` (§8.6), `noexcept` entry
+points (§7.1), `Locked` (§8.5), the ABI oracle (§12), value types' inline
+methods beyond `BRect.Width`/`Height` (hand-written snippets for now, with
+`B_ORIGIN` and the `pattern` constants, which the headers declare `extern`),
+`InitCheck()` for classes without a status parameter, and `MouseDown`, which
+still wants a person with a mouse.

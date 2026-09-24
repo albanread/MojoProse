@@ -595,3 +595,44 @@ no bytes. The sixth wrote `StringRef("\0", 1)`. Fixed, with a test in
 `test_string`: a default argument of `""` as a C string, which fails with
 the old compiler and passes now; the suite is unchanged by the fix. Nothing
 here is Haiku's: every target has this.
+
+## G7 — The bridge: P1, generated (2026-09-24)
+
+The bridge is generated now. `Haiku/generator/mojobe_gen.py` reads the
+Haiku headers through the build's clang (its JSON AST, for
+`aarch64-unknown-haiku`) and the annotations in `bridge.toml`, and writes
+both halves from one model: `libmojobe`'s entry points and shadow classes,
+and the `haiku` package's modules, with a manifest of every method and why
+any is left out. Constants and value-type layouts come from clang too: a
+probe file of `extern "C"` globals compiled to LLVM IR. For P0's seven
+classes: 641 methods, 379 left out (three quarters for a type not yet
+bridged), 916 constants, in about 4 s.
+
+The output replaces P0's hand-written bridge, and Dots still runs:
+`Haiku/tests/dots_smoke.py`, 5/5, against a headless Prose machine
+(captures, `hey`, exit status). `Haiku/tests/bridge_check.mojo`, 28/28,
+checks the rest against `libbe`: constants, value types by value and as
+results, `status_t` raising with `strerror()`'s text, out-parameters as
+results and tuples, NULL references, adoption, by-value overloads.
+`libmojobe.so` builds warning-clean with `-Wall -Wextra -Wpointer-arith`
+both with Prose's clang and on the Mac with the build's clang and `ld.lld`.
+
+What it settled, measured, is in `Haiku/docs/bridge-design.md` §17: every
+value type as a C mirror struct; named enums as Mojo types (else BWindow's
+two constructors collide); overloads a call cannot tell apart left out;
+and one hazard the tests found — a reference got from an owned value does
+not keep it alive, and Mojo's ASAP destruction deleted a parent view under
+its child's reference. That is the design's first open question, for P2.
+
+Build and test (the guest runner is any command that runs a shell line on
+the machine and prints the output):
+
+```
+python3 Haiku/generator/mojobe_gen.py          # on the Mac; CLANG=… if needed
+# on Prose, in a directory holding Haiku/bridge/{libmojobe,haiku}:
+c++ -O2 -Wall -Wextra -Wpointer-arith -shared -fPIC -o libmojobe.so \
+    libmojobe/mojobe.cpp -lbe
+mojo build -I . dots.mojo -o dots -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
+# on the Mac, with the machine running and automation allowed:
+python3 Haiku/tests/dots_smoke.py --run RUNNER --app …/Prose.app --dir DIR
+```
