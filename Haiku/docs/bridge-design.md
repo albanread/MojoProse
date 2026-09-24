@@ -3,7 +3,8 @@
 *MojoProse, 2026-09-23. Gate G7 of `PORT-JOURNAL.md`. P0 and P1 are built
 and run on Prose (Dots): the bridge is now generated from the headers.
 Sections 16 and 17 record what building them measured, including corrections
-to sections 3, 7 and 8.*
+to sections 3, 7 and 8; section 18 records P2 as it goes (references carry
+origins now).*
 
 How Mojo programs on Prose use the Haiku API — open windows, draw, take the
 mouse and the keyboard, send messages, show menus and alerts — as real Haiku
@@ -43,14 +44,14 @@ struct Canvas(Movable, ViewDraw, ViewMouseDown):
     def __init__(out self, var dots: List[BPoint]):
         self.dots = dots^
 
-    def Draw(mut self, view: BViewRef, updateRect: BRect):
+    def Draw(mut self, view: BViewRef[_], updateRect: BRect):
         view.SetHighColor(rgb(30, 30, 46))
         view.FillRect(view.Bounds())
         view.SetHighColor(rgb(255, 200, 0))
         for p in self.dots:
             view.FillEllipse(p, 4, 4)
 
-    def MouseDown(mut self, view: BViewRef, where: BPoint):
+    def MouseDown(mut self, view: BViewRef[_], where: BPoint):
         self.dots.append(where)
         view.Invalidate()
 
@@ -59,7 +60,9 @@ struct Main(Movable, WindowMessageReceived):
     def __init__(out self):
         pass
 
-    def MessageReceived(mut self, window: BWindowRef, message: BMessageRef):
+    def MessageReceived(
+        mut self, window: BWindowRef[_], message: BMessageRef[_]
+    ):
         if message.what == MSG_CLEAR:
             try:
                 var canvas = window.FindView("canvas")
@@ -292,7 +295,7 @@ the C++ through the bridge.
 |---|---|---|---|
 | **value** | `BRect`, `BPoint`, `rgb_color`, `BMessenger` | nobody: copied | plain structs |
 | **owned** | `BMessage`, `BBitmap`, `BFont`, a `BView` not yet added | Mojo, in `__deinit__` | a struct holding the pointer; moved, never copied |
-| **reference** | `BViewRef`, `BWindowRef`, `BMessageRef` | the kit | a non-owning pointer, valid in a hook or a `Locked` block; may be NULL |
+| **reference** | `BViewRef[origin]`, `BWindowRef[origin]`, `BMessageRef[origin]` | the kit | a non-owning pointer, borrowed from a hook's call or from what it was got from (§8.5); may be NULL |
 | **self-owning** | `BWindow`, `BApplication`, `BAlert` | itself (`Quit()`, `Go()`) | consumed by the call that hands it to the system: `window^.Show()` |
 
 **Adoption** is a consuming parameter. `BWindow.AddChild(var child: BView)`
@@ -338,10 +341,10 @@ One trait per hook, generated:
 
 ```mojo
 trait ViewDraw:
-    def Draw(mut self, view: BViewRef, updateRect: BRect): ...
+    def Draw(mut self, view: BViewRef[_], updateRect: BRect): ...
 
 trait ViewMouseDown:
-    def MouseDown(mut self, view: BViewRef, where: BPoint): ...
+    def MouseDown(mut self, view: BViewRef[_], where: BPoint): ...
 ```
 
 A type implements the hooks it wants — `struct Canvas(ViewDraw,
@@ -361,7 +364,11 @@ def _BView_hooks[T: Movable & Deinitable]() -> _BViewHooks:
     return hooks
 
 def _BView_Draw[T: ViewDraw](context: _Ptr, view: Int, updateRect: BRect) abi("C"):
-    context.unsafe_bitcast[T]()[].Draw(BViewRef(_ptr_from(view)), updateRect)
+    var call = _HookCall()          # what the hook's references borrow from
+    context.unsafe_bitcast[T]()[].Draw(
+        BViewRef[origin_of(call)](_ptr_from(view)), updateRect
+    )
+    _ = call^
 ```
 
 (As generated in P1. The hook traits' methods do not raise, so there is
@@ -406,9 +413,13 @@ Haiku's rules, stated once:
    computation. Worker threads must not touch Be objects: they do not hold the
    lock.
 
-References cannot be stored beyond their call: `BView.Ref` carries an origin
-tied to the hook or the `Locked` block that produced it, so keeping one in a
-struct field is refused by the compiler.
+References cannot be stored beyond their call: `BViewRef[origin]` carries
+an origin tied to the hook or the `Locked` block that produced it, so keeping
+one in a struct field is refused by the compiler. *As built in P2 (§18):* a
+hook's references are borrowed from a local of its trampoline; a reference
+a method returns is borrowed from the value or reference it was called on,
+and keeps it alive; `unsafe_untracked()` is the explicit way out, for a
+program that keeps a view it knows lives as long as its window.
 
 ### 8.6 Errors
 
@@ -552,12 +563,8 @@ of G1 cross-compiling) and the standard library taught Haiku (G5).
 1. **`Ref` origins.** Tying a reference's lifetime to a hook call is what Mojo
    origins are for, but the exact spelling for a pointer handed in from C is
    for P0 to settle. The fallback is a run-time check: each shadow stamps a
-   generation number on the references it gives out. *Still open after P1,
-   and now with a measured case (§17.6): a reference got from an owned value
-   (`parent.FindView("child")`) does not keep the value alive, and Mojo ends
-   the value at its last use — deleting the view the reference points into.
-   A reference returned by a method of an owned value should carry that
-   value's origin; P2 decides how.*
+   generation number on the references it gives out. *Answered in P2
+   (§18.1): origins, checked by the compiler; no run-time check needed.*
 2. **Hook traits.** A trait per hook is precise but long to write out; a type
    that wants twelve hooks lists twelve traits. The alternative, one trait
    with default bodies and no per-hook tables, sends every hook through Mojo.
@@ -690,3 +697,38 @@ methods beyond `BRect.Width`/`Height` (hand-written snippets for now, with
 `B_ORIGIN` and the `pattern` constants, which the headers declare `extern`),
 `InitCheck()` for classes without a status parameter, and `MouseDown`, which
 still wants a person with a mouse.
+
+## 18. P2, as it goes (2026-09-24)
+
+### 18.1 References carry origins
+
+`BViewRef[origin: ImmOrigin]`. The compiler now keeps alive what a reference
+was got from, and refuses what would let one outlive it:
+
+- **From a value or another reference:** a method returning an object takes
+  `ref self` and returns `BViewRef[origin_of(self)]`. With plain `self` the
+  compiler refuses — "cannot return 'self's origin, because it might expand
+  to a RegisterPassable type": a reference is register-passable, so its
+  `self` may be a copy. Keeping alive is transitive: a grandchild reference
+  keeps the child reference alive, and the child the owned parent (measured:
+  the parent's destructor runs after the grandchild's last use).
+- **In a hook:** the trampoline makes a local, `_HookCall`, and the hook's
+  references are borrowed from it; they end when the hook returns. (The
+  trampoline's `Int` arguments will not do: "value of type 'Int' doesn't have
+  a memory origin".) Hook traits take `BViewRef[_]`, as the standard
+  library's `Writer` takes `Span[Byte, _]`, and a program writes the same.
+- **State:** `state[T]()` returns `ref[origin.unsafe_mut_cast[True]()] T` —
+  borrowed as its reference is, and mutable, as `ArcPointer.__getitem__`
+  does. The C++ object owns the state; nothing else in Mojo can alias it.
+- **Defaults and escapes:** a NULL default is `BViewRef[ImmUntrackedOrigin]()`,
+  and a parameter taking one is `BViewRef[_]`, which also takes any
+  reference; `unsafe_untracked()` gives a reference the compiler does not
+  track, for a program that keeps a view pointer as Be programs do.
+
+Checked on Prose: `bridge_check` 28/28 with the parent no longer kept alive
+by hand (it aborted without origins, §17.6); `Haiku/tests/must_not_compile.sh`
+3/3 — keeping a hook's reference in `self` ("cannot implicitly convert
+'BViewRef[view.origin]' …"), returning a child reference past its parent
+("… 'BViewRef[origin_of(parent)]' …"), and using a window's view after
+`window^.Show()` ("use of uninitialized value 'window'"); Dots 5/5.
+
