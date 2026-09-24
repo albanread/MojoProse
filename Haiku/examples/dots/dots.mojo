@@ -62,10 +62,10 @@ def main() raises:
     )
 
     var menu = BMenu("Dots")
-    menu.AddItem(BMenuItem("Clear", BMessage(MSG_CLEAR), "C"))
-    menu.AddItem(BMenuItem("Quit", BMessage(B_QUIT_REQUESTED), "Q"))
+    _ = menu.AddItem(BMenuItem("Clear", BMessage(MSG_CLEAR), "C"))
+    _ = menu.AddItem(BMenuItem("Quit", BMessage(B_QUIT_REQUESTED), "Q"))
     var bar = BMenuBar(BRect(0, 0, 400, 19), "menubar")
-    bar.AddItem(menu^)  # the bar adopts the menu
+    _ = bar.AddItem(menu^)  # the bar adopts the menu
     window.AddChild(bar^)  # and the window the bar
 
     # A few dots to start with, so a drawn window shows the bridge working.
@@ -80,4 +80,4 @@ def main() raises:
         BView(frame, "canvas", B_FOLLOW_ALL, B_WILL_DRAW, Canvas(dots^))
     )
     window^.Show()  # the window runs, and owns itself
-    app.Run()
+    _ = app.Run()

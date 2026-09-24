@@ -1,0 +1,112 @@
+# The Haiku bridge's annotations: what the headers cannot say (design
+# section 10). mojobe_gen.py reads the headers through clang and this file,
+# and writes libmojobe and the `haiku` package's generated modules.
+
+# The headers the bridge covers; their constants, and those of the headers
+# they include from the same kit directories, become Mojo constants.
+headers = [
+	"Application.h",
+	"Window.h",
+	"View.h",
+	"Message.h",
+	"Menu.h",
+	"MenuBar.h",
+	"MenuItem.h",
+]
+constant_dirs = ["os/app", "os/interface", "os/support"]
+
+# Value types: copied, laid out in Mojo as in C++. A type that C++ cannot
+# pass in registers (a user-declared copy constructor makes BRect and BPoint
+# so) crosses the C interface as a plain C struct of the same fields.
+[values.BRect]
+[values.BPoint]
+[values.rgb_color]
+
+[values.pattern]
+# uint8 data[8]: one register in C, and so a UInt64 in Mojo, where an array
+# of bytes would not be laid out for C.
+mojo_fields = [["data", "UInt64"]]
+
+# Classes. kind: "owned" -- Mojo deletes it unless something adopts it;
+# "self-owning" -- handed to the system by one of `hands_over`, and deleted
+# otherwise by `destroy`. shadow: Mojo types may stand behind it, with these
+# hooks (the Be Book's hook functions).
+[classes.BApplication]
+kind = "owned"
+init_check = "error"       # the constructors' status_t* out-parameter raises
+shadow = true
+hooks = [
+	"ReadyToRun", "MessageReceived", "QuitRequested", "AboutRequested",
+	"Pulse",
+]
+
+[classes.BWindow]
+kind = "self-owning"
+hands_over = ["Show", "Quit"]
+destroy = "quit"           # never shown: locked, then Quit()
+shadow = true
+hooks = [
+	"MessageReceived", "QuitRequested", "FrameMoved", "FrameResized",
+	"WindowActivated", "WorkspaceActivated", "MenusBeginning", "MenusEnded",
+	"Zoom", "Minimize",
+]
+
+[classes.BView]
+kind = "owned"
+shadow = true
+hooks = [
+	"Draw", "DrawAfterChildren", "MouseDown", "MouseUp", "MouseMoved",
+	"KeyDown", "KeyUp", "MessageReceived", "AttachedToWindow",
+	"AllAttached", "DetachedFromWindow", "AllDetached", "FrameMoved",
+	"FrameResized", "WindowActivated", "Pulse",
+]
+
+[classes.BMessage]
+kind = "owned"
+# `what` is a public field; a reference reads it when it is made.
+ref_fields = ["what"]
+
+[classes.BMenu]
+kind = "owned"
+
+[classes.BMenuBar]
+kind = "owned"
+
+[classes.BMenuItem]
+kind = "owned"
+
+# Parameters that hand an object to the receiver, by method or constructor
+# ("Class::Name"), from the Be Book.
+[adopts]
+"BWindow::AddChild" = ["child"]
+"BView::AddChild" = ["child"]
+"BMenu::AddItem" = ["item", "menu"]
+"BMenuItem::BMenuItem" = ["message", "menu"]
+"BInvoker::SetMessage" = ["message"]
+
+# Methods left out, and why. Also left out without being named here: what
+# uses a type the bridge does not carry yet (the manifest says which).
+[skip]
+"BArchivable::Archive" = "archives come with BArchivable"
+"BArchivable::Perform" = "binary compatibility hook"
+"BHandler::Perform" = "binary compatibility hook"
+"BLooper::Perform" = "binary compatibility hook"
+"BView::Perform" = "binary compatibility hook"
+"BWindow::Perform" = "binary compatibility hook"
+"BApplication::Perform" = "binary compatibility hook"
+"BMenu::Perform" = "binary compatibility hook"
+"BMenuBar::Perform" = "binary compatibility hook"
+"BMenuItem::Perform" = "binary compatibility hook"
+"BLooper::Quit" = "BWindow and BApplication quit through their own Quit"
+"BLooper::Run" = "Show() runs a window; BApplication has its own Run"
+"BWindow::Run" = "Show() runs the window"
+"BHandler::SetLooper" = "the looper sets it"
+
+# Pointer parameters that are read and written (the rest are results).
+[inout]
+"BView::ConvertToScreen" = ["point", "rect"]
+"BView::ConvertFromScreen" = ["point", "rect"]
+"BView::ConvertToParent" = ["point", "rect"]
+"BView::ConvertFromParent" = ["point", "rect"]
+"BWindow::ConvertToScreen" = ["point", "rect"]
+"BWindow::ConvertFromScreen" = ["point", "rect"]
