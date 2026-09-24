@@ -14,10 +14,27 @@ Build on Prose, as Dots is built:
         -Xlinker -L. -Xlinker -lmojobe -Xlinker -lbe
 """
 
-from haiku import BMessage, BMessageRef, BPoint, BRect, BView, fourcc, rgb
+from haiku import BHandler, BLooper, BLooperRef, BMessage, BMessageRef
+from haiku import BPoint, BRect
+from haiku import BView, fourcc, rgb
 from haiku import B_ANY_TYPE, B_DOCUMENT_WINDOW, B_INT32_TYPE
 from haiku import B_TITLED_WINDOW, B_WILL_DRAW
 from haiku import window_type
+from haiku.hooks import LooperMessageReceived
+
+
+struct Worker(LooperMessageReceived, Movable):
+    """A Mojo type standing behind a looper."""
+
+    var seen: Int
+
+    def __init__(out self, seen: Int):
+        self.seen = seen
+
+    def MessageReceived(
+        mut self, looper: BLooperRef[_], message: BMessageRef[_]
+    ):
+        self.seen += 1
 
 
 struct Checks:
@@ -148,6 +165,35 @@ def main() raises:
         frame_in_parent.left == 10 and frame_in_parent.bottom == 69,
         String(frame_in_parent),
     )
+
+    # A looper borrows its handlers (~BHandler leaves the looper). A new
+    # looper is locked, as AddHandler requires.
+    var looper = BLooper("worker")
+    var handler = BHandler("handler")
+    # A string is a name, not a Mojo state: the shadow constructors' state
+    # must implement a hook, so BLooper("worker") is the plain constructor.
+    checks.check("BLooper(name): its name", looper.Name() == "worker")
+    checks.check("BHandler(name): its name", handler.Name() == "handler")
+    looper.AddHandler(handler)
+    checks.check("AddHandler: CountHandlers", looper.CountHandlers() == 2)
+    checks.check(
+        "BHandler.Looper() is the looper",
+        handler.Looper().Name() == "worker",
+    )
+    checks.check("IndexOf(handler)", looper.IndexOf(handler) == 1)
+
+    # A looper with a Mojo type behind it, and its state before it runs.
+    var shadowed = BLooper(Worker(41), "shadowed")
+    shadowed.state[Worker]().seen += 1
+    checks.check(
+        "BLooper(state, name): the name, and the state through the value",
+        shadowed.Name() == "shadowed" and shadowed.state[Worker]().seen == 42,
+    )
+    try:
+        _ = shadowed.state[Checks]()
+        checks.check("state of the wrong type raises", False)
+    except e:
+        checks.check("state of the wrong type raises", True)
 
     var total = checks.passed + checks.failed
     if checks.failed:

@@ -142,6 +142,97 @@ private:
 };
 
 
+class MojoBHandler : public BHandler {
+public:
+	MojoBHandler(const char * name, const mojobe_BHandler_hooks* hooks, void* context)
+		:
+		BHandler(name),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	virtual ~MojoBHandler()
+	{
+		// While ~BHandler runs this is a BHandler, so no hook can reach the
+		// Mojo state after it is gone.
+		if (fHooks.destroy != NULL)
+			fHooks.destroy(fContext);
+	}
+
+	virtual void MessageReceived(BMessage * message)
+	{
+		if (fHooks.MessageReceived == NULL || !fDepth.Enter("MessageReceived")) {
+			BHandler::MessageReceived(message);
+			return;
+		}
+		fHooks.MessageReceived(fContext, this, message);
+		fDepth.Leave();
+	}
+
+	//! The Mojo state, if it is of the type tagged.
+	void* Context(uint64 type) const
+	{
+		return fHooks.type == type ? fContext : NULL;
+	}
+
+private:
+	mojobe_BHandler_hooks	fHooks;
+	void*			fContext;
+	HookDepth		fDepth;
+};
+
+
+class MojoBLooper : public BLooper {
+public:
+	MojoBLooper(const char * name, int32 priority, int32 portCapacity, const mojobe_BLooper_hooks* hooks, void* context)
+		:
+		BLooper(name, priority, portCapacity),
+		fHooks(*hooks),
+		fContext(context)
+	{
+	}
+
+	virtual ~MojoBLooper()
+	{
+		// While ~BLooper runs this is a BLooper, so no hook can reach the
+		// Mojo state after it is gone.
+		if (fHooks.destroy != NULL)
+			fHooks.destroy(fContext);
+	}
+
+	virtual void MessageReceived(BMessage * message)
+	{
+		if (fHooks.MessageReceived == NULL || !fDepth.Enter("MessageReceived")) {
+			BLooper::MessageReceived(message);
+			return;
+		}
+		fHooks.MessageReceived(fContext, this, message);
+		fDepth.Leave();
+	}
+
+	virtual bool QuitRequested()
+	{
+		if (fHooks.QuitRequested == NULL || !fDepth.Enter("QuitRequested"))
+			return BLooper::QuitRequested();
+		bool result = fHooks.QuitRequested(fContext, this);
+		fDepth.Leave();
+		return result;
+	}
+
+	//! The Mojo state, if it is of the type tagged.
+	void* Context(uint64 type) const
+	{
+		return fHooks.type == type ? fContext : NULL;
+	}
+
+private:
+	mojobe_BLooper_hooks	fHooks;
+	void*			fContext;
+	HookDepth		fDepth;
+};
+
+
 class MojoBApplication : public BApplication {
 public:
 	MojoBApplication(const char * signature, status_t * error, const mojobe_BApplication_hooks* hooks, void* context)
@@ -566,6 +657,22 @@ extern "C" {
 
 
 void*
+mojobe_MojoBHandler_context(BHandler* self, uint64 type)
+{
+	MojoBHandler* object = dynamic_cast<MojoBHandler*>(self);
+	return object != NULL ? object->Context(type) : NULL;
+}
+
+
+void*
+mojobe_MojoBLooper_context(BLooper* self, uint64 type)
+{
+	MojoBLooper* object = dynamic_cast<MojoBLooper*>(self);
+	return object != NULL ? object->Context(type) : NULL;
+}
+
+
+void*
 mojobe_MojoBApplication_context(BApplication* self, uint64 type)
 {
 	MojoBApplication* object = dynamic_cast<MojoBApplication*>(self);
@@ -591,15 +698,522 @@ mojobe_MojoBView_context(BView* self, uint64 type)
 
 
 
-// #pragma mark - BApplication
+// #pragma mark - BHandler
 
 
-// status_t BApplication::Archive(BMessage* data, bool deep) const
+// status_t BHandler::Archive(BMessage* data, bool deep) const
 status_t
-mojobe_BApplication_Archive(BApplication* self, BMessage* a_data, bool a_deep)
+mojobe_BHandler_Archive(BHandler* self, BMessage* a_data, bool a_deep)
 {
 	return self->Archive(a_data, a_deep);
 }
+
+
+// void BHandler::MessageReceived(BMessage* message)
+void
+mojobe_BHandler_MessageReceived(BHandler* self, BMessage* a_message)
+{
+	self->MessageReceived(a_message);
+}
+
+
+// BLooper* BHandler::Looper() const
+BLooper*
+mojobe_BHandler_Looper(BHandler* self)
+{
+	return self->Looper();
+}
+
+
+// void BHandler::SetName(const char* name)
+void
+mojobe_BHandler_SetName(BHandler* self, const char* a_name)
+{
+	self->SetName(a_name);
+}
+
+
+// const char* BHandler::Name() const
+const char*
+mojobe_BHandler_Name(BHandler* self)
+{
+	return self->Name();
+}
+
+
+// void BHandler::SetNextHandler(BHandler* handler)
+void
+mojobe_BHandler_SetNextHandler(BHandler* self, BHandler* a_handler)
+{
+	self->SetNextHandler(a_handler);
+}
+
+
+// BHandler* BHandler::NextHandler() const
+BHandler*
+mojobe_BHandler_NextHandler(BHandler* self)
+{
+	return self->NextHandler();
+}
+
+
+// bool BHandler::LockLooper()
+bool
+mojobe_BHandler_LockLooper(BHandler* self)
+{
+	return self->LockLooper();
+}
+
+
+// status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)
+status_t
+mojobe_BHandler_LockLooperWithTimeout(BHandler* self, bigtime_t a_timeout)
+{
+	return self->LockLooperWithTimeout(a_timeout);
+}
+
+
+// void BHandler::UnlockLooper()
+void
+mojobe_BHandler_UnlockLooper(BHandler* self)
+{
+	self->UnlockLooper();
+}
+
+
+// BHandler* BHandler::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)
+BHandler*
+mojobe_BHandler_ResolveSpecifier(BHandler* self,
+	BMessage* a_message,
+	int32 a_index,
+	BMessage* a_specifier,
+	int32 a_what,
+	const char* a_property)
+{
+	return self->ResolveSpecifier(a_message, a_index, a_specifier, a_what, a_property);
+}
+
+
+// status_t BHandler::GetSupportedSuites(BMessage* data)
+status_t
+mojobe_BHandler_GetSupportedSuites(BHandler* self, BMessage* a_data)
+{
+	return self->GetSupportedSuites(a_data);
+}
+
+
+// status_t BHandler::StartWatching(BHandler* observer, uint32 what)
+status_t
+mojobe_BHandler_StartWatching(BHandler* self,
+	BHandler* a_observer,
+	uint32 a_what)
+{
+	return self->StartWatching(a_observer, a_what);
+}
+
+
+// status_t BHandler::StartWatchingAll(BHandler* observer)
+status_t
+mojobe_BHandler_StartWatchingAll(BHandler* self, BHandler* a_observer)
+{
+	return self->StartWatchingAll(a_observer);
+}
+
+
+// status_t BHandler::StopWatching(BHandler* observer, uint32 what)
+status_t
+mojobe_BHandler_StopWatching(BHandler* self,
+	BHandler* a_observer,
+	uint32 a_what)
+{
+	return self->StopWatching(a_observer, a_what);
+}
+
+
+// status_t BHandler::StopWatchingAll(BHandler* observer)
+status_t
+mojobe_BHandler_StopWatchingAll(BHandler* self, BHandler* a_observer)
+{
+	return self->StopWatchingAll(a_observer);
+}
+
+
+// void BHandler::SendNotices(uint32 what, const BMessage* notice)
+void
+mojobe_BHandler_SendNotices(BHandler* self, uint32 a_what, BMessage* a_notice)
+{
+	self->SendNotices(a_what, a_notice);
+}
+
+
+// bool BHandler::IsWatched() const
+bool
+mojobe_BHandler_IsWatched(BHandler* self)
+{
+	return self->IsWatched();
+}
+
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t
+mojobe_BHandler_AllUnarchived(BHandler* self, BMessage* a_archive)
+{
+	return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+}
+
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t
+mojobe_BHandler_AllArchived(BHandler* self, BMessage* a_archive)
+{
+	return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+}
+
+
+// BHandler::BHandler(const char* name)
+BHandler*
+mojobe_BHandler_new(const char* a_name)
+{
+	return new(std::nothrow) BHandler(a_name);
+}
+
+
+// BHandler::BHandler(const char* name), as a MojoBHandler
+BHandler*
+mojobe_MojoBHandler_new(const char* a_name,
+	const mojobe_BHandler_hooks* hooks,
+	void* context)
+{
+	return new(std::nothrow) MojoBHandler(a_name, hooks, context);
+}
+
+
+// ~BHandler()
+void
+mojobe_BHandler_delete(BHandler* self)
+{
+	delete self;
+}
+
+
+// BHandler's own MessageReceived
+void
+mojobe_BHandler_base_MessageReceived(BHandler* self, BMessage* message)
+{
+	self->BHandler::MessageReceived(message);
+}
+
+
+
+// #pragma mark - BLooper
+
+
+// status_t BLooper::PostMessage(uint32 command)
+status_t
+mojobe_BLooper_PostMessage__uint32(BLooper* self, uint32 a_command)
+{
+	return self->PostMessage(a_command);
+}
+
+
+// status_t BLooper::PostMessage(BMessage* message)
+status_t
+mojobe_BLooper_PostMessage__BMessageP(BLooper* self, BMessage* a_message)
+{
+	return self->PostMessage(a_message);
+}
+
+
+// status_t BLooper::PostMessage(uint32 command, BHandler* handler, BHandler* replyTo)
+status_t
+mojobe_BLooper_PostMessage__uint32_BHandlerP_BHandlerP(BLooper* self,
+	uint32 a_command,
+	BHandler* a_handler,
+	BHandler* a_replyTo)
+{
+	return self->PostMessage(a_command, a_handler, a_replyTo);
+}
+
+
+// status_t BLooper::PostMessage(BMessage* message, BHandler* handler, BHandler* replyTo)
+status_t
+mojobe_BLooper_PostMessage__BMessageP_BHandlerP_BHandlerP(BLooper* self,
+	BMessage* a_message,
+	BHandler* a_handler,
+	BHandler* a_replyTo)
+{
+	return self->PostMessage(a_message, a_handler, a_replyTo);
+}
+
+
+// void BLooper::DispatchMessage(BMessage* message, BHandler* handler)
+void
+mojobe_BLooper_DispatchMessage(BLooper* self,
+	BMessage* a_message,
+	BHandler* a_handler)
+{
+	self->DispatchMessage(a_message, a_handler);
+}
+
+
+// BMessage* BLooper::CurrentMessage() const
+BMessage*
+mojobe_BLooper_CurrentMessage(BLooper* self)
+{
+	return self->CurrentMessage();
+}
+
+
+// BMessage* BLooper::DetachCurrentMessage()
+BMessage*
+mojobe_BLooper_DetachCurrentMessage(BLooper* self)
+{
+	return self->DetachCurrentMessage();
+}
+
+
+// void BLooper::DispatchExternalMessage(BMessage* message, BHandler* handler, bool& _detached)
+void
+mojobe_BLooper_DispatchExternalMessage(BLooper* self,
+	BMessage* a_message,
+	BHandler* a_handler,
+	bool a__detached)
+{
+	self->DispatchExternalMessage(a_message, a_handler, a__detached);
+}
+
+
+// bool BLooper::IsMessageWaiting() const
+bool
+mojobe_BLooper_IsMessageWaiting(BLooper* self)
+{
+	return self->IsMessageWaiting();
+}
+
+
+// void BLooper::AddHandler(BHandler* handler)
+void
+mojobe_BLooper_AddHandler(BLooper* self, BHandler* a_handler)
+{
+	self->AddHandler(a_handler);
+}
+
+
+// bool BLooper::RemoveHandler(BHandler* handler)
+bool
+mojobe_BLooper_RemoveHandler(BLooper* self, BHandler* a_handler)
+{
+	return self->RemoveHandler(a_handler);
+}
+
+
+// int32 BLooper::CountHandlers() const
+int32
+mojobe_BLooper_CountHandlers(BLooper* self)
+{
+	return self->CountHandlers();
+}
+
+
+// BHandler* BLooper::HandlerAt(int32 index) const
+BHandler*
+mojobe_BLooper_HandlerAt(BLooper* self, int32 a_index)
+{
+	return self->HandlerAt(a_index);
+}
+
+
+// int32 BLooper::IndexOf(BHandler* handler) const
+int32
+mojobe_BLooper_IndexOf(BLooper* self, BHandler* a_handler)
+{
+	return self->IndexOf(a_handler);
+}
+
+
+// BHandler* BLooper::PreferredHandler() const
+BHandler*
+mojobe_BLooper_PreferredHandler(BLooper* self)
+{
+	return self->PreferredHandler();
+}
+
+
+// void BLooper::SetPreferredHandler(BHandler* handler)
+void
+mojobe_BLooper_SetPreferredHandler(BLooper* self, BHandler* a_handler)
+{
+	self->SetPreferredHandler(a_handler);
+}
+
+
+// thread_id BLooper::Run()
+int32
+mojobe_BLooper_Run(BLooper* self)
+{
+	return self->Run();
+}
+
+
+// void BLooper::Loop()
+void
+mojobe_BLooper_Loop(BLooper* self)
+{
+	self->Loop();
+}
+
+
+// void BLooper::Quit()
+void
+mojobe_BLooper_Quit(BLooper* self)
+{
+	self->Quit();
+}
+
+
+// bool BLooper::QuitRequested()
+bool
+mojobe_BLooper_QuitRequested(BLooper* self)
+{
+	return self->QuitRequested();
+}
+
+
+// bool BLooper::Lock()
+bool
+mojobe_BLooper_Lock(BLooper* self)
+{
+	return self->Lock();
+}
+
+
+// void BLooper::Unlock()
+void
+mojobe_BLooper_Unlock(BLooper* self)
+{
+	self->Unlock();
+}
+
+
+// bool BLooper::IsLocked() const
+bool
+mojobe_BLooper_IsLocked(BLooper* self)
+{
+	return self->IsLocked();
+}
+
+
+// status_t BLooper::LockWithTimeout(bigtime_t timeout)
+status_t
+mojobe_BLooper_LockWithTimeout(BLooper* self, bigtime_t a_timeout)
+{
+	return self->LockWithTimeout(a_timeout);
+}
+
+
+// thread_id BLooper::Thread() const
+int32
+mojobe_BLooper_Thread(BLooper* self)
+{
+	return self->Thread();
+}
+
+
+// team_id BLooper::Team() const
+int32
+mojobe_BLooper_Team(BLooper* self)
+{
+	return self->Team();
+}
+
+
+// thread_id BLooper::LockingThread() const
+int32
+mojobe_BLooper_LockingThread(BLooper* self)
+{
+	return self->LockingThread();
+}
+
+
+// int32 BLooper::CountLocks() const
+int32
+mojobe_BLooper_CountLocks(BLooper* self)
+{
+	return self->CountLocks();
+}
+
+
+// int32 BLooper::CountLockRequests() const
+int32
+mojobe_BLooper_CountLockRequests(BLooper* self)
+{
+	return self->CountLockRequests();
+}
+
+
+// sem_id BLooper::Sem() const
+int32
+mojobe_BLooper_Sem(BLooper* self)
+{
+	return self->Sem();
+}
+
+
+// BLooper* as BHandler*
+BHandler*
+mojobe_BLooper_as_BHandler(BLooper* self)
+{
+	return self;
+}
+
+
+// BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)
+BLooper*
+mojobe_BLooper_new(const char* a_name, int32 a_priority, int32 a_portCapacity)
+{
+	return new(std::nothrow) BLooper(a_name, a_priority, a_portCapacity);
+}
+
+
+// BLooper::BLooper(const char* name, int32 priority, int32 portCapacity), as a MojoBLooper
+BLooper*
+mojobe_MojoBLooper_new(const char* a_name,
+	int32 a_priority,
+	int32 a_portCapacity,
+	const mojobe_BLooper_hooks* hooks,
+	void* context)
+{
+	return new(std::nothrow) MojoBLooper(a_name, a_priority, a_portCapacity, hooks, context);
+}
+
+
+// deletes a BLooper that was never handed over: locked, then Quit()
+void
+mojobe_BLooper_destroy(BLooper* self)
+{
+	if (self->Lock())
+		self->Quit();
+}
+
+
+// BLooper's own MessageReceived
+void
+mojobe_BLooper_base_MessageReceived(BLooper* self, BMessage* message)
+{
+	self->BLooper::MessageReceived(message);
+}
+
+
+// BLooper's own QuitRequested
+bool
+mojobe_BLooper_base_QuitRequested(BLooper* self)
+{
+	return self->BLooper::QuitRequested();
+}
+
+
+
+// #pragma mark - BApplication
 
 
 // status_t BApplication::InitCheck() const
@@ -626,14 +1240,6 @@ mojobe_BApplication_Quit(BApplication* self)
 }
 
 
-// bool BApplication::QuitRequested()
-bool
-mojobe_BApplication_QuitRequested(BApplication* self)
-{
-	return self->QuitRequested();
-}
-
-
 // void BApplication::Pulse()
 void
 mojobe_BApplication_Pulse(BApplication* self)
@@ -647,14 +1253,6 @@ void
 mojobe_BApplication_ReadyToRun(BApplication* self)
 {
 	self->ReadyToRun();
-}
-
-
-// void BApplication::MessageReceived(BMessage* message)
-void
-mojobe_BApplication_MessageReceived(BApplication* self, BMessage* a_message)
-{
-	self->MessageReceived(a_message);
 }
 
 
@@ -738,6 +1336,14 @@ mojobe_BApplication_CountLoopers(BApplication* self)
 }
 
 
+// BLooper* BApplication::LooperAt(int32 index) const
+BLooper*
+mojobe_BApplication_LooperAt(BApplication* self, int32 a_index)
+{
+	return self->LooperAt(a_index);
+}
+
+
 // bool BApplication::IsLaunching() const
 bool
 mojobe_BApplication_IsLaunching(BApplication* self)
@@ -762,223 +1368,35 @@ mojobe_BApplication_SetPulseRate(BApplication* self, bigtime_t a_rate)
 }
 
 
-// status_t BApplication::GetSupportedSuites(BMessage* data)
+// status_t BApplication::RegisterLooper(BLooper* looper)
 status_t
-mojobe_BApplication_GetSupportedSuites(BApplication* self, BMessage* a_data)
+mojobe_BApplication_RegisterLooper(BApplication* self, BLooper* a_looper)
 {
-	return self->GetSupportedSuites(a_data);
+	return self->RegisterLooper(a_looper);
 }
 
 
-// status_t BLooper::PostMessage(uint32 command)
+// status_t BApplication::UnregisterLooper(BLooper* looper)
 status_t
-mojobe_BApplication_PostMessage__uint32(BApplication* self, uint32 a_command)
+mojobe_BApplication_UnregisterLooper(BApplication* self, BLooper* a_looper)
 {
-	return static_cast<BLooper*>(self)->PostMessage(a_command);
+	return self->UnregisterLooper(a_looper);
 }
 
 
-// status_t BLooper::PostMessage(BMessage* message)
-status_t
-mojobe_BApplication_PostMessage__BMessageP(BApplication* self,
-	BMessage* a_message)
+// BApplication* as BLooper*
+BLooper*
+mojobe_BApplication_as_BLooper(BApplication* self)
 {
-	return static_cast<BLooper*>(self)->PostMessage(a_message);
+	return self;
 }
 
 
-// BMessage* BLooper::CurrentMessage() const
-BMessage*
-mojobe_BApplication_CurrentMessage(BApplication* self)
+// BApplication* as BHandler*
+BHandler*
+mojobe_BApplication_as_BHandler(BApplication* self)
 {
-	return static_cast<BLooper*>(self)->CurrentMessage();
-}
-
-
-// BMessage* BLooper::DetachCurrentMessage()
-BMessage*
-mojobe_BApplication_DetachCurrentMessage(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->DetachCurrentMessage();
-}
-
-
-// bool BLooper::IsMessageWaiting() const
-bool
-mojobe_BApplication_IsMessageWaiting(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->IsMessageWaiting();
-}
-
-
-// int32 BLooper::CountHandlers() const
-int32
-mojobe_BApplication_CountHandlers(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->CountHandlers();
-}
-
-
-// void BLooper::Loop()
-void
-mojobe_BApplication_Loop(BApplication* self)
-{
-	static_cast<BLooper*>(self)->Loop();
-}
-
-
-// bool BLooper::Lock()
-bool
-mojobe_BApplication_Lock(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->Lock();
-}
-
-
-// void BLooper::Unlock()
-void
-mojobe_BApplication_Unlock(BApplication* self)
-{
-	static_cast<BLooper*>(self)->Unlock();
-}
-
-
-// bool BLooper::IsLocked() const
-bool
-mojobe_BApplication_IsLocked(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->IsLocked();
-}
-
-
-// status_t BLooper::LockWithTimeout(bigtime_t timeout)
-status_t
-mojobe_BApplication_LockWithTimeout(BApplication* self, bigtime_t a_timeout)
-{
-	return static_cast<BLooper*>(self)->LockWithTimeout(a_timeout);
-}
-
-
-// thread_id BLooper::Thread() const
-int32
-mojobe_BApplication_Thread(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->Thread();
-}
-
-
-// team_id BLooper::Team() const
-int32
-mojobe_BApplication_Team(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->Team();
-}
-
-
-// thread_id BLooper::LockingThread() const
-int32
-mojobe_BApplication_LockingThread(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->LockingThread();
-}
-
-
-// int32 BLooper::CountLocks() const
-int32
-mojobe_BApplication_CountLocks(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->CountLocks();
-}
-
-
-// int32 BLooper::CountLockRequests() const
-int32
-mojobe_BApplication_CountLockRequests(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->CountLockRequests();
-}
-
-
-// sem_id BLooper::Sem() const
-int32
-mojobe_BApplication_Sem(BApplication* self)
-{
-	return static_cast<BLooper*>(self)->Sem();
-}
-
-
-// void BHandler::SetName(const char* name)
-void
-mojobe_BApplication_SetName(BApplication* self, const char* a_name)
-{
-	static_cast<BHandler*>(self)->SetName(a_name);
-}
-
-
-// const char* BHandler::Name() const
-const char*
-mojobe_BApplication_Name(BApplication* self)
-{
-	return static_cast<BHandler*>(self)->Name();
-}
-
-
-// bool BHandler::LockLooper()
-bool
-mojobe_BApplication_LockLooper(BApplication* self)
-{
-	return static_cast<BHandler*>(self)->LockLooper();
-}
-
-
-// status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)
-status_t
-mojobe_BApplication_LockLooperWithTimeout(BApplication* self,
-	bigtime_t a_timeout)
-{
-	return static_cast<BHandler*>(self)->LockLooperWithTimeout(a_timeout);
-}
-
-
-// void BHandler::UnlockLooper()
-void
-mojobe_BApplication_UnlockLooper(BApplication* self)
-{
-	static_cast<BHandler*>(self)->UnlockLooper();
-}
-
-
-// void BHandler::SendNotices(uint32 what, const BMessage* notice)
-void
-mojobe_BApplication_SendNotices(BApplication* self,
-	uint32 a_what,
-	BMessage* a_notice)
-{
-	static_cast<BHandler*>(self)->SendNotices(a_what, a_notice);
-}
-
-
-// bool BHandler::IsWatched() const
-bool
-mojobe_BApplication_IsWatched(BApplication* self)
-{
-	return static_cast<BHandler*>(self)->IsWatched();
-}
-
-
-// status_t BArchivable::AllUnarchived(const BMessage* archive)
-status_t
-mojobe_BApplication_AllUnarchived(BApplication* self, BMessage* a_archive)
-{
-	return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
-}
-
-
-// status_t BArchivable::AllArchived(BMessage* archive) const
-status_t
-mojobe_BApplication_AllArchived(BApplication* self, BMessage* a_archive)
-{
-	return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	return self;
 }
 
 
@@ -1069,14 +1487,6 @@ mojobe_BApplication_base_Pulse(BApplication* self)
 // #pragma mark - BWindow
 
 
-// status_t BWindow::Archive(BMessage* archive, bool deep) const
-status_t
-mojobe_BWindow_Archive(BWindow* self, BMessage* a_archive, bool a_deep)
-{
-	return self->Archive(a_archive, a_deep);
-}
-
-
 // void BWindow::Quit()
 void
 mojobe_BWindow_Quit(BWindow* self)
@@ -1122,14 +1532,6 @@ BView*
 mojobe_BWindow_ChildAt(BWindow* self, int32 a_index)
 {
 	return self->ChildAt(a_index);
-}
-
-
-// void BWindow::MessageReceived(BMessage* message)
-void
-mojobe_BWindow_MessageReceived(BWindow* self, BMessage* a_message)
-{
-	self->MessageReceived(a_message);
 }
 
 
@@ -1222,12 +1624,24 @@ mojobe_BWindow_PulseRate(BWindow* self)
 
 // void BWindow::AddShortcut(uint32 key, uint32 modifiers, BMessage* message)
 void
-mojobe_BWindow_AddShortcut(BWindow* self,
+mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP(BWindow* self,
 	uint32 a_key,
 	uint32 a_modifiers,
 	BMessage* a_message)
 {
 	self->AddShortcut(a_key, a_modifiers, a_message);
+}
+
+
+// void BWindow::AddShortcut(uint32 key, uint32 modifiers, BMessage* message, BHandler* target)
+void
+mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP_BHandlerP(BWindow* self,
+	uint32 a_key,
+	uint32 a_modifiers,
+	BMessage* a_message,
+	BHandler* a_target)
+{
+	self->AddShortcut(a_key, a_modifiers, a_message, a_target);
 }
 
 
@@ -1663,14 +2077,6 @@ mojobe_BWindow_LastMouseMovedView(BWindow* self)
 }
 
 
-// status_t BWindow::GetSupportedSuites(BMessage* data)
-status_t
-mojobe_BWindow_GetSupportedSuites(BWindow* self, BMessage* a_data)
-{
-	return self->GetSupportedSuites(a_data);
-}
-
-
 // status_t BWindow::AddToSubset(BWindow* window)
 status_t
 mojobe_BWindow_AddToSubset(BWindow* self, BWindow* a_window)
@@ -1801,14 +2207,6 @@ mojobe_BWindow_GetWindowAlignment(BWindow* self,
 }
 
 
-// bool BWindow::QuitRequested()
-bool
-mojobe_BWindow_QuitRequested(BWindow* self)
-{
-	return self->QuitRequested();
-}
-
-
 // void BWindow::InvalidateLayout(bool descendants)
 void
 mojobe_BWindow_InvalidateLayout(BWindow* self, bool a_descendants)
@@ -1833,211 +2231,19 @@ mojobe_BWindow_IsOffscreenWindow(BWindow* self)
 }
 
 
-// status_t BLooper::PostMessage(uint32 command)
-status_t
-mojobe_BWindow_PostMessage__uint32(BWindow* self, uint32 a_command)
+// BWindow* as BLooper*
+BLooper*
+mojobe_BWindow_as_BLooper(BWindow* self)
 {
-	return static_cast<BLooper*>(self)->PostMessage(a_command);
+	return self;
 }
 
 
-// status_t BLooper::PostMessage(BMessage* message)
-status_t
-mojobe_BWindow_PostMessage__BMessageP(BWindow* self, BMessage* a_message)
+// BWindow* as BHandler*
+BHandler*
+mojobe_BWindow_as_BHandler(BWindow* self)
 {
-	return static_cast<BLooper*>(self)->PostMessage(a_message);
-}
-
-
-// BMessage* BLooper::CurrentMessage() const
-BMessage*
-mojobe_BWindow_CurrentMessage(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->CurrentMessage();
-}
-
-
-// BMessage* BLooper::DetachCurrentMessage()
-BMessage*
-mojobe_BWindow_DetachCurrentMessage(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->DetachCurrentMessage();
-}
-
-
-// bool BLooper::IsMessageWaiting() const
-bool
-mojobe_BWindow_IsMessageWaiting(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->IsMessageWaiting();
-}
-
-
-// int32 BLooper::CountHandlers() const
-int32
-mojobe_BWindow_CountHandlers(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->CountHandlers();
-}
-
-
-// void BLooper::Loop()
-void
-mojobe_BWindow_Loop(BWindow* self)
-{
-	static_cast<BLooper*>(self)->Loop();
-}
-
-
-// bool BLooper::Lock()
-bool
-mojobe_BWindow_Lock(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->Lock();
-}
-
-
-// void BLooper::Unlock()
-void
-mojobe_BWindow_Unlock(BWindow* self)
-{
-	static_cast<BLooper*>(self)->Unlock();
-}
-
-
-// bool BLooper::IsLocked() const
-bool
-mojobe_BWindow_IsLocked(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->IsLocked();
-}
-
-
-// status_t BLooper::LockWithTimeout(bigtime_t timeout)
-status_t
-mojobe_BWindow_LockWithTimeout(BWindow* self, bigtime_t a_timeout)
-{
-	return static_cast<BLooper*>(self)->LockWithTimeout(a_timeout);
-}
-
-
-// thread_id BLooper::Thread() const
-int32
-mojobe_BWindow_Thread(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->Thread();
-}
-
-
-// team_id BLooper::Team() const
-int32
-mojobe_BWindow_Team(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->Team();
-}
-
-
-// thread_id BLooper::LockingThread() const
-int32
-mojobe_BWindow_LockingThread(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->LockingThread();
-}
-
-
-// int32 BLooper::CountLocks() const
-int32
-mojobe_BWindow_CountLocks(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->CountLocks();
-}
-
-
-// int32 BLooper::CountLockRequests() const
-int32
-mojobe_BWindow_CountLockRequests(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->CountLockRequests();
-}
-
-
-// sem_id BLooper::Sem() const
-int32
-mojobe_BWindow_Sem(BWindow* self)
-{
-	return static_cast<BLooper*>(self)->Sem();
-}
-
-
-// void BHandler::SetName(const char* name)
-void
-mojobe_BWindow_SetName(BWindow* self, const char* a_name)
-{
-	static_cast<BHandler*>(self)->SetName(a_name);
-}
-
-
-// const char* BHandler::Name() const
-const char*
-mojobe_BWindow_Name(BWindow* self)
-{
-	return static_cast<BHandler*>(self)->Name();
-}
-
-
-// bool BHandler::LockLooper()
-bool
-mojobe_BWindow_LockLooper(BWindow* self)
-{
-	return static_cast<BHandler*>(self)->LockLooper();
-}
-
-
-// status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)
-status_t
-mojobe_BWindow_LockLooperWithTimeout(BWindow* self, bigtime_t a_timeout)
-{
-	return static_cast<BHandler*>(self)->LockLooperWithTimeout(a_timeout);
-}
-
-
-// void BHandler::UnlockLooper()
-void
-mojobe_BWindow_UnlockLooper(BWindow* self)
-{
-	static_cast<BHandler*>(self)->UnlockLooper();
-}
-
-
-// void BHandler::SendNotices(uint32 what, const BMessage* notice)
-void
-mojobe_BWindow_SendNotices(BWindow* self, uint32 a_what, BMessage* a_notice)
-{
-	static_cast<BHandler*>(self)->SendNotices(a_what, a_notice);
-}
-
-
-// bool BHandler::IsWatched() const
-bool
-mojobe_BWindow_IsWatched(BWindow* self)
-{
-	return static_cast<BHandler*>(self)->IsWatched();
-}
-
-
-// status_t BArchivable::AllUnarchived(const BMessage* archive)
-status_t
-mojobe_BWindow_AllUnarchived(BWindow* self, BMessage* a_archive)
-{
-	return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
-}
-
-
-// status_t BArchivable::AllArchived(BMessage* archive) const
-status_t
-mojobe_BWindow_AllArchived(BWindow* self, BMessage* a_archive)
-{
-	return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	return self;
 }
 
 
@@ -2193,30 +2399,6 @@ mojobe_BWindow_base_Minimize(BWindow* self, bool minimize)
 // #pragma mark - BView
 
 
-// status_t BView::Archive(BMessage* archive, bool deep) const
-status_t
-mojobe_BView_Archive(BView* self, BMessage* a_archive, bool a_deep)
-{
-	return self->Archive(a_archive, a_deep);
-}
-
-
-// status_t BView::AllUnarchived(const BMessage* archive)
-status_t
-mojobe_BView_AllUnarchived(BView* self, BMessage* a_archive)
-{
-	return self->AllUnarchived(a_archive);
-}
-
-
-// status_t BView::AllArchived(BMessage* archive) const
-status_t
-mojobe_BView_AllArchived(BView* self, BMessage* a_archive)
-{
-	return self->AllArchived(a_archive);
-}
-
-
 // void BView::AttachedToWindow()
 void
 mojobe_BView_AttachedToWindow(BView* self)
@@ -2246,14 +2428,6 @@ void
 mojobe_BView_AllDetached(BView* self)
 {
 	self->AllDetached();
-}
-
-
-// void BView::MessageReceived(BMessage* message)
-void
-mojobe_BView_MessageReceived(BView* self, BMessage* a_message)
-{
-	self->MessageReceived(a_message);
 }
 
 
@@ -2440,9 +2614,10 @@ mojobe_BView_GetMouse(BView* self,
 void
 mojobe_BView_DragMessage(BView* self,
 	BMessage* a_message,
-	mojobe_BRect a_dragRect)
+	mojobe_BRect a_dragRect,
+	BHandler* a_replyTo)
 {
-	self->DragMessage(a_message, mojobe_from_c(a_dragRect), static_cast<BHandler *>(NULL));
+	self->DragMessage(a_message, mojobe_from_c(a_dragRect), a_replyTo);
 }
 
 
@@ -3593,14 +3768,6 @@ mojobe_BView_ResizeToPreferred(BView* self)
 }
 
 
-// status_t BView::GetSupportedSuites(BMessage* data)
-status_t
-mojobe_BView_GetSupportedSuites(BView* self, BMessage* a_data)
-{
-	return self->GetSupportedSuites(a_data);
-}
-
-
 // bool BView::IsPrinting() const
 bool
 mojobe_BView_IsPrinting(BView* self)
@@ -3741,59 +3908,11 @@ mojobe_BView_HideToolTip(BView* self)
 }
 
 
-// void BHandler::SetName(const char* name)
-void
-mojobe_BView_SetName(BView* self, const char* a_name)
+// BView* as BHandler*
+BHandler*
+mojobe_BView_as_BHandler(BView* self)
 {
-	static_cast<BHandler*>(self)->SetName(a_name);
-}
-
-
-// const char* BHandler::Name() const
-const char*
-mojobe_BView_Name(BView* self)
-{
-	return static_cast<BHandler*>(self)->Name();
-}
-
-
-// bool BHandler::LockLooper()
-bool
-mojobe_BView_LockLooper(BView* self)
-{
-	return static_cast<BHandler*>(self)->LockLooper();
-}
-
-
-// status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)
-status_t
-mojobe_BView_LockLooperWithTimeout(BView* self, bigtime_t a_timeout)
-{
-	return static_cast<BHandler*>(self)->LockLooperWithTimeout(a_timeout);
-}
-
-
-// void BHandler::UnlockLooper()
-void
-mojobe_BView_UnlockLooper(BView* self)
-{
-	static_cast<BHandler*>(self)->UnlockLooper();
-}
-
-
-// void BHandler::SendNotices(uint32 what, const BMessage* notice)
-void
-mojobe_BView_SendNotices(BView* self, uint32 a_what, BMessage* a_notice)
-{
-	static_cast<BHandler*>(self)->SendNotices(a_what, a_notice);
-}
-
-
-// bool BHandler::IsWatched() const
-bool
-mojobe_BView_IsWatched(BView* self)
-{
-	return static_cast<BHandler*>(self)->IsWatched();
+	return self;
 }
 
 
@@ -4098,19 +4217,22 @@ mojobe_BMessage_DropPoint(BMessage* self, mojobe_BPoint* a_offset)
 
 // status_t BMessage::SendReply(uint32 command, BHandler* replyTo)
 status_t
-mojobe_BMessage_SendReply__uint32(BMessage* self, uint32 a_command)
+mojobe_BMessage_SendReply__uint32_BHandlerP(BMessage* self,
+	uint32 a_command,
+	BHandler* a_replyTo)
 {
-	return self->SendReply(a_command, static_cast<BHandler *>(NULL));
+	return self->SendReply(a_command, a_replyTo);
 }
 
 
 // status_t BMessage::SendReply(BMessage* reply, BHandler* replyTo, bigtime_t timeout)
 status_t
-mojobe_BMessage_SendReply__BMessageP_bigtime_t(BMessage* self,
+mojobe_BMessage_SendReply__BMessageP_BHandlerP_bigtime_t(BMessage* self,
 	BMessage* a_reply,
+	BHandler* a_replyTo,
 	bigtime_t a_timeout)
 {
-	return self->SendReply(a_reply, static_cast<BHandler *>(NULL), a_timeout);
+	return self->SendReply(a_reply, a_replyTo, a_timeout);
 }
 
 
@@ -5953,6 +6075,14 @@ mojobe_BMenu_FindItem__charP(BMenu* self, const char* a_name)
 }
 
 
+// status_t BMenu::SetTargetForItems(BHandler* target)
+status_t
+mojobe_BMenu_SetTargetForItems(BMenu* self, BHandler* a_target)
+{
+	return self->SetTargetForItems(a_target);
+}
+
+
 // void BMenu::SetEnabled(bool enable)
 void
 mojobe_BMenu_SetEnabled(BMenu* self, bool a_enable)
@@ -6105,6 +6235,14 @@ mojobe_BMenu_as_BView(BMenu* self)
 }
 
 
+// BMenu* as BHandler*
+BHandler*
+mojobe_BMenu_as_BHandler(BMenu* self)
+{
+	return self;
+}
+
+
 // BMenu::BMenu(const char* name, menu_layout layout)
 BMenu*
 mojobe_BMenu_new__charP_menu_layout(const char* a_name, menu_layout a_layout)
@@ -6178,6 +6316,14 @@ mojobe_BMenuBar_as_BMenu(BMenuBar* self)
 // BMenuBar* as BView*
 BView*
 mojobe_BMenuBar_as_BView(BMenuBar* self)
+{
+	return self;
+}
+
+
+// BMenuBar* as BHandler*
+BHandler*
+mojobe_BMenuBar_as_BHandler(BMenuBar* self)
 {
 	return self;
 }
@@ -6371,11 +6517,45 @@ mojobe_BMenuItem_Command(BMenuItem* self)
 }
 
 
+// status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
+status_t
+mojobe_BMenuItem_SetTarget(BMenuItem* self,
+	BHandler* a_handler,
+	BLooper* a_looper)
+{
+	return static_cast<BInvoker*>(self)->SetTarget(a_handler, a_looper);
+}
+
+
 // bool BInvoker::IsTargetLocal() const
 bool
 mojobe_BMenuItem_IsTargetLocal(BMenuItem* self)
 {
 	return static_cast<BInvoker*>(self)->IsTargetLocal();
+}
+
+
+// BHandler* BInvoker::Target(BLooper** _looper) const
+BHandler*
+mojobe_BMenuItem_Target(BMenuItem* self)
+{
+	return static_cast<BInvoker*>(self)->Target(static_cast<BLooper **>(NULL));
+}
+
+
+// status_t BInvoker::SetHandlerForReply(BHandler* handler)
+status_t
+mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self, BHandler* a_handler)
+{
+	return static_cast<BInvoker*>(self)->SetHandlerForReply(a_handler);
+}
+
+
+// BHandler* BInvoker::HandlerForReply() const
+BHandler*
+mojobe_BMenuItem_HandlerForReply(BMenuItem* self)
+{
+	return static_cast<BInvoker*>(self)->HandlerForReply();
 }
 
 

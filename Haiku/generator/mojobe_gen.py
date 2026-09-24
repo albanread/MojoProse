@@ -772,6 +772,12 @@ class Bridge:
 # ===----------------------------------------------------------------------=== #
 
 
+def hook_marker(cls):
+    """The trait every hook trait of a class inherits (`ViewHooks`): what a
+    Mojo type standing behind the class implements."""
+    return "%sHooks" % (cls[1:] if cls.startswith("B") else cls)
+
+
 def mojo_name(name):
     return name + "_" if name in MOJO_KEYWORDS else name
 
@@ -1201,12 +1207,14 @@ class Emitter:
                 except Unbridged as why:
                     manifest.append((m.cxx(), "skipped", str(why)))
                     continue
-                mine.setdefault(mojo_name(name), []).append(
-                    signature + (cls,))
                 if name in hands_over:
+                    # not in the trait, so not inherited: a subclass's own
+                    # (BApplication::Run over BLooper::Run) is no override
                     ref_extra.append(lines)
                     owned_extra.append(self.handover(lines, cls))
                 else:
+                    mine.setdefault(mojo_name(name), []).append(
+                        signature + (cls,))
                     trait_lines.append(lines)
                 manifest.append((m.cxx(), "included", entry_name))
         combined = {}
@@ -1385,8 +1393,11 @@ class Emitter:
                     split = index
                     break
             params = params[:split] + ["var state: T"] + params[split:]
-            head = "def __init__[T: Movable & Deinitable](%s) raises:" % ", ".join(
-                ["out self"] + params)
+            # T must stand behind the class (implement one of its hooks):
+            # an unconstrained T would take any argument, and BLooper("x")
+            # would make a looper whose Mojo state is "x"
+            head = "def __init__[T: %s & Movable & Deinitable](%s) raises:" % (
+                hook_marker(cls), ", ".join(["out self"] + params))
         else:
             head = "def __init__(%s) raises:" % ", ".join(["out self"] + params)
         lines.append(head)
@@ -1525,7 +1536,7 @@ class Emitter:
             arg_decls = ["mut self", "%s: %sRef[_]" % (subject, cls)] + [
                 "%s: %s" % (mojo_name(p.name), part[0]) for p, part in zip(m.params, parts)]
             mojo_traits.append([
-                "trait %s:" % trait,
+                "trait %s(%s):" % (trait, hook_marker(cls)),
                 '    """`%s`: a hook of %s."""' % (m.cxx(), cls),
                 "",
                 "    def %s(%s)%s:" % (hook, ", ".join(arg_decls),
@@ -1710,7 +1721,12 @@ class Emitter:
         for info, lines, _, _ in shadow_ctors:
             out.append("")
             out.extend("    " + l for l in lines)
-        for d in descendants:
+        # an owned value becomes its base's only if both end the same way:
+        # a BWindow must not become a BHandler that Mojo deletes
+        def ending(c):
+            return (self.b.classes[c].get("kind", "owned"),
+                    self.b.classes[c].get("destroy", "delete"))
+        for d in [d for d in descendants if ending(d) == ending(cls)]:
             out.append("")
             out.append("    @implicit")
             out.append("    def __init__(out self, var other: %s):" % d)
@@ -1733,10 +1749,33 @@ class Emitter:
             out.append("")
             out.extend("    " + l for l in lines)
         if hooks:
+            out.append("")
+            out.append("    def state[T: Movable & Deinitable](ref self) raises -> ref["
+                       "origin_of(self).unsafe_mut_cast[True]()] T:")
+            out.append('        """The Mojo value the %s was made from, borrowed from this' % cls)
+            out.append("        value.")
+            out.append("")
+            out.append("        Raises:")
+            out.append("            When it was not made from a `T`.")
+            out.append('        """')
+            out.append('        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()]('
+                       'external_call["mojobe_Mojo%s_context", Int]('
+                       '_addr(self._ptr), _type_tag[T]()), "%s")' % (cls, cls))
             self.write_hook_tables(cls, hooks)
 
     def write_hook_tables(self, cls, hooks):
         out = self.mojo
+        out.append("")
+        out.append("")
+        out.append("trait %s:" % hook_marker(cls))
+        out.append('    """A Mojo type that stands behind a `%s`: it implements one or'
+                   % cls)
+        out.append("    more of the hook traits, each of which inherits this one. Making a")
+        out.append("    `%s` with such a value as its state builds its hook table." % cls)
+        out.append('    """')
+        out.append("")
+        out.append("    pass")
+        self.hook_traits.append(hook_marker(cls))
         for lines in hooks["traits"]:
             out.append("")
             out.append("")

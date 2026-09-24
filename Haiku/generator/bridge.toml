@@ -5,6 +5,8 @@
 # The headers the bridge covers; their constants, and those of the headers
 # they include from the same kit directories, become Mojo constants.
 headers = [
+	"Handler.h",
+	"Looper.h",
 	"Application.h",
 	"Window.h",
 	"View.h",
@@ -13,7 +15,7 @@ headers = [
 	"MenuBar.h",
 	"MenuItem.h",
 ]
-constant_dirs = ["os/app", "os/interface", "os/support"]
+constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
 
 # Value types: copied, laid out in Mojo as in C++. A type that C++ cannot
 # pass in registers (a user-declared copy constructor makes BRect and BPoint
@@ -31,6 +33,18 @@ mojo_fields = [["data", "UInt64"]]
 # "self-owning" -- handed to the system by one of `hands_over`, and deleted
 # otherwise by `destroy`. shadow: Mojo types may stand behind it, with these
 # hooks (the Be Book's hook functions).
+[classes.BHandler]
+kind = "owned"             # a looper borrows its handlers: ~BHandler leaves it
+shadow = true
+hooks = ["MessageReceived"]
+
+[classes.BLooper]
+kind = "self-owning"
+hands_over = ["Run", "Quit"]
+destroy = "quit"           # never run: locked, then Quit(), which deletes it
+shadow = true
+hooks = ["MessageReceived", "QuitRequested"]
+
 [classes.BApplication]
 kind = "owned"
 init_check = "error"       # the constructors' status_t* out-parameter raises
@@ -97,8 +111,6 @@ kind = "owned"
 "BMenu::Perform" = "binary compatibility hook"
 "BMenuBar::Perform" = "binary compatibility hook"
 "BMenuItem::Perform" = "binary compatibility hook"
-"BLooper::Quit" = "BWindow and BApplication quit through their own Quit"
-"BLooper::Run" = "Show() runs a window; BApplication has its own Run"
 "BWindow::Run" = "Show() runs the window"
 "BHandler::SetLooper" = "the looper sets it"
 

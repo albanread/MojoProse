@@ -49,6 +49,8 @@ from ._constants import (
     cap_mode,
     color_which,
     command_code,
+    cpu_platform,
+    cpu_vendor,
     drawing_mode,
     font_direction,
     font_file_format,
@@ -63,6 +65,7 @@ from ._constants import (
     rect_tracking_style,
     set_font_mask,
     source_alpha,
+    topology_level_type,
     vertical_alignment,
     window_alignment,
     window_feel,
@@ -77,34 +80,976 @@ from ._constants import (
     B_INFINITE_TIMEOUT,
     B_ITEMS_IN_COLUMN,
     B_ITEMS_IN_ROW,
+    B_LOOPER_PORT_DEFAULT_CAPACITY,
+    B_NORMAL_PRIORITY,
     B_NO_TINT,
     B_TRACK_WHOLE_RECT,
     B_WILL_DRAW,
 )
 
 # ========================================================================== #
+# BHandler
+# ========================================================================== #
+
+
+trait _AsBHandler:
+    """Has a `BHandler*` for libmojobe."""
+
+    def _as_BHandler(self) -> _NPtr:
+        ...
+
+
+trait _BHandlerMethods(_AsBHandler):
+    """`BHandler`'s methods, for its references and the values Mojo owns."""
+
+    def Archive(self, data: Some[_AsBMessage], deep: Bool = True) raises:
+        """`status_t BHandler::Archive(BMessage* data, bool deep) const`."""
+        var _result = external_call["mojobe_BHandler_Archive", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::Archive"),
+            _addr(data._as_BMessage()),
+            deep,
+        )
+        _check(_result, "BHandler::Archive")
+
+    def MessageReceived(self, message: Some[_AsBMessage]):
+        """`void BHandler::MessageReceived(BMessage* message)`."""
+        external_call["mojobe_BHandler_MessageReceived", NoneType](
+            _nonnull(self._as_BHandler(), "BHandler::MessageReceived"),
+            _addr(message._as_BMessage()),
+        )
+
+    def Looper(ref self) -> BLooperRef[origin_of(self)]:
+        """`BLooper* BHandler::Looper() const`."""
+        var _result = external_call["mojobe_BHandler_Looper", Int](
+            _nonnull(self._as_BHandler(), "BHandler::Looper"),
+        )
+        return BLooperRef[origin_of(self)](_ptr_from(_result))
+
+    def SetName(self, var name: String):
+        """`void BHandler::SetName(const char* name)`."""
+        external_call["mojobe_BHandler_SetName", NoneType](
+            _nonnull(self._as_BHandler(), "BHandler::SetName"),
+            name.as_c_string_span(),
+        )
+        _ = name^
+
+    def Name(self) -> String:
+        """`const char* BHandler::Name() const`."""
+        var _result = external_call["mojobe_BHandler_Name", Int](
+            _nonnull(self._as_BHandler(), "BHandler::Name"),
+        )
+        return _string_from(_result)
+
+    def SetNextHandler(self, handler: Some[_AsBHandler]):
+        """`void BHandler::SetNextHandler(BHandler* handler)`."""
+        external_call["mojobe_BHandler_SetNextHandler", NoneType](
+            _nonnull(self._as_BHandler(), "BHandler::SetNextHandler"),
+            _addr(handler._as_BHandler()),
+        )
+
+    def NextHandler(ref self) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BHandler::NextHandler() const`."""
+        var _result = external_call["mojobe_BHandler_NextHandler", Int](
+            _nonnull(self._as_BHandler(), "BHandler::NextHandler"),
+        )
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def LockLooper(self) -> Bool:
+        """`bool BHandler::LockLooper()`."""
+        var _result = external_call["mojobe_BHandler_LockLooper", Bool](
+            _nonnull(self._as_BHandler(), "BHandler::LockLooper"),
+        )
+        return _result
+
+    def LockLooperWithTimeout(self, timeout: Int64) raises:
+        """`status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)`."""
+        var _result = external_call["mojobe_BHandler_LockLooperWithTimeout", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::LockLooperWithTimeout"),
+            timeout,
+        )
+        _check(_result, "BHandler::LockLooperWithTimeout")
+
+    def UnlockLooper(self):
+        """`void BHandler::UnlockLooper()`."""
+        external_call["mojobe_BHandler_UnlockLooper", NoneType](
+            _nonnull(self._as_BHandler(), "BHandler::UnlockLooper"),
+        )
+
+    def ResolveSpecifier(
+        ref self,
+        message: Some[_AsBMessage],
+        index: Int32,
+        specifier: Some[_AsBMessage],
+        what: Int32,
+        var property: String,
+    ) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BHandler::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)`."""
+        var _result = external_call["mojobe_BHandler_ResolveSpecifier", Int](
+            _nonnull(self._as_BHandler(), "BHandler::ResolveSpecifier"),
+            _addr(message._as_BMessage()),
+            index,
+            _addr(specifier._as_BMessage()),
+            what,
+            property.as_c_string_span(),
+        )
+        _ = property^
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def GetSupportedSuites(self, data: Some[_AsBMessage]) raises:
+        """`status_t BHandler::GetSupportedSuites(BMessage* data)`."""
+        var _result = external_call["mojobe_BHandler_GetSupportedSuites", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::GetSupportedSuites"),
+            _addr(data._as_BMessage()),
+        )
+        _check(_result, "BHandler::GetSupportedSuites")
+
+    def StartWatching(self, observer: Some[_AsBHandler], what: UInt32) raises:
+        """`status_t BHandler::StartWatching(BHandler* observer, uint32 what)`."""
+        var _result = external_call["mojobe_BHandler_StartWatching", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StartWatching"),
+            _addr(observer._as_BHandler()),
+            what,
+        )
+        _check(_result, "BHandler::StartWatching")
+
+    def StartWatchingAll(self, observer: Some[_AsBHandler]) raises:
+        """`status_t BHandler::StartWatchingAll(BHandler* observer)`."""
+        var _result = external_call["mojobe_BHandler_StartWatchingAll", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StartWatchingAll"),
+            _addr(observer._as_BHandler()),
+        )
+        _check(_result, "BHandler::StartWatchingAll")
+
+    def StopWatching(self, observer: Some[_AsBHandler], what: UInt32) raises:
+        """`status_t BHandler::StopWatching(BHandler* observer, uint32 what)`."""
+        var _result = external_call["mojobe_BHandler_StopWatching", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StopWatching"),
+            _addr(observer._as_BHandler()),
+            what,
+        )
+        _check(_result, "BHandler::StopWatching")
+
+    def StopWatchingAll(self, observer: Some[_AsBHandler]) raises:
+        """`status_t BHandler::StopWatchingAll(BHandler* observer)`."""
+        var _result = external_call["mojobe_BHandler_StopWatchingAll", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::StopWatchingAll"),
+            _addr(observer._as_BHandler()),
+        )
+        _check(_result, "BHandler::StopWatchingAll")
+
+    def SendNotices(
+        self,
+        what: UInt32,
+        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
+    ):
+        """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
+        external_call["mojobe_BHandler_SendNotices", NoneType](
+            _nonnull(self._as_BHandler(), "BHandler::SendNotices"),
+            what,
+            _addr(notice._as_BMessage()),
+        )
+
+    def IsWatched(self) -> Bool:
+        """`bool BHandler::IsWatched() const`."""
+        var _result = external_call["mojobe_BHandler_IsWatched", Bool](
+            _nonnull(self._as_BHandler(), "BHandler::IsWatched"),
+        )
+        return _result
+
+    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
+        var _result = external_call["mojobe_BHandler_AllUnarchived", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::AllUnarchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllUnarchived")
+
+    def AllArchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
+        var _result = external_call["mojobe_BHandler_AllArchived", Int32](
+            _nonnull(self._as_BHandler(), "BHandler::AllArchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllArchived")
+
+
+struct BHandlerRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BHandlerMethods,
+):
+    """A `BHandler` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BHandlerRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    @implicit
+    def __init__(out self, other: BLooperRef[Self.origin]):
+        """A `BLooper` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BApplicationRef[Self.origin]):
+        """A `BApplication` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BWindowRef[Self.origin]):
+        """A `BWindow` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BViewRef[Self.origin]):
+        """A `BView` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BMenuRef[Self.origin]):
+        """A `BMenu` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BMenuBarRef[Self.origin]):
+        """A `BMenuBar` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BHandlerRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BHandlerRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BHandler(self) -> _NPtr:
+        return self._ptr
+
+    def state[T: Movable & Deinitable](
+        self,
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BHandler was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBHandler_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BHandler",
+        )
+
+    def base_MessageReceived(self, message: BMessageRef[_]):
+        """`BHandler::MessageReceived`, the class's own."""
+        external_call["mojobe_BHandler_base_MessageReceived", NoneType](
+            _nonnull(self._ptr, "BHandler::MessageReceived"),
+            _addr(message._ptr),
+        )
+
+
+struct BHandler(Movable, _BHandlerMethods):
+    """A `BHandler` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self, var name: Optional[String] = None) raises:
+        """`BHandler::BHandler(const char* name)`."""
+        var name_address = 0
+        if name:
+            name_address = Int(name.value().as_c_string_span().ptr())
+        var address = external_call["mojobe_BHandler_new", Int](name_address)
+        _ = name^
+        if address == 0:
+            raise Error("BHandler could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: HandlerHooks & Movable & Deinitable](
+        out self,
+        var state: T,
+        var name: Optional[String] = None,
+    ) raises:
+        """`BHandler::BHandler(const char* name)`, its hooks those of `state`."""
+        var hooks = _BHandler_hooks[T]()
+        var context = _to_heap(state^)
+        var name_address = 0
+        if name:
+            name_address = Int(name.value().as_c_string_span().ptr())
+        var address = external_call["mojobe_MojoBHandler_new", Int](
+            name_address,
+            Pointer(to=hooks),
+            context,
+        )
+        _ = name^
+        if address == 0:
+            _destroy[T](context)
+            raise Error("BHandler could not be made")
+        self._ptr = _ptr_from(address)
+
+    @implicit
+    def __init__(out self, var other: BApplication):
+        """A `BApplication` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BApplication_as_BHandler", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BView):
+        """A `BView` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BView_as_BHandler", Int](other^._adopt()),
+        )
+
+    @implicit
+    def __init__(out self, var other: BMenu):
+        """A `BMenu` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BMenu_as_BHandler", Int](other^._adopt()),
+        )
+
+    @implicit
+    def __init__(out self, var other: BMenuBar):
+        """A `BMenuBar` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BMenuBar_as_BHandler", Int](other^._adopt()),
+        )
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BHandler_delete", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BHandler(self) -> _NPtr:
+        return self._ptr
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BHandler was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBHandler_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BHandler",
+        )
+
+
+trait HandlerHooks:
+    """A Mojo type that stands behind a `BHandler`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BHandler` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait HandlerMessageReceived(HandlerHooks):
+    """`void BHandler::MessageReceived(BMessage* message)`: a hook of BHandler."""
+
+    def MessageReceived(
+        mut self,
+        handler: BHandlerRef[_],
+        message: BMessageRef[_],
+    ):
+        ...
+
+
+struct _BHandlerHooks(ImplicitlyCopyable, RegisterPassable):
+    """`mojobe_BHandler_hooks`, laid out as C's."""
+
+    var type: UInt64
+    var destroy: _FnPtr
+    var MessageReceived: _FnPtr
+
+    def __init__(out self):
+        self.type = 0
+        self.destroy = {}
+        self.MessageReceived = {}
+
+
+def _BHandler_MessageReceived[T: HandlerMessageReceived](
+    context: _Ptr,
+    handler: Int,
+    message: Int,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MessageReceived(
+        BHandlerRef[origin_of(call)](_ptr_from(handler)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
+    )
+    _ = call^
+
+
+def _BHandler_hooks[T: Movable & Deinitable]() -> _BHandlerHooks:
+    """`T`'s hooks for a `BHandler`: a slot for each hook it implements, NULL for the rest, decided at compile time."""
+    var hooks = _BHandlerHooks()
+    hooks.type = _type_tag[T]()
+    hooks.destroy = _fn_ptr(_destroy[T])
+    comptime if conforms_to(T, HandlerMessageReceived):
+        hooks.MessageReceived = _fn_ptr(
+            _BHandler_MessageReceived[downcast[T, HandlerMessageReceived]],
+        )
+    return hooks
+
+# ========================================================================== #
+# BLooper
+# ========================================================================== #
+
+
+trait _AsBLooper(_AsBHandler):
+    """Has a `BLooper*` for libmojobe."""
+
+    def _as_BLooper(self) -> _NPtr:
+        ...
+
+
+trait _BLooperMethods(_AsBLooper, _BHandlerMethods):
+    """`BLooper`'s methods, for its references and the values Mojo owns."""
+
+    def PostMessage(self, command: UInt32) raises:
+        """`status_t BLooper::PostMessage(uint32 command)`."""
+        var _result = external_call["mojobe_BLooper_PostMessage__uint32", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::PostMessage"),
+            command,
+        )
+        _check(_result, "BLooper::PostMessage")
+
+    def PostMessage(self, message: Some[_AsBMessage]) raises:
+        """`status_t BLooper::PostMessage(BMessage* message)`."""
+        var _result = external_call["mojobe_BLooper_PostMessage__BMessageP", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::PostMessage"),
+            _addr(message._as_BMessage()),
+        )
+        _check(_result, "BLooper::PostMessage")
+
+    def PostMessage(
+        self,
+        command: UInt32,
+        handler: Some[_AsBHandler],
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`status_t BLooper::PostMessage(uint32 command, BHandler* handler, BHandler* replyTo)`."""
+        var _result = external_call["mojobe_BLooper_PostMessage__uint32_BHandlerP_BHandlerP", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::PostMessage"),
+            command,
+            _addr(handler._as_BHandler()),
+            _addr(replyTo._as_BHandler()),
+        )
+        _check(_result, "BLooper::PostMessage")
+
+    def PostMessage(
+        self,
+        message: Some[_AsBMessage],
+        handler: Some[_AsBHandler],
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`status_t BLooper::PostMessage(BMessage* message, BHandler* handler, BHandler* replyTo)`."""
+        var _result = external_call["mojobe_BLooper_PostMessage__BMessageP_BHandlerP_BHandlerP", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::PostMessage"),
+            _addr(message._as_BMessage()),
+            _addr(handler._as_BHandler()),
+            _addr(replyTo._as_BHandler()),
+        )
+        _check(_result, "BLooper::PostMessage")
+
+    def DispatchMessage(
+        self,
+        message: Some[_AsBMessage],
+        handler: Some[_AsBHandler],
+    ):
+        """`void BLooper::DispatchMessage(BMessage* message, BHandler* handler)`."""
+        external_call["mojobe_BLooper_DispatchMessage", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::DispatchMessage"),
+            _addr(message._as_BMessage()),
+            _addr(handler._as_BHandler()),
+        )
+
+    def CurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
+        """`BMessage* BLooper::CurrentMessage() const`."""
+        var _result = external_call["mojobe_BLooper_CurrentMessage", Int](
+            _nonnull(self._as_BLooper(), "BLooper::CurrentMessage"),
+        )
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
+
+    def DetachCurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
+        """`BMessage* BLooper::DetachCurrentMessage()`."""
+        var _result = external_call["mojobe_BLooper_DetachCurrentMessage", Int](
+            _nonnull(self._as_BLooper(), "BLooper::DetachCurrentMessage"),
+        )
+        return BMessageRef[origin_of(self)](_ptr_from(_result))
+
+    def DispatchExternalMessage(
+        self,
+        message: Some[_AsBMessage],
+        handler: Some[_AsBHandler],
+        _detached: Bool,
+    ):
+        """`void BLooper::DispatchExternalMessage(BMessage* message, BHandler* handler, bool& _detached)`."""
+        external_call["mojobe_BLooper_DispatchExternalMessage", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::DispatchExternalMessage"),
+            _addr(message._as_BMessage()),
+            _addr(handler._as_BHandler()),
+            _detached,
+        )
+
+    def IsMessageWaiting(self) -> Bool:
+        """`bool BLooper::IsMessageWaiting() const`."""
+        var _result = external_call["mojobe_BLooper_IsMessageWaiting", Bool](
+            _nonnull(self._as_BLooper(), "BLooper::IsMessageWaiting"),
+        )
+        return _result
+
+    def AddHandler(self, handler: Some[_AsBHandler]):
+        """`void BLooper::AddHandler(BHandler* handler)`."""
+        external_call["mojobe_BLooper_AddHandler", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::AddHandler"),
+            _addr(handler._as_BHandler()),
+        )
+
+    def RemoveHandler(self, handler: Some[_AsBHandler]) -> Bool:
+        """`bool BLooper::RemoveHandler(BHandler* handler)`."""
+        var _result = external_call["mojobe_BLooper_RemoveHandler", Bool](
+            _nonnull(self._as_BLooper(), "BLooper::RemoveHandler"),
+            _addr(handler._as_BHandler()),
+        )
+        return _result
+
+    def CountHandlers(self) -> Int32:
+        """`int32 BLooper::CountHandlers() const`."""
+        var _result = external_call["mojobe_BLooper_CountHandlers", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::CountHandlers"),
+        )
+        return _result
+
+    def HandlerAt(ref self, index: Int32) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BLooper::HandlerAt(int32 index) const`."""
+        var _result = external_call["mojobe_BLooper_HandlerAt", Int](
+            _nonnull(self._as_BLooper(), "BLooper::HandlerAt"),
+            index,
+        )
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def IndexOf(self, handler: Some[_AsBHandler]) -> Int32:
+        """`int32 BLooper::IndexOf(BHandler* handler) const`."""
+        var _result = external_call["mojobe_BLooper_IndexOf", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::IndexOf"),
+            _addr(handler._as_BHandler()),
+        )
+        return _result
+
+    def PreferredHandler(ref self) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BLooper::PreferredHandler() const`."""
+        var _result = external_call["mojobe_BLooper_PreferredHandler", Int](
+            _nonnull(self._as_BLooper(), "BLooper::PreferredHandler"),
+        )
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def SetPreferredHandler(self, handler: Some[_AsBHandler]):
+        """`void BLooper::SetPreferredHandler(BHandler* handler)`."""
+        external_call["mojobe_BLooper_SetPreferredHandler", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::SetPreferredHandler"),
+            _addr(handler._as_BHandler()),
+        )
+
+    def Loop(self):
+        """`void BLooper::Loop()`."""
+        external_call["mojobe_BLooper_Loop", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::Loop"),
+        )
+
+    def QuitRequested(self) -> Bool:
+        """`bool BLooper::QuitRequested()`."""
+        var _result = external_call["mojobe_BLooper_QuitRequested", Bool](
+            _nonnull(self._as_BLooper(), "BLooper::QuitRequested"),
+        )
+        return _result
+
+    def Lock(self) -> Bool:
+        """`bool BLooper::Lock()`."""
+        var _result = external_call["mojobe_BLooper_Lock", Bool](
+            _nonnull(self._as_BLooper(), "BLooper::Lock"),
+        )
+        return _result
+
+    def Unlock(self):
+        """`void BLooper::Unlock()`."""
+        external_call["mojobe_BLooper_Unlock", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::Unlock"),
+        )
+
+    def IsLocked(self) -> Bool:
+        """`bool BLooper::IsLocked() const`."""
+        var _result = external_call["mojobe_BLooper_IsLocked", Bool](
+            _nonnull(self._as_BLooper(), "BLooper::IsLocked"),
+        )
+        return _result
+
+    def LockWithTimeout(self, timeout: Int64) raises:
+        """`status_t BLooper::LockWithTimeout(bigtime_t timeout)`."""
+        var _result = external_call["mojobe_BLooper_LockWithTimeout", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::LockWithTimeout"),
+            timeout,
+        )
+        _check(_result, "BLooper::LockWithTimeout")
+
+    def Thread(self) -> Int32:
+        """`thread_id BLooper::Thread() const`."""
+        var _result = external_call["mojobe_BLooper_Thread", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::Thread"),
+        )
+        return _result
+
+    def Team(self) -> Int32:
+        """`team_id BLooper::Team() const`."""
+        var _result = external_call["mojobe_BLooper_Team", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::Team"),
+        )
+        return _result
+
+    def LockingThread(self) -> Int32:
+        """`thread_id BLooper::LockingThread() const`."""
+        var _result = external_call["mojobe_BLooper_LockingThread", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::LockingThread"),
+        )
+        return _result
+
+    def CountLocks(self) -> Int32:
+        """`int32 BLooper::CountLocks() const`."""
+        var _result = external_call["mojobe_BLooper_CountLocks", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::CountLocks"),
+        )
+        return _result
+
+    def CountLockRequests(self) -> Int32:
+        """`int32 BLooper::CountLockRequests() const`."""
+        var _result = external_call["mojobe_BLooper_CountLockRequests", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::CountLockRequests"),
+        )
+        return _result
+
+    def Sem(self) -> Int32:
+        """`sem_id BLooper::Sem() const`."""
+        var _result = external_call["mojobe_BLooper_Sem", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::Sem"),
+        )
+        return _result
+
+
+struct BLooperRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BLooperMethods,
+):
+    """A `BLooper` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BLooperRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    @implicit
+    def __init__(out self, other: BApplicationRef[Self.origin]):
+        """A `BApplication` is a `BLooper`."""
+        self = BLooperRef[Self.origin](other._as_BLooper())
+
+    @implicit
+    def __init__(out self, other: BWindowRef[Self.origin]):
+        """A `BWindow` is a `BLooper`."""
+        self = BLooperRef[Self.origin](other._as_BLooper())
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BLooperRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BLooperRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BLooper(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BLooper_as_BHandler", Int](_addr(self._ptr)),
+        )
+
+    def Run(self) -> Int32:
+        """`thread_id BLooper::Run()`."""
+        var _result = external_call["mojobe_BLooper_Run", Int32](
+            _nonnull(self._as_BLooper(), "BLooper::Run"),
+        )
+        return _result
+
+    def Quit(self):
+        """`void BLooper::Quit()`."""
+        external_call["mojobe_BLooper_Quit", NoneType](
+            _nonnull(self._as_BLooper(), "BLooper::Quit"),
+        )
+
+    def state[T: Movable & Deinitable](
+        self,
+    ) raises -> ref[Self.origin.unsafe_mut_cast[True]()] T:
+        """The Mojo value the BLooper was made from, borrowed as this
+        reference is (the C++ object owns it; nothing else in Mojo
+        does).
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, Self.origin.unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBLooper_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BLooper",
+        )
+
+    def base_MessageReceived(self, message: BMessageRef[_]):
+        """`BLooper::MessageReceived`, the class's own."""
+        external_call["mojobe_BLooper_base_MessageReceived", NoneType](
+            _nonnull(self._ptr, "BLooper::MessageReceived"),
+            _addr(message._ptr),
+        )
+
+    def base_QuitRequested(self) -> Bool:
+        """`BLooper::QuitRequested`, the class's own."""
+        return external_call["mojobe_BLooper_base_QuitRequested", Bool](
+            _nonnull(self._ptr, "BLooper::QuitRequested"),
+        )
+
+
+struct BLooper(Movable, _BLooperMethods):
+    """A `BLooper` Mojo made. It owns itself once handed over (Run, Quit); until then, Mojo deletes it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        var name: Optional[String] = None,
+        priority: Int32 = B_NORMAL_PRIORITY,
+        portCapacity: Int32 = B_LOOPER_PORT_DEFAULT_CAPACITY,
+    ) raises:
+        """`BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)`."""
+        var name_address = 0
+        if name:
+            name_address = Int(name.value().as_c_string_span().ptr())
+        var address = external_call["mojobe_BLooper_new", Int](
+            name_address,
+            priority,
+            portCapacity,
+        )
+        _ = name^
+        if address == 0:
+            raise Error("BLooper could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__[T: LooperHooks & Movable & Deinitable](
+        out self,
+        var state: T,
+        var name: Optional[String] = None,
+        priority: Int32 = B_NORMAL_PRIORITY,
+        portCapacity: Int32 = B_LOOPER_PORT_DEFAULT_CAPACITY,
+    ) raises:
+        """`BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)`, its hooks those of `state`."""
+        var hooks = _BLooper_hooks[T]()
+        var context = _to_heap(state^)
+        var name_address = 0
+        if name:
+            name_address = Int(name.value().as_c_string_span().ptr())
+        var address = external_call["mojobe_MojoBLooper_new", Int](
+            name_address,
+            priority,
+            portCapacity,
+            Pointer(to=hooks),
+            context,
+        )
+        _ = name^
+        if address == 0:
+            _destroy[T](context)
+            raise Error("BLooper could not be made")
+        self._ptr = _ptr_from(address)
+
+    @implicit
+    def __init__(out self, var other: BWindow):
+        """A `BWindow` is a `BLooper`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BWindow_as_BLooper", Int](other^._adopt()),
+        )
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BLooper_destroy", NoneType](_addr(self._ptr))
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BLooper(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BLooper_as_BHandler", Int](_addr(self._ptr)),
+        )
+
+    def Run(deinit self) -> Int32:
+        """`thread_id BLooper::Run()`."""
+        var _result = external_call["mojobe_BLooper_Run", Int32](
+            _nonnull(self._ptr, "BLooper::Run"),
+        )
+        return _result
+
+    def Quit(deinit self):
+        """`void BLooper::Quit()`."""
+        external_call["mojobe_BLooper_Quit", NoneType](
+            _nonnull(self._ptr, "BLooper::Quit"),
+        )
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BLooper was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBLooper_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BLooper",
+        )
+
+
+trait LooperHooks:
+    """A Mojo type that stands behind a `BLooper`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BLooper` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait LooperMessageReceived(LooperHooks):
+    """`void BLooper::MessageReceived(BMessage* message)`: a hook of BLooper."""
+
+    def MessageReceived(
+        mut self,
+        looper: BLooperRef[_],
+        message: BMessageRef[_],
+    ):
+        ...
+
+
+trait LooperQuitRequested(LooperHooks):
+    """`bool BLooper::QuitRequested()`: a hook of BLooper."""
+
+    def QuitRequested(mut self, looper: BLooperRef[_]) -> Bool:
+        ...
+
+
+struct _BLooperHooks(ImplicitlyCopyable, RegisterPassable):
+    """`mojobe_BLooper_hooks`, laid out as C's."""
+
+    var type: UInt64
+    var destroy: _FnPtr
+    var MessageReceived: _FnPtr
+    var QuitRequested: _FnPtr
+
+    def __init__(out self):
+        self.type = 0
+        self.destroy = {}
+        self.MessageReceived = {}
+        self.QuitRequested = {}
+
+
+def _BLooper_MessageReceived[T: LooperMessageReceived](
+    context: _Ptr,
+    looper: Int,
+    message: Int,
+) abi("C"):
+    var call = _HookCall()
+    context.unsafe_bitcast[T]()[].MessageReceived(
+        BLooperRef[origin_of(call)](_ptr_from(looper)),
+        BMessageRef[origin_of(call)](_ptr_from(message)),
+    )
+    _ = call^
+
+
+def _BLooper_QuitRequested[T: LooperQuitRequested](
+    context: _Ptr,
+    looper: Int,
+) abi("C") -> Bool:
+    var call = _HookCall()
+    var result = context.unsafe_bitcast[T]()[].QuitRequested(
+        BLooperRef[origin_of(call)](_ptr_from(looper)),
+    )
+    _ = call^
+    return result
+
+
+def _BLooper_hooks[T: Movable & Deinitable]() -> _BLooperHooks:
+    """`T`'s hooks for a `BLooper`: a slot for each hook it implements, NULL for the rest, decided at compile time."""
+    var hooks = _BLooperHooks()
+    hooks.type = _type_tag[T]()
+    hooks.destroy = _fn_ptr(_destroy[T])
+    comptime if conforms_to(T, LooperMessageReceived):
+        hooks.MessageReceived = _fn_ptr(
+            _BLooper_MessageReceived[downcast[T, LooperMessageReceived]],
+        )
+    comptime if conforms_to(T, LooperQuitRequested):
+        hooks.QuitRequested = _fn_ptr(
+            _BLooper_QuitRequested[downcast[T, LooperQuitRequested]],
+        )
+    return hooks
+
+# ========================================================================== #
 # BApplication
 # ========================================================================== #
 
 
-trait _AsBApplication:
+trait _AsBApplication(_AsBLooper):
     """Has a `BApplication*` for libmojobe."""
 
     def _as_BApplication(self) -> _NPtr:
         ...
 
 
-trait _BApplicationMethods(_AsBApplication):
+trait _BApplicationMethods(_AsBApplication, _BLooperMethods):
     """`BApplication`'s methods, for its references and the values Mojo owns."""
-
-    def Archive(self, data: Some[_AsBMessage], deep: Bool = True) raises:
-        """`status_t BApplication::Archive(BMessage* data, bool deep) const`."""
-        var _result = external_call["mojobe_BApplication_Archive", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::Archive"),
-            _addr(data._as_BMessage()),
-            deep,
-        )
-        _check(_result, "BApplication::Archive")
 
     def InitCheck(self) raises:
         """`status_t BApplication::InitCheck() const`."""
@@ -126,13 +1071,6 @@ trait _BApplicationMethods(_AsBApplication):
             _nonnull(self._as_BApplication(), "BApplication::Quit"),
         )
 
-    def QuitRequested(self) -> Bool:
-        """`bool BApplication::QuitRequested()`."""
-        var _result = external_call["mojobe_BApplication_QuitRequested", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::QuitRequested"),
-        )
-        return _result
-
     def Pulse(self):
         """`void BApplication::Pulse()`."""
         external_call["mojobe_BApplication_Pulse", NoneType](
@@ -143,13 +1081,6 @@ trait _BApplicationMethods(_AsBApplication):
         """`void BApplication::ReadyToRun()`."""
         external_call["mojobe_BApplication_ReadyToRun", NoneType](
             _nonnull(self._as_BApplication(), "BApplication::ReadyToRun"),
-        )
-
-    def MessageReceived(self, message: Some[_AsBMessage]):
-        """`void BApplication::MessageReceived(BMessage* message)`."""
-        external_call["mojobe_BApplication_MessageReceived", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::MessageReceived"),
-            _addr(message._as_BMessage()),
         )
 
     def AppActivated(self, active: Bool):
@@ -219,6 +1150,14 @@ trait _BApplicationMethods(_AsBApplication):
         )
         return _result
 
+    def LooperAt(ref self, index: Int32) -> BLooperRef[origin_of(self)]:
+        """`BLooper* BApplication::LooperAt(int32 index) const`."""
+        var _result = external_call["mojobe_BApplication_LooperAt", Int](
+            _nonnull(self._as_BApplication(), "BApplication::LooperAt"),
+            index,
+        )
+        return BLooperRef[origin_of(self)](_ptr_from(_result))
+
     def IsLaunching(self) -> Bool:
         """`bool BApplication::IsLaunching() const`."""
         var _result = external_call["mojobe_BApplication_IsLaunching", Bool](
@@ -240,216 +1179,21 @@ trait _BApplicationMethods(_AsBApplication):
             rate,
         )
 
-    def GetSupportedSuites(self, data: Some[_AsBMessage]) raises:
-        """`status_t BApplication::GetSupportedSuites(BMessage* data)`."""
-        var _result = external_call["mojobe_BApplication_GetSupportedSuites", Int32](
-            _nonnull(
-                self._as_BApplication(),
-                "BApplication::GetSupportedSuites",
-            ),
-            _addr(data._as_BMessage()),
+    def RegisterLooper(self, looper: Some[_AsBLooper]) raises:
+        """`status_t BApplication::RegisterLooper(BLooper* looper)`."""
+        var _result = external_call["mojobe_BApplication_RegisterLooper", Int32](
+            _nonnull(self._as_BApplication(), "BApplication::RegisterLooper"),
+            _addr(looper._as_BLooper()),
         )
-        _check(_result, "BApplication::GetSupportedSuites")
+        _check(_result, "BApplication::RegisterLooper")
 
-    def PostMessage(self, command: UInt32) raises:
-        """`status_t BLooper::PostMessage(uint32 command)`."""
-        var _result = external_call["mojobe_BApplication_PostMessage__uint32", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::PostMessage"),
-            command,
+    def UnregisterLooper(self, looper: Some[_AsBLooper]) raises:
+        """`status_t BApplication::UnregisterLooper(BLooper* looper)`."""
+        var _result = external_call["mojobe_BApplication_UnregisterLooper", Int32](
+            _nonnull(self._as_BApplication(), "BApplication::UnregisterLooper"),
+            _addr(looper._as_BLooper()),
         )
-        _check(_result, "BLooper::PostMessage")
-
-    def PostMessage(self, message: Some[_AsBMessage]) raises:
-        """`status_t BLooper::PostMessage(BMessage* message)`."""
-        var _result = external_call["mojobe_BApplication_PostMessage__BMessageP", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::PostMessage"),
-            _addr(message._as_BMessage()),
-        )
-        _check(_result, "BLooper::PostMessage")
-
-    def CurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
-        """`BMessage* BLooper::CurrentMessage() const`."""
-        var _result = external_call["mojobe_BApplication_CurrentMessage", Int](
-            _nonnull(self._as_BApplication(), "BApplication::CurrentMessage"),
-        )
-        return BMessageRef[origin_of(self)](_ptr_from(_result))
-
-    def DetachCurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
-        """`BMessage* BLooper::DetachCurrentMessage()`."""
-        var _result = external_call["mojobe_BApplication_DetachCurrentMessage", Int](
-            _nonnull(
-                self._as_BApplication(),
-                "BApplication::DetachCurrentMessage",
-            ),
-        )
-        return BMessageRef[origin_of(self)](_ptr_from(_result))
-
-    def IsMessageWaiting(self) -> Bool:
-        """`bool BLooper::IsMessageWaiting() const`."""
-        var _result = external_call["mojobe_BApplication_IsMessageWaiting", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::IsMessageWaiting"),
-        )
-        return _result
-
-    def CountHandlers(self) -> Int32:
-        """`int32 BLooper::CountHandlers() const`."""
-        var _result = external_call["mojobe_BApplication_CountHandlers", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::CountHandlers"),
-        )
-        return _result
-
-    def Loop(self):
-        """`void BLooper::Loop()`."""
-        external_call["mojobe_BApplication_Loop", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::Loop"),
-        )
-
-    def Lock(self) -> Bool:
-        """`bool BLooper::Lock()`."""
-        var _result = external_call["mojobe_BApplication_Lock", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::Lock"),
-        )
-        return _result
-
-    def Unlock(self):
-        """`void BLooper::Unlock()`."""
-        external_call["mojobe_BApplication_Unlock", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::Unlock"),
-        )
-
-    def IsLocked(self) -> Bool:
-        """`bool BLooper::IsLocked() const`."""
-        var _result = external_call["mojobe_BApplication_IsLocked", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::IsLocked"),
-        )
-        return _result
-
-    def LockWithTimeout(self, timeout: Int64) raises:
-        """`status_t BLooper::LockWithTimeout(bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BApplication_LockWithTimeout", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::LockWithTimeout"),
-            timeout,
-        )
-        _check(_result, "BLooper::LockWithTimeout")
-
-    def Thread(self) -> Int32:
-        """`thread_id BLooper::Thread() const`."""
-        var _result = external_call["mojobe_BApplication_Thread", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::Thread"),
-        )
-        return _result
-
-    def Team(self) -> Int32:
-        """`team_id BLooper::Team() const`."""
-        var _result = external_call["mojobe_BApplication_Team", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::Team"),
-        )
-        return _result
-
-    def LockingThread(self) -> Int32:
-        """`thread_id BLooper::LockingThread() const`."""
-        var _result = external_call["mojobe_BApplication_LockingThread", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::LockingThread"),
-        )
-        return _result
-
-    def CountLocks(self) -> Int32:
-        """`int32 BLooper::CountLocks() const`."""
-        var _result = external_call["mojobe_BApplication_CountLocks", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::CountLocks"),
-        )
-        return _result
-
-    def CountLockRequests(self) -> Int32:
-        """`int32 BLooper::CountLockRequests() const`."""
-        var _result = external_call["mojobe_BApplication_CountLockRequests", Int32](
-            _nonnull(
-                self._as_BApplication(),
-                "BApplication::CountLockRequests",
-            ),
-        )
-        return _result
-
-    def Sem(self) -> Int32:
-        """`sem_id BLooper::Sem() const`."""
-        var _result = external_call["mojobe_BApplication_Sem", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::Sem"),
-        )
-        return _result
-
-    def SetName(self, var name: String):
-        """`void BHandler::SetName(const char* name)`."""
-        external_call["mojobe_BApplication_SetName", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::SetName"),
-            name.as_c_string_span(),
-        )
-        _ = name^
-
-    def Name(self) -> String:
-        """`const char* BHandler::Name() const`."""
-        var _result = external_call["mojobe_BApplication_Name", Int](
-            _nonnull(self._as_BApplication(), "BApplication::Name"),
-        )
-        return _string_from(_result)
-
-    def LockLooper(self) -> Bool:
-        """`bool BHandler::LockLooper()`."""
-        var _result = external_call["mojobe_BApplication_LockLooper", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::LockLooper"),
-        )
-        return _result
-
-    def LockLooperWithTimeout(self, timeout: Int64) raises:
-        """`status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BApplication_LockLooperWithTimeout", Int32](
-            _nonnull(
-                self._as_BApplication(),
-                "BApplication::LockLooperWithTimeout",
-            ),
-            timeout,
-        )
-        _check(_result, "BHandler::LockLooperWithTimeout")
-
-    def UnlockLooper(self):
-        """`void BHandler::UnlockLooper()`."""
-        external_call["mojobe_BApplication_UnlockLooper", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::UnlockLooper"),
-        )
-
-    def SendNotices(
-        self,
-        what: UInt32,
-        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
-    ):
-        """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
-        external_call["mojobe_BApplication_SendNotices", NoneType](
-            _nonnull(self._as_BApplication(), "BApplication::SendNotices"),
-            what,
-            _addr(notice._as_BMessage()),
-        )
-
-    def IsWatched(self) -> Bool:
-        """`bool BHandler::IsWatched() const`."""
-        var _result = external_call["mojobe_BApplication_IsWatched", Bool](
-            _nonnull(self._as_BApplication(), "BApplication::IsWatched"),
-        )
-        return _result
-
-    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
-        var _result = external_call["mojobe_BApplication_AllUnarchived", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::AllUnarchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BArchivable::AllUnarchived")
-
-    def AllArchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
-        var _result = external_call["mojobe_BApplication_AllArchived", Int32](
-            _nonnull(self._as_BApplication(), "BApplication::AllArchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BArchivable::AllArchived")
+        _check(_result, "BApplication::UnregisterLooper")
 
 
 struct BApplicationRef[origin: ImmOrigin](
@@ -483,6 +1227,20 @@ struct BApplicationRef[origin: ImmOrigin](
 
     def _as_BApplication(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BApplication_as_BLooper", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BApplication_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
 
     def state[T: Movable & Deinitable](
         self,
@@ -553,7 +1311,7 @@ struct BApplication(Movable, _BApplicationMethods):
             raise Error("BApplication could not be made")
         self._ptr = _ptr_from(address)
 
-    def __init__[T: Movable & Deinitable](
+    def __init__[T: ApplicationHooks & Movable & Deinitable](
         out self,
         var signature: String,
         var state: T,
@@ -585,16 +1343,56 @@ struct BApplication(Movable, _BApplicationMethods):
 
     def _as_BApplication(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BApplication_as_BLooper", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BApplication_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BApplication was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBApplication_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BApplication",
+        )
 
 
-trait ApplicationReadyToRun:
+trait ApplicationHooks:
+    """A Mojo type that stands behind a `BApplication`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BApplication` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait ApplicationReadyToRun(ApplicationHooks):
     """`void BApplication::ReadyToRun()`: a hook of BApplication."""
 
     def ReadyToRun(mut self, application: BApplicationRef[_]):
         ...
 
 
-trait ApplicationMessageReceived:
+trait ApplicationMessageReceived(ApplicationHooks):
     """`void BApplication::MessageReceived(BMessage* message)`: a hook of BApplication."""
 
     def MessageReceived(
@@ -605,21 +1403,21 @@ trait ApplicationMessageReceived:
         ...
 
 
-trait ApplicationQuitRequested:
+trait ApplicationQuitRequested(ApplicationHooks):
     """`bool BApplication::QuitRequested()`: a hook of BApplication."""
 
     def QuitRequested(mut self, application: BApplicationRef[_]) -> Bool:
         ...
 
 
-trait ApplicationAboutRequested:
+trait ApplicationAboutRequested(ApplicationHooks):
     """`void BApplication::AboutRequested()`: a hook of BApplication."""
 
     def AboutRequested(mut self, application: BApplicationRef[_]):
         ...
 
 
-trait ApplicationPulse:
+trait ApplicationPulse(ApplicationHooks):
     """`void BApplication::Pulse()`: a hook of BApplication."""
 
     def Pulse(mut self, application: BApplicationRef[_]):
@@ -737,24 +1535,15 @@ def _BApplication_hooks[T: Movable & Deinitable]() -> _BApplicationHooks:
 # ========================================================================== #
 
 
-trait _AsBWindow:
+trait _AsBWindow(_AsBLooper):
     """Has a `BWindow*` for libmojobe."""
 
     def _as_BWindow(self) -> _NPtr:
         ...
 
 
-trait _BWindowMethods(_AsBWindow):
+trait _BWindowMethods(_AsBWindow, _BLooperMethods):
     """`BWindow`'s methods, for its references and the values Mojo owns."""
-
-    def Archive(self, archive: Some[_AsBMessage], deep: Bool = True) raises:
-        """`status_t BWindow::Archive(BMessage* archive, bool deep) const`."""
-        var _result = external_call["mojobe_BWindow_Archive", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::Archive"),
-            _addr(archive._as_BMessage()),
-            deep,
-        )
-        _check(_result, "BWindow::Archive")
 
     def Close(self):
         """`void BWindow::Close()`."""
@@ -796,13 +1585,6 @@ trait _BWindowMethods(_AsBWindow):
             index,
         )
         return BViewRef[origin_of(self)](_ptr_from(_result))
-
-    def MessageReceived(self, message: Some[_AsBMessage]):
-        """`void BWindow::MessageReceived(BMessage* message)`."""
-        external_call["mojobe_BWindow_MessageReceived", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::MessageReceived"),
-            _addr(message._as_BMessage()),
-        )
 
     def FrameMoved(self, newPosition: BPoint):
         """`void BWindow::FrameMoved(BPoint newPosition)`."""
@@ -886,11 +1668,27 @@ trait _BWindowMethods(_AsBWindow):
         message: Some[_AsBMessage],
     ):
         """`void BWindow::AddShortcut(uint32 key, uint32 modifiers, BMessage* message)`."""
-        external_call["mojobe_BWindow_AddShortcut", NoneType](
+        external_call["mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP", NoneType](
             _nonnull(self._as_BWindow(), "BWindow::AddShortcut"),
             key,
             modifiers,
             _addr(message._as_BMessage()),
+        )
+
+    def AddShortcut(
+        self,
+        key: UInt32,
+        modifiers: UInt32,
+        message: Some[_AsBMessage],
+        target: Some[_AsBHandler],
+    ):
+        """`void BWindow::AddShortcut(uint32 key, uint32 modifiers, BMessage* message, BHandler* target)`."""
+        external_call["mojobe_BWindow_AddShortcut__uint32_uint32_BMessageP_BHandlerP", NoneType](
+            _nonnull(self._as_BWindow(), "BWindow::AddShortcut"),
+            key,
+            modifiers,
+            _addr(message._as_BMessage()),
+            _addr(target._as_BHandler()),
         )
 
     def HasShortcut(self, key: UInt32, modifiers: UInt32) -> Bool:
@@ -1279,14 +2077,6 @@ trait _BWindowMethods(_AsBWindow):
         )
         return BViewRef[origin_of(self)](_ptr_from(_result))
 
-    def GetSupportedSuites(self, data: Some[_AsBMessage]) raises:
-        """`status_t BWindow::GetSupportedSuites(BMessage* data)`."""
-        var _result = external_call["mojobe_BWindow_GetSupportedSuites", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::GetSupportedSuites"),
-            _addr(data._as_BMessage()),
-        )
-        _check(_result, "BWindow::GetSupportedSuites")
-
     def AddToSubset(self, window: Some[_AsBWindow]) raises:
         """`status_t BWindow::AddToSubset(BWindow* window)`."""
         var _result = external_call["mojobe_BWindow_AddToSubset", Int32](
@@ -1442,13 +2232,6 @@ trait _BWindowMethods(_AsBWindow):
             heightOffset,
         )
 
-    def QuitRequested(self) -> Bool:
-        """`bool BWindow::QuitRequested()`."""
-        var _result = external_call["mojobe_BWindow_QuitRequested", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::QuitRequested"),
-        )
-        return _result
-
     def InvalidateLayout(self, descendants: Bool = False):
         """`void BWindow::InvalidateLayout(bool descendants)`."""
         external_call["mojobe_BWindow_InvalidateLayout", NoneType](
@@ -1469,197 +2252,6 @@ trait _BWindowMethods(_AsBWindow):
             _nonnull(self._as_BWindow(), "BWindow::IsOffscreenWindow"),
         )
         return _result
-
-    def PostMessage(self, command: UInt32) raises:
-        """`status_t BLooper::PostMessage(uint32 command)`."""
-        var _result = external_call["mojobe_BWindow_PostMessage__uint32", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::PostMessage"),
-            command,
-        )
-        _check(_result, "BLooper::PostMessage")
-
-    def PostMessage(self, message: Some[_AsBMessage]) raises:
-        """`status_t BLooper::PostMessage(BMessage* message)`."""
-        var _result = external_call["mojobe_BWindow_PostMessage__BMessageP", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::PostMessage"),
-            _addr(message._as_BMessage()),
-        )
-        _check(_result, "BLooper::PostMessage")
-
-    def CurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
-        """`BMessage* BLooper::CurrentMessage() const`."""
-        var _result = external_call["mojobe_BWindow_CurrentMessage", Int](
-            _nonnull(self._as_BWindow(), "BWindow::CurrentMessage"),
-        )
-        return BMessageRef[origin_of(self)](_ptr_from(_result))
-
-    def DetachCurrentMessage(ref self) -> BMessageRef[origin_of(self)]:
-        """`BMessage* BLooper::DetachCurrentMessage()`."""
-        var _result = external_call["mojobe_BWindow_DetachCurrentMessage", Int](
-            _nonnull(self._as_BWindow(), "BWindow::DetachCurrentMessage"),
-        )
-        return BMessageRef[origin_of(self)](_ptr_from(_result))
-
-    def IsMessageWaiting(self) -> Bool:
-        """`bool BLooper::IsMessageWaiting() const`."""
-        var _result = external_call["mojobe_BWindow_IsMessageWaiting", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::IsMessageWaiting"),
-        )
-        return _result
-
-    def CountHandlers(self) -> Int32:
-        """`int32 BLooper::CountHandlers() const`."""
-        var _result = external_call["mojobe_BWindow_CountHandlers", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::CountHandlers"),
-        )
-        return _result
-
-    def Loop(self):
-        """`void BLooper::Loop()`."""
-        external_call["mojobe_BWindow_Loop", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::Loop"),
-        )
-
-    def Lock(self) -> Bool:
-        """`bool BLooper::Lock()`."""
-        var _result = external_call["mojobe_BWindow_Lock", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::Lock"),
-        )
-        return _result
-
-    def Unlock(self):
-        """`void BLooper::Unlock()`."""
-        external_call["mojobe_BWindow_Unlock", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::Unlock"),
-        )
-
-    def IsLocked(self) -> Bool:
-        """`bool BLooper::IsLocked() const`."""
-        var _result = external_call["mojobe_BWindow_IsLocked", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::IsLocked"),
-        )
-        return _result
-
-    def LockWithTimeout(self, timeout: Int64) raises:
-        """`status_t BLooper::LockWithTimeout(bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BWindow_LockWithTimeout", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::LockWithTimeout"),
-            timeout,
-        )
-        _check(_result, "BLooper::LockWithTimeout")
-
-    def Thread(self) -> Int32:
-        """`thread_id BLooper::Thread() const`."""
-        var _result = external_call["mojobe_BWindow_Thread", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::Thread"),
-        )
-        return _result
-
-    def Team(self) -> Int32:
-        """`team_id BLooper::Team() const`."""
-        var _result = external_call["mojobe_BWindow_Team", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::Team"),
-        )
-        return _result
-
-    def LockingThread(self) -> Int32:
-        """`thread_id BLooper::LockingThread() const`."""
-        var _result = external_call["mojobe_BWindow_LockingThread", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::LockingThread"),
-        )
-        return _result
-
-    def CountLocks(self) -> Int32:
-        """`int32 BLooper::CountLocks() const`."""
-        var _result = external_call["mojobe_BWindow_CountLocks", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::CountLocks"),
-        )
-        return _result
-
-    def CountLockRequests(self) -> Int32:
-        """`int32 BLooper::CountLockRequests() const`."""
-        var _result = external_call["mojobe_BWindow_CountLockRequests", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::CountLockRequests"),
-        )
-        return _result
-
-    def Sem(self) -> Int32:
-        """`sem_id BLooper::Sem() const`."""
-        var _result = external_call["mojobe_BWindow_Sem", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::Sem"),
-        )
-        return _result
-
-    def SetName(self, var name: String):
-        """`void BHandler::SetName(const char* name)`."""
-        external_call["mojobe_BWindow_SetName", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::SetName"),
-            name.as_c_string_span(),
-        )
-        _ = name^
-
-    def Name(self) -> String:
-        """`const char* BHandler::Name() const`."""
-        var _result = external_call["mojobe_BWindow_Name", Int](
-            _nonnull(self._as_BWindow(), "BWindow::Name"),
-        )
-        return _string_from(_result)
-
-    def LockLooper(self) -> Bool:
-        """`bool BHandler::LockLooper()`."""
-        var _result = external_call["mojobe_BWindow_LockLooper", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::LockLooper"),
-        )
-        return _result
-
-    def LockLooperWithTimeout(self, timeout: Int64) raises:
-        """`status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BWindow_LockLooperWithTimeout", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::LockLooperWithTimeout"),
-            timeout,
-        )
-        _check(_result, "BHandler::LockLooperWithTimeout")
-
-    def UnlockLooper(self):
-        """`void BHandler::UnlockLooper()`."""
-        external_call["mojobe_BWindow_UnlockLooper", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::UnlockLooper"),
-        )
-
-    def SendNotices(
-        self,
-        what: UInt32,
-        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
-    ):
-        """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
-        external_call["mojobe_BWindow_SendNotices", NoneType](
-            _nonnull(self._as_BWindow(), "BWindow::SendNotices"),
-            what,
-            _addr(notice._as_BMessage()),
-        )
-
-    def IsWatched(self) -> Bool:
-        """`bool BHandler::IsWatched() const`."""
-        var _result = external_call["mojobe_BWindow_IsWatched", Bool](
-            _nonnull(self._as_BWindow(), "BWindow::IsWatched"),
-        )
-        return _result
-
-    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
-        var _result = external_call["mojobe_BWindow_AllUnarchived", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::AllUnarchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BArchivable::AllUnarchived")
-
-    def AllArchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
-        var _result = external_call["mojobe_BWindow_AllArchived", Int32](
-            _nonnull(self._as_BWindow(), "BWindow::AllArchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BArchivable::AllArchived")
 
 
 struct BWindowRef[origin: ImmOrigin](
@@ -1693,6 +2285,16 @@ struct BWindowRef[origin: ImmOrigin](
 
     def _as_BWindow(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BWindow_as_BLooper", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BWindow_as_BHandler", Int](_addr(self._ptr)),
+        )
 
     def Quit(self):
         """`void BWindow::Quit()`."""
@@ -1845,7 +2447,7 @@ struct BWindow(Movable, _BWindowMethods):
             raise Error("BWindow could not be made")
         self._ptr = _ptr_from(address)
 
-    def __init__[T: Movable & Deinitable](
+    def __init__[T: WindowHooks & Movable & Deinitable](
         out self,
         frame: BRect,
         var title: String,
@@ -1872,7 +2474,7 @@ struct BWindow(Movable, _BWindowMethods):
             raise Error("BWindow could not be made")
         self._ptr = _ptr_from(address)
 
-    def __init__[T: Movable & Deinitable](
+    def __init__[T: WindowHooks & Movable & Deinitable](
         out self,
         frame: BRect,
         var title: String,
@@ -1910,6 +2512,16 @@ struct BWindow(Movable, _BWindowMethods):
 
     def _as_BWindow(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BLooper(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BWindow_as_BLooper", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BWindow_as_BHandler", Int](_addr(self._ptr)),
+        )
 
     def Quit(deinit self):
         """`void BWindow::Quit()`."""
@@ -1923,8 +2535,34 @@ struct BWindow(Movable, _BWindowMethods):
             _nonnull(self._ptr, "BWindow::Show"),
         )
 
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BWindow was made from, borrowed from this
+        value.
 
-trait WindowMessageReceived:
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBWindow_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BWindow",
+        )
+
+
+trait WindowHooks:
+    """A Mojo type that stands behind a `BWindow`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BWindow` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait WindowMessageReceived(WindowHooks):
     """`void BWindow::MessageReceived(BMessage* message)`: a hook of BWindow."""
 
     def MessageReceived(
@@ -1935,21 +2573,21 @@ trait WindowMessageReceived:
         ...
 
 
-trait WindowQuitRequested:
+trait WindowQuitRequested(WindowHooks):
     """`bool BWindow::QuitRequested()`: a hook of BWindow."""
 
     def QuitRequested(mut self, window: BWindowRef[_]) -> Bool:
         ...
 
 
-trait WindowFrameMoved:
+trait WindowFrameMoved(WindowHooks):
     """`void BWindow::FrameMoved(BPoint newPosition)`: a hook of BWindow."""
 
     def FrameMoved(mut self, window: BWindowRef[_], newPosition: BPoint):
         ...
 
 
-trait WindowFrameResized:
+trait WindowFrameResized(WindowHooks):
     """`void BWindow::FrameResized(float newWidth, float newHeight)`: a hook of BWindow."""
 
     def FrameResized(
@@ -1961,14 +2599,14 @@ trait WindowFrameResized:
         ...
 
 
-trait WindowWindowActivated:
+trait WindowWindowActivated(WindowHooks):
     """`void BWindow::WindowActivated(bool focus)`: a hook of BWindow."""
 
     def WindowActivated(mut self, window: BWindowRef[_], focus: Bool):
         ...
 
 
-trait WindowWorkspaceActivated:
+trait WindowWorkspaceActivated(WindowHooks):
     """`void BWindow::WorkspaceActivated(int32 workspace, bool state)`: a hook of BWindow."""
 
     def WorkspaceActivated(
@@ -1980,21 +2618,21 @@ trait WindowWorkspaceActivated:
         ...
 
 
-trait WindowMenusBeginning:
+trait WindowMenusBeginning(WindowHooks):
     """`void BWindow::MenusBeginning()`: a hook of BWindow."""
 
     def MenusBeginning(mut self, window: BWindowRef[_]):
         ...
 
 
-trait WindowMenusEnded:
+trait WindowMenusEnded(WindowHooks):
     """`void BWindow::MenusEnded()`: a hook of BWindow."""
 
     def MenusEnded(mut self, window: BWindowRef[_]):
         ...
 
 
-trait WindowZoom:
+trait WindowZoom(WindowHooks):
     """`void BWindow::Zoom(BPoint origin, float width, float height)`: a hook of BWindow."""
 
     def Zoom(
@@ -2007,7 +2645,7 @@ trait WindowZoom:
         ...
 
 
-trait WindowMinimize:
+trait WindowMinimize(WindowHooks):
     """`void BWindow::Minimize(bool minimize)`: a hook of BWindow."""
 
     def Minimize(mut self, window: BWindowRef[_], minimize: Bool):
@@ -2226,40 +2864,15 @@ def _BWindow_hooks[T: Movable & Deinitable]() -> _BWindowHooks:
 # ========================================================================== #
 
 
-trait _AsBView:
+trait _AsBView(_AsBHandler):
     """Has a `BView*` for libmojobe."""
 
     def _as_BView(self) -> _NPtr:
         ...
 
 
-trait _BViewMethods(_AsBView):
+trait _BViewMethods(_AsBView, _BHandlerMethods):
     """`BView`'s methods, for its references and the values Mojo owns."""
-
-    def Archive(self, archive: Some[_AsBMessage], deep: Bool = True) raises:
-        """`status_t BView::Archive(BMessage* archive, bool deep) const`."""
-        var _result = external_call["mojobe_BView_Archive", Int32](
-            _nonnull(self._as_BView(), "BView::Archive"),
-            _addr(archive._as_BMessage()),
-            deep,
-        )
-        _check(_result, "BView::Archive")
-
-    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BView::AllUnarchived(const BMessage* archive)`."""
-        var _result = external_call["mojobe_BView_AllUnarchived", Int32](
-            _nonnull(self._as_BView(), "BView::AllUnarchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BView::AllUnarchived")
-
-    def AllArchived(self, archive: Some[_AsBMessage]) raises:
-        """`status_t BView::AllArchived(BMessage* archive) const`."""
-        var _result = external_call["mojobe_BView_AllArchived", Int32](
-            _nonnull(self._as_BView(), "BView::AllArchived"),
-            _addr(archive._as_BMessage()),
-        )
-        _check(_result, "BView::AllArchived")
 
     def AttachedToWindow(self):
         """`void BView::AttachedToWindow()`."""
@@ -2283,13 +2896,6 @@ trait _BViewMethods(_AsBView):
         """`void BView::AllDetached()`."""
         external_call["mojobe_BView_AllDetached", NoneType](
             _nonnull(self._as_BView(), "BView::AllDetached"),
-        )
-
-    def MessageReceived(self, message: Some[_AsBMessage]):
-        """`void BView::MessageReceived(BMessage* message)`."""
-        external_call["mojobe_BView_MessageReceived", NoneType](
-            _nonnull(self._as_BView(), "BView::MessageReceived"),
-            _addr(message._as_BMessage()),
         )
 
     def AddChild(
@@ -2466,12 +3072,18 @@ trait _BViewMethods(_AsBView):
         )
         return (location, buttons)
 
-    def DragMessage(self, message: Some[_AsBMessage], dragRect: BRect):
+    def DragMessage(
+        self,
+        message: Some[_AsBMessage],
+        dragRect: BRect,
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ):
         """`void BView::DragMessage(BMessage* message, BRect dragRect, BHandler* replyTo)`."""
         external_call["mojobe_BView_DragMessage", NoneType](
             _nonnull(self._as_BView(), "BView::DragMessage"),
             _addr(message._as_BMessage()),
             dragRect,
+            _addr(replyTo._as_BHandler()),
         )
 
     def FindView(ref self, var name: String) -> BViewRef[origin_of(self)]:
@@ -3612,14 +4224,6 @@ trait _BViewMethods(_AsBView):
             _nonnull(self._as_BView(), "BView::ResizeToPreferred"),
         )
 
-    def GetSupportedSuites(self, data: Some[_AsBMessage]) raises:
-        """`status_t BView::GetSupportedSuites(BMessage* data)`."""
-        var _result = external_call["mojobe_BView_GetSupportedSuites", Int32](
-            _nonnull(self._as_BView(), "BView::GetSupportedSuites"),
-            _addr(data._as_BMessage()),
-        )
-        _check(_result, "BView::GetSupportedSuites")
-
     def IsPrinting(self) -> Bool:
         """`bool BView::IsPrinting() const`."""
         var _result = external_call["mojobe_BView_IsPrinting", Bool](
@@ -3744,61 +4348,6 @@ trait _BViewMethods(_AsBView):
             _nonnull(self._as_BView(), "BView::HideToolTip"),
         )
 
-    def SetName(self, var name: String):
-        """`void BHandler::SetName(const char* name)`."""
-        external_call["mojobe_BView_SetName", NoneType](
-            _nonnull(self._as_BView(), "BView::SetName"),
-            name.as_c_string_span(),
-        )
-        _ = name^
-
-    def Name(self) -> String:
-        """`const char* BHandler::Name() const`."""
-        var _result = external_call["mojobe_BView_Name", Int](
-            _nonnull(self._as_BView(), "BView::Name"),
-        )
-        return _string_from(_result)
-
-    def LockLooper(self) -> Bool:
-        """`bool BHandler::LockLooper()`."""
-        var _result = external_call["mojobe_BView_LockLooper", Bool](
-            _nonnull(self._as_BView(), "BView::LockLooper"),
-        )
-        return _result
-
-    def LockLooperWithTimeout(self, timeout: Int64) raises:
-        """`status_t BHandler::LockLooperWithTimeout(bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BView_LockLooperWithTimeout", Int32](
-            _nonnull(self._as_BView(), "BView::LockLooperWithTimeout"),
-            timeout,
-        )
-        _check(_result, "BHandler::LockLooperWithTimeout")
-
-    def UnlockLooper(self):
-        """`void BHandler::UnlockLooper()`."""
-        external_call["mojobe_BView_UnlockLooper", NoneType](
-            _nonnull(self._as_BView(), "BView::UnlockLooper"),
-        )
-
-    def SendNotices(
-        self,
-        what: UInt32,
-        notice: BMessageRef[_] = BMessageRef[ImmUntrackedOrigin](),
-    ):
-        """`void BHandler::SendNotices(uint32 what, const BMessage* notice)`."""
-        external_call["mojobe_BView_SendNotices", NoneType](
-            _nonnull(self._as_BView(), "BView::SendNotices"),
-            what,
-            _addr(notice._as_BMessage()),
-        )
-
-    def IsWatched(self) -> Bool:
-        """`bool BHandler::IsWatched() const`."""
-        var _result = external_call["mojobe_BView_IsWatched", Bool](
-            _nonnull(self._as_BView(), "BView::IsWatched"),
-        )
-        return _result
-
 
 struct BViewRef[origin: ImmOrigin](
     Boolable,
@@ -3841,6 +4390,11 @@ struct BViewRef[origin: ImmOrigin](
 
     def _as_BView(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BView_as_BHandler", Int](_addr(self._ptr)),
+        )
 
     def state[T: Movable & Deinitable](
         self,
@@ -4013,7 +4567,7 @@ struct BView(Movable, _BViewMethods):
             raise Error("BView could not be made")
         self._ptr = _ptr_from(address)
 
-    def __init__[T: Movable & Deinitable](
+    def __init__[T: ViewHooks & Movable & Deinitable](
         out self,
         var name: String,
         flags: UInt32,
@@ -4034,7 +4588,7 @@ struct BView(Movable, _BViewMethods):
             raise Error("BView could not be made")
         self._ptr = _ptr_from(address)
 
-    def __init__[T: Movable & Deinitable](
+    def __init__[T: ViewHooks & Movable & Deinitable](
         out self,
         frame: BRect,
         var name: String,
@@ -4082,37 +4636,68 @@ struct BView(Movable, _BViewMethods):
 
     def _as_BView(self) -> _NPtr:
         return self._ptr
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BView_as_BHandler", Int](_addr(self._ptr)),
+        )
+
+    def state[T: Movable & Deinitable](
+        ref self,
+    ) raises -> ref[origin_of(self).unsafe_mut_cast[True]()] T:
+        """The Mojo value the BView was made from, borrowed from this
+        value.
+
+        Raises:
+            When it was not made from a `T`.
+        """
+        return _state_at[T, origin_of(self).unsafe_mut_cast[True]()](
+            external_call["mojobe_MojoBView_context", Int](
+                _addr(self._ptr),
+                _type_tag[T](),
+            ),
+            "BView",
+        )
 
 
-trait ViewDraw:
+trait ViewHooks:
+    """A Mojo type that stands behind a `BView`: it implements one or
+    more of the hook traits, each of which inherits this one. Making a
+    `BView` with such a value as its state builds its hook table.
+    """
+
+    pass
+
+
+trait ViewDraw(ViewHooks):
     """`void BView::Draw(BRect updateRect)`: a hook of BView."""
 
     def Draw(mut self, view: BViewRef[_], updateRect: BRect):
         ...
 
 
-trait ViewDrawAfterChildren:
+trait ViewDrawAfterChildren(ViewHooks):
     """`void BView::DrawAfterChildren(BRect updateRect)`: a hook of BView."""
 
     def DrawAfterChildren(mut self, view: BViewRef[_], updateRect: BRect):
         ...
 
 
-trait ViewMouseDown:
+trait ViewMouseDown(ViewHooks):
     """`void BView::MouseDown(BPoint where)`: a hook of BView."""
 
     def MouseDown(mut self, view: BViewRef[_], where: BPoint):
         ...
 
 
-trait ViewMouseUp:
+trait ViewMouseUp(ViewHooks):
     """`void BView::MouseUp(BPoint where)`: a hook of BView."""
 
     def MouseUp(mut self, view: BViewRef[_], where: BPoint):
         ...
 
 
-trait ViewMouseMoved:
+trait ViewMouseMoved(ViewHooks):
     """`void BView::MouseMoved(BPoint where, uint32 code, const BMessage* dragMessage)`: a hook of BView."""
 
     def MouseMoved(
@@ -4125,63 +4710,63 @@ trait ViewMouseMoved:
         ...
 
 
-trait ViewKeyDown:
+trait ViewKeyDown(ViewHooks):
     """`void BView::KeyDown(const char* bytes, int32 numBytes)`: a hook of BView."""
 
     def KeyDown(mut self, view: BViewRef[_], bytes: String, numBytes: Int32):
         ...
 
 
-trait ViewKeyUp:
+trait ViewKeyUp(ViewHooks):
     """`void BView::KeyUp(const char* bytes, int32 numBytes)`: a hook of BView."""
 
     def KeyUp(mut self, view: BViewRef[_], bytes: String, numBytes: Int32):
         ...
 
 
-trait ViewMessageReceived:
+trait ViewMessageReceived(ViewHooks):
     """`void BView::MessageReceived(BMessage* message)`: a hook of BView."""
 
     def MessageReceived(mut self, view: BViewRef[_], message: BMessageRef[_]):
         ...
 
 
-trait ViewAttachedToWindow:
+trait ViewAttachedToWindow(ViewHooks):
     """`void BView::AttachedToWindow()`: a hook of BView."""
 
     def AttachedToWindow(mut self, view: BViewRef[_]):
         ...
 
 
-trait ViewAllAttached:
+trait ViewAllAttached(ViewHooks):
     """`void BView::AllAttached()`: a hook of BView."""
 
     def AllAttached(mut self, view: BViewRef[_]):
         ...
 
 
-trait ViewDetachedFromWindow:
+trait ViewDetachedFromWindow(ViewHooks):
     """`void BView::DetachedFromWindow()`: a hook of BView."""
 
     def DetachedFromWindow(mut self, view: BViewRef[_]):
         ...
 
 
-trait ViewAllDetached:
+trait ViewAllDetached(ViewHooks):
     """`void BView::AllDetached()`: a hook of BView."""
 
     def AllDetached(mut self, view: BViewRef[_]):
         ...
 
 
-trait ViewFrameMoved:
+trait ViewFrameMoved(ViewHooks):
     """`void BView::FrameMoved(BPoint newPosition)`: a hook of BView."""
 
     def FrameMoved(mut self, view: BViewRef[_], newPosition: BPoint):
         ...
 
 
-trait ViewFrameResized:
+trait ViewFrameResized(ViewHooks):
     """`void BView::FrameResized(float newWidth, float newHeight)`: a hook of BView."""
 
     def FrameResized(
@@ -4193,14 +4778,14 @@ trait ViewFrameResized:
         ...
 
 
-trait ViewWindowActivated:
+trait ViewWindowActivated(ViewHooks):
     """`void BView::WindowActivated(bool active)`: a hook of BView."""
 
     def WindowActivated(mut self, view: BViewRef[_], active: Bool):
         ...
 
 
-trait ViewPulse:
+trait ViewPulse(ViewHooks):
     """`void BView::Pulse()`: a hook of BView."""
 
     def Pulse(mut self, view: BViewRef[_]):
@@ -4627,23 +5212,30 @@ trait _BMessageMethods(_AsBMessage):
         )
         return (_result, offset)
 
-    def SendReply(self, command: UInt32) raises:
+    def SendReply(
+        self,
+        command: UInt32,
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
+    ) raises:
         """`status_t BMessage::SendReply(uint32 command, BHandler* replyTo)`."""
-        var _result = external_call["mojobe_BMessage_SendReply__uint32", Int32](
+        var _result = external_call["mojobe_BMessage_SendReply__uint32_BHandlerP", Int32](
             _nonnull(self._as_BMessage(), "BMessage::SendReply"),
             command,
+            _addr(replyTo._as_BHandler()),
         )
         _check(_result, "BMessage::SendReply")
 
     def SendReply(
         self,
         reply: Some[_AsBMessage],
+        replyTo: BHandlerRef[_] = BHandlerRef[ImmUntrackedOrigin](),
         timeout: Int64 = B_INFINITE_TIMEOUT,
     ) raises:
         """`status_t BMessage::SendReply(BMessage* reply, BHandler* replyTo, bigtime_t timeout)`."""
-        var _result = external_call["mojobe_BMessage_SendReply__BMessageP_bigtime_t", Int32](
+        var _result = external_call["mojobe_BMessage_SendReply__BMessageP_BHandlerP_bigtime_t", Int32](
             _nonnull(self._as_BMessage(), "BMessage::SendReply"),
             _addr(reply._as_BMessage()),
+            _addr(replyTo._as_BHandler()),
             timeout,
         )
         _check(_result, "BMessage::SendReply")
@@ -6837,6 +7429,14 @@ trait _BMenuMethods(_AsBMenu, _BViewMethods):
         _ = name^
         return BMenuItemRef[origin_of(self)](_ptr_from(_result))
 
+    def SetTargetForItems(self, target: Some[_AsBHandler]) raises:
+        """`status_t BMenu::SetTargetForItems(BHandler* target)`."""
+        var _result = external_call["mojobe_BMenu_SetTargetForItems", Int32](
+            _nonnull(self._as_BMenu(), "BMenu::SetTargetForItems"),
+            _addr(target._as_BHandler()),
+        )
+        _check(_result, "BMenu::SetTargetForItems")
+
     def SetEnabled(self, enable: Bool):
         """`void BMenu::SetEnabled(bool enable)`."""
         external_call["mojobe_BMenu_SetEnabled", NoneType](
@@ -7009,6 +7609,11 @@ struct BMenuRef[origin: ImmOrigin](
         return _ptr_from(
             external_call["mojobe_BMenu_as_BView", Int](_addr(self._ptr)),
         )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BMenu_as_BHandler", Int](_addr(self._ptr)),
+        )
 
 
 struct BMenu(Movable, _BMenuMethods):
@@ -7068,6 +7673,11 @@ struct BMenu(Movable, _BMenuMethods):
     def _as_BView(self) -> _NPtr:
         return _ptr_from(
             external_call["mojobe_BMenu_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BMenu_as_BHandler", Int](_addr(self._ptr)),
         )
 
 # ========================================================================== #
@@ -7155,6 +7765,11 @@ struct BMenuBarRef[origin: ImmOrigin](
         return _ptr_from(
             external_call["mojobe_BMenuBar_as_BView", Int](_addr(self._ptr)),
         )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BMenuBar_as_BHandler", Int](_addr(self._ptr)),
+        )
 
 
 struct BMenuBar(Movable, _BMenuBarMethods):
@@ -7218,6 +7833,11 @@ struct BMenuBar(Movable, _BMenuBarMethods):
     def _as_BView(self) -> _NPtr:
         return _ptr_from(
             external_call["mojobe_BMenuBar_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BMenuBar_as_BHandler", Int](_addr(self._ptr)),
         )
 
 # ========================================================================== #
@@ -7377,12 +7997,47 @@ trait _BMenuItemMethods(_AsBMenuItem):
         )
         return _result
 
+    def SetTarget(
+        self,
+        handler: Some[_AsBHandler],
+        looper: BLooperRef[_] = BLooperRef[ImmUntrackedOrigin](),
+    ) raises:
+        """`status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)`."""
+        var _result = external_call["mojobe_BMenuItem_SetTarget", Int32](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::SetTarget"),
+            _addr(handler._as_BHandler()),
+            _addr(looper._as_BLooper()),
+        )
+        _check(_result, "BInvoker::SetTarget")
+
     def IsTargetLocal(self) -> Bool:
         """`bool BInvoker::IsTargetLocal() const`."""
         var _result = external_call["mojobe_BMenuItem_IsTargetLocal", Bool](
             _nonnull(self._as_BMenuItem(), "BMenuItem::IsTargetLocal"),
         )
         return _result
+
+    def Target(ref self) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BInvoker::Target(BLooper** _looper) const`."""
+        var _result = external_call["mojobe_BMenuItem_Target", Int](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::Target"),
+        )
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
+
+    def SetHandlerForReply(self, handler: Some[_AsBHandler]) raises:
+        """`status_t BInvoker::SetHandlerForReply(BHandler* handler)`."""
+        var _result = external_call["mojobe_BMenuItem_SetHandlerForReply", Int32](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::SetHandlerForReply"),
+            _addr(handler._as_BHandler()),
+        )
+        _check(_result, "BInvoker::SetHandlerForReply")
+
+    def HandlerForReply(ref self) -> BHandlerRef[origin_of(self)]:
+        """`BHandler* BInvoker::HandlerForReply() const`."""
+        var _result = external_call["mojobe_BMenuItem_HandlerForReply", Int](
+            _nonnull(self._as_BMenuItem(), "BMenuItem::HandlerForReply"),
+        )
+        return BHandlerRef[origin_of(self)](_ptr_from(_result))
 
     def Invoke(
         self,

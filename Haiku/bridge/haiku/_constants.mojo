@@ -133,6 +133,26 @@ struct command_code(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct cpu_platform(Equatable, TrivialRegisterPassable):
+    """`enum cpu_platform`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct cpu_vendor(Equatable, TrivialRegisterPassable):
+    """`enum cpu_vendor`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct drawing_mode(Equatable, TrivialRegisterPassable):
     """`enum drawing_mode`."""
 
@@ -273,6 +293,16 @@ struct source_alpha(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct topology_level_type(Equatable, TrivialRegisterPassable):
+    """`enum topology_level_type`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct vertical_alignment(Equatable, TrivialRegisterPassable):
     """`enum vertical_alignment`."""
 
@@ -350,8 +380,11 @@ comptime B_8_BIT_640x400: UInt32 = 0x80000000
 comptime B_8_BIT_640x480: UInt32 = 1
 comptime B_8_BIT_800x600: UInt32 = 2
 comptime B_ABOUT_REQUESTED: UInt32 = 0x5f414252
+comptime B_ABSOLUTE_REAL_TIME_TIMEOUT: UInt32 = 0x50
+comptime B_ABSOLUTE_TIMEOUT: UInt32 = 0x10
 comptime B_ACQUIRE_OVERLAY_LOCK: UInt32 = 0x5f414f56
 comptime B_ACTIVE_ICON_BITMAP: UInt32 = 1
+comptime B_ADD_ON_IMAGE: UInt32 = 3
 comptime B_AFFINE_TRANSFORM_TYPE: UInt32 = 0x414d5458
 comptime B_ALIGNMENT_TYPE: UInt32 = 0x414c474e
 comptime B_ALIGN_BOTTOM = vertical_alignment(0x30)
@@ -390,6 +423,7 @@ comptime B_ANY_KERNEL_ADDRESS: Int32 = 4
 comptime B_ANY_TYPE: UInt32 = 0x414e5954
 comptime B_APP_ACTIVATED: UInt32 = 0x5f414354
 comptime B_APP_ERROR_BASE: Int32 = -2147475456
+comptime B_APP_IMAGE: UInt32 = 1
 comptime B_ARCHIVED_OBJECT = command_code(0x41524356)
 comptime B_ARGV_RECEIVED: UInt32 = 0x5f415247
 comptime B_ASCII_ACKNOWLEDGE: UInt32 = 6
@@ -463,12 +497,14 @@ comptime B_BUTT_JOIN = join_mode(3)
 comptime B_BYTE_ALIGNMENT = window_alignment(0)
 comptime B_CANCEL: UInt32 = 0x5f434e43
 comptime B_CANCELED: Int32 = -2147483636
+comptime B_CAN_INTERRUPT: UInt32 = 1
 comptime B_CAPS_LOCK: UInt32 = 8
 comptime B_CAPS_LOCK_KEY: UInt32 = 0x3b
 comptime B_CAPS_SHIFT_TABLE: UInt32 = 0x20
 comptime B_CAPS_TABLE: UInt32 = 0x40
 comptime B_CHAR_SPACING: UInt32 = 0
 comptime B_CHAR_TYPE: UInt32 = 0x43484152
+comptime B_CHECK_PERMISSION: UInt32 = 4
 comptime B_CLICK_TO_FOCUS_MOUSE = mode_mouse(-1)
 comptime B_CLONEABLE_AREA: Int32 = 0x100
 comptime B_CLONE_ADDRESS: Int32 = 3
@@ -498,6 +534,48 @@ comptime B_CONTROL_TEXT_COLOR = color_which(0xe)
 comptime B_COPY = command_code(0x434f5059)
 comptime B_COPY_TARGET = command_code(0x44444350)
 comptime B_COUNT_PROPERTIES = command_code(0x50434e54)
+comptime B_CPU_ALPHA = cpu_platform(8)
+comptime B_CPU_ARM = cpu_platform(6)
+comptime B_CPU_ARM_64 = cpu_platform(7)
+comptime B_CPU_M68K = cpu_platform(5)
+comptime B_CPU_MIPS = cpu_platform(9)
+comptime B_CPU_PPC = cpu_platform(3)
+comptime B_CPU_PPC_64 = cpu_platform(4)
+comptime B_CPU_RISC_V = cpu_platform(0xc)
+comptime B_CPU_SH = cpu_platform(0xa)
+comptime B_CPU_SPARC = cpu_platform(0xb)
+comptime B_CPU_UNKNOWN = cpu_platform(0)
+comptime B_CPU_VENDOR_AMD = cpu_vendor(1)
+comptime B_CPU_VENDOR_AMPERE = cpu_vendor(0x1b)
+comptime B_CPU_VENDOR_APM = cpu_vendor(0x17)
+comptime B_CPU_VENDOR_APPLE = cpu_vendor(0x1a)
+comptime B_CPU_VENDOR_ARM = cpu_vendor(0xf)
+comptime B_CPU_VENDOR_BROADCOM = cpu_vendor(0x10)
+comptime B_CPU_VENDOR_CAVIUM = cpu_vendor(0x11)
+comptime B_CPU_VENDOR_CYRIX = cpu_vendor(2)
+comptime B_CPU_VENDOR_DEC = cpu_vendor(0x12)
+comptime B_CPU_VENDOR_FREESCALE = cpu_vendor(0x15)
+comptime B_CPU_VENDOR_FUJITSU = cpu_vendor(0xe)
+comptime B_CPU_VENDOR_HISILICON = cpu_vendor(0x13)
+comptime B_CPU_VENDOR_HYGON = cpu_vendor(0xc)
+comptime B_CPU_VENDOR_IBM = cpu_vendor(9)
+comptime B_CPU_VENDOR_IDT = cpu_vendor(3)
+comptime B_CPU_VENDOR_INFINEON = cpu_vendor(0x14)
+comptime B_CPU_VENDOR_INTEL = cpu_vendor(4)
+comptime B_CPU_VENDOR_MARVELL = cpu_vendor(0x19)
+comptime B_CPU_VENDOR_MICROSOFT = cpu_vendor(0x1c)
+comptime B_CPU_VENDOR_MOTOROLA = cpu_vendor(0xa)
+comptime B_CPU_VENDOR_NATIONAL_SEMICONDUCTOR = cpu_vendor(5)
+comptime B_CPU_VENDOR_NEC = cpu_vendor(0xb)
+comptime B_CPU_VENDOR_NVIDIA = cpu_vendor(0x16)
+comptime B_CPU_VENDOR_QUALCOMM = cpu_vendor(0x18)
+comptime B_CPU_VENDOR_RISE = cpu_vendor(6)
+comptime B_CPU_VENDOR_SUN = cpu_vendor(0xd)
+comptime B_CPU_VENDOR_TRANSMETA = cpu_vendor(7)
+comptime B_CPU_VENDOR_UNKNOWN = cpu_vendor(0)
+comptime B_CPU_VENDOR_VIA = cpu_vendor(8)
+comptime B_CPU_x86 = cpu_platform(1)
+comptime B_CPU_x86_64 = cpu_platform(2)
 comptime B_CREATE_ACTIVE_ICON_BITMAP: UInt32 = 0x400
 comptime B_CREATE_DISABLED_ICON_BITMAPS: UInt32 = 0x1000
 comptime B_CREATE_FILE: Int32 = 0x200
@@ -570,6 +648,7 @@ comptime B_DOCUMENT_WINDOW_LOOK = window_look(0xb)
 comptime B_DONT_DO_THAT: Int32 = -2147483631
 comptime B_DOUBLE_TYPE: UInt32 = 0x44424c45
 comptime B_DOWN_ARROW: UInt32 = 0x1f
+comptime B_DO_NOT_RESCHEDULE: UInt32 = 2
 comptime B_DO_NOT_RESIZE_TO_FIT: UInt32 = 1
 comptime B_DRAW_ON_CHILDREN: UInt32 = 0x800000
 comptime B_DUPLICATE_REPLY: Int32 = -2147475455
@@ -582,6 +661,16 @@ comptime B_ERASE_FILE: Int32 = 0x400
 comptime B_ERROR: Int32 = -1
 comptime B_ERRORS_END: Int32 = -2147418113
 comptime B_ESCAPE: UInt32 = 0x1b
+comptime B_EVENT_ACQUIRE_SEMAPHORE: UInt32 = 1
+comptime B_EVENT_DISCONNECTED: UInt32 = 0x80
+comptime B_EVENT_ERROR: UInt32 = 4
+comptime B_EVENT_HIGH_PRIORITY_READ: UInt32 = 0x20
+comptime B_EVENT_HIGH_PRIORITY_WRITE: UInt32 = 0x40
+comptime B_EVENT_INVALID: UInt32 = 0x1000
+comptime B_EVENT_PRIORITY_READ: UInt32 = 8
+comptime B_EVENT_PRIORITY_WRITE: UInt32 = 0x10
+comptime B_EVENT_READ: UInt32 = 1
+comptime B_EVENT_WRITE: UInt32 = 2
 comptime B_EVEN_ODD: UInt32 = 0
 comptime B_EXACT_ADDRESS: Int32 = 1
 comptime B_EXECUTE_AREA: Int32 = 4
@@ -760,6 +849,7 @@ comptime B_KEYBOARD_NAVIGATION_COLOR = color_which(4)
 comptime B_KEY_DOWN: UInt32 = 0x5f4b5944
 comptime B_KEY_MAP_LOADED: UInt32 = 0x5f4b4d4c
 comptime B_KEY_UP: UInt32 = 0x5f4b5955
+comptime B_KILL_CAN_INTERRUPT: UInt32 = 0x20
 comptime B_LAB24: UInt32 = 0x4032
 comptime B_LAB32: UInt32 = 0x4033
 comptime B_LABA32: UInt32 = 0x6033
@@ -780,6 +870,7 @@ comptime B_LEFT_CONTROL_KEY: UInt32 = 0x1000
 comptime B_LEFT_OPTION_KEY: UInt32 = 0x4000
 comptime B_LEFT_SHIFT_KEY: UInt32 = 0x100
 comptime B_LEGACY_EXECUTABLE: Int32 = -2147478778
+comptime B_LIBRARY_IMAGE: UInt32 = 2
 comptime B_LIGHTEN_1_TINT: Float32 = 0.5899999737739563
 comptime B_LIGHTEN_2_TINT: Float32 = 0.38499999046325684
 comptime B_LIGHTEN_MAX_TINT: Float32 = 0.0
@@ -943,10 +1034,16 @@ comptime B_NUMPAD_EQUAL_KEY: UInt32 = 0x6a
 comptime B_NUM_LOCK: UInt32 = 0x20
 comptime B_NUM_LOCK_KEY: UInt32 = 0x22
 comptime B_OBJECT_TYPE: UInt32 = 0x4f505452
+comptime B_OBJECT_TYPE_FD: UInt32 = 0
+comptime B_OBJECT_TYPE_PORT: UInt32 = 2
+comptime B_OBJECT_TYPE_SEMAPHORE: UInt32 = 1
+comptime B_OBJECT_TYPE_THREAD: UInt32 = 3
 comptime B_OBSERVER_NOTICE_CHANGE = command_code(0x4e544348)
 comptime B_OBSERVER_OBSERVE_ALL: UInt32 = 0xffffffff
 comptime B_OFF_T_TYPE: UInt32 = 0x4f464654
 comptime B_OK: Int32 = 0
+comptime B_ONE_SHOT_ABSOLUTE_ALARM: UInt32 = 1
+comptime B_ONE_SHOT_RELATIVE_ALARM: UInt32 = 2
 comptime B_OPEN_AT_END: Int32 = 0x800
 comptime B_OPEN_IN_WORKSPACE: UInt32 = 0x5f4f5753
 comptime B_OPTION_CAPS_SHIFT_TABLE: UInt32 = 2
@@ -990,6 +1087,7 @@ comptime B_PASTE = command_code(0x50535445)
 comptime B_PATH_NAME_LENGTH: Int32 = 0x400
 comptime B_PATTERN_TYPE: UInt32 = 0x5041544e
 comptime B_PAUSE_KEY: UInt32 = 0x10
+comptime B_PERIODIC_ALARM: UInt32 = 3
 comptime B_PERMISSION_DENIED: Int32 = -2147483646
 comptime B_PIXEL_ALIGNMENT = window_alignment(1)
 comptime B_PIXEL_ALPHA = source_alpha(0)
@@ -1030,6 +1128,9 @@ comptime B_REDO = command_code(0x5245444f)
 comptime B_REFS_RECEIVED: UInt32 = 0x5f525243
 comptime B_REF_TYPE: UInt32 = 0x52524546
 comptime B_REGULAR_FACE: UInt32 = 0x40
+comptime B_RELATIVE_TIMEOUT: UInt32 = 8
+comptime B_RELEASE_ALL: UInt32 = 8
+comptime B_RELEASE_IF_WAITING_ONLY: UInt32 = 0x10
 comptime B_RELEASE_OVERLAY_LOCK: UInt32 = 0x5f524f56
 comptime B_REPLY = command_code(0x52504c59)
 comptime B_RESET_STATUS_BAR = command_code(0x53425253)
@@ -1130,20 +1231,36 @@ comptime B_SWAP_LENDIAN_TO_HOST: UInt32 = 2
 comptime B_SYMBOL_TYPE_ANY: Int32 = 5
 comptime B_SYMBOL_TYPE_DATA: Int32 = 1
 comptime B_SYMBOL_TYPE_TEXT: Int32 = 2
+comptime B_SYSTEM_IMAGE: UInt32 = 4
 comptime B_SYSTEM_TEAM: Int32 = 1
 comptime B_SYSTEM_TIMEBASE: Int32 = 0
 comptime B_TAB: UInt32 = 9
+comptime B_TEAM_USAGE_CHILDREN: Int32 = -1
+comptime B_TEAM_USAGE_SELF: Int32 = 0
 comptime B_TERTIARY_MOUSE_BUTTON: UInt32 = 4
+comptime B_THREAD_ASLEEP: UInt32 = 4
+comptime B_THREAD_READY: UInt32 = 2
+comptime B_THREAD_RECEIVING: UInt32 = 3
+comptime B_THREAD_RUNNING: UInt32 = 1
+comptime B_THREAD_SUSPENDED: UInt32 = 5
+comptime B_THREAD_WAITING: UInt32 = 6
 comptime B_TILE_BITMAP = bitmap_tiling(3)
 comptime B_TILE_BITMAP_X = bitmap_tiling(1)
 comptime B_TILE_BITMAP_Y = bitmap_tiling(2)
 comptime B_TIMED_OUT: Int32 = -2147483639
+comptime B_TIMEOUT: UInt32 = 8
+comptime B_TIMEOUT_REAL_TIME_BASE: UInt32 = 0x40
 comptime B_TIME_TYPE: UInt32 = 0x54494d45
 comptime B_TITLED_WINDOW = window_type(1)
 comptime B_TITLED_WINDOW_LOOK = window_look(1)
 comptime B_TOOL_TIP_BACKGROUND_COLOR = color_which(0x14)
 comptime B_TOOL_TIP_TEXT_COLOR = color_which(0x15)
 comptime B_TOO_MANY_ARGS: Int32 = -2147454975
+comptime B_TOPOLOGY_CORE = topology_level_type(3)
+comptime B_TOPOLOGY_PACKAGE = topology_level_type(4)
+comptime B_TOPOLOGY_ROOT = topology_level_type(1)
+comptime B_TOPOLOGY_SMT = topology_level_type(2)
+comptime B_TOPOLOGY_UNKNOWN = topology_level_type(0)
 comptime B_TRACKER_ADDON_MESSAGE: UInt32 = 0x5f54414d
 comptime B_TRACK_RECT_CORNER = rect_tracking_style(1)
 comptime B_TRACK_WHOLE_RECT = rect_tracking_style(0)
