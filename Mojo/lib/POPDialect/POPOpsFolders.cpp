@@ -2518,7 +2518,7 @@ ErrorTreeOrSuccess StringAddressOp::interpret(ArrayRef<Attribute> operands,
     return ErrorTree(getLoc(), Error("argument is not a concrete string"));
   StringRef str(value.data(), value.size() + 1);
   if (value.getValue().empty())
-    str = "\0";
+    str = StringRef("\0", 1);
 
   MemoryHandleAttr hdl = MemoryHandleAttr::get(getContext(), str);
   ErrorOr<int64_t> addr = state.mapConstGlobalMemory(hdl);
@@ -2538,7 +2538,7 @@ StringAddressOp::parametric_interpret(ArrayRef<Attribute> operands,
     return ErrorTree(getLoc(), Error("argument is not a concrete string"));
   StringRef str(value.data(), value.size() + 1);
   if (value.getValue().empty())
-    str = "\0";
+    str = StringRef("\0", 1);
 
   MemoryHandleAttr hdl = MemoryHandleAttr::get(getContext(), str);
   ErrorOr<int64_t> addr = state.mapConstGlobalMemory(hdl);

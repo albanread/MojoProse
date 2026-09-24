@@ -1520,6 +1520,21 @@ def test_as_c_string_span_empty() raises:
     assert_true(string.as_bytes() == cslice.as_bytes())
 
 
+def _default_empty(string: String = "") -> String:
+    return string
+
+
+def test_as_c_string_span_default_argument() raises:
+    # A default argument of "" is a String made at compile time, which String
+    # takes to be nul terminated. The compiler used to emit it as a global of
+    # no bytes, so the C string was whatever came next in memory.
+    var string = _default_empty()
+    var cslice = string.as_c_string_span()
+    assert_equal(string.byte_length(), 0)
+    assert_equal(len(cslice), 0)
+    assert_equal(cslice.ptr()[unsafe_offset=0], 0)
+
+
 def test_as_c_string_span_inlined() raises:
     var string = String("a")
     var cslice = string.as_c_string_span()

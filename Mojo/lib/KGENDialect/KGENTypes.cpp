@@ -1365,7 +1365,7 @@ ErrorOrSuccess StringType::writeTo(TypedAttr value, int64_t addr,
   if (auto strAttr = dyn_cast_if_present<StringAttr>(value)) {
     StringRef str(strAttr.data(), strAttr.size() + 1);
     if (strAttr.getValue().empty())
-      str = "\0";
+      str = StringRef("\0", 1);
     MemoryHandleAttr hdl = MemoryHandleAttr::get(getContext(), str);
     ErrorOr<int64_t> strAddr = state.mapConstGlobalMemory(hdl);
     if (strAddr.isError())

@@ -340,7 +340,7 @@ FailureOr<TypedAttr> IREvaluator::evaluateStringAddress(ParamOperatorAttr op) {
 
   StringRef str(value.data(), value.size() + 1);
   if (value.getValue().empty())
-    str = "\0";
+    str = StringRef("\0", 1);
 
   auto resetState = llvm::scope_exit([&] { reset(); });
 
