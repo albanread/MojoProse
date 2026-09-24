@@ -1420,6 +1420,86 @@ mojobe_BHandler_to_BMenuBar(BHandler* self)
 }
 
 
+// BHandler* as BPopUpMenu*, or NULL
+BPopUpMenu*
+mojobe_BHandler_to_BPopUpMenu(BHandler* self)
+{
+	return dynamic_cast<BPopUpMenu*>(self);
+}
+
+
+// BHandler* as BControl*, or NULL
+BControl*
+mojobe_BHandler_to_BControl(BHandler* self)
+{
+	return dynamic_cast<BControl*>(self);
+}
+
+
+// BHandler* as BButton*, or NULL
+BButton*
+mojobe_BHandler_to_BButton(BHandler* self)
+{
+	return dynamic_cast<BButton*>(self);
+}
+
+
+// BHandler* as BCheckBox*, or NULL
+BCheckBox*
+mojobe_BHandler_to_BCheckBox(BHandler* self)
+{
+	return dynamic_cast<BCheckBox*>(self);
+}
+
+
+// BHandler* as BRadioButton*, or NULL
+BRadioButton*
+mojobe_BHandler_to_BRadioButton(BHandler* self)
+{
+	return dynamic_cast<BRadioButton*>(self);
+}
+
+
+// BHandler* as BTextControl*, or NULL
+BTextControl*
+mojobe_BHandler_to_BTextControl(BHandler* self)
+{
+	return dynamic_cast<BTextControl*>(self);
+}
+
+
+// BHandler* as BSlider*, or NULL
+BSlider*
+mojobe_BHandler_to_BSlider(BHandler* self)
+{
+	return dynamic_cast<BSlider*>(self);
+}
+
+
+// BHandler* as BStringView*, or NULL
+BStringView*
+mojobe_BHandler_to_BStringView(BHandler* self)
+{
+	return dynamic_cast<BStringView*>(self);
+}
+
+
+// BHandler* as BScrollView*, or NULL
+BScrollView*
+mojobe_BHandler_to_BScrollView(BHandler* self)
+{
+	return dynamic_cast<BScrollView*>(self);
+}
+
+
+// BHandler* as BAlert*, or NULL
+BAlert*
+mojobe_BHandler_to_BAlert(BHandler* self)
+{
+	return dynamic_cast<BAlert*>(self);
+}
+
+
 // BHandler::BHandler(const char* name)
 BHandler*
 mojobe_BHandler_new(const char* a_name)
@@ -1953,6 +2033,14 @@ BWindow*
 mojobe_BLooper_to_BWindow(BLooper* self)
 {
 	return dynamic_cast<BWindow*>(self);
+}
+
+
+// BLooper* as BAlert*, or NULL
+BAlert*
+mojobe_BLooper_to_BAlert(BLooper* self)
+{
+	return dynamic_cast<BAlert*>(self);
 }
 
 
@@ -2787,6 +2875,35 @@ mojobe_BWindow_RemoveShortcut(BWindow* self, uint32 a_key, uint32 a_modifiers)
 	} catch (...) {
 		mojobe_unexpected("mojobe_BWindow_RemoveShortcut");
 	}
+}
+
+
+// void BWindow::SetDefaultButton(BButton* button)
+void
+mojobe_BWindow_SetDefaultButton(BWindow* self, BButton* a_button)
+{
+	try {
+		self->SetDefaultButton(a_button);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetDefaultButton");
+	}
+}
+
+
+// BButton* BWindow::DefaultButton() const
+BButton*
+mojobe_BWindow_DefaultButton(BWindow* self)
+{
+	try {
+		return self->DefaultButton();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_DefaultButton");
+	}
+	return {};
 }
 
 
@@ -3822,6 +3939,14 @@ mojobe_BWindow_as_BHandler(BWindow* self)
 }
 
 
+// BWindow* as BAlert*, or NULL
+BAlert*
+mojobe_BWindow_to_BAlert(BWindow* self)
+{
+	return dynamic_cast<BAlert*>(self);
+}
+
+
 // BWindow::BWindow(BRect frame, const char* title, window_type type, uint32 flags, uint32 workspace)
 BWindow*
 mojobe_BWindow_new__BRect_charP_window_type_uint32_uint32(mojobe_BRect a_frame,
@@ -4383,6 +4508,20 @@ mojobe_BView_FrameResized(BView* self, float a_newWidth, float a_newHeight)
 		return;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BView_FrameResized");
+	}
+}
+
+
+// void BView::TargetedByScrollView(BScrollView* scrollView)
+void
+mojobe_BView_TargetedByScrollView(BView* self, BScrollView* a_scrollView)
+{
+	try {
+		self->TargetedByScrollView(a_scrollView);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_TargetedByScrollView");
 	}
 }
 
@@ -6682,6 +6821,78 @@ BMenuBar*
 mojobe_BView_to_BMenuBar(BView* self)
 {
 	return dynamic_cast<BMenuBar*>(self);
+}
+
+
+// BView* as BPopUpMenu*, or NULL
+BPopUpMenu*
+mojobe_BView_to_BPopUpMenu(BView* self)
+{
+	return dynamic_cast<BPopUpMenu*>(self);
+}
+
+
+// BView* as BControl*, or NULL
+BControl*
+mojobe_BView_to_BControl(BView* self)
+{
+	return dynamic_cast<BControl*>(self);
+}
+
+
+// BView* as BButton*, or NULL
+BButton*
+mojobe_BView_to_BButton(BView* self)
+{
+	return dynamic_cast<BButton*>(self);
+}
+
+
+// BView* as BCheckBox*, or NULL
+BCheckBox*
+mojobe_BView_to_BCheckBox(BView* self)
+{
+	return dynamic_cast<BCheckBox*>(self);
+}
+
+
+// BView* as BRadioButton*, or NULL
+BRadioButton*
+mojobe_BView_to_BRadioButton(BView* self)
+{
+	return dynamic_cast<BRadioButton*>(self);
+}
+
+
+// BView* as BTextControl*, or NULL
+BTextControl*
+mojobe_BView_to_BTextControl(BView* self)
+{
+	return dynamic_cast<BTextControl*>(self);
+}
+
+
+// BView* as BSlider*, or NULL
+BSlider*
+mojobe_BView_to_BSlider(BView* self)
+{
+	return dynamic_cast<BSlider*>(self);
+}
+
+
+// BView* as BStringView*, or NULL
+BStringView*
+mojobe_BView_to_BStringView(BView* self)
+{
+	return dynamic_cast<BStringView*>(self);
+}
+
+
+// BView* as BScrollView*, or NULL
+BScrollView*
+mojobe_BView_to_BScrollView(BView* self)
+{
+	return dynamic_cast<BScrollView*>(self);
 }
 
 
@@ -10849,6 +11060,14 @@ mojobe_BMenu_to_BMenuBar(BMenu* self)
 }
 
 
+// BMenu* as BPopUpMenu*, or NULL
+BPopUpMenu*
+mojobe_BMenu_to_BPopUpMenu(BMenu* self)
+{
+	return dynamic_cast<BPopUpMenu*>(self);
+}
+
+
 // BMenu::BMenu(const char* name, menu_layout layout)
 BMenu*
 mojobe_BMenu_new__charP_menu_layout(const char* a_name, menu_layout a_layout)
@@ -11014,6 +11233,334 @@ mojobe_BMenuBar_new__charP_menu_layout_uint32(const char* a_name,
 // ~BMenuBar()
 void
 mojobe_BMenuBar_delete(BMenuBar* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BInvoker
+
+
+// status_t BInvoker::SetMessage(BMessage* message)
+status_t
+mojobe_BInvoker_SetMessage(BInvoker* self, BMessage* a_message)
+{
+	try {
+		return self->SetMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_SetMessage");
+	}
+	return B_ERROR;
+}
+
+
+// BMessage* BInvoker::Message() const
+BMessage*
+mojobe_BInvoker_Message(BInvoker* self)
+{
+	try {
+		return self->Message();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Message");
+	}
+	return {};
+}
+
+
+// uint32 BInvoker::Command() const
+uint32
+mojobe_BInvoker_Command(BInvoker* self)
+{
+	try {
+		return self->Command();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Command");
+	}
+	return {};
+}
+
+
+// status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
+status_t
+mojobe_BInvoker_SetTarget__BHandlerP_BLooperP(BInvoker* self,
+	BHandler* a_handler,
+	BLooper* a_looper)
+{
+	try {
+		return self->SetTarget(a_handler, a_looper);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_SetTarget__BHandlerP_BLooperP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BInvoker::SetTarget(BMessenger messenger)
+status_t
+mojobe_BInvoker_SetTarget__BMessenger(BInvoker* self,
+	const BMessenger* a_messenger)
+{
+	try {
+		return self->SetTarget(*a_messenger);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_SetTarget__BMessenger");
+	}
+	return B_ERROR;
+}
+
+
+// bool BInvoker::IsTargetLocal() const
+bool
+mojobe_BInvoker_IsTargetLocal(BInvoker* self)
+{
+	try {
+		return self->IsTargetLocal();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_IsTargetLocal");
+	}
+	return {};
+}
+
+
+// BHandler* BInvoker::Target(BLooper** _looper) const
+BHandler*
+mojobe_BInvoker_Target(BInvoker* self)
+{
+	try {
+		return self->Target(static_cast<BLooper **>(NULL));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Target");
+	}
+	return {};
+}
+
+
+// BMessenger BInvoker::Messenger() const
+void
+mojobe_BInvoker_Messenger(BInvoker* self, BMessenger* a_result)
+{
+	try {
+		new(a_result) BMessenger(self->Messenger());
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Messenger");
+	}
+}
+
+
+// status_t BInvoker::SetHandlerForReply(BHandler* handler)
+status_t
+mojobe_BInvoker_SetHandlerForReply(BInvoker* self, BHandler* a_handler)
+{
+	try {
+		return self->SetHandlerForReply(a_handler);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_SetHandlerForReply");
+	}
+	return B_ERROR;
+}
+
+
+// BHandler* BInvoker::HandlerForReply() const
+BHandler*
+mojobe_BInvoker_HandlerForReply(BInvoker* self)
+{
+	try {
+		return self->HandlerForReply();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_HandlerForReply");
+	}
+	return {};
+}
+
+
+// status_t BInvoker::Invoke(BMessage* message)
+status_t
+mojobe_BInvoker_Invoke(BInvoker* self, BMessage* a_message)
+{
+	try {
+		return self->Invoke(a_message);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Invoke");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BInvoker::InvokeNotify(BMessage* message, uint32 kind)
+status_t
+mojobe_BInvoker_InvokeNotify(BInvoker* self, BMessage* a_message, uint32 a_kind)
+{
+	try {
+		return self->InvokeNotify(a_message, a_kind);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_InvokeNotify");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BInvoker::SetTimeout(bigtime_t timeout)
+status_t
+mojobe_BInvoker_SetTimeout(BInvoker* self, bigtime_t a_timeout)
+{
+	try {
+		return self->SetTimeout(a_timeout);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_SetTimeout");
+	}
+	return B_ERROR;
+}
+
+
+// bigtime_t BInvoker::Timeout() const
+int64
+mojobe_BInvoker_Timeout(BInvoker* self)
+{
+	try {
+		return self->Timeout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_Timeout");
+	}
+	return {};
+}
+
+
+// BInvoker* as BMenuItem*, or NULL
+BMenuItem*
+mojobe_BInvoker_to_BMenuItem(BInvoker* self)
+{
+	return dynamic_cast<BMenuItem*>(self);
+}
+
+
+// BInvoker* as BControl*, or NULL
+BControl*
+mojobe_BInvoker_to_BControl(BInvoker* self)
+{
+	return dynamic_cast<BControl*>(self);
+}
+
+
+// BInvoker* as BButton*, or NULL
+BButton*
+mojobe_BInvoker_to_BButton(BInvoker* self)
+{
+	return dynamic_cast<BButton*>(self);
+}
+
+
+// BInvoker* as BCheckBox*, or NULL
+BCheckBox*
+mojobe_BInvoker_to_BCheckBox(BInvoker* self)
+{
+	return dynamic_cast<BCheckBox*>(self);
+}
+
+
+// BInvoker* as BRadioButton*, or NULL
+BRadioButton*
+mojobe_BInvoker_to_BRadioButton(BInvoker* self)
+{
+	return dynamic_cast<BRadioButton*>(self);
+}
+
+
+// BInvoker* as BTextControl*, or NULL
+BTextControl*
+mojobe_BInvoker_to_BTextControl(BInvoker* self)
+{
+	return dynamic_cast<BTextControl*>(self);
+}
+
+
+// BInvoker* as BSlider*, or NULL
+BSlider*
+mojobe_BInvoker_to_BSlider(BInvoker* self)
+{
+	return dynamic_cast<BSlider*>(self);
+}
+
+
+// BInvoker::BInvoker()
+BInvoker*
+mojobe_BInvoker_new__void()
+{
+	try {
+		return new(std::nothrow) BInvoker();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_new__void");
+	}
+	return {};
+}
+
+
+// BInvoker::BInvoker(BMessage* message, const BHandler* handler, const BLooper* looper)
+BInvoker*
+mojobe_BInvoker_new__BMessageP_BHandlerP_BLooperP(BMessage* a_message,
+	BHandler* a_handler,
+	BLooper* a_looper)
+{
+	try {
+		return new(std::nothrow) BInvoker(a_message, a_handler, a_looper);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_new__BMessageP_BHandlerP_BLooperP");
+	}
+	return {};
+}
+
+
+// BInvoker::BInvoker(BMessage* message, BMessenger target)
+BInvoker*
+mojobe_BInvoker_new__BMessageP_BMessenger(BMessage* a_message,
+	const BMessenger* a_target)
+{
+	try {
+		return new(std::nothrow) BInvoker(a_message, *a_target);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BInvoker_new__BMessageP_BMessenger");
+	}
+	return {};
+}
+
+
+// ~BInvoker()
+void
+mojobe_BInvoker_delete(BInvoker* self)
 {
 	delete self;
 }
@@ -11260,217 +11807,11 @@ mojobe_BMenuItem_AllArchived(BMenuItem* self, BMessage* a_archive)
 }
 
 
-// status_t BInvoker::SetMessage(BMessage* message)
-status_t
-mojobe_BMenuItem_SetMessage(BMenuItem* self, BMessage* a_message)
+// BMenuItem* as BInvoker*
+BInvoker*
+mojobe_BMenuItem_as_BInvoker(BMenuItem* self)
 {
-	try {
-		return static_cast<BInvoker*>(self)->SetMessage(a_message);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_SetMessage");
-	}
-	return B_ERROR;
-}
-
-
-// BMessage* BInvoker::Message() const
-BMessage*
-mojobe_BMenuItem_Message(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->Message();
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Message");
-	}
-	return {};
-}
-
-
-// uint32 BInvoker::Command() const
-uint32
-mojobe_BMenuItem_Command(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->Command();
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Command");
-	}
-	return {};
-}
-
-
-// status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
-status_t
-mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP(BMenuItem* self,
-	BHandler* a_handler,
-	BLooper* a_looper)
-{
-	try {
-		return static_cast<BInvoker*>(self)->SetTarget(a_handler, a_looper);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP");
-	}
-	return B_ERROR;
-}
-
-
-// status_t BInvoker::SetTarget(BMessenger messenger)
-status_t
-mojobe_BMenuItem_SetTarget__BMessenger(BMenuItem* self,
-	const BMessenger* a_messenger)
-{
-	try {
-		return static_cast<BInvoker*>(self)->SetTarget(*a_messenger);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_SetTarget__BMessenger");
-	}
-	return B_ERROR;
-}
-
-
-// bool BInvoker::IsTargetLocal() const
-bool
-mojobe_BMenuItem_IsTargetLocal(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->IsTargetLocal();
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_IsTargetLocal");
-	}
-	return {};
-}
-
-
-// BHandler* BInvoker::Target(BLooper** _looper) const
-BHandler*
-mojobe_BMenuItem_Target(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->Target(static_cast<BLooper **>(NULL));
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Target");
-	}
-	return {};
-}
-
-
-// BMessenger BInvoker::Messenger() const
-void
-mojobe_BMenuItem_Messenger(BMenuItem* self, BMessenger* a_result)
-{
-	try {
-		new(a_result) BMessenger(static_cast<BInvoker*>(self)->Messenger());
-	} catch (const std::bad_alloc&) {
-		return;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Messenger");
-	}
-}
-
-
-// status_t BInvoker::SetHandlerForReply(BHandler* handler)
-status_t
-mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self, BHandler* a_handler)
-{
-	try {
-		return static_cast<BInvoker*>(self)->SetHandlerForReply(a_handler);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_SetHandlerForReply");
-	}
-	return B_ERROR;
-}
-
-
-// BHandler* BInvoker::HandlerForReply() const
-BHandler*
-mojobe_BMenuItem_HandlerForReply(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->HandlerForReply();
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_HandlerForReply");
-	}
-	return {};
-}
-
-
-// status_t BInvoker::Invoke(BMessage* message)
-status_t
-mojobe_BMenuItem_Invoke(BMenuItem* self, BMessage* a_message)
-{
-	try {
-		return static_cast<BInvoker*>(self)->Invoke(a_message);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Invoke");
-	}
-	return B_ERROR;
-}
-
-
-// status_t BInvoker::InvokeNotify(BMessage* message, uint32 kind)
-status_t
-mojobe_BMenuItem_InvokeNotify(BMenuItem* self,
-	BMessage* a_message,
-	uint32 a_kind)
-{
-	try {
-		return static_cast<BInvoker*>(self)->InvokeNotify(a_message, a_kind);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_InvokeNotify");
-	}
-	return B_ERROR;
-}
-
-
-// status_t BInvoker::SetTimeout(bigtime_t timeout)
-status_t
-mojobe_BMenuItem_SetTimeout(BMenuItem* self, bigtime_t a_timeout)
-{
-	try {
-		return static_cast<BInvoker*>(self)->SetTimeout(a_timeout);
-	} catch (const std::bad_alloc&) {
-		return B_NO_MEMORY;
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_SetTimeout");
-	}
-	return B_ERROR;
-}
-
-
-// bigtime_t BInvoker::Timeout() const
-int64
-mojobe_BMenuItem_Timeout(BMenuItem* self)
-{
-	try {
-		return static_cast<BInvoker*>(self)->Timeout();
-	} catch (const std::bad_alloc&) {
-		return {};
-	} catch (...) {
-		mojobe_unexpected("mojobe_BMenuItem_Timeout");
-	}
-	return {};
+	return self;
 }
 
 
@@ -11510,6 +11851,2444 @@ mojobe_BMenuItem_new__BMenuP_BMessageP(BMenu* a_menu, BMessage* a_message)
 // ~BMenuItem()
 void
 mojobe_BMenuItem_delete(BMenuItem* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BPopUpMenu
+
+
+// BMenuItem* BPopUpMenu::Go(BPoint where, bool autoInvoke, bool keepOpen, bool async)
+BMenuItem*
+mojobe_BPopUpMenu_Go__BPoint_bool_bool_bool(BPopUpMenu* self,
+	mojobe_BPoint a_where,
+	bool a_autoInvoke,
+	bool a_keepOpen,
+	bool a_async)
+{
+	try {
+		return self->Go(mojobe_from_c(a_where), a_autoInvoke, a_keepOpen, a_async);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPopUpMenu_Go__BPoint_bool_bool_bool");
+	}
+	return {};
+}
+
+
+// BMenuItem* BPopUpMenu::Go(BPoint where, bool autoInvoke, bool keepOpen, BRect openRect, bool async)
+BMenuItem*
+mojobe_BPopUpMenu_Go__BPoint_bool_bool_BRect_bool(BPopUpMenu* self,
+	mojobe_BPoint a_where,
+	bool a_autoInvoke,
+	bool a_keepOpen,
+	mojobe_BRect a_openRect,
+	bool a_async)
+{
+	try {
+		return self->Go(mojobe_from_c(a_where), a_autoInvoke, a_keepOpen, mojobe_from_c(a_openRect), a_async);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPopUpMenu_Go__BPoint_bool_bool_BRect_bool");
+	}
+	return {};
+}
+
+
+// void BPopUpMenu::SetAsyncAutoDestruct(bool on)
+void
+mojobe_BPopUpMenu_SetAsyncAutoDestruct(BPopUpMenu* self, bool a_on)
+{
+	try {
+		self->SetAsyncAutoDestruct(a_on);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPopUpMenu_SetAsyncAutoDestruct");
+	}
+}
+
+
+// bool BPopUpMenu::AsyncAutoDestruct() const
+bool
+mojobe_BPopUpMenu_AsyncAutoDestruct(BPopUpMenu* self)
+{
+	try {
+		return self->AsyncAutoDestruct();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPopUpMenu_AsyncAutoDestruct");
+	}
+	return {};
+}
+
+
+// BPopUpMenu* as BMenu*
+BMenu*
+mojobe_BPopUpMenu_as_BMenu(BPopUpMenu* self)
+{
+	return self;
+}
+
+
+// BPopUpMenu* as BView*
+BView*
+mojobe_BPopUpMenu_as_BView(BPopUpMenu* self)
+{
+	return self;
+}
+
+
+// BPopUpMenu* as BHandler*
+BHandler*
+mojobe_BPopUpMenu_as_BHandler(BPopUpMenu* self)
+{
+	return self;
+}
+
+
+// BPopUpMenu::BPopUpMenu(const char* name, bool radioMode, bool labelFromMarked, menu_layout layout)
+BPopUpMenu*
+mojobe_BPopUpMenu_new(const char* a_name,
+	bool a_radioMode,
+	bool a_labelFromMarked,
+	menu_layout a_layout)
+{
+	try {
+		return new(std::nothrow) BPopUpMenu(a_name, a_radioMode, a_labelFromMarked, a_layout);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BPopUpMenu_new");
+	}
+	return {};
+}
+
+
+// ~BPopUpMenu()
+void
+mojobe_BPopUpMenu_delete(BPopUpMenu* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BControl
+
+
+// void BControl::SetLabel(const char* string)
+void
+mojobe_BControl_SetLabel(BControl* self, const char* a_string)
+{
+	try {
+		self->SetLabel(a_string);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_SetLabel");
+	}
+}
+
+
+// const char* BControl::Label() const
+const char*
+mojobe_BControl_Label(BControl* self)
+{
+	try {
+		return self->Label();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_Label");
+	}
+	return {};
+}
+
+
+// void BControl::SetValue(int32 value)
+void
+mojobe_BControl_SetValue(BControl* self, int32 a_value)
+{
+	try {
+		self->SetValue(a_value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_SetValue");
+	}
+}
+
+
+// int32 BControl::Value() const
+int32
+mojobe_BControl_Value(BControl* self)
+{
+	try {
+		return self->Value();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_Value");
+	}
+	return {};
+}
+
+
+// void BControl::SetEnabled(bool enabled)
+void
+mojobe_BControl_SetEnabled(BControl* self, bool a_enabled)
+{
+	try {
+		self->SetEnabled(a_enabled);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_SetEnabled");
+	}
+}
+
+
+// bool BControl::IsEnabled() const
+bool
+mojobe_BControl_IsEnabled(BControl* self)
+{
+	try {
+		return self->IsEnabled();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_IsEnabled");
+	}
+	return {};
+}
+
+
+// BControl* as BView*
+BView*
+mojobe_BControl_as_BView(BControl* self)
+{
+	return self;
+}
+
+
+// BControl* as BInvoker*
+BInvoker*
+mojobe_BControl_as_BInvoker(BControl* self)
+{
+	return self;
+}
+
+
+// BControl* as BHandler*
+BHandler*
+mojobe_BControl_as_BHandler(BControl* self)
+{
+	return self;
+}
+
+
+// BControl* as BButton*, or NULL
+BButton*
+mojobe_BControl_to_BButton(BControl* self)
+{
+	return dynamic_cast<BButton*>(self);
+}
+
+
+// BControl* as BCheckBox*, or NULL
+BCheckBox*
+mojobe_BControl_to_BCheckBox(BControl* self)
+{
+	return dynamic_cast<BCheckBox*>(self);
+}
+
+
+// BControl* as BRadioButton*, or NULL
+BRadioButton*
+mojobe_BControl_to_BRadioButton(BControl* self)
+{
+	return dynamic_cast<BRadioButton*>(self);
+}
+
+
+// BControl* as BTextControl*, or NULL
+BTextControl*
+mojobe_BControl_to_BTextControl(BControl* self)
+{
+	return dynamic_cast<BTextControl*>(self);
+}
+
+
+// BControl* as BSlider*, or NULL
+BSlider*
+mojobe_BControl_to_BSlider(BControl* self)
+{
+	return dynamic_cast<BSlider*>(self);
+}
+
+
+// BControl::BControl(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BControl*
+mojobe_BControl_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BControl(mojobe_from_c(a_frame), a_name, a_label, a_message, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_new__BRect_charP_charP_BMessageP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BControl::BControl(const char* name, const char* label, BMessage* message, uint32 flags)
+BControl*
+mojobe_BControl_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BControl(a_name, a_label, a_message, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BControl_new__charP_charP_BMessageP_uint32");
+	}
+	return {};
+}
+
+
+// ~BControl()
+void
+mojobe_BControl_delete(BControl* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BButton
+
+
+// void BButton::MakeDefault(bool flag)
+void
+mojobe_BButton_MakeDefault(BButton* self, bool a_flag)
+{
+	try {
+		self->MakeDefault(a_flag);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_MakeDefault");
+	}
+}
+
+
+// bool BButton::IsDefault() const
+bool
+mojobe_BButton_IsDefault(BButton* self)
+{
+	try {
+		return self->IsDefault();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_IsDefault");
+	}
+	return {};
+}
+
+
+// bool BButton::IsFlat() const
+bool
+mojobe_BButton_IsFlat(BButton* self)
+{
+	try {
+		return self->IsFlat();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_IsFlat");
+	}
+	return {};
+}
+
+
+// void BButton::SetFlat(bool flat)
+void
+mojobe_BButton_SetFlat(BButton* self, bool a_flat)
+{
+	try {
+		self->SetFlat(a_flat);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_SetFlat");
+	}
+}
+
+
+// BMessage* BButton::PopUpMessage() const
+BMessage*
+mojobe_BButton_PopUpMessage(BButton* self)
+{
+	try {
+		return self->PopUpMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_PopUpMessage");
+	}
+	return {};
+}
+
+
+// void BButton::SetPopUpMessage(BMessage* message)
+void
+mojobe_BButton_SetPopUpMessage(BButton* self, BMessage* a_message)
+{
+	try {
+		self->SetPopUpMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_SetPopUpMessage");
+	}
+}
+
+
+// BButton* as BControl*
+BControl*
+mojobe_BButton_as_BControl(BButton* self)
+{
+	return self;
+}
+
+
+// BButton* as BView*
+BView*
+mojobe_BButton_as_BView(BButton* self)
+{
+	return self;
+}
+
+
+// BButton* as BInvoker*
+BInvoker*
+mojobe_BButton_as_BInvoker(BButton* self)
+{
+	return self;
+}
+
+
+// BButton* as BHandler*
+BHandler*
+mojobe_BButton_as_BHandler(BButton* self)
+{
+	return self;
+}
+
+
+// BButton::BButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BButton*
+mojobe_BButton_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BButton(mojobe_from_c(a_frame), a_name, a_label, a_message, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_new__BRect_charP_charP_BMessageP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BButton::BButton(const char* name, const char* label, BMessage* message, uint32 flags)
+BButton*
+mojobe_BButton_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BButton(a_name, a_label, a_message, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_new__charP_charP_BMessageP_uint32");
+	}
+	return {};
+}
+
+
+// BButton::BButton(const char* label, BMessage* message)
+BButton*
+mojobe_BButton_new__charP_BMessageP(const char* a_label, BMessage* a_message)
+{
+	try {
+		return new(std::nothrow) BButton(a_label, a_message);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BButton_new__charP_BMessageP");
+	}
+	return {};
+}
+
+
+// ~BButton()
+void
+mojobe_BButton_delete(BButton* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BCheckBox
+
+
+// bool BCheckBox::IsPartialStateToOff() const
+bool
+mojobe_BCheckBox_IsPartialStateToOff(BCheckBox* self)
+{
+	try {
+		return self->IsPartialStateToOff();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BCheckBox_IsPartialStateToOff");
+	}
+	return {};
+}
+
+
+// void BCheckBox::SetPartialStateToOff(bool partialToOff)
+void
+mojobe_BCheckBox_SetPartialStateToOff(BCheckBox* self, bool a_partialToOff)
+{
+	try {
+		self->SetPartialStateToOff(a_partialToOff);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BCheckBox_SetPartialStateToOff");
+	}
+}
+
+
+// BCheckBox* as BControl*
+BControl*
+mojobe_BCheckBox_as_BControl(BCheckBox* self)
+{
+	return self;
+}
+
+
+// BCheckBox* as BView*
+BView*
+mojobe_BCheckBox_as_BView(BCheckBox* self)
+{
+	return self;
+}
+
+
+// BCheckBox* as BInvoker*
+BInvoker*
+mojobe_BCheckBox_as_BInvoker(BCheckBox* self)
+{
+	return self;
+}
+
+
+// BCheckBox* as BHandler*
+BHandler*
+mojobe_BCheckBox_as_BHandler(BCheckBox* self)
+{
+	return self;
+}
+
+
+// BCheckBox::BCheckBox(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BCheckBox*
+mojobe_BCheckBox_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BCheckBox(mojobe_from_c(a_frame), a_name, a_label, a_message, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BCheckBox_new__BRect_charP_charP_BMessageP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BCheckBox::BCheckBox(const char* name, const char* label, BMessage* message, uint32 flags)
+BCheckBox*
+mojobe_BCheckBox_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BCheckBox(a_name, a_label, a_message, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BCheckBox_new__charP_charP_BMessageP_uint32");
+	}
+	return {};
+}
+
+
+// BCheckBox::BCheckBox(const char* label, BMessage* message)
+BCheckBox*
+mojobe_BCheckBox_new__charP_BMessageP(const char* a_label, BMessage* a_message)
+{
+	try {
+		return new(std::nothrow) BCheckBox(a_label, a_message);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BCheckBox_new__charP_BMessageP");
+	}
+	return {};
+}
+
+
+// ~BCheckBox()
+void
+mojobe_BCheckBox_delete(BCheckBox* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BRadioButton
+
+
+// BRadioButton* as BControl*
+BControl*
+mojobe_BRadioButton_as_BControl(BRadioButton* self)
+{
+	return self;
+}
+
+
+// BRadioButton* as BView*
+BView*
+mojobe_BRadioButton_as_BView(BRadioButton* self)
+{
+	return self;
+}
+
+
+// BRadioButton* as BInvoker*
+BInvoker*
+mojobe_BRadioButton_as_BInvoker(BRadioButton* self)
+{
+	return self;
+}
+
+
+// BRadioButton* as BHandler*
+BHandler*
+mojobe_BRadioButton_as_BHandler(BRadioButton* self)
+{
+	return self;
+}
+
+
+// BRadioButton::BRadioButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BRadioButton*
+mojobe_BRadioButton_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BRadioButton(mojobe_from_c(a_frame), a_name, a_label, a_message, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRadioButton_new__BRect_charP_charP_BMessageP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BRadioButton::BRadioButton(const char* name, const char* label, BMessage* message, uint32 flags)
+BRadioButton*
+mojobe_BRadioButton_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BRadioButton(a_name, a_label, a_message, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRadioButton_new__charP_charP_BMessageP_uint32");
+	}
+	return {};
+}
+
+
+// BRadioButton::BRadioButton(const char* label, BMessage* message)
+BRadioButton*
+mojobe_BRadioButton_new__charP_BMessageP(const char* a_label,
+	BMessage* a_message)
+{
+	try {
+		return new(std::nothrow) BRadioButton(a_label, a_message);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRadioButton_new__charP_BMessageP");
+	}
+	return {};
+}
+
+
+// ~BRadioButton()
+void
+mojobe_BRadioButton_delete(BRadioButton* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BTextControl
+
+
+// void BTextControl::SetText(const char* text)
+void
+mojobe_BTextControl_SetText(BTextControl* self, const char* a_text)
+{
+	try {
+		self->SetText(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_SetText");
+	}
+}
+
+
+// const char* BTextControl::Text() const
+const char*
+mojobe_BTextControl_Text(BTextControl* self)
+{
+	try {
+		return self->Text();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_Text");
+	}
+	return {};
+}
+
+
+// int32 BTextControl::TextLength() const
+int32
+mojobe_BTextControl_TextLength(BTextControl* self)
+{
+	try {
+		return self->TextLength();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_TextLength");
+	}
+	return {};
+}
+
+
+// void BTextControl::MarkAsInvalid(bool invalid)
+void
+mojobe_BTextControl_MarkAsInvalid(BTextControl* self, bool a_invalid)
+{
+	try {
+		self->MarkAsInvalid(a_invalid);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_MarkAsInvalid");
+	}
+}
+
+
+// void BTextControl::SetModificationMessage(BMessage* message)
+void
+mojobe_BTextControl_SetModificationMessage(BTextControl* self,
+	BMessage* a_message)
+{
+	try {
+		self->SetModificationMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_SetModificationMessage");
+	}
+}
+
+
+// BMessage* BTextControl::ModificationMessage() const
+BMessage*
+mojobe_BTextControl_ModificationMessage(BTextControl* self)
+{
+	try {
+		return self->ModificationMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_ModificationMessage");
+	}
+	return {};
+}
+
+
+// void BTextControl::SetAlignment(alignment label, alignment text)
+void
+mojobe_BTextControl_SetAlignment(BTextControl* self,
+	alignment a_label,
+	alignment a_text)
+{
+	try {
+		self->SetAlignment(a_label, a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_SetAlignment");
+	}
+}
+
+
+// void BTextControl::GetAlignment(alignment* _label, alignment* _text) const
+void
+mojobe_BTextControl_GetAlignment(BTextControl* self,
+	alignment * a__label,
+	alignment * a__text)
+{
+	try {
+		self->GetAlignment(a__label, a__text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_GetAlignment");
+	}
+}
+
+
+// void BTextControl::SetDivider(float position)
+void
+mojobe_BTextControl_SetDivider(BTextControl* self, float a_position)
+{
+	try {
+		self->SetDivider(a_position);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_SetDivider");
+	}
+}
+
+
+// float BTextControl::Divider() const
+float
+mojobe_BTextControl_Divider(BTextControl* self)
+{
+	try {
+		return self->Divider();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_Divider");
+	}
+	return {};
+}
+
+
+// BTextControl* as BControl*
+BControl*
+mojobe_BTextControl_as_BControl(BTextControl* self)
+{
+	return self;
+}
+
+
+// BTextControl* as BView*
+BView*
+mojobe_BTextControl_as_BView(BTextControl* self)
+{
+	return self;
+}
+
+
+// BTextControl* as BInvoker*
+BInvoker*
+mojobe_BTextControl_as_BInvoker(BTextControl* self)
+{
+	return self;
+}
+
+
+// BTextControl* as BHandler*
+BHandler*
+mojobe_BTextControl_as_BHandler(BTextControl* self)
+{
+	return self;
+}
+
+
+// BTextControl::BTextControl(BRect frame, const char* name, const char* label, const char* initialText, BMessage* message, uint32 resizeMask, uint32 flags)
+BTextControl*
+mojobe_BTextControl_new__BRect_charP_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message,
+	uint32 a_resizeMask,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BTextControl(mojobe_from_c(a_frame), a_name, a_label, a_initialText, a_message, a_resizeMask, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_new__BRect_charP_charP_charP_BMessageP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BTextControl::BTextControl(const char* name, const char* label, const char* initialText, BMessage* message, uint32 flags)
+BTextControl*
+mojobe_BTextControl_new__charP_charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BTextControl(a_name, a_label, a_initialText, a_message, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_new__charP_charP_charP_BMessageP_uint32");
+	}
+	return {};
+}
+
+
+// BTextControl::BTextControl(const char* label, const char* initialText, BMessage* message)
+BTextControl*
+mojobe_BTextControl_new__charP_charP_BMessageP(const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message)
+{
+	try {
+		return new(std::nothrow) BTextControl(a_label, a_initialText, a_message);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_new__charP_charP_BMessageP");
+	}
+	return {};
+}
+
+
+// ~BTextControl()
+void
+mojobe_BTextControl_delete(BTextControl* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BSlider
+
+
+// void BSlider::SetLimitLabels(const char* minLabel, const char* maxLabel)
+void
+mojobe_BSlider_SetLimitLabels(BSlider* self,
+	const char* a_minLabel,
+	const char* a_maxLabel)
+{
+	try {
+		self->SetLimitLabels(a_minLabel, a_maxLabel);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetLimitLabels");
+	}
+}
+
+
+// const char* BSlider::MinLimitLabel() const
+const char*
+mojobe_BSlider_MinLimitLabel(BSlider* self)
+{
+	try {
+		return self->MinLimitLabel();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_MinLimitLabel");
+	}
+	return {};
+}
+
+
+// const char* BSlider::MaxLimitLabel() const
+const char*
+mojobe_BSlider_MaxLimitLabel(BSlider* self)
+{
+	try {
+		return self->MaxLimitLabel();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_MaxLimitLabel");
+	}
+	return {};
+}
+
+
+// int32 BSlider::ValueForPoint(BPoint point) const
+int32
+mojobe_BSlider_ValueForPoint(BSlider* self, mojobe_BPoint a_point)
+{
+	try {
+		return self->ValueForPoint(mojobe_from_c(a_point));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_ValueForPoint");
+	}
+	return {};
+}
+
+
+// void BSlider::SetPosition(float arg0)
+void
+mojobe_BSlider_SetPosition(BSlider* self, float a_arg0)
+{
+	try {
+		self->SetPosition(a_arg0);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetPosition");
+	}
+}
+
+
+// float BSlider::Position() const
+float
+mojobe_BSlider_Position(BSlider* self)
+{
+	try {
+		return self->Position();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_Position");
+	}
+	return {};
+}
+
+
+// void BSlider::GetLimits(int32* minimum, int32* maximum) const
+void
+mojobe_BSlider_GetLimits(BSlider* self, int32 * a_minimum, int32 * a_maximum)
+{
+	try {
+		self->GetLimits(a_minimum, a_maximum);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_GetLimits");
+	}
+}
+
+
+// void BSlider::DrawSlider()
+void
+mojobe_BSlider_DrawSlider(BSlider* self)
+{
+	try {
+		self->DrawSlider();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawSlider");
+	}
+}
+
+
+// void BSlider::DrawBar()
+void
+mojobe_BSlider_DrawBar(BSlider* self)
+{
+	try {
+		self->DrawBar();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawBar");
+	}
+}
+
+
+// void BSlider::DrawHashMarks()
+void
+mojobe_BSlider_DrawHashMarks(BSlider* self)
+{
+	try {
+		self->DrawHashMarks();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawHashMarks");
+	}
+}
+
+
+// void BSlider::DrawThumb()
+void
+mojobe_BSlider_DrawThumb(BSlider* self)
+{
+	try {
+		self->DrawThumb();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawThumb");
+	}
+}
+
+
+// void BSlider::DrawFocusMark()
+void
+mojobe_BSlider_DrawFocusMark(BSlider* self)
+{
+	try {
+		self->DrawFocusMark();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawFocusMark");
+	}
+}
+
+
+// void BSlider::DrawText()
+void
+mojobe_BSlider_DrawText(BSlider* self)
+{
+	try {
+		self->DrawText();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_DrawText");
+	}
+}
+
+
+// const char* BSlider::UpdateText() const
+const char*
+mojobe_BSlider_UpdateText(BSlider* self)
+{
+	try {
+		return self->UpdateText();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_UpdateText");
+	}
+	return {};
+}
+
+
+// void BSlider::UpdateTextChanged()
+void
+mojobe_BSlider_UpdateTextChanged(BSlider* self)
+{
+	try {
+		self->UpdateTextChanged();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_UpdateTextChanged");
+	}
+}
+
+
+// BRect BSlider::BarFrame() const
+mojobe_BRect
+mojobe_BSlider_BarFrame(BSlider* self)
+{
+	try {
+		return mojobe_to_c(self->BarFrame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_BarFrame");
+	}
+	return {};
+}
+
+
+// BRect BSlider::HashMarksFrame() const
+mojobe_BRect
+mojobe_BSlider_HashMarksFrame(BSlider* self)
+{
+	try {
+		return mojobe_to_c(self->HashMarksFrame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_HashMarksFrame");
+	}
+	return {};
+}
+
+
+// BRect BSlider::ThumbFrame() const
+mojobe_BRect
+mojobe_BSlider_ThumbFrame(BSlider* self)
+{
+	try {
+		return mojobe_to_c(self->ThumbFrame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_ThumbFrame");
+	}
+	return {};
+}
+
+
+// void BSlider::SetModificationMessage(BMessage* message)
+void
+mojobe_BSlider_SetModificationMessage(BSlider* self, BMessage* a_message)
+{
+	try {
+		self->SetModificationMessage(a_message);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetModificationMessage");
+	}
+}
+
+
+// BMessage* BSlider::ModificationMessage() const
+BMessage*
+mojobe_BSlider_ModificationMessage(BSlider* self)
+{
+	try {
+		return self->ModificationMessage();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_ModificationMessage");
+	}
+	return {};
+}
+
+
+// void BSlider::SetSnoozeAmount(int32 microSeconds)
+void
+mojobe_BSlider_SetSnoozeAmount(BSlider* self, int32 a_microSeconds)
+{
+	try {
+		self->SetSnoozeAmount(a_microSeconds);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetSnoozeAmount");
+	}
+}
+
+
+// int32 BSlider::SnoozeAmount() const
+int32
+mojobe_BSlider_SnoozeAmount(BSlider* self)
+{
+	try {
+		return self->SnoozeAmount();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SnoozeAmount");
+	}
+	return {};
+}
+
+
+// void BSlider::SetKeyIncrementValue(int32 value)
+void
+mojobe_BSlider_SetKeyIncrementValue(BSlider* self, int32 a_value)
+{
+	try {
+		self->SetKeyIncrementValue(a_value);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetKeyIncrementValue");
+	}
+}
+
+
+// int32 BSlider::KeyIncrementValue() const
+int32
+mojobe_BSlider_KeyIncrementValue(BSlider* self)
+{
+	try {
+		return self->KeyIncrementValue();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_KeyIncrementValue");
+	}
+	return {};
+}
+
+
+// void BSlider::SetHashMarkCount(int32 count)
+void
+mojobe_BSlider_SetHashMarkCount(BSlider* self, int32 a_count)
+{
+	try {
+		self->SetHashMarkCount(a_count);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetHashMarkCount");
+	}
+}
+
+
+// int32 BSlider::HashMarkCount() const
+int32
+mojobe_BSlider_HashMarkCount(BSlider* self)
+{
+	try {
+		return self->HashMarkCount();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_HashMarkCount");
+	}
+	return {};
+}
+
+
+// void BSlider::SetHashMarks(hash_mark_location where)
+void
+mojobe_BSlider_SetHashMarks(BSlider* self, hash_mark_location a_where)
+{
+	try {
+		self->SetHashMarks(a_where);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetHashMarks");
+	}
+}
+
+
+// hash_mark_location BSlider::HashMarks() const
+hash_mark_location
+mojobe_BSlider_HashMarks(BSlider* self)
+{
+	try {
+		return self->HashMarks();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_HashMarks");
+	}
+	return {};
+}
+
+
+// void BSlider::SetStyle(thumb_style style)
+void
+mojobe_BSlider_SetStyle(BSlider* self, thumb_style a_style)
+{
+	try {
+		self->SetStyle(a_style);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetStyle");
+	}
+}
+
+
+// thumb_style BSlider::Style() const
+thumb_style
+mojobe_BSlider_Style(BSlider* self)
+{
+	try {
+		return self->Style();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_Style");
+	}
+	return {};
+}
+
+
+// void BSlider::SetBarColor(rgb_color color)
+void
+mojobe_BSlider_SetBarColor(BSlider* self, mojobe_rgb_color a_color)
+{
+	try {
+		self->SetBarColor(mojobe_from_c(a_color));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetBarColor");
+	}
+}
+
+
+// rgb_color BSlider::BarColor() const
+mojobe_rgb_color
+mojobe_BSlider_BarColor(BSlider* self)
+{
+	try {
+		return mojobe_to_c(self->BarColor());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_BarColor");
+	}
+	return {};
+}
+
+
+// void BSlider::UseFillColor(bool useFill, const rgb_color* color)
+void
+mojobe_BSlider_UseFillColor(BSlider* self, bool a_useFill)
+{
+	try {
+		self->UseFillColor(a_useFill, static_cast<const rgb_color *>(NULL));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_UseFillColor");
+	}
+}
+
+
+// bool BSlider::FillColor(rgb_color* color) const
+bool
+mojobe_BSlider_FillColor(BSlider* self, mojobe_rgb_color* a_color)
+{
+	try {
+		rgb_color t_color;
+		bool result = self->FillColor(&t_color);
+		if (a_color != NULL)
+		*a_color = mojobe_to_c(t_color);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_FillColor");
+	}
+	return {};
+}
+
+
+// BView* BSlider::OffscreenView() const
+BView*
+mojobe_BSlider_OffscreenView(BSlider* self)
+{
+	try {
+		return self->OffscreenView();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_OffscreenView");
+	}
+	return {};
+}
+
+
+// orientation BSlider::Orientation() const
+orientation
+mojobe_BSlider_Orientation(BSlider* self)
+{
+	try {
+		return self->Orientation();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_Orientation");
+	}
+	return {};
+}
+
+
+// void BSlider::SetOrientation(orientation arg0)
+void
+mojobe_BSlider_SetOrientation(BSlider* self, orientation a_arg0)
+{
+	try {
+		self->SetOrientation(a_arg0);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetOrientation");
+	}
+}
+
+
+// float BSlider::BarThickness() const
+float
+mojobe_BSlider_BarThickness(BSlider* self)
+{
+	try {
+		return self->BarThickness();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_BarThickness");
+	}
+	return {};
+}
+
+
+// void BSlider::SetBarThickness(float thickness)
+void
+mojobe_BSlider_SetBarThickness(BSlider* self, float a_thickness)
+{
+	try {
+		self->SetBarThickness(a_thickness);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetBarThickness");
+	}
+}
+
+
+// void BSlider::SetLimits(int32 minimum, int32 maximum)
+void
+mojobe_BSlider_SetLimits(BSlider* self, int32 a_minimum, int32 a_maximum)
+{
+	try {
+		self->SetLimits(a_minimum, a_maximum);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_SetLimits");
+	}
+}
+
+
+// float BSlider::MaxUpdateTextWidth()
+float
+mojobe_BSlider_MaxUpdateTextWidth(BSlider* self)
+{
+	try {
+		return self->MaxUpdateTextWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_MaxUpdateTextWidth");
+	}
+	return {};
+}
+
+
+// BSlider* as BControl*
+BControl*
+mojobe_BSlider_as_BControl(BSlider* self)
+{
+	return self;
+}
+
+
+// BSlider* as BView*
+BView*
+mojobe_BSlider_as_BView(BSlider* self)
+{
+	return self;
+}
+
+
+// BSlider* as BInvoker*
+BInvoker*
+mojobe_BSlider_as_BInvoker(BSlider* self)
+{
+	return self;
+}
+
+
+// BSlider* as BHandler*
+BHandler*
+mojobe_BSlider_as_BHandler(BSlider* self)
+{
+	return self;
+}
+
+
+// BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, thumb_style thumbType, uint32 resizingMode, uint32 flags)
+BSlider*
+mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_thumb_style_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	thumb_style a_thumbType,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BSlider(mojobe_from_c(a_frame), a_name, a_label, a_message, a_minValue, a_maxValue, a_thumbType, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_thumb_style_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 resizingMode, uint32 flags)
+BSlider*
+mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	orientation a_posture,
+	thumb_style a_thumbType,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BSlider(mojobe_from_c(a_frame), a_name, a_label, a_message, a_minValue, a_maxValue, a_posture, a_thumbType, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BSlider::BSlider(const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 flags)
+BSlider*
+mojobe_BSlider_new__charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	orientation a_posture,
+	thumb_style a_thumbType,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BSlider(a_name, a_label, a_message, a_minValue, a_maxValue, a_posture, a_thumbType, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSlider_new__charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32");
+	}
+	return {};
+}
+
+
+// ~BSlider()
+void
+mojobe_BSlider_delete(BSlider* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BStringView
+
+
+// void BStringView::SetText(const char* text)
+void
+mojobe_BStringView_SetText(BStringView* self, const char* a_text)
+{
+	try {
+		self->SetText(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_SetText");
+	}
+}
+
+
+// const char* BStringView::Text() const
+const char*
+mojobe_BStringView_Text(BStringView* self)
+{
+	try {
+		return self->Text();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_Text");
+	}
+	return {};
+}
+
+
+// void BStringView::SetAlignment(alignment flag)
+void
+mojobe_BStringView_SetAlignment(BStringView* self, alignment a_flag)
+{
+	try {
+		self->SetAlignment(a_flag);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_SetAlignment");
+	}
+}
+
+
+// alignment BStringView::Alignment() const
+alignment
+mojobe_BStringView_Alignment(BStringView* self)
+{
+	try {
+		return self->Alignment();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_Alignment");
+	}
+	return {};
+}
+
+
+// void BStringView::SetTruncation(uint32 truncationMode)
+void
+mojobe_BStringView_SetTruncation(BStringView* self, uint32 a_truncationMode)
+{
+	try {
+		self->SetTruncation(a_truncationMode);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_SetTruncation");
+	}
+}
+
+
+// uint32 BStringView::Truncation() const
+uint32
+mojobe_BStringView_Truncation(BStringView* self)
+{
+	try {
+		return self->Truncation();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_Truncation");
+	}
+	return {};
+}
+
+
+// BStringView* as BView*
+BView*
+mojobe_BStringView_as_BView(BStringView* self)
+{
+	return self;
+}
+
+
+// BStringView* as BHandler*
+BHandler*
+mojobe_BStringView_as_BHandler(BStringView* self)
+{
+	return self;
+}
+
+
+// BStringView::BStringView(BRect frame, const char* name, const char* text, uint32 resizingMode, uint32 flags)
+BStringView*
+mojobe_BStringView_new__BRect_charP_charP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_text,
+	uint32 a_resizingMode,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BStringView(mojobe_from_c(a_frame), a_name, a_text, a_resizingMode, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_new__BRect_charP_charP_uint32_uint32");
+	}
+	return {};
+}
+
+
+// BStringView::BStringView(const char* name, const char* text, uint32 flags)
+BStringView*
+mojobe_BStringView_new__charP_charP_uint32(const char* a_name,
+	const char* a_text,
+	uint32 a_flags)
+{
+	try {
+		return new(std::nothrow) BStringView(a_name, a_text, a_flags);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BStringView_new__charP_charP_uint32");
+	}
+	return {};
+}
+
+
+// ~BStringView()
+void
+mojobe_BStringView_delete(BStringView* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BScrollView
+
+
+// void BScrollView::SetBorder(border_style border)
+void
+mojobe_BScrollView_SetBorder(BScrollView* self, border_style a_border)
+{
+	try {
+		self->SetBorder(a_border);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_SetBorder");
+	}
+}
+
+
+// border_style BScrollView::Border() const
+border_style
+mojobe_BScrollView_Border(BScrollView* self)
+{
+	try {
+		return self->Border();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_Border");
+	}
+	return {};
+}
+
+
+// void BScrollView::SetBorders(uint32 borders)
+void
+mojobe_BScrollView_SetBorders(BScrollView* self, uint32 a_borders)
+{
+	try {
+		self->SetBorders(a_borders);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_SetBorders");
+	}
+}
+
+
+// uint32 BScrollView::Borders() const
+uint32
+mojobe_BScrollView_Borders(BScrollView* self)
+{
+	try {
+		return self->Borders();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_Borders");
+	}
+	return {};
+}
+
+
+// status_t BScrollView::SetBorderHighlighted(bool highlight)
+status_t
+mojobe_BScrollView_SetBorderHighlighted(BScrollView* self, bool a_highlight)
+{
+	try {
+		return self->SetBorderHighlighted(a_highlight);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_SetBorderHighlighted");
+	}
+	return B_ERROR;
+}
+
+
+// bool BScrollView::IsBorderHighlighted() const
+bool
+mojobe_BScrollView_IsBorderHighlighted(BScrollView* self)
+{
+	try {
+		return self->IsBorderHighlighted();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_IsBorderHighlighted");
+	}
+	return {};
+}
+
+
+// void BScrollView::SetTarget(BView* target)
+void
+mojobe_BScrollView_SetTarget(BScrollView* self, BView* a_target)
+{
+	try {
+		self->SetTarget(a_target);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_SetTarget");
+	}
+}
+
+
+// BView* BScrollView::Target() const
+BView*
+mojobe_BScrollView_Target(BScrollView* self)
+{
+	try {
+		return self->Target();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_Target");
+	}
+	return {};
+}
+
+
+// BScrollView* as BView*
+BView*
+mojobe_BScrollView_as_BView(BScrollView* self)
+{
+	return self;
+}
+
+
+// BScrollView* as BHandler*
+BHandler*
+mojobe_BScrollView_as_BHandler(BScrollView* self)
+{
+	return self;
+}
+
+
+// BScrollView::BScrollView(const char* name, BView* target, uint32 resizingMode, uint32 flags, bool horizontal, bool vertical, border_style border)
+BScrollView*
+mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style(const char* a_name,
+	BView* a_target,
+	uint32 a_resizingMode,
+	uint32 a_flags,
+	bool a_horizontal,
+	bool a_vertical,
+	border_style a_border)
+{
+	try {
+		return new(std::nothrow) BScrollView(a_name, a_target, a_resizingMode, a_flags, a_horizontal, a_vertical, a_border);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style");
+	}
+	return {};
+}
+
+
+// BScrollView::BScrollView(const char* name, BView* target, uint32 flags, bool horizontal, bool vertical, border_style border)
+BScrollView*
+mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style(const char* a_name,
+	BView* a_target,
+	uint32 a_flags,
+	bool a_horizontal,
+	bool a_vertical,
+	border_style a_border)
+{
+	try {
+		return new(std::nothrow) BScrollView(a_name, a_target, a_flags, a_horizontal, a_vertical, a_border);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style");
+	}
+	return {};
+}
+
+
+// ~BScrollView()
+void
+mojobe_BScrollView_delete(BScrollView* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BAlert
+
+
+// void BAlert::SetType(alert_type type)
+void
+mojobe_BAlert_SetType(BAlert* self, alert_type a_type)
+{
+	try {
+		self->SetType(a_type);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetType");
+	}
+}
+
+
+// void BAlert::SetText(const char* text)
+void
+mojobe_BAlert_SetText(BAlert* self, const char* a_text)
+{
+	try {
+		self->SetText(a_text);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetText");
+	}
+}
+
+
+// void BAlert::SetButtonSpacing(button_spacing spacing)
+void
+mojobe_BAlert_SetButtonSpacing(BAlert* self, button_spacing a_spacing)
+{
+	try {
+		self->SetButtonSpacing(a_spacing);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetButtonSpacing");
+	}
+}
+
+
+// void BAlert::SetButtonWidth(button_width width)
+void
+mojobe_BAlert_SetButtonWidth(BAlert* self, button_width a_width)
+{
+	try {
+		self->SetButtonWidth(a_width);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetButtonWidth");
+	}
+}
+
+
+// void BAlert::SetShortcut(int32 buttonIndex, char key)
+void
+mojobe_BAlert_SetShortcut(BAlert* self, int32 a_buttonIndex, char a_key)
+{
+	try {
+		self->SetShortcut(a_buttonIndex, a_key);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_SetShortcut");
+	}
+}
+
+
+// char BAlert::Shortcut(int32 buttonIndex) const
+char
+mojobe_BAlert_Shortcut(BAlert* self, int32 a_buttonIndex)
+{
+	try {
+		return self->Shortcut(a_buttonIndex);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_Shortcut");
+	}
+	return {};
+}
+
+
+// int32 BAlert::Go()
+int32
+mojobe_BAlert_Go__void(BAlert* self)
+{
+	try {
+		return self->Go();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_Go__void");
+	}
+	return {};
+}
+
+
+// status_t BAlert::Go(BInvoker* invoker)
+status_t
+mojobe_BAlert_Go__BInvokerP(BAlert* self, BInvoker* a_invoker)
+{
+	try {
+		return self->Go(a_invoker);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_Go__BInvokerP");
+	}
+	return B_ERROR;
+}
+
+
+// void BAlert::AddButton(const char* label, char key)
+void
+mojobe_BAlert_AddButton(BAlert* self, const char* a_label, char a_key)
+{
+	try {
+		self->AddButton(a_label, a_key);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_AddButton");
+	}
+}
+
+
+// int32 BAlert::CountButtons() const
+int32
+mojobe_BAlert_CountButtons(BAlert* self)
+{
+	try {
+		return self->CountButtons();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_CountButtons");
+	}
+	return {};
+}
+
+
+// BButton* BAlert::ButtonAt(int32 index) const
+BButton*
+mojobe_BAlert_ButtonAt(BAlert* self, int32 a_index)
+{
+	try {
+		return self->ButtonAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_ButtonAt");
+	}
+	return {};
+}
+
+
+// void BAlert::Quit()
+void
+mojobe_BAlert_Quit(BAlert* self)
+{
+	try {
+		self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_Quit");
+	}
+}
+
+
+// BAlert* as BWindow*
+BWindow*
+mojobe_BAlert_as_BWindow(BAlert* self)
+{
+	return self;
+}
+
+
+// BAlert* as BLooper*
+BLooper*
+mojobe_BAlert_as_BLooper(BAlert* self)
+{
+	return self;
+}
+
+
+// BAlert* as BHandler*
+BHandler*
+mojobe_BAlert_as_BHandler(BAlert* self)
+{
+	return self;
+}
+
+
+// BAlert::BAlert()
+BAlert*
+mojobe_BAlert_new__void()
+{
+	try {
+		return new(std::nothrow) BAlert();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_new__void");
+	}
+	return {};
+}
+
+
+// BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, alert_type type)
+BAlert*
+mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_alert_type(const char* a_title,
+	const char* a_text,
+	const char* a_button1,
+	const char* a_button2,
+	const char* a_button3,
+	button_width a_width,
+	alert_type a_type)
+{
+	try {
+		return new(std::nothrow) BAlert(a_title, a_text, a_button1, a_button2, a_button3, a_width, a_type);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_alert_type");
+	}
+	return {};
+}
+
+
+// BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, button_spacing spacing, alert_type type)
+BAlert*
+mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spacing_alert_type(const char* a_title,
+	const char* a_text,
+	const char* a_button1,
+	const char* a_button2,
+	const char* a_button3,
+	button_width a_width,
+	button_spacing a_spacing,
+	alert_type a_type)
+{
+	try {
+		return new(std::nothrow) BAlert(a_title, a_text, a_button1, a_button2, a_button3, a_width, a_spacing, a_type);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spacing_alert_type");
+	}
+	return {};
+}
+
+
+// deletes a BAlert that was never handed over: locked, then Quit()
+void
+mojobe_BAlert_destroy(BAlert* self)
+{
+	try {
+		if (self->Lock())
+			self->Quit();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_destroy");
+	}
+}
+
+
+
+// #pragma mark - BMessageRunner
+
+
+// status_t BMessageRunner::InitCheck() const
+status_t
+mojobe_BMessageRunner_InitCheck(BMessageRunner* self)
+{
+	try {
+		return self->InitCheck();
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_InitCheck");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessageRunner::SetInterval(bigtime_t interval)
+status_t
+mojobe_BMessageRunner_SetInterval(BMessageRunner* self, bigtime_t a_interval)
+{
+	try {
+		return self->SetInterval(a_interval);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_SetInterval");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessageRunner::SetCount(int32 count)
+status_t
+mojobe_BMessageRunner_SetCount(BMessageRunner* self, int32 a_count)
+{
+	try {
+		return self->SetCount(a_count);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_SetCount");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessageRunner::GetInfo(bigtime_t* interval, int32* count) const
+status_t
+mojobe_BMessageRunner_GetInfo(BMessageRunner* self,
+	bigtime_t * a_interval,
+	int32 * a_count)
+{
+	try {
+		return self->GetInfo(a_interval, a_count);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_GetInfo");
+	}
+	return B_ERROR;
+}
+
+
+// BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)
+BMessageRunner*
+mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BMessageRunner* object = new(std::nothrow) BMessageRunner(*a_target, a_message, a_interval, a_count);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32");
+	}
+	return {};
+}
+
+
+// BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)
+BMessageRunner*
+mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_BMessenger(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count,
+	const BMessenger* a_replyTo,
+	status_t* _status)
+{
+	try {
+		status_t status = B_NO_MEMORY;
+		BMessageRunner* object = new(std::nothrow) BMessageRunner(*a_target, a_message, a_interval, a_count, *a_replyTo);
+		if (object != NULL) {
+			status = object->InitCheck();
+			if (status != B_OK) {
+				delete object;
+				object = NULL;
+			}
+		}
+		*_status = status;
+		return object;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_BMessenger");
+	}
+	return {};
+}
+
+
+// ~BMessageRunner()
+void
+mojobe_BMessageRunner_delete(BMessageRunner* self)
 {
 	delete self;
 }

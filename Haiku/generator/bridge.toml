@@ -15,6 +15,18 @@ headers = [
 	"Menu.h",
 	"MenuBar.h",
 	"MenuItem.h",
+	"PopUpMenu.h",
+	"Invoker.h",
+	"Control.h",
+	"Button.h",
+	"CheckBox.h",
+	"RadioButton.h",
+	"TextControl.h",
+	"Slider.h",
+	"StringView.h",
+	"ScrollView.h",
+	"Alert.h",
+	"MessageRunner.h",
 ]
 constant_dirs = ["os/app", "os/interface", "os/kernel", "os/support"]
 
@@ -97,6 +109,46 @@ kind = "owned"
 [classes.BMenuItem]
 kind = "owned"
 
+[classes.BPopUpMenu]
+kind = "owned"
+
+# Controls: a BInvoker sends its message; a BControl is a view that is one.
+[classes.BInvoker]
+kind = "owned"
+
+[classes.BControl]
+kind = "owned"
+
+[classes.BButton]
+kind = "owned"
+
+[classes.BCheckBox]
+kind = "owned"
+
+[classes.BRadioButton]
+kind = "owned"
+
+[classes.BTextControl]
+kind = "owned"
+
+[classes.BSlider]
+kind = "owned"
+
+[classes.BStringView]
+kind = "owned"
+
+[classes.BScrollView]
+kind = "owned"
+
+[classes.BAlert]
+kind = "self-owning"
+hands_over = ["Go"]        # runs it, and it quits (deletes itself)
+destroy = "quit"
+
+[classes.BMessageRunner]
+kind = "owned"
+init_check = "InitCheck()" # the constructors report only through InitCheck()
+
 # Parameters that hand an object to the receiver, by method or constructor
 # ("Class::Name"), from the Be Book.
 [adopts]
@@ -105,6 +157,16 @@ kind = "owned"
 "BMenu::AddItem" = ["item", "menu"]
 "BMenuItem::BMenuItem" = ["message", "menu"]
 "BInvoker::SetMessage" = ["message"]
+"BInvoker::BInvoker" = ["message"]
+"BControl::BControl" = ["message"]
+"BButton::BButton" = ["message"]
+"BCheckBox::BCheckBox" = ["message"]
+"BRadioButton::BRadioButton" = ["message"]
+"BTextControl::BTextControl" = ["message"]
+"BTextControl::SetModificationMessage" = ["message"]
+"BSlider::BSlider" = ["message"]
+"BSlider::SetModificationMessage" = ["message"]
+"BScrollView::BScrollView" = ["target"]
 
 # Methods left out, and why. Also left out without being named here: what
 # uses a type the bridge does not carry yet (the manifest says which).

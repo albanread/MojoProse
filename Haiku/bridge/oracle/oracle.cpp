@@ -335,6 +335,18 @@ mojobe_oracle_echo_BSpacing(int8 before, BSpacing value, double after,
 	return result;
 }
 
+alert_type
+mojobe_oracle_echo_alert_type(int8 before, alert_type value, double after,
+	alert_type* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	alert_type result = value;
+	result = (alert_type)(result + 1);
+	return result;
+}
+
 alignment
 mojobe_oracle_echo_alignment(int8 before, alignment value, double after,
 	alignment* seen, int8* seenBefore, double* seenAfter)
@@ -416,6 +428,18 @@ mojobe_oracle_echo_buffer_orientation(int8 before, buffer_orientation value, dou
 	*seenAfter = after;
 	buffer_orientation result = value;
 	result = (buffer_orientation)(result + 1);
+	return result;
+}
+
+button_spacing
+mojobe_oracle_echo_button_spacing(int8 before, button_spacing value, double after,
+	button_spacing* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	button_spacing result = value;
+	result = (button_spacing)(result + 1);
 	return result;
 }
 
@@ -539,6 +563,18 @@ mojobe_oracle_echo_font_metric_mode(int8 before, font_metric_mode value, double 
 	return result;
 }
 
+hash_mark_location
+mojobe_oracle_echo_hash_mark_location(int8 before, hash_mark_location value, double after,
+	hash_mark_location* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	hash_mark_location result = value;
+	result = (hash_mark_location)(result + 1);
+	return result;
+}
+
 join_mode
 mojobe_oracle_echo_join_mode(int8 before, join_mode value, double after,
 	join_mode* seen, int8* seenBefore, double* seenAfter)
@@ -659,6 +695,18 @@ mojobe_oracle_echo_source_alpha(int8 before, source_alpha value, double after,
 	return result;
 }
 
+thumb_style
+mojobe_oracle_echo_thumb_style(int8 before, thumb_style value, double after,
+	thumb_style* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	thumb_style result = value;
+	result = (thumb_style)(result + 1);
+	return result;
+}
+
 topology_level_type
 mojobe_oracle_echo_topology_level_type(int8 before, topology_level_type value, double after,
 	topology_level_type* seen, int8* seenBefore, double* seenAfter)
@@ -668,6 +716,18 @@ mojobe_oracle_echo_topology_level_type(int8 before, topology_level_type value, d
 	*seenAfter = after;
 	topology_level_type result = value;
 	result = (topology_level_type)(result + 1);
+	return result;
+}
+
+undo_state
+mojobe_oracle_echo_undo_state(int8 before, undo_state value, double after,
+	undo_state* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	undo_state result = value;
+	result = (undo_state)(result + 1);
 	return result;
 }
 

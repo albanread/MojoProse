@@ -26,6 +26,18 @@
 #include <Menu.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
+#include <PopUpMenu.h>
+#include <Invoker.h>
+#include <Control.h>
+#include <Button.h>
+#include <CheckBox.h>
+#include <RadioButton.h>
+#include <TextControl.h>
+#include <Slider.h>
+#include <StringView.h>
+#include <ScrollView.h>
+#include <Alert.h>
+#include <MessageRunner.h>
 
 
 extern "C" {
@@ -370,6 +382,36 @@ BMenu* mojobe_BHandler_to_BMenu(BHandler* self);
 // BHandler* as BMenuBar*, or NULL
 BMenuBar* mojobe_BHandler_to_BMenuBar(BHandler* self);
 
+// BHandler* as BPopUpMenu*, or NULL
+BPopUpMenu* mojobe_BHandler_to_BPopUpMenu(BHandler* self);
+
+// BHandler* as BControl*, or NULL
+BControl* mojobe_BHandler_to_BControl(BHandler* self);
+
+// BHandler* as BButton*, or NULL
+BButton* mojobe_BHandler_to_BButton(BHandler* self);
+
+// BHandler* as BCheckBox*, or NULL
+BCheckBox* mojobe_BHandler_to_BCheckBox(BHandler* self);
+
+// BHandler* as BRadioButton*, or NULL
+BRadioButton* mojobe_BHandler_to_BRadioButton(BHandler* self);
+
+// BHandler* as BTextControl*, or NULL
+BTextControl* mojobe_BHandler_to_BTextControl(BHandler* self);
+
+// BHandler* as BSlider*, or NULL
+BSlider* mojobe_BHandler_to_BSlider(BHandler* self);
+
+// BHandler* as BStringView*, or NULL
+BStringView* mojobe_BHandler_to_BStringView(BHandler* self);
+
+// BHandler* as BScrollView*, or NULL
+BScrollView* mojobe_BHandler_to_BScrollView(BHandler* self);
+
+// BHandler* as BAlert*, or NULL
+BAlert* mojobe_BHandler_to_BAlert(BHandler* self);
+
 // BHandler::BHandler(const char* name)
 BHandler* mojobe_BHandler_new(const char* a_name);
 
@@ -498,6 +540,9 @@ BApplication* mojobe_BLooper_to_BApplication(BLooper* self);
 
 // BLooper* as BWindow*, or NULL
 BWindow* mojobe_BLooper_to_BWindow(BLooper* self);
+
+// BLooper* as BAlert*, or NULL
+BAlert* mojobe_BLooper_to_BAlert(BLooper* self);
 
 // BLooper::BLooper(const char* name, int32 priority, int32 portCapacity)
 BLooper* mojobe_BLooper_new(const char* a_name,
@@ -709,6 +754,12 @@ bool mojobe_BWindow_HasShortcut(BWindow* self,
 void mojobe_BWindow_RemoveShortcut(BWindow* self,
 	uint32 a_key,
 	uint32 a_modifiers);
+
+// void BWindow::SetDefaultButton(BButton* button)
+void mojobe_BWindow_SetDefaultButton(BWindow* self, BButton* a_button);
+
+// BButton* BWindow::DefaultButton() const
+BButton* mojobe_BWindow_DefaultButton(BWindow* self);
 
 // void BWindow::MenusBeginning()
 void mojobe_BWindow_MenusBeginning(BWindow* self);
@@ -952,6 +1003,9 @@ BLooper* mojobe_BWindow_as_BLooper(BWindow* self);
 // BWindow* as BHandler*
 BHandler* mojobe_BWindow_as_BHandler(BWindow* self);
 
+// BWindow* as BAlert*, or NULL
+BAlert* mojobe_BWindow_to_BAlert(BWindow* self);
+
 // BWindow::BWindow(BRect frame, const char* title, window_type type, uint32 flags, uint32 workspace)
 BWindow* mojobe_BWindow_new__BRect_charP_window_type_uint32_uint32(mojobe_BRect a_frame,
 	const char* a_title,
@@ -1100,6 +1154,9 @@ void mojobe_BView_FrameMoved(BView* self, mojobe_BPoint a_newPosition);
 void mojobe_BView_FrameResized(BView* self,
 	float a_newWidth,
 	float a_newHeight);
+
+// void BView::TargetedByScrollView(BScrollView* scrollView)
+void mojobe_BView_TargetedByScrollView(BView* self, BScrollView* a_scrollView);
 
 // void BView::BeginRectTracking(BRect startRect, uint32 style)
 void mojobe_BView_BeginRectTracking(BView* self,
@@ -1700,6 +1757,33 @@ BMenu* mojobe_BView_to_BMenu(BView* self);
 
 // BView* as BMenuBar*, or NULL
 BMenuBar* mojobe_BView_to_BMenuBar(BView* self);
+
+// BView* as BPopUpMenu*, or NULL
+BPopUpMenu* mojobe_BView_to_BPopUpMenu(BView* self);
+
+// BView* as BControl*, or NULL
+BControl* mojobe_BView_to_BControl(BView* self);
+
+// BView* as BButton*, or NULL
+BButton* mojobe_BView_to_BButton(BView* self);
+
+// BView* as BCheckBox*, or NULL
+BCheckBox* mojobe_BView_to_BCheckBox(BView* self);
+
+// BView* as BRadioButton*, or NULL
+BRadioButton* mojobe_BView_to_BRadioButton(BView* self);
+
+// BView* as BTextControl*, or NULL
+BTextControl* mojobe_BView_to_BTextControl(BView* self);
+
+// BView* as BSlider*, or NULL
+BSlider* mojobe_BView_to_BSlider(BView* self);
+
+// BView* as BStringView*, or NULL
+BStringView* mojobe_BView_to_BStringView(BView* self);
+
+// BView* as BScrollView*, or NULL
+BScrollView* mojobe_BView_to_BScrollView(BView* self);
 
 // BView::BView(const char* name, uint32 flags, BLayout* layout)
 BView* mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags);
@@ -2865,6 +2949,9 @@ BHandler* mojobe_BMenu_as_BHandler(BMenu* self);
 // BMenu* as BMenuBar*, or NULL
 BMenuBar* mojobe_BMenu_to_BMenuBar(BMenu* self);
 
+// BMenu* as BPopUpMenu*, or NULL
+BPopUpMenu* mojobe_BMenu_to_BPopUpMenu(BMenu* self);
+
 // BMenu::BMenu(const char* name, menu_layout layout)
 BMenu* mojobe_BMenu_new__charP_menu_layout(const char* a_name,
 	menu_layout a_layout);
@@ -2916,6 +3003,94 @@ BMenuBar* mojobe_BMenuBar_new__charP_menu_layout_uint32(const char* a_name,
 
 // ~BMenuBar()
 void mojobe_BMenuBar_delete(BMenuBar* self);
+
+
+// #pragma mark - BInvoker
+
+
+// status_t BInvoker::SetMessage(BMessage* message)
+status_t mojobe_BInvoker_SetMessage(BInvoker* self, BMessage* a_message);
+
+// BMessage* BInvoker::Message() const
+BMessage* mojobe_BInvoker_Message(BInvoker* self);
+
+// uint32 BInvoker::Command() const
+uint32 mojobe_BInvoker_Command(BInvoker* self);
+
+// status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
+status_t mojobe_BInvoker_SetTarget__BHandlerP_BLooperP(BInvoker* self,
+	BHandler* a_handler,
+	BLooper* a_looper);
+
+// status_t BInvoker::SetTarget(BMessenger messenger)
+status_t mojobe_BInvoker_SetTarget__BMessenger(BInvoker* self,
+	const BMessenger* a_messenger);
+
+// bool BInvoker::IsTargetLocal() const
+bool mojobe_BInvoker_IsTargetLocal(BInvoker* self);
+
+// BHandler* BInvoker::Target(BLooper** _looper) const
+BHandler* mojobe_BInvoker_Target(BInvoker* self);
+
+// BMessenger BInvoker::Messenger() const
+void mojobe_BInvoker_Messenger(BInvoker* self, BMessenger* a_result);
+
+// status_t BInvoker::SetHandlerForReply(BHandler* handler)
+status_t mojobe_BInvoker_SetHandlerForReply(BInvoker* self,
+	BHandler* a_handler);
+
+// BHandler* BInvoker::HandlerForReply() const
+BHandler* mojobe_BInvoker_HandlerForReply(BInvoker* self);
+
+// status_t BInvoker::Invoke(BMessage* message)
+status_t mojobe_BInvoker_Invoke(BInvoker* self, BMessage* a_message);
+
+// status_t BInvoker::InvokeNotify(BMessage* message, uint32 kind)
+status_t mojobe_BInvoker_InvokeNotify(BInvoker* self,
+	BMessage* a_message,
+	uint32 a_kind);
+
+// status_t BInvoker::SetTimeout(bigtime_t timeout)
+status_t mojobe_BInvoker_SetTimeout(BInvoker* self, bigtime_t a_timeout);
+
+// bigtime_t BInvoker::Timeout() const
+int64 mojobe_BInvoker_Timeout(BInvoker* self);
+
+// BInvoker* as BMenuItem*, or NULL
+BMenuItem* mojobe_BInvoker_to_BMenuItem(BInvoker* self);
+
+// BInvoker* as BControl*, or NULL
+BControl* mojobe_BInvoker_to_BControl(BInvoker* self);
+
+// BInvoker* as BButton*, or NULL
+BButton* mojobe_BInvoker_to_BButton(BInvoker* self);
+
+// BInvoker* as BCheckBox*, or NULL
+BCheckBox* mojobe_BInvoker_to_BCheckBox(BInvoker* self);
+
+// BInvoker* as BRadioButton*, or NULL
+BRadioButton* mojobe_BInvoker_to_BRadioButton(BInvoker* self);
+
+// BInvoker* as BTextControl*, or NULL
+BTextControl* mojobe_BInvoker_to_BTextControl(BInvoker* self);
+
+// BInvoker* as BSlider*, or NULL
+BSlider* mojobe_BInvoker_to_BSlider(BInvoker* self);
+
+// BInvoker::BInvoker()
+BInvoker* mojobe_BInvoker_new__void();
+
+// BInvoker::BInvoker(BMessage* message, const BHandler* handler, const BLooper* looper)
+BInvoker* mojobe_BInvoker_new__BMessageP_BHandlerP_BLooperP(BMessage* a_message,
+	BHandler* a_handler,
+	BLooper* a_looper);
+
+// BInvoker::BInvoker(BMessage* message, BMessenger target)
+BInvoker* mojobe_BInvoker_new__BMessageP_BMessenger(BMessage* a_message,
+	const BMessenger* a_target);
+
+// ~BInvoker()
+void mojobe_BInvoker_delete(BInvoker* self);
 
 
 // #pragma mark - BMenuItem
@@ -2973,53 +3148,8 @@ status_t mojobe_BMenuItem_AllUnarchived(BMenuItem* self, BMessage* a_archive);
 // status_t BArchivable::AllArchived(BMessage* archive) const
 status_t mojobe_BMenuItem_AllArchived(BMenuItem* self, BMessage* a_archive);
 
-// status_t BInvoker::SetMessage(BMessage* message)
-status_t mojobe_BMenuItem_SetMessage(BMenuItem* self, BMessage* a_message);
-
-// BMessage* BInvoker::Message() const
-BMessage* mojobe_BMenuItem_Message(BMenuItem* self);
-
-// uint32 BInvoker::Command() const
-uint32 mojobe_BMenuItem_Command(BMenuItem* self);
-
-// status_t BInvoker::SetTarget(const BHandler* handler, const BLooper* looper)
-status_t mojobe_BMenuItem_SetTarget__BHandlerP_BLooperP(BMenuItem* self,
-	BHandler* a_handler,
-	BLooper* a_looper);
-
-// status_t BInvoker::SetTarget(BMessenger messenger)
-status_t mojobe_BMenuItem_SetTarget__BMessenger(BMenuItem* self,
-	const BMessenger* a_messenger);
-
-// bool BInvoker::IsTargetLocal() const
-bool mojobe_BMenuItem_IsTargetLocal(BMenuItem* self);
-
-// BHandler* BInvoker::Target(BLooper** _looper) const
-BHandler* mojobe_BMenuItem_Target(BMenuItem* self);
-
-// BMessenger BInvoker::Messenger() const
-void mojobe_BMenuItem_Messenger(BMenuItem* self, BMessenger* a_result);
-
-// status_t BInvoker::SetHandlerForReply(BHandler* handler)
-status_t mojobe_BMenuItem_SetHandlerForReply(BMenuItem* self,
-	BHandler* a_handler);
-
-// BHandler* BInvoker::HandlerForReply() const
-BHandler* mojobe_BMenuItem_HandlerForReply(BMenuItem* self);
-
-// status_t BInvoker::Invoke(BMessage* message)
-status_t mojobe_BMenuItem_Invoke(BMenuItem* self, BMessage* a_message);
-
-// status_t BInvoker::InvokeNotify(BMessage* message, uint32 kind)
-status_t mojobe_BMenuItem_InvokeNotify(BMenuItem* self,
-	BMessage* a_message,
-	uint32 a_kind);
-
-// status_t BInvoker::SetTimeout(bigtime_t timeout)
-status_t mojobe_BMenuItem_SetTimeout(BMenuItem* self, bigtime_t a_timeout);
-
-// bigtime_t BInvoker::Timeout() const
-int64 mojobe_BMenuItem_Timeout(BMenuItem* self);
+// BMenuItem* as BInvoker*
+BInvoker* mojobe_BMenuItem_as_BInvoker(BMenuItem* self);
 
 // BMenuItem::BMenuItem(const char* label, BMessage* message, char shortcut, uint32 modifiers)
 BMenuItem* mojobe_BMenuItem_new__charP_BMessageP_char_uint32(const char* a_label,
@@ -3033,6 +3163,712 @@ BMenuItem* mojobe_BMenuItem_new__BMenuP_BMessageP(BMenu* a_menu,
 
 // ~BMenuItem()
 void mojobe_BMenuItem_delete(BMenuItem* self);
+
+
+// #pragma mark - BPopUpMenu
+
+
+// BMenuItem* BPopUpMenu::Go(BPoint where, bool autoInvoke, bool keepOpen, bool async)
+BMenuItem* mojobe_BPopUpMenu_Go__BPoint_bool_bool_bool(BPopUpMenu* self,
+	mojobe_BPoint a_where,
+	bool a_autoInvoke,
+	bool a_keepOpen,
+	bool a_async);
+
+// BMenuItem* BPopUpMenu::Go(BPoint where, bool autoInvoke, bool keepOpen, BRect openRect, bool async)
+BMenuItem* mojobe_BPopUpMenu_Go__BPoint_bool_bool_BRect_bool(BPopUpMenu* self,
+	mojobe_BPoint a_where,
+	bool a_autoInvoke,
+	bool a_keepOpen,
+	mojobe_BRect a_openRect,
+	bool a_async);
+
+// void BPopUpMenu::SetAsyncAutoDestruct(bool on)
+void mojobe_BPopUpMenu_SetAsyncAutoDestruct(BPopUpMenu* self, bool a_on);
+
+// bool BPopUpMenu::AsyncAutoDestruct() const
+bool mojobe_BPopUpMenu_AsyncAutoDestruct(BPopUpMenu* self);
+
+// BPopUpMenu* as BMenu*
+BMenu* mojobe_BPopUpMenu_as_BMenu(BPopUpMenu* self);
+
+// BPopUpMenu* as BView*
+BView* mojobe_BPopUpMenu_as_BView(BPopUpMenu* self);
+
+// BPopUpMenu* as BHandler*
+BHandler* mojobe_BPopUpMenu_as_BHandler(BPopUpMenu* self);
+
+// BPopUpMenu::BPopUpMenu(const char* name, bool radioMode, bool labelFromMarked, menu_layout layout)
+BPopUpMenu* mojobe_BPopUpMenu_new(const char* a_name,
+	bool a_radioMode,
+	bool a_labelFromMarked,
+	menu_layout a_layout);
+
+// ~BPopUpMenu()
+void mojobe_BPopUpMenu_delete(BPopUpMenu* self);
+
+
+// #pragma mark - BControl
+
+
+// void BControl::SetLabel(const char* string)
+void mojobe_BControl_SetLabel(BControl* self, const char* a_string);
+
+// const char* BControl::Label() const
+const char* mojobe_BControl_Label(BControl* self);
+
+// void BControl::SetValue(int32 value)
+void mojobe_BControl_SetValue(BControl* self, int32 a_value);
+
+// int32 BControl::Value() const
+int32 mojobe_BControl_Value(BControl* self);
+
+// void BControl::SetEnabled(bool enabled)
+void mojobe_BControl_SetEnabled(BControl* self, bool a_enabled);
+
+// bool BControl::IsEnabled() const
+bool mojobe_BControl_IsEnabled(BControl* self);
+
+// BControl* as BView*
+BView* mojobe_BControl_as_BView(BControl* self);
+
+// BControl* as BInvoker*
+BInvoker* mojobe_BControl_as_BInvoker(BControl* self);
+
+// BControl* as BHandler*
+BHandler* mojobe_BControl_as_BHandler(BControl* self);
+
+// BControl* as BButton*, or NULL
+BButton* mojobe_BControl_to_BButton(BControl* self);
+
+// BControl* as BCheckBox*, or NULL
+BCheckBox* mojobe_BControl_to_BCheckBox(BControl* self);
+
+// BControl* as BRadioButton*, or NULL
+BRadioButton* mojobe_BControl_to_BRadioButton(BControl* self);
+
+// BControl* as BTextControl*, or NULL
+BTextControl* mojobe_BControl_to_BTextControl(BControl* self);
+
+// BControl* as BSlider*, or NULL
+BSlider* mojobe_BControl_to_BSlider(BControl* self);
+
+// BControl::BControl(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BControl* mojobe_BControl_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BControl::BControl(const char* name, const char* label, BMessage* message, uint32 flags)
+BControl* mojobe_BControl_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags);
+
+// ~BControl()
+void mojobe_BControl_delete(BControl* self);
+
+
+// #pragma mark - BButton
+
+
+// void BButton::MakeDefault(bool flag)
+void mojobe_BButton_MakeDefault(BButton* self, bool a_flag);
+
+// bool BButton::IsDefault() const
+bool mojobe_BButton_IsDefault(BButton* self);
+
+// bool BButton::IsFlat() const
+bool mojobe_BButton_IsFlat(BButton* self);
+
+// void BButton::SetFlat(bool flat)
+void mojobe_BButton_SetFlat(BButton* self, bool a_flat);
+
+// BMessage* BButton::PopUpMessage() const
+BMessage* mojobe_BButton_PopUpMessage(BButton* self);
+
+// void BButton::SetPopUpMessage(BMessage* message)
+void mojobe_BButton_SetPopUpMessage(BButton* self, BMessage* a_message);
+
+// BButton* as BControl*
+BControl* mojobe_BButton_as_BControl(BButton* self);
+
+// BButton* as BView*
+BView* mojobe_BButton_as_BView(BButton* self);
+
+// BButton* as BInvoker*
+BInvoker* mojobe_BButton_as_BInvoker(BButton* self);
+
+// BButton* as BHandler*
+BHandler* mojobe_BButton_as_BHandler(BButton* self);
+
+// BButton::BButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BButton* mojobe_BButton_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BButton::BButton(const char* name, const char* label, BMessage* message, uint32 flags)
+BButton* mojobe_BButton_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags);
+
+// BButton::BButton(const char* label, BMessage* message)
+BButton* mojobe_BButton_new__charP_BMessageP(const char* a_label,
+	BMessage* a_message);
+
+// ~BButton()
+void mojobe_BButton_delete(BButton* self);
+
+
+// #pragma mark - BCheckBox
+
+
+// bool BCheckBox::IsPartialStateToOff() const
+bool mojobe_BCheckBox_IsPartialStateToOff(BCheckBox* self);
+
+// void BCheckBox::SetPartialStateToOff(bool partialToOff)
+void mojobe_BCheckBox_SetPartialStateToOff(BCheckBox* self,
+	bool a_partialToOff);
+
+// BCheckBox* as BControl*
+BControl* mojobe_BCheckBox_as_BControl(BCheckBox* self);
+
+// BCheckBox* as BView*
+BView* mojobe_BCheckBox_as_BView(BCheckBox* self);
+
+// BCheckBox* as BInvoker*
+BInvoker* mojobe_BCheckBox_as_BInvoker(BCheckBox* self);
+
+// BCheckBox* as BHandler*
+BHandler* mojobe_BCheckBox_as_BHandler(BCheckBox* self);
+
+// BCheckBox::BCheckBox(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BCheckBox* mojobe_BCheckBox_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BCheckBox::BCheckBox(const char* name, const char* label, BMessage* message, uint32 flags)
+BCheckBox* mojobe_BCheckBox_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags);
+
+// BCheckBox::BCheckBox(const char* label, BMessage* message)
+BCheckBox* mojobe_BCheckBox_new__charP_BMessageP(const char* a_label,
+	BMessage* a_message);
+
+// ~BCheckBox()
+void mojobe_BCheckBox_delete(BCheckBox* self);
+
+
+// #pragma mark - BRadioButton
+
+
+// BRadioButton* as BControl*
+BControl* mojobe_BRadioButton_as_BControl(BRadioButton* self);
+
+// BRadioButton* as BView*
+BView* mojobe_BRadioButton_as_BView(BRadioButton* self);
+
+// BRadioButton* as BInvoker*
+BInvoker* mojobe_BRadioButton_as_BInvoker(BRadioButton* self);
+
+// BRadioButton* as BHandler*
+BHandler* mojobe_BRadioButton_as_BHandler(BRadioButton* self);
+
+// BRadioButton::BRadioButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)
+BRadioButton* mojobe_BRadioButton_new__BRect_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BRadioButton::BRadioButton(const char* name, const char* label, BMessage* message, uint32 flags)
+BRadioButton* mojobe_BRadioButton_new__charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	uint32 a_flags);
+
+// BRadioButton::BRadioButton(const char* label, BMessage* message)
+BRadioButton* mojobe_BRadioButton_new__charP_BMessageP(const char* a_label,
+	BMessage* a_message);
+
+// ~BRadioButton()
+void mojobe_BRadioButton_delete(BRadioButton* self);
+
+
+// #pragma mark - BTextControl
+
+
+// void BTextControl::SetText(const char* text)
+void mojobe_BTextControl_SetText(BTextControl* self, const char* a_text);
+
+// const char* BTextControl::Text() const
+const char* mojobe_BTextControl_Text(BTextControl* self);
+
+// int32 BTextControl::TextLength() const
+int32 mojobe_BTextControl_TextLength(BTextControl* self);
+
+// void BTextControl::MarkAsInvalid(bool invalid)
+void mojobe_BTextControl_MarkAsInvalid(BTextControl* self, bool a_invalid);
+
+// void BTextControl::SetModificationMessage(BMessage* message)
+void mojobe_BTextControl_SetModificationMessage(BTextControl* self,
+	BMessage* a_message);
+
+// BMessage* BTextControl::ModificationMessage() const
+BMessage* mojobe_BTextControl_ModificationMessage(BTextControl* self);
+
+// void BTextControl::SetAlignment(alignment label, alignment text)
+void mojobe_BTextControl_SetAlignment(BTextControl* self,
+	alignment a_label,
+	alignment a_text);
+
+// void BTextControl::GetAlignment(alignment* _label, alignment* _text) const
+void mojobe_BTextControl_GetAlignment(BTextControl* self,
+	alignment * a__label,
+	alignment * a__text);
+
+// void BTextControl::SetDivider(float position)
+void mojobe_BTextControl_SetDivider(BTextControl* self, float a_position);
+
+// float BTextControl::Divider() const
+float mojobe_BTextControl_Divider(BTextControl* self);
+
+// BTextControl* as BControl*
+BControl* mojobe_BTextControl_as_BControl(BTextControl* self);
+
+// BTextControl* as BView*
+BView* mojobe_BTextControl_as_BView(BTextControl* self);
+
+// BTextControl* as BInvoker*
+BInvoker* mojobe_BTextControl_as_BInvoker(BTextControl* self);
+
+// BTextControl* as BHandler*
+BHandler* mojobe_BTextControl_as_BHandler(BTextControl* self);
+
+// BTextControl::BTextControl(BRect frame, const char* name, const char* label, const char* initialText, BMessage* message, uint32 resizeMask, uint32 flags)
+BTextControl* mojobe_BTextControl_new__BRect_charP_charP_charP_BMessageP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message,
+	uint32 a_resizeMask,
+	uint32 a_flags);
+
+// BTextControl::BTextControl(const char* name, const char* label, const char* initialText, BMessage* message, uint32 flags)
+BTextControl* mojobe_BTextControl_new__charP_charP_charP_BMessageP_uint32(const char* a_name,
+	const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message,
+	uint32 a_flags);
+
+// BTextControl::BTextControl(const char* label, const char* initialText, BMessage* message)
+BTextControl* mojobe_BTextControl_new__charP_charP_BMessageP(const char* a_label,
+	const char* a_initialText,
+	BMessage* a_message);
+
+// ~BTextControl()
+void mojobe_BTextControl_delete(BTextControl* self);
+
+
+// #pragma mark - BSlider
+
+
+// void BSlider::SetLimitLabels(const char* minLabel, const char* maxLabel)
+void mojobe_BSlider_SetLimitLabels(BSlider* self,
+	const char* a_minLabel,
+	const char* a_maxLabel);
+
+// const char* BSlider::MinLimitLabel() const
+const char* mojobe_BSlider_MinLimitLabel(BSlider* self);
+
+// const char* BSlider::MaxLimitLabel() const
+const char* mojobe_BSlider_MaxLimitLabel(BSlider* self);
+
+// int32 BSlider::ValueForPoint(BPoint point) const
+int32 mojobe_BSlider_ValueForPoint(BSlider* self, mojobe_BPoint a_point);
+
+// void BSlider::SetPosition(float arg0)
+void mojobe_BSlider_SetPosition(BSlider* self, float a_arg0);
+
+// float BSlider::Position() const
+float mojobe_BSlider_Position(BSlider* self);
+
+// void BSlider::GetLimits(int32* minimum, int32* maximum) const
+void mojobe_BSlider_GetLimits(BSlider* self,
+	int32 * a_minimum,
+	int32 * a_maximum);
+
+// void BSlider::DrawSlider()
+void mojobe_BSlider_DrawSlider(BSlider* self);
+
+// void BSlider::DrawBar()
+void mojobe_BSlider_DrawBar(BSlider* self);
+
+// void BSlider::DrawHashMarks()
+void mojobe_BSlider_DrawHashMarks(BSlider* self);
+
+// void BSlider::DrawThumb()
+void mojobe_BSlider_DrawThumb(BSlider* self);
+
+// void BSlider::DrawFocusMark()
+void mojobe_BSlider_DrawFocusMark(BSlider* self);
+
+// void BSlider::DrawText()
+void mojobe_BSlider_DrawText(BSlider* self);
+
+// const char* BSlider::UpdateText() const
+const char* mojobe_BSlider_UpdateText(BSlider* self);
+
+// void BSlider::UpdateTextChanged()
+void mojobe_BSlider_UpdateTextChanged(BSlider* self);
+
+// BRect BSlider::BarFrame() const
+mojobe_BRect mojobe_BSlider_BarFrame(BSlider* self);
+
+// BRect BSlider::HashMarksFrame() const
+mojobe_BRect mojobe_BSlider_HashMarksFrame(BSlider* self);
+
+// BRect BSlider::ThumbFrame() const
+mojobe_BRect mojobe_BSlider_ThumbFrame(BSlider* self);
+
+// void BSlider::SetModificationMessage(BMessage* message)
+void mojobe_BSlider_SetModificationMessage(BSlider* self, BMessage* a_message);
+
+// BMessage* BSlider::ModificationMessage() const
+BMessage* mojobe_BSlider_ModificationMessage(BSlider* self);
+
+// void BSlider::SetSnoozeAmount(int32 microSeconds)
+void mojobe_BSlider_SetSnoozeAmount(BSlider* self, int32 a_microSeconds);
+
+// int32 BSlider::SnoozeAmount() const
+int32 mojobe_BSlider_SnoozeAmount(BSlider* self);
+
+// void BSlider::SetKeyIncrementValue(int32 value)
+void mojobe_BSlider_SetKeyIncrementValue(BSlider* self, int32 a_value);
+
+// int32 BSlider::KeyIncrementValue() const
+int32 mojobe_BSlider_KeyIncrementValue(BSlider* self);
+
+// void BSlider::SetHashMarkCount(int32 count)
+void mojobe_BSlider_SetHashMarkCount(BSlider* self, int32 a_count);
+
+// int32 BSlider::HashMarkCount() const
+int32 mojobe_BSlider_HashMarkCount(BSlider* self);
+
+// void BSlider::SetHashMarks(hash_mark_location where)
+void mojobe_BSlider_SetHashMarks(BSlider* self, hash_mark_location a_where);
+
+// hash_mark_location BSlider::HashMarks() const
+hash_mark_location mojobe_BSlider_HashMarks(BSlider* self);
+
+// void BSlider::SetStyle(thumb_style style)
+void mojobe_BSlider_SetStyle(BSlider* self, thumb_style a_style);
+
+// thumb_style BSlider::Style() const
+thumb_style mojobe_BSlider_Style(BSlider* self);
+
+// void BSlider::SetBarColor(rgb_color color)
+void mojobe_BSlider_SetBarColor(BSlider* self, mojobe_rgb_color a_color);
+
+// rgb_color BSlider::BarColor() const
+mojobe_rgb_color mojobe_BSlider_BarColor(BSlider* self);
+
+// void BSlider::UseFillColor(bool useFill, const rgb_color* color)
+void mojobe_BSlider_UseFillColor(BSlider* self, bool a_useFill);
+
+// bool BSlider::FillColor(rgb_color* color) const
+bool mojobe_BSlider_FillColor(BSlider* self, mojobe_rgb_color* a_color);
+
+// BView* BSlider::OffscreenView() const
+BView* mojobe_BSlider_OffscreenView(BSlider* self);
+
+// orientation BSlider::Orientation() const
+orientation mojobe_BSlider_Orientation(BSlider* self);
+
+// void BSlider::SetOrientation(orientation arg0)
+void mojobe_BSlider_SetOrientation(BSlider* self, orientation a_arg0);
+
+// float BSlider::BarThickness() const
+float mojobe_BSlider_BarThickness(BSlider* self);
+
+// void BSlider::SetBarThickness(float thickness)
+void mojobe_BSlider_SetBarThickness(BSlider* self, float a_thickness);
+
+// void BSlider::SetLimits(int32 minimum, int32 maximum)
+void mojobe_BSlider_SetLimits(BSlider* self, int32 a_minimum, int32 a_maximum);
+
+// float BSlider::MaxUpdateTextWidth()
+float mojobe_BSlider_MaxUpdateTextWidth(BSlider* self);
+
+// BSlider* as BControl*
+BControl* mojobe_BSlider_as_BControl(BSlider* self);
+
+// BSlider* as BView*
+BView* mojobe_BSlider_as_BView(BSlider* self);
+
+// BSlider* as BInvoker*
+BInvoker* mojobe_BSlider_as_BInvoker(BSlider* self);
+
+// BSlider* as BHandler*
+BHandler* mojobe_BSlider_as_BHandler(BSlider* self);
+
+// BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, thumb_style thumbType, uint32 resizingMode, uint32 flags)
+BSlider* mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_thumb_style_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	thumb_style a_thumbType,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 resizingMode, uint32 flags)
+BSlider* mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	orientation a_posture,
+	thumb_style a_thumbType,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BSlider::BSlider(const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 flags)
+BSlider* mojobe_BSlider_new__charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32(const char* a_name,
+	const char* a_label,
+	BMessage* a_message,
+	int32 a_minValue,
+	int32 a_maxValue,
+	orientation a_posture,
+	thumb_style a_thumbType,
+	uint32 a_flags);
+
+// ~BSlider()
+void mojobe_BSlider_delete(BSlider* self);
+
+
+// #pragma mark - BStringView
+
+
+// void BStringView::SetText(const char* text)
+void mojobe_BStringView_SetText(BStringView* self, const char* a_text);
+
+// const char* BStringView::Text() const
+const char* mojobe_BStringView_Text(BStringView* self);
+
+// void BStringView::SetAlignment(alignment flag)
+void mojobe_BStringView_SetAlignment(BStringView* self, alignment a_flag);
+
+// alignment BStringView::Alignment() const
+alignment mojobe_BStringView_Alignment(BStringView* self);
+
+// void BStringView::SetTruncation(uint32 truncationMode)
+void mojobe_BStringView_SetTruncation(BStringView* self,
+	uint32 a_truncationMode);
+
+// uint32 BStringView::Truncation() const
+uint32 mojobe_BStringView_Truncation(BStringView* self);
+
+// BStringView* as BView*
+BView* mojobe_BStringView_as_BView(BStringView* self);
+
+// BStringView* as BHandler*
+BHandler* mojobe_BStringView_as_BHandler(BStringView* self);
+
+// BStringView::BStringView(BRect frame, const char* name, const char* text, uint32 resizingMode, uint32 flags)
+BStringView* mojobe_BStringView_new__BRect_charP_charP_uint32_uint32(mojobe_BRect a_frame,
+	const char* a_name,
+	const char* a_text,
+	uint32 a_resizingMode,
+	uint32 a_flags);
+
+// BStringView::BStringView(const char* name, const char* text, uint32 flags)
+BStringView* mojobe_BStringView_new__charP_charP_uint32(const char* a_name,
+	const char* a_text,
+	uint32 a_flags);
+
+// ~BStringView()
+void mojobe_BStringView_delete(BStringView* self);
+
+
+// #pragma mark - BScrollView
+
+
+// void BScrollView::SetBorder(border_style border)
+void mojobe_BScrollView_SetBorder(BScrollView* self, border_style a_border);
+
+// border_style BScrollView::Border() const
+border_style mojobe_BScrollView_Border(BScrollView* self);
+
+// void BScrollView::SetBorders(uint32 borders)
+void mojobe_BScrollView_SetBorders(BScrollView* self, uint32 a_borders);
+
+// uint32 BScrollView::Borders() const
+uint32 mojobe_BScrollView_Borders(BScrollView* self);
+
+// status_t BScrollView::SetBorderHighlighted(bool highlight)
+status_t mojobe_BScrollView_SetBorderHighlighted(BScrollView* self,
+	bool a_highlight);
+
+// bool BScrollView::IsBorderHighlighted() const
+bool mojobe_BScrollView_IsBorderHighlighted(BScrollView* self);
+
+// void BScrollView::SetTarget(BView* target)
+void mojobe_BScrollView_SetTarget(BScrollView* self, BView* a_target);
+
+// BView* BScrollView::Target() const
+BView* mojobe_BScrollView_Target(BScrollView* self);
+
+// BScrollView* as BView*
+BView* mojobe_BScrollView_as_BView(BScrollView* self);
+
+// BScrollView* as BHandler*
+BHandler* mojobe_BScrollView_as_BHandler(BScrollView* self);
+
+// BScrollView::BScrollView(const char* name, BView* target, uint32 resizingMode, uint32 flags, bool horizontal, bool vertical, border_style border)
+BScrollView* mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style(const char* a_name,
+	BView* a_target,
+	uint32 a_resizingMode,
+	uint32 a_flags,
+	bool a_horizontal,
+	bool a_vertical,
+	border_style a_border);
+
+// BScrollView::BScrollView(const char* name, BView* target, uint32 flags, bool horizontal, bool vertical, border_style border)
+BScrollView* mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style(const char* a_name,
+	BView* a_target,
+	uint32 a_flags,
+	bool a_horizontal,
+	bool a_vertical,
+	border_style a_border);
+
+// ~BScrollView()
+void mojobe_BScrollView_delete(BScrollView* self);
+
+
+// #pragma mark - BAlert
+
+
+// void BAlert::SetType(alert_type type)
+void mojobe_BAlert_SetType(BAlert* self, alert_type a_type);
+
+// void BAlert::SetText(const char* text)
+void mojobe_BAlert_SetText(BAlert* self, const char* a_text);
+
+// void BAlert::SetButtonSpacing(button_spacing spacing)
+void mojobe_BAlert_SetButtonSpacing(BAlert* self, button_spacing a_spacing);
+
+// void BAlert::SetButtonWidth(button_width width)
+void mojobe_BAlert_SetButtonWidth(BAlert* self, button_width a_width);
+
+// void BAlert::SetShortcut(int32 buttonIndex, char key)
+void mojobe_BAlert_SetShortcut(BAlert* self, int32 a_buttonIndex, char a_key);
+
+// char BAlert::Shortcut(int32 buttonIndex) const
+char mojobe_BAlert_Shortcut(BAlert* self, int32 a_buttonIndex);
+
+// int32 BAlert::Go()
+int32 mojobe_BAlert_Go__void(BAlert* self);
+
+// status_t BAlert::Go(BInvoker* invoker)
+status_t mojobe_BAlert_Go__BInvokerP(BAlert* self, BInvoker* a_invoker);
+
+// void BAlert::AddButton(const char* label, char key)
+void mojobe_BAlert_AddButton(BAlert* self, const char* a_label, char a_key);
+
+// int32 BAlert::CountButtons() const
+int32 mojobe_BAlert_CountButtons(BAlert* self);
+
+// BButton* BAlert::ButtonAt(int32 index) const
+BButton* mojobe_BAlert_ButtonAt(BAlert* self, int32 a_index);
+
+// void BAlert::Quit()
+void mojobe_BAlert_Quit(BAlert* self);
+
+// BAlert* as BWindow*
+BWindow* mojobe_BAlert_as_BWindow(BAlert* self);
+
+// BAlert* as BLooper*
+BLooper* mojobe_BAlert_as_BLooper(BAlert* self);
+
+// BAlert* as BHandler*
+BHandler* mojobe_BAlert_as_BHandler(BAlert* self);
+
+// BAlert::BAlert()
+BAlert* mojobe_BAlert_new__void();
+
+// BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, alert_type type)
+BAlert* mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_alert_type(const char* a_title,
+	const char* a_text,
+	const char* a_button1,
+	const char* a_button2,
+	const char* a_button3,
+	button_width a_width,
+	alert_type a_type);
+
+// BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, button_spacing spacing, alert_type type)
+BAlert* mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spacing_alert_type(const char* a_title,
+	const char* a_text,
+	const char* a_button1,
+	const char* a_button2,
+	const char* a_button3,
+	button_width a_width,
+	button_spacing a_spacing,
+	alert_type a_type);
+
+// deletes a BAlert that was never handed over: locked, then Quit()
+void mojobe_BAlert_destroy(BAlert* self);
+
+
+// #pragma mark - BMessageRunner
+
+
+// status_t BMessageRunner::InitCheck() const
+status_t mojobe_BMessageRunner_InitCheck(BMessageRunner* self);
+
+// status_t BMessageRunner::SetInterval(bigtime_t interval)
+status_t mojobe_BMessageRunner_SetInterval(BMessageRunner* self,
+	bigtime_t a_interval);
+
+// status_t BMessageRunner::SetCount(int32 count)
+status_t mojobe_BMessageRunner_SetCount(BMessageRunner* self, int32 a_count);
+
+// status_t BMessageRunner::GetInfo(bigtime_t* interval, int32* count) const
+status_t mojobe_BMessageRunner_GetInfo(BMessageRunner* self,
+	bigtime_t * a_interval,
+	int32 * a_count);
+
+// BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)
+BMessageRunner* mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count,
+	status_t* _status);
+
+// BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)
+BMessageRunner* mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_BMessenger(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count,
+	const BMessenger* a_replyTo,
+	status_t* _status);
+
+// ~BMessageRunner()
+void mojobe_BMessageRunner_delete(BMessageRunner* self);
 
 
 // #pragma mark - Hand-written (Haiku/generator/snippets/mojobe.h)

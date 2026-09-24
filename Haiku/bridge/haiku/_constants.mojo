@@ -23,6 +23,16 @@ struct BSpacing(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct alert_type(Equatable, TrivialRegisterPassable):
+    """`enum alert_type`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct alignment(Equatable, TrivialRegisterPassable):
     """`enum alignment`."""
 
@@ -85,6 +95,16 @@ struct buffer_layout(Equatable, TrivialRegisterPassable):
 @fieldwise_init
 struct buffer_orientation(Equatable, TrivialRegisterPassable):
     """`enum buffer_orientation`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct button_spacing(Equatable, TrivialRegisterPassable):
+    """`enum button_spacing`."""
 
     var value: UInt32
 
@@ -193,6 +213,16 @@ struct font_metric_mode(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct hash_mark_location(Equatable, TrivialRegisterPassable):
+    """`enum hash_mark_location`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct join_mode(Equatable, TrivialRegisterPassable):
     """`enum join_mode`."""
 
@@ -293,8 +323,28 @@ struct source_alpha(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct thumb_style(Equatable, TrivialRegisterPassable):
+    """`enum thumb_style`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
 struct topology_level_type(Equatable, TrivialRegisterPassable):
     """`enum topology_level_type`."""
+
+    var value: UInt32
+
+    def __or__(self, other: Self) -> Self:
+        return Self(self.value | other.value)
+
+
+@fieldwise_init
+struct undo_state(Equatable, TrivialRegisterPassable):
+    """`enum undo_state`."""
 
     var value: UInt32
 
@@ -419,6 +469,7 @@ comptime B_ALPHA_OVERLAY = alpha_function(0)
 comptime B_ALREADY_RUNNING: Int32 = -2147475452
 comptime B_AMBIGUOUS_APP_LAUNCH: Int32 = -2147475450
 comptime B_ANY_ADDRESS: Int32 = 0
+comptime B_ANY_BYTES_PER_ROW: Int32 = -1
 comptime B_ANY_KERNEL_ADDRESS: Int32 = 4
 comptime B_ANY_TYPE: UInt32 = 0x414e5954
 comptime B_APP_ACTIVATED: UInt32 = 0x5f414354
@@ -477,7 +528,17 @@ comptime B_BIG_RGB_16_BIT: UInt32 = 0x1010
 comptime B_BIG_RGB_32_BIT: UInt32 = 0x1008
 comptime B_BITMAPS_SUPPORT_ATTACHED_VIEWS: UInt32 = 2
 comptime B_BITMAPS_SUPPORT_OVERLAY: UInt32 = 4
+comptime B_BITMAP_ACCEPTS_VIEWS: UInt32 = 2
+comptime B_BITMAP_CLEAR_TO_WHITE: UInt32 = 1
+comptime B_BITMAP_IS_AREA: UInt32 = 4
+comptime B_BITMAP_IS_CONTIGUOUS: UInt32 = 0x1c
+comptime B_BITMAP_IS_LOCKED: UInt32 = 0xc
+comptime B_BITMAP_IS_OFFSCREEN: UInt32 = 0x20
+comptime B_BITMAP_NO_SERVER_LINK: UInt32 = 0x100
+comptime B_BITMAP_RESERVE_OVERLAY_CHANNEL: UInt32 = 0x80
 comptime B_BITMAP_SPACING: UInt32 = 2
+comptime B_BITMAP_WILL_OVERLAY: UInt32 = 0x60
+comptime B_BLOCK_THUMB = thumb_style(0)
 comptime B_BOLD_FACE: UInt32 = 0x20
 comptime B_BOOL_TYPE: UInt32 = 0x424f4f4c
 comptime B_BORDERED_WINDOW = window_type(0x14)
@@ -529,6 +590,9 @@ comptime B_CONTROL_INVOKED = command_code(0x4349564b)
 comptime B_CONTROL_KEY: UInt32 = 4
 comptime B_CONTROL_MARK_COLOR = color_which(0x1b)
 comptime B_CONTROL_MODIFIED = command_code(0x434d4f44)
+comptime B_CONTROL_OFF: UInt32 = 0
+comptime B_CONTROL_ON: UInt32 = 1
+comptime B_CONTROL_PARTIALLY_ON: UInt32 = 2
 comptime B_CONTROL_TABLE: UInt32 = 1
 comptime B_CONTROL_TEXT_COLOR = color_which(0xe)
 comptime B_COPY = command_code(0x434f5059)
@@ -652,6 +716,7 @@ comptime B_DO_NOT_RESCHEDULE: UInt32 = 2
 comptime B_DO_NOT_RESIZE_TO_FIT: UInt32 = 1
 comptime B_DRAW_ON_CHILDREN: UInt32 = 0x800000
 comptime B_DUPLICATE_REPLY: Int32 = -2147475455
+comptime B_EMPTY_ALERT = alert_type(0)
 comptime B_END: UInt32 = 4
 comptime B_ENDORSABLE = command_code(0x454e444f)
 comptime B_ENTER: UInt32 = 0xa
@@ -672,6 +737,7 @@ comptime B_EVENT_PRIORITY_WRITE: UInt32 = 0x10
 comptime B_EVENT_READ: UInt32 = 1
 comptime B_EVENT_WRITE: UInt32 = 2
 comptime B_EVEN_ODD: UInt32 = 0
+comptime B_EVEN_SPACING = button_spacing(0)
 comptime B_EXACT_ADDRESS: Int32 = 1
 comptime B_EXECUTE_AREA: Int32 = 4
 comptime B_EXECUTE_PROPERTY = command_code(0x50455845)
@@ -787,6 +853,12 @@ comptime B_HAIKU_VERSION_DANO: Int32 = 3
 comptime B_HANGUL_HANJA_KEY: UInt32 = 0xf1
 comptime B_HANGUL_KEY: UInt32 = 0xf0
 comptime B_HANKAKU_ZENKAKU: UInt32 = 0xf3
+comptime B_HASH_MARKS_BOTH = hash_mark_location(3)
+comptime B_HASH_MARKS_BOTTOM = hash_mark_location(2)
+comptime B_HASH_MARKS_LEFT = hash_mark_location(1)
+comptime B_HASH_MARKS_NONE = hash_mark_location(0)
+comptime B_HASH_MARKS_RIGHT = hash_mark_location(2)
+comptime B_HASH_MARKS_TOP = hash_mark_location(1)
 comptime B_HAS_TUNED_FONT: UInt32 = 1
 comptime B_HEAVY_FACE: UInt32 = 0x200
 comptime B_HIGHLIGHT_BACKGROUND_TINT: Float32 = 1.2949999570846558
@@ -803,12 +875,14 @@ comptime B_HSIA32: UInt32 = 0x6041
 comptime B_HSV24: UInt32 = 0x4042
 comptime B_HSV32: UInt32 = 0x4043
 comptime B_HSVA32: UInt32 = 0x6043
+comptime B_IDEA_ALERT = alert_type(2)
 comptime B_IDLE_PRIORITY: Int32 = 0
 comptime B_ID_SPECIFIER: UInt32 = 7
 comptime B_ILLEGAL_DATA: Int32 = -2147465214
 comptime B_INACTIVE_ICON_BITMAP: UInt32 = 0
 comptime B_INDEX_SPECIFIER: UInt32 = 2
 comptime B_INFINITE_TIMEOUT: Int64 = 0x7fffffffffffffff
+comptime B_INFO_ALERT = alert_type(1)
 comptime B_INPUT_DEVICES_CHANGED = command_code(0x49444348)
 comptime B_INPUT_METHOD_AWARE: UInt32 = 0x400000
 comptime B_INPUT_METHOD_EVENT = command_code(0x494d4556)
@@ -1040,6 +1114,7 @@ comptime B_OBJECT_TYPE_SEMAPHORE: UInt32 = 1
 comptime B_OBJECT_TYPE_THREAD: UInt32 = 3
 comptime B_OBSERVER_NOTICE_CHANGE = command_code(0x4e544348)
 comptime B_OBSERVER_OBSERVE_ALL: UInt32 = 0xffffffff
+comptime B_OFFSET_SPACING = button_spacing(1)
 comptime B_OFF_T_TYPE: UInt32 = 0x4f464654
 comptime B_OK: Int32 = 0
 comptime B_ONE_SHOT_ABSOLUTE_ALARM: UInt32 = 1
@@ -1211,6 +1286,7 @@ comptime B_SQUARE_JOIN = join_mode(4)
 comptime B_SSIZE_T_TYPE: UInt32 = 0x53535a54
 comptime B_STACK_AREA: Int32 = 8
 comptime B_STATUS_BAR_COLOR = color_which(0x25)
+comptime B_STOP_ALERT = alert_type(4)
 comptime B_STORAGE_ERROR_BASE: Int32 = -2147459072
 comptime B_STREAM_NOT_FOUND: Int32 = -2147467264
 comptime B_STRIKEOUT_FACE: UInt32 = 0x10
@@ -1270,6 +1346,7 @@ comptime B_TRANSLATOR_ADDED: UInt32 = 0x5f415254
 comptime B_TRANSLATOR_REMOVED: UInt32 = 0x5f525254
 comptime B_TRANSPARENT_BACKGROUND: UInt32 = 0x40000
 comptime B_TRASH_TARGET = command_code(0x4444524d)
+comptime B_TRIANGLE_THUMB = thumb_style(1)
 comptime B_TRIM_ICON_BITMAP: UInt32 = 0x100
 comptime B_TRIM_ICON_BITMAP_KEEP_ASPECT: UInt32 = 0x200
 comptime B_TRUETYPE_WINDOWS = font_file_format(0)
@@ -1283,6 +1360,12 @@ comptime B_UINT64_TYPE: UInt32 = 0x554c4c47
 comptime B_UINT8_TYPE: UInt32 = 0x55425954
 comptime B_UNDERSCORE_FACE: UInt32 = 2
 comptime B_UNDO = command_code(0x554e444f)
+comptime B_UNDO_CLEAR = undo_state(4)
+comptime B_UNDO_CUT = undo_state(2)
+comptime B_UNDO_DROP = undo_state(5)
+comptime B_UNDO_PASTE = undo_state(3)
+comptime B_UNDO_TYPING = undo_state(1)
+comptime B_UNDO_UNAVAILABLE = undo_state(0)
 comptime B_UNICODE_UTF8: UInt32 = 0
 comptime B_UNKNOWN_EXECUTABLE: Int32 = -2147478779
 comptime B_UNKNOWN_MIME_TYPE: Int32 = -2147475449
@@ -1320,6 +1403,7 @@ comptime B_VIEW_COORDINATES: UInt32 = 2
 comptime B_VIEW_MOVED: UInt32 = 0x5f564d56
 comptime B_VIEW_RESIZED: UInt32 = 0x5f565253
 comptime B_WAIT_FOR_RETRACE = bitmap_drawing_options(0x800)
+comptime B_WARNING_ALERT = alert_type(3)
 comptime B_WARP_FOCUS_FOLLOWS_MOUSE = mode_focus_follows_mouse(1)
 comptime B_WIDTH_AS_USUAL = button_width(0)
 comptime B_WIDTH_FROM_LABEL = button_width(2)

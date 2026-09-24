@@ -538,6 +538,17 @@ def main() raises:
         seenBSpacing == givenBSpacing and beforeBSpacing == -5 and afterBSpacing == 2.75)
     checks.check("BSpacing returned", resultBSpacing == BSpacing(-2))
 
+    var givenalert_type = alert_type(3)
+    var seenalert_type = givenalert_type
+    var beforealert_type = Int8(0)
+    var afteralert_type = Float64(0)
+    var resultalert_type = external_call["mojobe_oracle_echo_alert_type", alert_type](
+        Int8(-5), givenalert_type, Float64(2.75), Pointer(to=seenalert_type),
+        Pointer(to=beforealert_type), Pointer(to=afteralert_type))
+    checks.check("alert_type by value, between an int8 and a double",
+        seenalert_type == givenalert_type and beforealert_type == -5 and afteralert_type == 2.75)
+    checks.check("alert_type returned", resultalert_type == alert_type(4))
+
     var givenalignment = alignment(-3)
     var seenalignment = givenalignment
     var beforealignment = Int8(0)
@@ -644,6 +655,22 @@ def main() raises:
     checks.check(
         "buffer_orientation returned",
         resultbuffer_orientation == buffer_orientation(4),
+    )
+
+    var givenbutton_spacing = button_spacing(3)
+    var seenbutton_spacing = givenbutton_spacing
+    var beforebutton_spacing = Int8(0)
+    var afterbutton_spacing = Float64(0)
+    var resultbutton_spacing = external_call["mojobe_oracle_echo_button_spacing", button_spacing](
+        Int8(-5), givenbutton_spacing, Float64(2.75), Pointer(
+            to=seenbutton_spacing,
+        ),
+        Pointer(to=beforebutton_spacing), Pointer(to=afterbutton_spacing))
+    checks.check("button_spacing by value, between an int8 and a double",
+        seenbutton_spacing == givenbutton_spacing and beforebutton_spacing == -5 and afterbutton_spacing == 2.75)
+    checks.check(
+        "button_spacing returned",
+        resultbutton_spacing == button_spacing(4),
     )
 
     var givenbutton_width = button_width(3)
@@ -777,6 +804,24 @@ def main() raises:
     checks.check(
         "font_metric_mode returned",
         resultfont_metric_mode == font_metric_mode(4),
+    )
+
+    var givenhash_mark_location = hash_mark_location(3)
+    var seenhash_mark_location = givenhash_mark_location
+    var beforehash_mark_location = Int8(0)
+    var afterhash_mark_location = Float64(0)
+    var resulthash_mark_location = external_call["mojobe_oracle_echo_hash_mark_location", hash_mark_location](
+        Int8(-5), givenhash_mark_location, Float64(2.75), Pointer(
+            to=seenhash_mark_location,
+        ),
+        Pointer(to=beforehash_mark_location), Pointer(
+            to=afterhash_mark_location,
+        ))
+    checks.check("hash_mark_location by value, between an int8 and a double",
+        seenhash_mark_location == givenhash_mark_location and beforehash_mark_location == -5 and afterhash_mark_location == 2.75)
+    checks.check(
+        "hash_mark_location returned",
+        resulthash_mark_location == hash_mark_location(4),
     )
 
     var givenjoin_mode = join_mode(3)
@@ -920,6 +965,17 @@ def main() raises:
         seensource_alpha == givensource_alpha and beforesource_alpha == -5 and aftersource_alpha == 2.75)
     checks.check("source_alpha returned", resultsource_alpha == source_alpha(4))
 
+    var giventhumb_style = thumb_style(3)
+    var seenthumb_style = giventhumb_style
+    var beforethumb_style = Int8(0)
+    var afterthumb_style = Float64(0)
+    var resultthumb_style = external_call["mojobe_oracle_echo_thumb_style", thumb_style](
+        Int8(-5), giventhumb_style, Float64(2.75), Pointer(to=seenthumb_style),
+        Pointer(to=beforethumb_style), Pointer(to=afterthumb_style))
+    checks.check("thumb_style by value, between an int8 and a double",
+        seenthumb_style == giventhumb_style and beforethumb_style == -5 and afterthumb_style == 2.75)
+    checks.check("thumb_style returned", resultthumb_style == thumb_style(4))
+
     var giventopology_level_type = topology_level_type(3)
     var seentopology_level_type = giventopology_level_type
     var beforetopology_level_type = Int8(0)
@@ -937,6 +993,17 @@ def main() raises:
         "topology_level_type returned",
         resulttopology_level_type == topology_level_type(4),
     )
+
+    var givenundo_state = undo_state(3)
+    var seenundo_state = givenundo_state
+    var beforeundo_state = Int8(0)
+    var afterundo_state = Float64(0)
+    var resultundo_state = external_call["mojobe_oracle_echo_undo_state", undo_state](
+        Int8(-5), givenundo_state, Float64(2.75), Pointer(to=seenundo_state),
+        Pointer(to=beforeundo_state), Pointer(to=afterundo_state))
+    checks.check("undo_state by value, between an int8 and a double",
+        seenundo_state == givenundo_state and beforeundo_state == -5 and afterundo_state == 2.75)
+    checks.check("undo_state returned", resultundo_state == undo_state(4))
 
     var givenvertical_alignment = vertical_alignment(-3)
     var seenvertical_alignment = givenvertical_alignment
