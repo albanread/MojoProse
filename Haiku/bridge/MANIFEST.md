@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 1036 included, 252 overrides reached through a base, 365 left out.
+In all: 1185 included, 338 overrides reached through a base, 317 left out.
 
 ## BMessenger: 17 included, 0 overrides reached through a base, 3 left out
 
@@ -107,7 +107,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BHandler::SetFilterList(BList* filters)` | skipped | parameter filters: BList * is not bridged |
 | `BList* BHandler::FilterList()` | skipped | result: BList * is not bridged |
 | `status_t BHandler::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
-| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | static |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
 | `status_t BHandler::Archive(BMessage* data, bool deep) const` | included | mojobe_BHandler_Archive |
 | `void BHandler::MessageReceived(BMessage* message)` | included | mojobe_BHandler_MessageReceived |
 | `BLooper* BHandler::Looper() const` | included | mojobe_BHandler_Looper |
@@ -136,13 +136,13 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BHandler::BHandler(const char* name)` | included | mojobe_BHandler_new |
 | `hook void BHandler::MessageReceived(BMessage* message)` | included | HandlerMessageReceived |
 
-## BLooper: 33 included, 4 overrides reached through a base, 9 left out
+## BLooper: 34 included, 4 overrides reached through a base, 8 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BLooper::Instantiate(BMessage* data)` | skipped | static |
 | `BMessageQueue* BLooper::MessageQueue() const` | skipped | result: BMessageQueue * is not bridged |
-| `BLooper* BLooper::LooperForThread(thread_id thread)` | skipped | static |
+| `BLooper* BLooper::LooperForThread(thread_id thread)` | included | mojobe_BLooper_LooperForThread, static |
 | `void BLooper::AddCommonFilter(BMessageFilter* filter)` | skipped | parameter filter: BMessageFilter * is not bridged |
 | `bool BLooper::RemoveCommonFilter(BMessageFilter* filter)` | skipped | parameter filter: BMessageFilter * is not bridged |
 | `void BLooper::SetCommonFilterList(BList* filters)` | skipped | parameter filters: BList * is not bridged |
@@ -196,7 +196,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BApplication::SetCursor(const void* cursor)` | skipped | parameter cursor: const void * is not bridged |
 | `void BApplication::SetCursor(const BCursor* cursor, bool sync)` | skipped | parameter cursor: const BCursor * is not bridged |
 | `status_t BApplication::GetAppInfo(app_info* info) const` | skipped | parameter info: app_info * is not bridged |
-| `BResources* BApplication::AppResources()` | skipped | static |
+| `BResources* BApplication::AppResources()` | skipped | result: BResources * is not bridged |
 | `status_t BApplication::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
 | `status_t BApplication::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `status_t BApplication::InitCheck() const` | included | mojobe_BApplication_InitCheck |
@@ -235,25 +235,22 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `hook void BApplication::Pulse()` | included | ApplicationPulse |
 | `hook void BApplication::RefsReceived(BMessage* message)` | included | ApplicationRefsReceived |
 
-## BWindow: 104 included, 6 overrides reached through a base, 12 left out
+## BWindow: 108 included, 6 overrides reached through a base, 8 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BWindow::Instantiate(BMessage* archive)` | skipped | static |
-| `void BWindow::AddChild(BLayoutItem* child)` | skipped | parameter child: BLayoutItem * is not bridged |
 | `void BWindow::ConvertToScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertFromScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertToScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
 | `void BWindow::ConvertFromScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
-| `BSize BWindow::Size() const` | skipped | result: BSize is not bridged |
 | `status_t BWindow::Perform(perform_code code, void* data)` | skipped | binary compatibility hook |
 | `thread_id BWindow::Run()` | skipped | Show() runs the window |
-| `void BWindow::SetLayout(BLayout* layout)` | skipped | parameter layout: BLayout * is not bridged |
-| `BLayout* BWindow::GetLayout() const` | skipped | result: BLayout * is not bridged |
 | `status_t BWindow::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BWindow::Quit()` | included | mojobe_BWindow_Quit |
 | `void BWindow::Close()` | included | mojobe_BWindow_Close |
-| `void BWindow::AddChild(BView* child, BView* before)` | included | mojobe_BWindow_AddChild |
+| `void BWindow::AddChild(BView* child, BView* before)` | included | mojobe_BWindow_AddChild__BViewP_BViewP |
+| `void BWindow::AddChild(BLayoutItem* child)` | included | mojobe_BWindow_AddChild__BLayoutItemP |
 | `bool BWindow::RemoveChild(BView* child)` | included | mojobe_BWindow_RemoveChild |
 | `int32 BWindow::CountChildren() const` | included | mojobe_BWindow_CountChildren |
 | `BView* BWindow::ChildAt(int32 index) const` | included | mojobe_BWindow_ChildAt |
@@ -314,6 +311,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BRect BWindow::Bounds() const` | included | mojobe_BWindow_Bounds |
 | `BRect BWindow::Frame() const` | included | mojobe_BWindow_Frame |
 | `BRect BWindow::DecoratorFrame() const` | included | mojobe_BWindow_DecoratorFrame |
+| `BSize BWindow::Size() const` | included | mojobe_BWindow_Size |
 | `const char* BWindow::Title() const` | included | mojobe_BWindow_Title |
 | `void BWindow::SetTitle(const char* title)` | included | mojobe_BWindow_SetTitle |
 | `bool BWindow::IsFront() const` | included | mojobe_BWindow_IsFront |
@@ -345,6 +343,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BWindow::SetWindowAlignment(window_alignment mode, int32 h, int32 hOffset, int32 width, int32 widthOffset, int32 v, int32 vOffset, int32 height, int32 heightOffset)` | included | mojobe_BWindow_SetWindowAlignment |
 | `status_t BWindow::GetWindowAlignment(window_alignment* mode, int32* h, int32* hOffset, int32* width, int32* widthOffset, int32* v, int32* vOffset, int32* height, int32* heightOffset) const` | included | mojobe_BWindow_GetWindowAlignment |
 | `bool BWindow::QuitRequested()` | skipped | reached through BLooper's QuitRequested |
+| `void BWindow::SetLayout(BLayout* layout)` | included | mojobe_BWindow_SetLayout |
+| `BLayout* BWindow::GetLayout() const` | included | mojobe_BWindow_GetLayout |
 | `void BWindow::InvalidateLayout(bool descendants)` | included | mojobe_BWindow_InvalidateLayout |
 | `void BWindow::Layout(bool force)` | included | mojobe_BWindow_Layout |
 | `bool BWindow::IsOffscreenWindow() const` | included | mojobe_BWindow_IsOffscreenWindow |
@@ -362,12 +362,11 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `hook void BWindow::Zoom(BPoint origin, float width, float height)` | included | WindowZoom |
 | `hook void BWindow::Minimize(bool minimize)` | included | WindowMinimize |
 
-## BView: 215 included, 6 overrides reached through a base, 90 left out
+## BView: 232 included, 6 overrides reached through a base, 73 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BView::Instantiate(BMessage* archive)` | skipped | static |
-| `bool BView::AddChild(BLayoutItem* child)` | skipped | parameter child: BLayoutItem * is not bridged |
 | `void BView::ConvertToScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BView::ConvertFromScreen(BPoint* point) const` | skipped | changes point in place; the overload that returns the result is bridged |
 | `void BView::ConvertToScreen(BRect* rect) const` | skipped | changes rect in place; the overload that returns the result is bridged |
@@ -434,24 +433,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BView::DrawPicture(const BPicture* a_picture, BPoint where)` | skipped | parameter a_picture: const BPicture * is not bridged |
 | `void BView::DrawPictureAsync(const BPicture* a_picture)` | skipped | parameter a_picture: const BPicture * is not bridged |
 | `void BView::DrawPictureAsync(const BPicture* a_picture, BPoint where)` | skipped | parameter a_picture: const BPicture * is not bridged |
-| `void BView::ResizeTo(BSize size)` | skipped | parameter size: BSize is not bridged |
 | `BScrollBar* BView::ScrollBar(orientation direction) const` | skipped | result: BScrollBar * is not bridged |
 | `status_t BView::Perform(perform_code code, void* data)` | skipped | binary compatibility hook |
-| `BSize BView::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BView::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BView::PreferredSize()` | skipped | result: BSize is not bridged |
-| `BAlignment BView::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
-| `void BView::SetExplicitMinSize(BSize size)` | skipped | parameter size: BSize is not bridged |
-| `void BView::SetExplicitMaxSize(BSize size)` | skipped | parameter size: BSize is not bridged |
-| `void BView::SetExplicitPreferredSize(BSize size)` | skipped | parameter size: BSize is not bridged |
-| `void BView::SetExplicitSize(BSize size)` | skipped | parameter size: BSize is not bridged |
-| `void BView::SetExplicitAlignment(BAlignment alignment)` | skipped | parameter alignment: BAlignment is not bridged |
-| `BSize BView::ExplicitMinSize() const` | skipped | result: BSize is not bridged |
-| `BSize BView::ExplicitMaxSize() const` | skipped | result: BSize is not bridged |
-| `BSize BView::ExplicitPreferredSize() const` | skipped | result: BSize is not bridged |
-| `BAlignment BView::ExplicitAlignment() const` | skipped | result: BAlignment is not bridged |
-| `void BView::SetLayout(BLayout* layout)` | skipped | parameter layout: BLayout * is not bridged |
-| `BLayout* BView::GetLayout() const` | skipped | result: BLayout * is not bridged |
 | `BLayoutContext* BView::LayoutContext() const` | skipped | result: BLayoutContext * is not bridged |
 | `void BView::SetToolTip(BToolTip* tip)` | skipped | parameter tip: BToolTip * is not bridged |
 | `BToolTip* BView::ToolTip() const` | skipped | result: BToolTip * is not bridged |
@@ -463,7 +446,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BView::DetachedFromWindow()` | included | mojobe_BView_DetachedFromWindow |
 | `void BView::AllDetached()` | included | mojobe_BView_AllDetached |
 | `void BView::MessageReceived(BMessage* message)` | skipped | reached through BHandler's MessageReceived |
-| `void BView::AddChild(BView* child, BView* before)` | included | mojobe_BView_AddChild |
+| `void BView::AddChild(BView* child, BView* before)` | included | mojobe_BView_AddChild__BViewP_BViewP |
+| `bool BView::AddChild(BLayoutItem* child)` | included | mojobe_BView_AddChild__BLayoutItemP |
 | `bool BView::RemoveChild(BView* child)` | included | mojobe_BView_RemoveChild |
 | `int32 BView::CountChildren() const` | included | mojobe_BView_CountChildren |
 | `BView* BView::ChildAt(int32 index) const` | included | mojobe_BView_ChildAt |
@@ -625,7 +609,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BView::MoveTo(BPoint where)` | included | mojobe_BView_MoveTo__BPoint |
 | `void BView::MoveTo(float x, float y)` | included | mojobe_BView_MoveTo__float_float |
 | `void BView::ResizeBy(float dh, float dv)` | included | mojobe_BView_ResizeBy |
-| `void BView::ResizeTo(float width, float height)` | included | mojobe_BView_ResizeTo |
+| `void BView::ResizeTo(float width, float height)` | included | mojobe_BView_ResizeTo__float_float |
+| `void BView::ResizeTo(BSize size)` | included | mojobe_BView_ResizeTo__BSize |
 | `void BView::ScrollBy(float dh, float dv)` | included | mojobe_BView_ScrollBy |
 | `void BView::ScrollTo(float x, float y)` | included | mojobe_BView_ScrollTo__float_float |
 | `void BView::ScrollTo(BPoint where)` | included | mojobe_BView_ScrollTo__BPoint |
@@ -645,9 +630,24 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BView::SetScale(float scale) const` | included | mojobe_BView_SetScale |
 | `float BView::Scale() const` | included | mojobe_BView_Scale |
 | `void BView::DrawAfterChildren(BRect updateRect)` | included | mojobe_BView_DrawAfterChildren |
+| `BSize BView::MinSize()` | included | mojobe_BView_MinSize |
+| `BSize BView::MaxSize()` | included | mojobe_BView_MaxSize |
+| `BSize BView::PreferredSize()` | included | mojobe_BView_PreferredSize |
+| `BAlignment BView::LayoutAlignment()` | included | mojobe_BView_LayoutAlignment |
+| `void BView::SetExplicitMinSize(BSize size)` | included | mojobe_BView_SetExplicitMinSize |
+| `void BView::SetExplicitMaxSize(BSize size)` | included | mojobe_BView_SetExplicitMaxSize |
+| `void BView::SetExplicitPreferredSize(BSize size)` | included | mojobe_BView_SetExplicitPreferredSize |
+| `void BView::SetExplicitSize(BSize size)` | included | mojobe_BView_SetExplicitSize |
+| `void BView::SetExplicitAlignment(BAlignment alignment)` | included | mojobe_BView_SetExplicitAlignment |
+| `BSize BView::ExplicitMinSize() const` | included | mojobe_BView_ExplicitMinSize |
+| `BSize BView::ExplicitMaxSize() const` | included | mojobe_BView_ExplicitMaxSize |
+| `BSize BView::ExplicitPreferredSize() const` | included | mojobe_BView_ExplicitPreferredSize |
+| `BAlignment BView::ExplicitAlignment() const` | included | mojobe_BView_ExplicitAlignment |
 | `bool BView::HasHeightForWidth()` | included | mojobe_BView_HasHeightForWidth |
 | `void BView::GetHeightForWidth(float width, float* min, float* max, float* preferred)` | included | mojobe_BView_GetHeightForWidth |
 | `void BView::InvalidateLayout(bool descendants)` | included | mojobe_BView_InvalidateLayout |
+| `void BView::SetLayout(BLayout* layout)` | included | mojobe_BView_SetLayout |
+| `BLayout* BView::GetLayout() const` | included | mojobe_BView_GetLayout |
 | `void BView::EnableLayoutInvalidation()` | included | mojobe_BView_EnableLayoutInvalidation |
 | `void BView::DisableLayoutInvalidation()` | included | mojobe_BView_DisableLayoutInvalidation |
 | `bool BView::IsLayoutInvalidationDisabled()` | included | mojobe_BView_IsLayoutInvalidationDisabled |
@@ -659,7 +659,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BView::ShowToolTip(BToolTip* tip)` | included | mojobe_BView_ShowToolTip |
 | `void BView::HideToolTip()` | included | mojobe_BView_HideToolTip |
 | `BView::BView(BMessage* archive)` | skipped | archive constructor |
-| `BView::BView(const char* name, uint32 flags, BLayout* layout)` | included | mojobe_BView_new__charP_uint32 |
+| `BView::BView(const char* name, uint32 flags, BLayout* layout)` | included | mojobe_BView_new__charP_uint32_BLayoutP |
 | `BView::BView(BRect frame, const char* name, uint32 resizingMode, uint32 flags)` | included | mojobe_BView_new__BRect_charP_uint32_uint32 |
 | `hook void BView::Draw(BRect updateRect)` | included | ViewDraw |
 | `hook void BView::DrawAfterChildren(BRect updateRect)` | included | ViewDrawAfterChildren |
@@ -678,7 +678,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `hook void BView::WindowActivated(bool active)` | included | ViewWindowActivated |
 | `hook void BView::Pulse()` | included | ViewPulse |
 
-## BMessage: 200 included, 0 overrides reached through a base, 69 left out
+## BMessage: 216 included, 0 overrides reached through a base, 53 left out
 
 | C++ | | |
 |---|---|---|
@@ -687,18 +687,12 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::Flatten(char* buffer, ssize_t size) const` | skipped | parameter buffer: char * is not bridged |
 | `status_t BMessage::Flatten(BDataIO* stream, ssize_t* size) const` | skipped | parameter stream: BDataIO * is not bridged |
 | `status_t BMessage::Unflatten(BDataIO* stream)` | skipped | parameter stream: BDataIO * is not bridged |
-| `status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)` | skipped | parameter alignment: const BAlignment & is not bridged |
-| `status_t BMessage::AddSize(const char* name, BSize size)` | skipped | parameter size: BSize is not bridged |
 | `status_t BMessage::AddString(const char* name, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::AddStrings(const char* name, const BStringList& list)` | skipped | parameter list: const BStringList & is not bridged |
 | `status_t BMessage::AddPointer(const char* name, const void* pointer)` | skipped | parameter pointer: const void * is not bridged |
 | `status_t BMessage::AddNodeRef(const char* name, const node_ref* ref)` | skipped | parameter ref: const node_ref * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, BFlattenable* object, int32 count)` | skipped | parameter object: BFlattenable * is not bridged |
 | `status_t BMessage::AddFlat(const char* name, const BFlattenable* object, int32 count)` | skipped | parameter object: const BFlattenable * is not bridged |
-| `status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const` | skipped | parameter alignment: BAlignment * is not bridged |
-| `status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const` | skipped | parameter alignment: BAlignment * is not bridged |
-| `status_t BMessage::FindSize(const char* name, BSize* size) const` | skipped | parameter size: BSize * is not bridged |
-| `status_t BMessage::FindSize(const char* name, int32 index, BSize* size) const` | skipped | parameter size: BSize * is not bridged |
 | `status_t BMessage::FindString(const char* name, BString* string) const` | skipped | parameter string: BString * is not bridged |
 | `status_t BMessage::FindString(const char* name, int32 index, BString* string) const` | skipped | parameter string: BString * is not bridged |
 | `status_t BMessage::FindStrings(const char* name, BStringList* list) const` | skipped | parameter list: BStringList * is not bridged |
@@ -710,10 +704,6 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::FindFlat(const char* name, int32 index, BFlattenable* object) const` | skipped | parameter object: BFlattenable * is not bridged |
 | `status_t BMessage::FindData(const char* name, type_code type, const void** data, ssize_t* numBytes) const` | skipped | parameter data: const void ** is not bridged |
 | `status_t BMessage::FindData(const char* name, type_code type, int32 index, const void** data, ssize_t* numBytes) const` | skipped | parameter data: const void ** is not bridged |
-| `status_t BMessage::ReplaceAlignment(const char* name, const BAlignment& alignment)` | skipped | parameter alignment: const BAlignment & is not bridged |
-| `status_t BMessage::ReplaceAlignment(const char* name, int32 index, const BAlignment& alignment)` | skipped | parameter alignment: const BAlignment & is not bridged |
-| `status_t BMessage::ReplaceSize(const char* name, BSize aSize)` | skipped | parameter aSize: BSize is not bridged |
-| `status_t BMessage::ReplaceSize(const char* name, int32 index, BSize aSize)` | skipped | parameter aSize: BSize is not bridged |
 | `status_t BMessage::ReplaceString(const char* name, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::ReplaceString(const char* name, int32 index, const BString& string)` | skipped | parameter string: const BString & is not bridged |
 | `status_t BMessage::ReplacePointer(const char* name, const void* pointer)` | skipped | parameter pointer: const void * is not bridged |
@@ -730,14 +720,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `bool BMessage::HasFlat(const char* name, int32 n, const BFlattenable* object) const` | skipped | parameter object: const BFlattenable * is not bridged |
 | `const void* BMessage::GetPointer(const char* name, int32 index, const void* defaultValue) const` | skipped | result: const void * is not bridged |
 | `const void* BMessage::GetPointer(const char* name, const void* defaultValue) const` | skipped | result: const void * is not bridged |
-| `BAlignment BMessage::GetAlignment(const char* name, int32 index, const BAlignment& defaultValue) const` | skipped | parameter defaultValue: const BAlignment & is not bridged |
-| `BAlignment BMessage::GetAlignment(const char* name, const BAlignment& defaultValue) const` | skipped | parameter defaultValue: const BAlignment & is not bridged |
-| `BSize BMessage::GetSize(const char* name, int32 index, const BSize& defaultValue) const` | skipped | parameter defaultValue: const BSize & is not bridged |
-| `BSize BMessage::GetSize(const char* name, const BSize& defaultValue) const` | skipped | parameter defaultValue: const BSize & is not bridged |
 | `status_t BMessage::SetPointer(const char* name, const void* value)` | skipped | parameter value: const void * is not bridged |
 | `status_t BMessage::SetString(const char* name, const BString& string)` | skipped | parameter string: const BString & is not bridged |
-| `status_t BMessage::SetAlignment(const char* name, const BAlignment& value)` | skipped | parameter value: const BAlignment & is not bridged |
-| `status_t BMessage::SetSize(const char* name, const BSize& value)` | skipped | parameter value: const BSize & is not bridged |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, int32* countFound) const` | included | mojobe_BMessage_GetInfo__charP_type_codeP_int32P |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, bool* fixedSize) const` | skipped | a call would match another overload too |
 | `status_t BMessage::GetInfo(const char* name, type_code* typeFound, int32* countFound, bool* fixedSize) const` | skipped | a call would match another overload too |
@@ -770,8 +754,10 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::GetCurrentSpecifier(int32* index, BMessage* specifier, int32* what, const char** property) const` | included | mojobe_BMessage_GetCurrentSpecifier |
 | `bool BMessage::HasSpecifiers() const` | included | mojobe_BMessage_HasSpecifiers |
 | `status_t BMessage::PopSpecifier()` | included | mojobe_BMessage_PopSpecifier |
+| `status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)` | included | mojobe_BMessage_AddAlignment |
 | `status_t BMessage::AddRect(const char* name, BRect rect)` | included | mojobe_BMessage_AddRect |
 | `status_t BMessage::AddPoint(const char* name, BPoint point)` | included | mojobe_BMessage_AddPoint |
+| `status_t BMessage::AddSize(const char* name, BSize size)` | included | mojobe_BMessage_AddSize |
 | `status_t BMessage::AddString(const char* name, const char* string)` | included | mojobe_BMessage_AddString |
 | `status_t BMessage::AddInt8(const char* name, int8 value)` | included | mojobe_BMessage_AddInt8 |
 | `status_t BMessage::AddUInt8(const char* name, uint8 value)` | included | mojobe_BMessage_AddUInt8 |
@@ -793,12 +779,16 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::RemoveData(const char* name, int32 index)` | included | mojobe_BMessage_RemoveData |
 | `status_t BMessage::RemoveName(const char* name)` | included | mojobe_BMessage_RemoveName |
 | `status_t BMessage::MakeEmpty()` | included | mojobe_BMessage_MakeEmpty |
+| `status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const` | included | mojobe_BMessage_FindAlignment__charP_BAlignmentP |
+| `status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const` | included | mojobe_BMessage_FindAlignment__charP_int32_BAlignmentP |
 | `status_t BMessage::FindRect(const char* name, BRect* rect) const` | included | mojobe_BMessage_FindRect__charP_BRectP |
 | `status_t BMessage::FindRect(const char* name, int32 index, BRect* rect) const` | included | mojobe_BMessage_FindRect__charP_int32_BRectP |
 | `BRect BMessage::FindRect(const char* name, int32 n) const` | skipped | a call would match another overload too |
 | `status_t BMessage::FindPoint(const char* name, BPoint* point) const` | included | mojobe_BMessage_FindPoint__charP_BPointP |
 | `status_t BMessage::FindPoint(const char* name, int32 index, BPoint* point) const` | included | mojobe_BMessage_FindPoint__charP_int32_BPointP |
 | `BPoint BMessage::FindPoint(const char* name, int32 n) const` | skipped | a call would match another overload too |
+| `status_t BMessage::FindSize(const char* name, BSize* size) const` | included | mojobe_BMessage_FindSize__charP_BSizeP |
+| `status_t BMessage::FindSize(const char* name, int32 index, BSize* size) const` | included | mojobe_BMessage_FindSize__charP_int32_BSizeP |
 | `status_t BMessage::FindString(const char* name, const char** string) const` | included | mojobe_BMessage_FindString__charP_charPP |
 | `status_t BMessage::FindString(const char* name, int32 index, const char** string) const` | included | mojobe_BMessage_FindString__charP_int32_charPP |
 | `const char* BMessage::FindString(const char* name, int32 n) const` | skipped | a call would match another overload too |
@@ -839,10 +829,14 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::FindRef(const char* name, int32 index, entry_ref* ref) const` | included | mojobe_BMessage_FindRef__charP_int32_entry_refP |
 | `status_t BMessage::FindMessage(const char* name, BMessage* message) const` | included | mojobe_BMessage_FindMessage__charP_BMessageP |
 | `status_t BMessage::FindMessage(const char* name, int32 index, BMessage* message) const` | included | mojobe_BMessage_FindMessage__charP_int32_BMessageP |
+| `status_t BMessage::ReplaceAlignment(const char* name, const BAlignment& alignment)` | included | mojobe_BMessage_ReplaceAlignment__charP_BAlignment |
+| `status_t BMessage::ReplaceAlignment(const char* name, int32 index, const BAlignment& alignment)` | included | mojobe_BMessage_ReplaceAlignment__charP_int32_BAlignment |
 | `status_t BMessage::ReplaceRect(const char* name, BRect rect)` | included | mojobe_BMessage_ReplaceRect__charP_BRect |
 | `status_t BMessage::ReplaceRect(const char* name, int32 index, BRect rect)` | included | mojobe_BMessage_ReplaceRect__charP_int32_BRect |
 | `status_t BMessage::ReplacePoint(const char* name, BPoint aPoint)` | included | mojobe_BMessage_ReplacePoint__charP_BPoint |
 | `status_t BMessage::ReplacePoint(const char* name, int32 index, BPoint aPoint)` | included | mojobe_BMessage_ReplacePoint__charP_int32_BPoint |
+| `status_t BMessage::ReplaceSize(const char* name, BSize aSize)` | included | mojobe_BMessage_ReplaceSize__charP_BSize |
+| `status_t BMessage::ReplaceSize(const char* name, int32 index, BSize aSize)` | included | mojobe_BMessage_ReplaceSize__charP_int32_BSize |
 | `status_t BMessage::ReplaceString(const char* name, const char* string)` | included | mojobe_BMessage_ReplaceString__charP_charP |
 | `status_t BMessage::ReplaceString(const char* name, int32 index, const char* string)` | included | mojobe_BMessage_ReplaceString__charP_int32_charP |
 | `status_t BMessage::ReplaceInt8(const char* name, int8 value)` | included | mojobe_BMessage_ReplaceInt8__charP_int8 |
@@ -927,10 +921,14 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `rgb_color BMessage::GetColor(const char* name, int32 index, rgb_color defaultValue) const` | included | mojobe_BMessage_GetColor__charP_int32_rgb_color |
 | `const char* BMessage::GetString(const char* name, const char* defaultValue) const` | included | mojobe_BMessage_GetString__charP_charP |
 | `const char* BMessage::GetString(const char* name, int32 index, const char* defaultValue) const` | included | mojobe_BMessage_GetString__charP_int32_charP |
+| `BAlignment BMessage::GetAlignment(const char* name, int32 index, const BAlignment& defaultValue) const` | included | mojobe_BMessage_GetAlignment__charP_int32_BAlignment |
+| `BAlignment BMessage::GetAlignment(const char* name, const BAlignment& defaultValue) const` | included | mojobe_BMessage_GetAlignment__charP_BAlignment |
 | `BRect BMessage::GetRect(const char* name, int32 index, const BRect& defaultValue) const` | included | mojobe_BMessage_GetRect__charP_int32_BRect |
 | `BRect BMessage::GetRect(const char* name, const BRect& defaultValue) const` | included | mojobe_BMessage_GetRect__charP_BRect |
 | `BPoint BMessage::GetPoint(const char* name, int32 index, const BPoint& defaultValue) const` | included | mojobe_BMessage_GetPoint__charP_int32_BPoint |
 | `BPoint BMessage::GetPoint(const char* name, const BPoint& defaultValue) const` | included | mojobe_BMessage_GetPoint__charP_BPoint |
+| `BSize BMessage::GetSize(const char* name, int32 index, const BSize& defaultValue) const` | included | mojobe_BMessage_GetSize__charP_int32_BSize |
+| `BSize BMessage::GetSize(const char* name, const BSize& defaultValue) const` | included | mojobe_BMessage_GetSize__charP_BSize |
 | `status_t BMessage::SetBool(const char* name, bool value)` | included | mojobe_BMessage_SetBool |
 | `status_t BMessage::SetInt8(const char* name, int8 value)` | included | mojobe_BMessage_SetInt8 |
 | `status_t BMessage::SetUInt8(const char* name, uint8 value)` | included | mojobe_BMessage_SetUInt8 |
@@ -944,22 +942,21 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BMessage::SetString(const char* name, const char* string)` | included | mojobe_BMessage_SetString |
 | `status_t BMessage::SetFloat(const char* name, float value)` | included | mojobe_BMessage_SetFloat |
 | `status_t BMessage::SetDouble(const char* name, double value)` | included | mojobe_BMessage_SetDouble |
+| `status_t BMessage::SetAlignment(const char* name, const BAlignment& value)` | included | mojobe_BMessage_SetAlignment |
 | `status_t BMessage::SetPoint(const char* name, const BPoint& value)` | included | mojobe_BMessage_SetPoint |
 | `status_t BMessage::SetRect(const char* name, const BRect& value)` | included | mojobe_BMessage_SetRect |
+| `status_t BMessage::SetSize(const char* name, const BSize& value)` | included | mojobe_BMessage_SetSize |
 | `status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)` | included | mojobe_BMessage_SetData |
 | `BMessage::what (field)` | included | get_what, set_what |
 | `BMessage::BMessage(const BMessage& other)` | skipped | copy constructor |
 | `BMessage::BMessage()` | included | mojobe_BMessage_new__void |
 | `BMessage::BMessage(uint32 what)` | included | mojobe_BMessage_new__uint32 |
 
-## BMenu: 41 included, 16 overrides reached through a base, 10 left out
+## BMenu: 41 included, 19 overrides reached through a base, 7 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BMenu::Instantiate(BMessage* archive)` | skipped | static |
-| `BSize BMenu::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BMenu::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BMenu::PreferredSize()` | skipped | result: BSize is not bridged |
 | `bool BMenu::AddList(BList* list, int32 index)` | skipped | parameter list: BList * is not bridged |
 | `status_t BMenu::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
 | `bool BMenu::AddDynamicItem(add_state state)` | skipped | parameter state: add_state is not bridged |
@@ -973,6 +970,9 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BMenu::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BMenu::MessageReceived(BMessage* message)` | skipped | reached through BHandler's MessageReceived |
 | `void BMenu::KeyDown(const char* bytes, int32 numBytes)` | skipped | reached through BView's KeyDown |
+| `BSize BMenu::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BMenu::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BMenu::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `void BMenu::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
 | `void BMenu::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
 | `void BMenu::DoLayout()` | included | mojobe_BMenu_DoLayout |
@@ -1024,14 +1024,11 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BMenu::BMenu(const char* name, menu_layout layout)` | included | mojobe_BMenu_new__charP_menu_layout |
 | `BMenu::BMenu(const char* name, float width, float height)` | included | mojobe_BMenu_new__charP_float_float |
 
-## BMenuBar: 6 included, 19 overrides reached through a base, 6 left out
+## BMenuBar: 6 included, 22 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BMenuBar::Instantiate(BMessage* archive)` | skipped | static |
-| `BSize BMenuBar::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BMenuBar::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BMenuBar::PreferredSize()` | skipped | result: BSize is not bridged |
 | `status_t BMenuBar::Perform(perform_code code, void* data)` | skipped | binary compatibility hook |
 | `status_t BMenuBar::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BMenuBar::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
@@ -1042,6 +1039,9 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BMenuBar::MakeFocus(bool state)` | skipped | reached through BView's MakeFocus |
 | `void BMenuBar::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
 | `void BMenuBar::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
+| `BSize BMenuBar::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BMenuBar::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BMenuBar::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `void BMenuBar::FrameMoved(BPoint newPosition)` | skipped | reached through BView's FrameMoved |
 | `void BMenuBar::FrameResized(float newWidth, float newHeight)` | skipped | reached through BView's FrameResized |
 | `void BMenuBar::Show()` | skipped | reached through BView's Show |
@@ -1087,7 +1087,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | C++ | | |
 |---|---|---|
 | `BArchivable* BMenuItem::Instantiate(BMessage* archive)` | skipped | static |
-| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | static |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
 | `status_t BArchivable::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
 | `status_t BMenuItem::Archive(BMessage* archive, bool deep) const` | included | mojobe_BMenuItem_Archive |
 | `void BMenuItem::SetLabel(const char* name)` | included | mojobe_BMenuItem_SetLabel |
@@ -1174,7 +1174,7 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BControl::BControl(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BControl_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BControl::BControl(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BControl_new__charP_charP_BMessageP_uint32 |
 
-## BButton: 9 included, 23 overrides reached through a base, 8 left out
+## BButton: 9 included, 26 overrides reached through a base, 5 left out
 
 | C++ | | |
 |---|---|---|
@@ -1182,9 +1182,6 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BBehavior BButton::Behavior() const` | skipped | result: BBehavior is not bridged |
 | `void BButton::SetBehavior(BBehavior behavior)` | skipped | parameter behavior: BBehavior is not bridged |
 | `status_t BButton::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
-| `BSize BButton::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BButton::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BButton::PreferredSize()` | skipped | result: BSize is not bridged |
 | `status_t BButton::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BButton::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BButton::MouseDown(BPoint where)` | skipped | reached through BView's MouseDown |
@@ -1213,21 +1210,20 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BButton::AllDetached()` | skipped | reached through BView's AllDetached |
 | `BHandler* BButton::ResolveSpecifier(BMessage* message, int32 index, BMessage* specifier, int32 what, const char* property)` | skipped | reached through BHandler's ResolveSpecifier |
 | `status_t BButton::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `BSize BButton::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BButton::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BButton::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `status_t BButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BButton::BButton(BMessage* data)` | skipped | archive constructor |
 | `BButton::BButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BButton_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BButton::BButton(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BButton_new__charP_charP_BMessageP_uint32 |
 | `BButton::BButton(const char* label, BMessage* message)` | included | mojobe_BButton_new__charP_BMessageP |
 
-## BCheckBox: 5 included, 22 overrides reached through a base, 7 left out
+## BCheckBox: 5 included, 26 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BCheckBox::Instantiate(BMessage* data)` | skipped | static |
-| `BSize BCheckBox::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BCheckBox::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BCheckBox::PreferredSize()` | skipped | result: BSize is not bridged |
-| `BAlignment BCheckBox::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
 | `status_t BCheckBox::Perform(perform_code code, void* data)` | skipped | parameter data: void * is not bridged |
 | `status_t BCheckBox::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BCheckBox::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
@@ -1245,6 +1241,10 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BCheckBox::MouseMoved(BPoint where, uint32 code, const BMessage* dragMessage)` | skipped | reached through BView's MouseMoved |
 | `void BCheckBox::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
 | `void BCheckBox::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
+| `BSize BCheckBox::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BCheckBox::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BCheckBox::PreferredSize()` | skipped | reached through BView's PreferredSize |
+| `BAlignment BCheckBox::LayoutAlignment()` | skipped | reached through BView's LayoutAlignment |
 | `void BCheckBox::MakeFocus(bool focused)` | skipped | reached through BView's MakeFocus |
 | `void BCheckBox::SetValue(int32 value)` | skipped | reached through BControl's SetValue |
 | `status_t BCheckBox::Invoke(BMessage* message)` | skipped | reached through BInvoker's Invoke |
@@ -1258,14 +1258,12 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BCheckBox::BCheckBox(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BCheckBox_new__charP_charP_BMessageP_uint32 |
 | `BCheckBox::BCheckBox(const char* label, BMessage* message)` | included | mojobe_BCheckBox_new__charP_BMessageP |
 
-## BRadioButton: 3 included, 22 overrides reached through a base, 5 left out
+## BRadioButton: 3 included, 24 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BRadioButton::Instantiate(BMessage* data)` | skipped | static |
 | `status_t BRadioButton::Perform(perform_code d, void* argument)` | skipped | parameter argument: void * is not bridged |
-| `BSize BRadioButton::MaxSize()` | skipped | result: BSize is not bridged |
-| `BAlignment BRadioButton::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
 | `status_t BRadioButton::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BRadioButton::Draw(BRect updateRect)` | skipped | reached through BView's Draw |
 | `void BRadioButton::MouseDown(BPoint where)` | skipped | reached through BView's MouseDown |
@@ -1287,24 +1285,20 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BRadioButton::AllAttached()` | skipped | reached through BView's AllAttached |
 | `void BRadioButton::AllDetached()` | skipped | reached through BView's AllDetached |
 | `status_t BRadioButton::GetSupportedSuites(BMessage* message)` | skipped | reached through BHandler's GetSupportedSuites |
+| `BSize BRadioButton::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BAlignment BRadioButton::LayoutAlignment()` | skipped | reached through BView's LayoutAlignment |
 | `status_t BRadioButton::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BRadioButton::BRadioButton(BMessage* data)` | skipped | archive constructor |
 | `BRadioButton::BRadioButton(BRect frame, const char* name, const char* label, BMessage* message, uint32 resizingMode, uint32 flags)` | included | mojobe_BRadioButton_new__BRect_charP_charP_BMessageP_uint32_uint32 |
 | `BRadioButton::BRadioButton(const char* name, const char* label, BMessage* message, uint32 flags)` | included | mojobe_BRadioButton_new__charP_charP_BMessageP_uint32 |
 | `BRadioButton::BRadioButton(const char* label, BMessage* message)` | included | mojobe_BRadioButton_new__charP_BMessageP |
 
-## BTextControl: 13 included, 22 overrides reached through a base, 9 left out
+## BTextControl: 15 included, 26 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BTextControl::Instantiate(BMessage* archive)` | skipped | static |
 | `BTextView* BTextControl::TextView() const` | skipped | result: BTextView * is not bridged |
-| `BSize BTextControl::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BTextControl::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BTextControl::PreferredSize()` | skipped | result: BSize is not bridged |
-| `BAlignment BTextControl::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
-| `BLayoutItem* BTextControl::CreateLabelLayoutItem()` | skipped | result: BLayoutItem * is not bridged |
-| `BLayoutItem* BTextControl::CreateTextViewLayoutItem()` | skipped | result: BLayoutItem * is not bridged |
 | `status_t BTextControl::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BTextControl::SetText(const char* text)` | included | mojobe_BTextControl_SetText |
 | `const char* BTextControl::Text() const` | included | mojobe_BTextControl_Text |
@@ -1337,20 +1331,23 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BTextControl::AllDetached()` | skipped | reached through BView's AllDetached |
 | `status_t BTextControl::GetSupportedSuites(BMessage* data)` | skipped | reached through BHandler's GetSupportedSuites |
 | `void BTextControl::SetFlags(uint32 flags)` | skipped | reached through BView's SetFlags |
+| `BSize BTextControl::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BTextControl::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BTextControl::PreferredSize()` | skipped | reached through BView's PreferredSize |
+| `BAlignment BTextControl::LayoutAlignment()` | skipped | reached through BView's LayoutAlignment |
+| `BLayoutItem* BTextControl::CreateLabelLayoutItem()` | included | mojobe_BTextControl_CreateLabelLayoutItem |
+| `BLayoutItem* BTextControl::CreateTextViewLayoutItem()` | included | mojobe_BTextControl_CreateTextViewLayoutItem |
 | `BTextControl::BTextControl(BMessage* archive)` | skipped | archive constructor |
 | `BTextControl::BTextControl(BRect frame, const char* name, const char* label, const char* initialText, BMessage* message, uint32 resizeMask, uint32 flags)` | included | mojobe_BTextControl_new__BRect_charP_charP_charP_BMessageP_uint32_uint32 |
 | `BTextControl::BTextControl(const char* name, const char* label, const char* initialText, BMessage* message, uint32 flags)` | included | mojobe_BTextControl_new__charP_charP_charP_BMessageP_uint32 |
 | `BTextControl::BTextControl(const char* label, const char* initialText, BMessage* message)` | included | mojobe_BTextControl_new__charP_charP_BMessageP |
 
-## BSlider: 44 included, 28 overrides reached through a base, 6 left out
+## BSlider: 44 included, 31 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BSlider::Instantiate(BMessage* archive)` | skipped | static |
 | `status_t BSlider::Perform(perform_code code, void* data)` | skipped | parameter data: void * is not bridged |
-| `BSize BSlider::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BSlider::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BSlider::PreferredSize()` | skipped | result: BSize is not bridged |
 | `status_t BSlider::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BSlider::WindowActivated(bool state)` | skipped | reached through BView's WindowActivated |
 | `void BSlider::AttachedToWindow()` | skipped | reached through BView's AttachedToWindow |
@@ -1419,21 +1416,20 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BSlider::SetFont(const BFont* font, uint32 properties)` | skipped | reached through BView's SetFont |
 | `void BSlider::SetLimits(int32 minimum, int32 maximum)` | included | mojobe_BSlider_SetLimits |
 | `float BSlider::MaxUpdateTextWidth()` | included | mojobe_BSlider_MaxUpdateTextWidth |
+| `BSize BSlider::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BSlider::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BSlider::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `status_t BSlider::SetIcon(const BBitmap* icon, uint32 flags)` | skipped | reached through BControl's SetIcon |
 | `BSlider::BSlider(BMessage* archive)` | skipped | archive constructor |
 | `BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, thumb_style thumbType, uint32 resizingMode, uint32 flags)` | included | mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_thumb_style_uint32_uint32 |
 | `BSlider::BSlider(BRect frame, const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 resizingMode, uint32 flags)` | included | mojobe_BSlider_new__BRect_charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32_uint32 |
 | `BSlider::BSlider(const char* name, const char* label, BMessage* message, int32 minValue, int32 maxValue, orientation posture, thumb_style thumbType, uint32 flags)` | included | mojobe_BSlider_new__charP_charP_BMessageP_int32_int32_orientation_thumb_style_uint32 |
 
-## BStringView: 8 included, 18 overrides reached through a base, 6 left out
+## BStringView: 8 included, 22 overrides reached through a base, 2 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BStringView::Instantiate(BMessage* archive)` | skipped | static |
-| `BSize BStringView::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BStringView::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BStringView::PreferredSize()` | skipped | result: BSize is not bridged |
-| `BAlignment BStringView::LayoutAlignment()` | skipped | result: BAlignment is not bridged |
 | `status_t BStringView::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
 | `void BStringView::SetText(const char* text)` | included | mojobe_BStringView_SetText |
 | `const char* BStringView::Text() const` | included | mojobe_BStringView_Text |
@@ -1447,7 +1443,11 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BStringView::AllDetached()` | skipped | reached through BView's AllDetached |
 | `void BStringView::MakeFocus(bool focus)` | skipped | reached through BView's MakeFocus |
 | `void BStringView::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
+| `BSize BStringView::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BStringView::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BStringView::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `void BStringView::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
+| `BAlignment BStringView::LayoutAlignment()` | skipped | reached through BView's LayoutAlignment |
 | `void BStringView::FrameMoved(BPoint newPosition)` | skipped | reached through BView's FrameMoved |
 | `void BStringView::FrameResized(float newWidth, float newHeight)` | skipped | reached through BView's FrameResized |
 | `void BStringView::Draw(BRect bounds)` | skipped | reached through BView's Draw |
@@ -1462,14 +1462,11 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BStringView::BStringView(BRect frame, const char* name, const char* text, uint32 resizingMode, uint32 flags)` | included | mojobe_BStringView_new__BRect_charP_charP_uint32_uint32 |
 | `BStringView::BStringView(const char* name, const char* text, uint32 flags)` | included | mojobe_BStringView_new__charP_charP_uint32 |
 
-## BScrollView: 10 included, 19 overrides reached through a base, 7 left out
+## BScrollView: 10 included, 22 overrides reached through a base, 4 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BScrollView::Instantiate(BMessage* archive)` | skipped | static |
-| `BSize BScrollView::MinSize()` | skipped | result: BSize is not bridged |
-| `BSize BScrollView::MaxSize()` | skipped | result: BSize is not bridged |
-| `BSize BScrollView::PreferredSize()` | skipped | result: BSize is not bridged |
 | `BScrollBar* BScrollView::ScrollBar(orientation direction) const` | skipped | result: BScrollBar * is not bridged |
 | `status_t BScrollView::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
 | `status_t BScrollView::Archive(BMessage* archive, bool deep) const` | skipped | reached through BHandler's Archive |
@@ -1489,6 +1486,9 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BScrollView::GetPreferredSize(float* _width, float* _height)` | skipped | reached through BView's GetPreferredSize |
 | `void BScrollView::ResizeToPreferred()` | skipped | reached through BView's ResizeToPreferred |
 | `void BScrollView::MakeFocus(bool focus)` | skipped | reached through BView's MakeFocus |
+| `BSize BScrollView::MinSize()` | skipped | reached through BView's MinSize |
+| `BSize BScrollView::MaxSize()` | skipped | reached through BView's MaxSize |
+| `BSize BScrollView::PreferredSize()` | skipped | reached through BView's PreferredSize |
 | `void BScrollView::SetBorder(border_style border)` | included | mojobe_BScrollView_SetBorder |
 | `border_style BScrollView::Border() const` | included | mojobe_BScrollView_Border |
 | `void BScrollView::SetBorders(uint32 borders)` | included | mojobe_BScrollView_SetBorders |
@@ -1503,14 +1503,14 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 resizingMode, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_uint32_bool_bool_border_style |
 | `BScrollView::BScrollView(const char* name, BView* target, uint32 flags, bool horizontal, bool vertical, border_style border)` | included | mojobe_BScrollView_new__charP_BViewP_uint32_bool_bool_border_style |
 
-## BAlert: 16 included, 8 overrides reached through a base, 5 left out
+## BAlert: 17 included, 8 overrides reached through a base, 4 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BAlert::Instantiate(BMessage* data)` | skipped | static |
 | `BTextView* BAlert::TextView() const` | skipped | result: BTextView * is not bridged |
 | `status_t BAlert::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
-| `BPoint BAlert::AlertPosition(float width, float height)` | skipped | static |
+| `BPoint BAlert::AlertPosition(float width, float height)` | included | mojobe_BAlert_AlertPosition, static |
 | `status_t BAlert::Archive(BMessage* data, bool deep) const` | skipped | reached through BHandler's Archive |
 | `alert_type BAlert::Type() const` | skipped | reached through BWindow's Type |
 | `void BAlert::SetType(alert_type type)` | included | mojobe_BAlert_SetType |
@@ -1537,14 +1537,13 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, alert_type type)` | included | mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_alert_type |
 | `BAlert::BAlert(const char* title, const char* text, const char* button1, const char* button2, const char* button3, button_width width, button_spacing spacing, alert_type type)` | included | mojobe_BAlert_new__charP_charP_charP_charP_charP_button_width_button_spacing_alert_type |
 
-## BRegion: 27 included, 0 overrides reached through a base, 10 left out
+## BRegion: 28 included, 0 overrides reached through a base, 9 left out
 
 | C++ | | |
 |---|---|---|
 | `BRegion& BRegion::operator=(const BRegion& other)` | skipped | operator |
 | `BRegion& BRegion::operator=(BRegion&& other)` | skipped | operator |
 | `bool BRegion::operator==(const BRegion& other) const` | skipped | operator |
-| `void BRegion::ScaleBy(BSize scale)` | skipped | parameter scale: BSize is not bridged |
 | `void BRegion::Set(BRect rect)` | included | mojobe_BRegion_Set__BRect |
 | `void BRegion::Set(clipping_rect clipping)` | included | mojobe_BRegion_Set__clipping_rect |
 | `void BRegion::MoveFrom(BRegion& other)` | included | mojobe_BRegion_MoveFrom |
@@ -1564,7 +1563,8 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `void BRegion::PrintToStream() const` | included | mojobe_BRegion_PrintToStream |
 | `void BRegion::OffsetBy(const BPoint& point)` | included | mojobe_BRegion_OffsetBy__BPoint |
 | `void BRegion::OffsetBy(int32 x, int32 y)` | included | mojobe_BRegion_OffsetBy__int32_int32 |
-| `void BRegion::ScaleBy(float x, float y)` | included | mojobe_BRegion_ScaleBy |
+| `void BRegion::ScaleBy(BSize scale)` | included | mojobe_BRegion_ScaleBy__BSize |
+| `void BRegion::ScaleBy(float x, float y)` | included | mojobe_BRegion_ScaleBy__float_float |
 | `void BRegion::MakeEmpty()` | included | mojobe_BRegion_MakeEmpty |
 | `void BRegion::Include(BRect rect)` | included | mojobe_BRegion_Include__BRect |
 | `void BRegion::Include(clipping_rect clipping)` | included | mojobe_BRegion_Include__clipping_rect |
@@ -1579,17 +1579,15 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BRegion::BRegion()` | included | mojobe_BRegion_new__void |
 | `BRegion::BRegion(const BRect rect)` | included | mojobe_BRegion_new__BRect |
 
-## BBitmap: 30 included, 0 overrides reached through a base, 11 left out
+## BBitmap: 32 included, 0 overrides reached through a base, 9 left out
 
 | C++ | | |
 |---|---|---|
 | `BArchivable* BBitmap::Instantiate(BMessage* data)` | skipped | static |
 | `status_t BBitmap::SetDrawingFlags(uint32 flags)` | skipped | declared in the header, but not defined in libbe.so, libroot.so, libtracker.so |
-| `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
-| `status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)` | skipped | parameter size: BSize is not bridged |
 | `status_t BBitmap::GetOverlayRestrictions(overlay_restrictions* restrictions) const` | skipped | parameter restrictions: overlay_restrictions * is not bridged |
 | `BBitmap& BBitmap::operator=(const BBitmap& source)` | skipped | operator |
-| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | static |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
 | `status_t BArchivable::Perform(perform_code d, void* arg)` | skipped | binary compatibility hook |
 | `status_t BBitmap::Archive(BMessage* data, bool deep) const` | included | mojobe_BBitmap_Archive |
 | `status_t BBitmap::InitCheck() const` | included | mojobe_BBitmap_InitCheck |
@@ -1604,7 +1602,9 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `BRect BBitmap::Bounds() const` | included | mojobe_BBitmap_Bounds |
 | `uint32 BBitmap::Flags() const` | included | mojobe_BBitmap_Flags |
 | `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, int32 offset, color_space colorSpace)` | included | mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space |
+| `status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)` | included | mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize |
 | `status_t BBitmap::ImportBits(const BBitmap* bitmap)` | included | mojobe_BBitmap_ImportBits__BBitmapP |
+| `status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)` | included | mojobe_BBitmap_ImportBits__BBitmapP_BPoint_BPoint_BSize |
 | `void BBitmap::AddChild(BView* view)` | included | mojobe_BBitmap_AddChild |
 | `bool BBitmap::RemoveChild(BView* view)` | included | mojobe_BBitmap_RemoveChild |
 | `int32 BBitmap::CountChildren() const` | included | mojobe_BBitmap_CountChildren |
@@ -1664,6 +1664,228 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BScreen::SetBrightness(float brightness)` | included | mojobe_BScreen_SetBrightness |
 | `BScreen::BScreen(screen_id id)` | included | mojobe_BScreen_new__screen_id |
 | `BScreen::BScreen(BWindow* window)` | included | mojobe_BScreen_new__BWindowP |
+
+## BLayoutItem: 24 included, 0 overrides reached through a base, 6 left out
+
+| C++ | | |
+|---|---|---|
+| `void* BLayoutItem::LayoutData() const` | skipped | result: void * is not bridged |
+| `void BLayoutItem::SetLayoutData(void* data)` | skipped | parameter data: void * is not bridged |
+| `status_t BLayoutItem::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `BArchivable* BArchivable::Instantiate(BMessage* archive)` | skipped | a static of BArchivable |
+| `BLayout* BLayoutItem::Layout() const` | included | mojobe_BLayoutItem_Layout |
+| `bool BLayoutItem::RemoveSelf()` | included | mojobe_BLayoutItem_RemoveSelf |
+| `BSize BLayoutItem::MinSize()` | included | mojobe_BLayoutItem_MinSize |
+| `BSize BLayoutItem::MaxSize()` | included | mojobe_BLayoutItem_MaxSize |
+| `BSize BLayoutItem::PreferredSize()` | included | mojobe_BLayoutItem_PreferredSize |
+| `BAlignment BLayoutItem::Alignment()` | included | mojobe_BLayoutItem_Alignment |
+| `void BLayoutItem::SetExplicitMinSize(BSize size)` | included | mojobe_BLayoutItem_SetExplicitMinSize |
+| `void BLayoutItem::SetExplicitMaxSize(BSize size)` | included | mojobe_BLayoutItem_SetExplicitMaxSize |
+| `void BLayoutItem::SetExplicitPreferredSize(BSize size)` | included | mojobe_BLayoutItem_SetExplicitPreferredSize |
+| `void BLayoutItem::SetExplicitSize(BSize size)` | included | mojobe_BLayoutItem_SetExplicitSize |
+| `void BLayoutItem::SetExplicitAlignment(BAlignment alignment)` | included | mojobe_BLayoutItem_SetExplicitAlignment |
+| `bool BLayoutItem::IsVisible()` | included | mojobe_BLayoutItem_IsVisible |
+| `void BLayoutItem::SetVisible(bool visible)` | included | mojobe_BLayoutItem_SetVisible |
+| `BRect BLayoutItem::Frame()` | included | mojobe_BLayoutItem_Frame |
+| `void BLayoutItem::SetFrame(BRect frame)` | included | mojobe_BLayoutItem_SetFrame |
+| `bool BLayoutItem::HasHeightForWidth()` | included | mojobe_BLayoutItem_HasHeightForWidth |
+| `void BLayoutItem::GetHeightForWidth(float width, float* min, float* max, float* preferred)` | included | mojobe_BLayoutItem_GetHeightForWidth |
+| `BView* BLayoutItem::View()` | included | mojobe_BLayoutItem_View |
+| `void BLayoutItem::InvalidateLayout(bool children)` | included | mojobe_BLayoutItem_InvalidateLayout |
+| `void BLayoutItem::Relayout(bool immediate)` | included | mojobe_BLayoutItem_Relayout |
+| `void BLayoutItem::AlignInFrame(BRect frame)` | included | mojobe_BLayoutItem_AlignInFrame |
+| `status_t BLayoutItem::Archive(BMessage* into, bool deep) const` | included | mojobe_BLayoutItem_Archive |
+| `status_t BArchivable::AllUnarchived(const BMessage* archive)` | included | mojobe_BLayoutItem_AllUnarchived |
+| `status_t BArchivable::AllArchived(BMessage* archive) const` | included | mojobe_BLayoutItem_AllArchived |
+| `BLayoutItem::BLayoutItem()` | skipped | abstract: pure virtual methods |
+| `BLayoutItem::BLayoutItem(BMessage* from)` | skipped | abstract: pure virtual methods |
+
+## BLayout: 20 included, 4 overrides reached through a base, 4 left out
+
+| C++ | | |
+|---|---|---|
+| `BLayoutContext* BLayout::LayoutContext() const` | skipped | result: BLayoutContext * is not bridged |
+| `status_t BLayout::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `BView* BLayout::Owner() const` | included | mojobe_BLayout_Owner |
+| `BView* BLayout::TargetView() const` | included | mojobe_BLayout_TargetView |
+| `BView* BLayout::View()` | skipped | reached through BLayoutItem's View |
+| `BLayoutItem* BLayout::AddView(BView* child)` | included | mojobe_BLayout_AddView__BViewP |
+| `BLayoutItem* BLayout::AddView(int32 index, BView* child)` | included | mojobe_BLayout_AddView__int32_BViewP |
+| `bool BLayout::AddItem(BLayoutItem* item)` | included | mojobe_BLayout_AddItem__BLayoutItemP |
+| `bool BLayout::AddItem(int32 index, BLayoutItem* item)` | included | mojobe_BLayout_AddItem__int32_BLayoutItemP |
+| `bool BLayout::RemoveView(BView* child)` | included | mojobe_BLayout_RemoveView |
+| `bool BLayout::RemoveItem(BLayoutItem* item)` | included | mojobe_BLayout_RemoveItem__BLayoutItemP |
+| `BLayoutItem* BLayout::RemoveItem(int32 index)` | included | mojobe_BLayout_RemoveItem__int32 |
+| `BLayoutItem* BLayout::ItemAt(int32 index) const` | included | mojobe_BLayout_ItemAt |
+| `int32 BLayout::CountItems() const` | included | mojobe_BLayout_CountItems |
+| `int32 BLayout::IndexOfItem(const BLayoutItem* item) const` | included | mojobe_BLayout_IndexOfItem |
+| `int32 BLayout::IndexOfView(BView* child) const` | included | mojobe_BLayout_IndexOfView |
+| `bool BLayout::AncestorsVisible() const` | included | mojobe_BLayout_AncestorsVisible |
+| `void BLayout::InvalidateLayout(bool children)` | skipped | reached through BLayoutItem's InvalidateLayout |
+| `void BLayout::Relayout(bool immediate)` | skipped | reached through BLayoutItem's Relayout |
+| `void BLayout::RequireLayout()` | included | mojobe_BLayout_RequireLayout |
+| `bool BLayout::IsValid()` | included | mojobe_BLayout_IsValid |
+| `void BLayout::EnableLayoutInvalidation()` | included | mojobe_BLayout_EnableLayoutInvalidation |
+| `void BLayout::DisableLayoutInvalidation()` | included | mojobe_BLayout_DisableLayoutInvalidation |
+| `void BLayout::LayoutItems(bool force)` | included | mojobe_BLayout_LayoutItems |
+| `BRect BLayout::LayoutArea()` | included | mojobe_BLayout_LayoutArea |
+| `status_t BLayout::Archive(BMessage* into, bool deep) const` | skipped | reached through BLayoutItem's Archive |
+| `BLayout::BLayout()` | skipped | abstract: pure virtual methods |
+| `BLayout::BLayout(BMessage* archive)` | skipped | abstract: pure virtual methods |
+
+## BGroupLayout: 19 included, 19 overrides reached through a base, 4 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BGroupLayout::Instantiate(BMessage* from)` | skipped | static |
+| `status_t BGroupLayout::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `void BTwoDimensionalLayout::AlignLayoutWith(BTwoDimensionalLayout* other, orientation orientation)` | skipped | parameter other: BTwoDimensionalLayout * is not bridged |
+| `float BGroupLayout::Spacing() const` | included | mojobe_BGroupLayout_Spacing |
+| `void BGroupLayout::SetSpacing(float spacing)` | included | mojobe_BGroupLayout_SetSpacing |
+| `orientation BGroupLayout::Orientation() const` | included | mojobe_BGroupLayout_Orientation |
+| `void BGroupLayout::SetOrientation(orientation orientation)` | included | mojobe_BGroupLayout_SetOrientation |
+| `float BGroupLayout::ItemWeight(int32 index) const` | included | mojobe_BGroupLayout_ItemWeight |
+| `void BGroupLayout::SetItemWeight(int32 index, float weight)` | included | mojobe_BGroupLayout_SetItemWeight |
+| `BLayoutItem* BGroupLayout::AddView(BView* child)` | skipped | reached through BLayout's AddView |
+| `BLayoutItem* BGroupLayout::AddView(int32 index, BView* child)` | skipped | reached through BLayout's AddView |
+| `BLayoutItem* BGroupLayout::AddView(BView* child, float weight)` | included | mojobe_BGroupLayout_AddView__BViewP_float |
+| `BLayoutItem* BGroupLayout::AddView(int32 index, BView* child, float weight)` | included | mojobe_BGroupLayout_AddView__int32_BViewP_float |
+| `bool BGroupLayout::AddItem(BLayoutItem* item)` | skipped | reached through BLayout's AddItem |
+| `bool BGroupLayout::AddItem(int32 index, BLayoutItem* item)` | skipped | reached through BLayout's AddItem |
+| `bool BGroupLayout::AddItem(BLayoutItem* item, float weight)` | included | mojobe_BGroupLayout_AddItem__BLayoutItemP_float |
+| `bool BGroupLayout::AddItem(int32 index, BLayoutItem* item, float weight)` | included | mojobe_BGroupLayout_AddItem__int32_BLayoutItemP_float |
+| `status_t BGroupLayout::Archive(BMessage* into, bool deep) const` | skipped | reached through BLayoutItem's Archive |
+| `void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)` | included | mojobe_BGroupLayout_SetInsets__float_float_float_float |
+| `void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)` | included | mojobe_BGroupLayout_SetInsets__float_float |
+| `void BTwoDimensionalLayout::SetInsets(float insets)` | included | mojobe_BGroupLayout_SetInsets__float |
+| `void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const` | included | mojobe_BGroupLayout_GetInsets |
+| `BSize BTwoDimensionalLayout::BaseMinSize()` | included | mojobe_BGroupLayout_BaseMinSize |
+| `BSize BTwoDimensionalLayout::BaseMaxSize()` | included | mojobe_BGroupLayout_BaseMaxSize |
+| `BSize BTwoDimensionalLayout::BasePreferredSize()` | included | mojobe_BGroupLayout_BasePreferredSize |
+| `BAlignment BTwoDimensionalLayout::BaseAlignment()` | included | mojobe_BGroupLayout_BaseAlignment |
+| `bool BTwoDimensionalLayout::HasHeightForWidth()` | skipped | reached through BLayoutItem's HasHeightForWidth |
+| `void BTwoDimensionalLayout::GetHeightForWidth(float width, float* min, float* max, float* preferred)` | skipped | reached through BLayoutItem's GetHeightForWidth |
+| `void BTwoDimensionalLayout::SetFrame(BRect frame)` | skipped | reached through BLayoutItem's SetFrame |
+| `BSize BAbstractLayout::MinSize()` | skipped | reached through BLayoutItem's MinSize |
+| `BSize BAbstractLayout::MaxSize()` | skipped | reached through BLayoutItem's MaxSize |
+| `BSize BAbstractLayout::PreferredSize()` | skipped | reached through BLayoutItem's PreferredSize |
+| `BAlignment BAbstractLayout::Alignment()` | skipped | reached through BLayoutItem's Alignment |
+| `void BAbstractLayout::SetExplicitMinSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMinSize |
+| `void BAbstractLayout::SetExplicitMaxSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMaxSize |
+| `void BAbstractLayout::SetExplicitPreferredSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitPreferredSize |
+| `void BAbstractLayout::SetExplicitAlignment(BAlignment alignment)` | skipped | reached through BLayoutItem's SetExplicitAlignment |
+| `BRect BAbstractLayout::Frame()` | skipped | reached through BLayoutItem's Frame |
+| `bool BAbstractLayout::IsVisible()` | skipped | reached through BLayoutItem's IsVisible |
+| `void BAbstractLayout::SetVisible(bool visible)` | skipped | reached through BLayoutItem's SetVisible |
+| `BGroupLayout::BGroupLayout(BMessage* from)` | skipped | archive constructor |
+| `BGroupLayout::BGroupLayout(orientation orientation, float spacing)` | included | mojobe_BGroupLayout_new |
+
+## BGridLayout: 31 included, 19 overrides reached through a base, 4 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BGridLayout::Instantiate(BMessage* from)` | skipped | static |
+| `status_t BGridLayout::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `void BTwoDimensionalLayout::AlignLayoutWith(BTwoDimensionalLayout* other, orientation orientation)` | skipped | parameter other: BTwoDimensionalLayout * is not bridged |
+| `int32 BGridLayout::CountColumns() const` | included | mojobe_BGridLayout_CountColumns |
+| `int32 BGridLayout::CountRows() const` | included | mojobe_BGridLayout_CountRows |
+| `float BGridLayout::HorizontalSpacing() const` | included | mojobe_BGridLayout_HorizontalSpacing |
+| `float BGridLayout::VerticalSpacing() const` | included | mojobe_BGridLayout_VerticalSpacing |
+| `void BGridLayout::SetHorizontalSpacing(float spacing)` | included | mojobe_BGridLayout_SetHorizontalSpacing |
+| `void BGridLayout::SetVerticalSpacing(float spacing)` | included | mojobe_BGridLayout_SetVerticalSpacing |
+| `void BGridLayout::SetSpacing(float horizontal, float vertical)` | included | mojobe_BGridLayout_SetSpacing |
+| `float BGridLayout::ColumnWeight(int32 column) const` | included | mojobe_BGridLayout_ColumnWeight |
+| `void BGridLayout::SetColumnWeight(int32 column, float weight)` | included | mojobe_BGridLayout_SetColumnWeight |
+| `float BGridLayout::MinColumnWidth(int32 column) const` | included | mojobe_BGridLayout_MinColumnWidth |
+| `void BGridLayout::SetMinColumnWidth(int32 column, float width)` | included | mojobe_BGridLayout_SetMinColumnWidth |
+| `float BGridLayout::MaxColumnWidth(int32 column) const` | included | mojobe_BGridLayout_MaxColumnWidth |
+| `void BGridLayout::SetMaxColumnWidth(int32 column, float width)` | included | mojobe_BGridLayout_SetMaxColumnWidth |
+| `float BGridLayout::RowWeight(int32 row) const` | included | mojobe_BGridLayout_RowWeight |
+| `void BGridLayout::SetRowWeight(int32 row, float weight)` | included | mojobe_BGridLayout_SetRowWeight |
+| `float BGridLayout::MinRowHeight(int row) const` | included | mojobe_BGridLayout_MinRowHeight |
+| `void BGridLayout::SetMinRowHeight(int32 row, float height)` | included | mojobe_BGridLayout_SetMinRowHeight |
+| `float BGridLayout::MaxRowHeight(int32 row) const` | included | mojobe_BGridLayout_MaxRowHeight |
+| `void BGridLayout::SetMaxRowHeight(int32 row, float height)` | included | mojobe_BGridLayout_SetMaxRowHeight |
+| `BLayoutItem* BGridLayout::ItemAt(int32 column, int32 row) const` | included | mojobe_BGridLayout_ItemAt |
+| `BLayoutItem* BGridLayout::AddView(BView* child)` | skipped | reached through BLayout's AddView |
+| `BLayoutItem* BGridLayout::AddView(int32 index, BView* child)` | skipped | reached through BLayout's AddView |
+| `BLayoutItem* BGridLayout::AddView(BView* child, int32 column, int32 row, int32 columnCount, int32 rowCount)` | included | mojobe_BGridLayout_AddView__BViewP_int32_int32_int32_int32 |
+| `bool BGridLayout::AddItem(BLayoutItem* item)` | skipped | reached through BLayout's AddItem |
+| `bool BGridLayout::AddItem(int32 index, BLayoutItem* item)` | skipped | reached through BLayout's AddItem |
+| `bool BGridLayout::AddItem(BLayoutItem* item, int32 column, int32 row, int32 columnCount, int32 rowCount)` | included | mojobe_BGridLayout_AddItem__BLayoutItemP_int32_int32_int32_int32 |
+| `status_t BGridLayout::Archive(BMessage* into, bool deep) const` | skipped | reached through BLayoutItem's Archive |
+| `void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)` | included | mojobe_BGridLayout_SetInsets__float_float_float_float |
+| `void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)` | included | mojobe_BGridLayout_SetInsets__float_float |
+| `void BTwoDimensionalLayout::SetInsets(float insets)` | included | mojobe_BGridLayout_SetInsets__float |
+| `void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const` | included | mojobe_BGridLayout_GetInsets |
+| `BSize BTwoDimensionalLayout::BaseMinSize()` | included | mojobe_BGridLayout_BaseMinSize |
+| `BSize BTwoDimensionalLayout::BaseMaxSize()` | included | mojobe_BGridLayout_BaseMaxSize |
+| `BSize BTwoDimensionalLayout::BasePreferredSize()` | included | mojobe_BGridLayout_BasePreferredSize |
+| `BAlignment BTwoDimensionalLayout::BaseAlignment()` | included | mojobe_BGridLayout_BaseAlignment |
+| `bool BTwoDimensionalLayout::HasHeightForWidth()` | skipped | reached through BLayoutItem's HasHeightForWidth |
+| `void BTwoDimensionalLayout::GetHeightForWidth(float width, float* min, float* max, float* preferred)` | skipped | reached through BLayoutItem's GetHeightForWidth |
+| `void BTwoDimensionalLayout::SetFrame(BRect frame)` | skipped | reached through BLayoutItem's SetFrame |
+| `BSize BAbstractLayout::MinSize()` | skipped | reached through BLayoutItem's MinSize |
+| `BSize BAbstractLayout::MaxSize()` | skipped | reached through BLayoutItem's MaxSize |
+| `BSize BAbstractLayout::PreferredSize()` | skipped | reached through BLayoutItem's PreferredSize |
+| `BAlignment BAbstractLayout::Alignment()` | skipped | reached through BLayoutItem's Alignment |
+| `void BAbstractLayout::SetExplicitMinSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMinSize |
+| `void BAbstractLayout::SetExplicitMaxSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMaxSize |
+| `void BAbstractLayout::SetExplicitPreferredSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitPreferredSize |
+| `void BAbstractLayout::SetExplicitAlignment(BAlignment alignment)` | skipped | reached through BLayoutItem's SetExplicitAlignment |
+| `BRect BAbstractLayout::Frame()` | skipped | reached through BLayoutItem's Frame |
+| `bool BAbstractLayout::IsVisible()` | skipped | reached through BLayoutItem's IsVisible |
+| `void BAbstractLayout::SetVisible(bool visible)` | skipped | reached through BLayoutItem's SetVisible |
+| `BGridLayout::BGridLayout(BMessage* from)` | skipped | archive constructor |
+| `BGridLayout::BGridLayout(float horizontal, float vertical)` | included | mojobe_BGridLayout_new |
+
+## BSpaceLayoutItem: 4 included, 13 overrides reached through a base, 2 left out
+
+| C++ | | |
+|---|---|---|
+| `BSpaceLayoutItem* BSpaceLayoutItem::CreateGlue()` | included | mojobe_BSpaceLayoutItem_CreateGlue, static |
+| `BSpaceLayoutItem* BSpaceLayoutItem::CreateHorizontalStrut(float width)` | included | mojobe_BSpaceLayoutItem_CreateHorizontalStrut, static |
+| `BSpaceLayoutItem* BSpaceLayoutItem::CreateVerticalStrut(float height)` | included | mojobe_BSpaceLayoutItem_CreateVerticalStrut, static |
+| `BArchivable* BSpaceLayoutItem::Instantiate(BMessage* from)` | skipped | static |
+| `BSize BSpaceLayoutItem::MinSize()` | skipped | reached through BLayoutItem's MinSize |
+| `BSize BSpaceLayoutItem::MaxSize()` | skipped | reached through BLayoutItem's MaxSize |
+| `BSize BSpaceLayoutItem::PreferredSize()` | skipped | reached through BLayoutItem's PreferredSize |
+| `BAlignment BSpaceLayoutItem::Alignment()` | skipped | reached through BLayoutItem's Alignment |
+| `void BSpaceLayoutItem::SetExplicitMinSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMinSize |
+| `void BSpaceLayoutItem::SetExplicitMaxSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitMaxSize |
+| `void BSpaceLayoutItem::SetExplicitPreferredSize(BSize size)` | skipped | reached through BLayoutItem's SetExplicitPreferredSize |
+| `void BSpaceLayoutItem::SetExplicitAlignment(BAlignment alignment)` | skipped | reached through BLayoutItem's SetExplicitAlignment |
+| `bool BSpaceLayoutItem::IsVisible()` | skipped | reached through BLayoutItem's IsVisible |
+| `void BSpaceLayoutItem::SetVisible(bool visible)` | skipped | reached through BLayoutItem's SetVisible |
+| `BRect BSpaceLayoutItem::Frame()` | skipped | reached through BLayoutItem's Frame |
+| `void BSpaceLayoutItem::SetFrame(BRect frame)` | skipped | reached through BLayoutItem's SetFrame |
+| `status_t BSpaceLayoutItem::Archive(BMessage* into, bool deep) const` | skipped | reached through BLayoutItem's Archive |
+| `BSpaceLayoutItem::BSpaceLayoutItem(BMessage* archive)` | skipped | archive constructor |
+| `BSpaceLayoutItem::BSpaceLayoutItem(BSize minSize, BSize maxSize, BSize preferredSize, BAlignment alignment)` | included | mojobe_BSpaceLayoutItem_new |
+
+## BGroupView: 3 included, 1 overrides reached through a base, 3 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BGroupView::Instantiate(BMessage* from)` | skipped | static |
+| `status_t BGroupView::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `void BGroupView::SetLayout(BLayout* layout)` | skipped | reached through BView's SetLayout |
+| `BGroupLayout* BGroupView::GroupLayout() const` | included | mojobe_BGroupView_GroupLayout |
+| `BGroupView::BGroupView(BMessage* from)` | skipped | archive constructor |
+| `BGroupView::BGroupView(orientation orientation, float spacing)` | included | mojobe_BGroupView_new__orientation_float |
+| `BGroupView::BGroupView(const char* name, orientation orientation, float spacing)` | included | mojobe_BGroupView_new__charP_orientation_float |
+
+## BGridView: 3 included, 1 overrides reached through a base, 3 left out
+
+| C++ | | |
+|---|---|---|
+| `BArchivable* BGridView::Instantiate(BMessage* from)` | skipped | static |
+| `status_t BGridView::Perform(perform_code d, void* arg)` | skipped | parameter arg: void * is not bridged |
+| `void BGridView::SetLayout(BLayout* layout)` | skipped | reached through BView's SetLayout |
+| `BGridLayout* BGridView::GridLayout() const` | included | mojobe_BGridView_GridLayout |
+| `BGridView::BGridView(BMessage* from)` | skipped | archive constructor |
+| `BGridView::BGridView(float horizontal, float vertical)` | included | mojobe_BGridView_new__float_float |
+| `BGridView::BGridView(const char* name, float horizontal, float vertical)` | included | mojobe_BGridView_new__charP_float_float |
 
 ## entry_ref: 5 included, 0 overrides reached through a base, 5 left out
 
@@ -1793,12 +2015,12 @@ In all: 1036 included, 252 overrides reached through a base, 365 left out.
 | `status_t BFilePanel::GetNextSelectedRef(entry_ref* ref)` | included | mojobe_BFilePanel_GetNextSelectedRef |
 | `BFilePanel::BFilePanel(file_panel_mode mode, BMessenger* target, const entry_ref* directory, uint32 nodeFlavors, bool allowMultipleSelection, BMessage* message, BRefFilter* refFilter, bool modal, bool hideWhenDone)` | included | mojobe_BFilePanel_new |
 
-## BMessageRunner: 6 included, 0 overrides reached through a base, 4 left out
+## BMessageRunner: 7 included, 0 overrides reached through a base, 3 left out
 
 | C++ | | |
 |---|---|---|
-| `status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)` | skipped | static |
-| `status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)` | skipped | static |
+| `status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)` | included | mojobe_BMessageRunner_StartSending, static |
+| `status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)` | skipped | entry point mojobe_BMessageRunner_StartSending exists |
 | `status_t BMessageRunner::InitCheck() const` | included | mojobe_BMessageRunner_InitCheck |
 | `status_t BMessageRunner::SetInterval(bigtime_t interval)` | included | mojobe_BMessageRunner_SetInterval |
 | `status_t BMessageRunner::SetCount(int32 count)` | included | mojobe_BMessageRunner_SetCount |

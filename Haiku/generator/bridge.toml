@@ -31,6 +31,15 @@ headers = [
 	"Region.h",
 	"Bitmap.h",
 	"Screen.h",
+	"Size.h",
+	"Alignment.h",
+	"LayoutItem.h",
+	"Layout.h",
+	"GroupLayout.h",
+	"GridLayout.h",
+	"SpaceLayoutItem.h",
+	"GroupView.h",
+	"GridView.h",
 	"Entry.h",
 	"Path.h",
 	"FilePanel.h",
@@ -40,6 +49,13 @@ constant_dirs = ["os/app", "os/interface", "os/kernel", "os/storage", "os/suppor
 
 # Free functions.
 functions = ["find_directory"]
+
+# Static methods that make an object the caller owns.
+factories = [
+	"BSpaceLayoutItem::CreateGlue",
+	"BSpaceLayoutItem::CreateHorizontalStrut",
+	"BSpaceLayoutItem::CreateVerticalStrut",
+]
 
 # The libraries libmojobe links, where every method it calls that is neither
 # virtual nor defined in a header must be defined (BFilePanel is Tracker's).
@@ -52,6 +68,8 @@ libraries = ["libbe.so", "libroot.so", "libtracker.so"]
 [values.BPoint]
 [values.rgb_color]
 
+[values.BSize]
+[values.BAlignment]
 [values.font_height]
 [values.clipping_rect]
 [values.screen_id]
@@ -177,6 +195,29 @@ init_check = "InitCheck()"
 [classes.BScreen]
 kind = "owned"
 
+# Layouts: a view's layout places its children; a layout adopts the views
+# and items added to it, and a view the layout set on it.
+[classes.BLayoutItem]
+kind = "owned"
+
+[classes.BLayout]
+kind = "owned"
+
+[classes.BGroupLayout]
+kind = "owned"
+
+[classes.BGridLayout]
+kind = "owned"
+
+[classes.BSpaceLayoutItem]
+kind = "owned"
+
+[classes.BGroupView]
+kind = "owned"
+
+[classes.BGridView]
+kind = "owned"
+
 # The storage kit: paths, entries, file panels.
 [classes.entry_ref]
 kind = "owned"             # its name is a string it owns: not a value class
@@ -213,6 +254,16 @@ init_check = "InitCheck()" # the constructors report only through InitCheck()
 "BSlider::SetModificationMessage" = ["message"]
 "BScrollView::BScrollView" = ["target"]
 "BBitmap::AddChild" = ["view"]     # ~BBitmap deletes its window, and its views
+"BView::SetLayout" = ["layout"]
+"BWindow::SetLayout" = ["layout"]
+"BGroupView::SetLayout" = ["layout"]
+"BGridView::SetLayout" = ["layout"]
+"BLayout::AddView" = ["child"]
+"BLayout::AddItem" = ["item"]
+"BGroupLayout::AddView" = ["child"]
+"BGroupLayout::AddItem" = ["item"]
+"BGridLayout::AddView" = ["child"]
+"BGridLayout::AddItem" = ["item"]
 
 # Methods left out, and why. Also left out without being named here: what
 # uses a type the bridge does not carry yet (the manifest says which).

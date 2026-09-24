@@ -317,6 +317,32 @@ mojobe_oracle_echo_rgb_color(int8 before, mojobe_rgb_color value, double after,
 	return result;
 }
 
+mojobe_BSize
+mojobe_oracle_echo_BSize(int8 before, mojobe_BSize value, double after,
+	mojobe_BSize* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_BSize result = value;
+	result.width += 1;
+	result.height += 1;
+	return result;
+}
+
+mojobe_BAlignment
+mojobe_oracle_echo_BAlignment(int8 before, mojobe_BAlignment value, double after,
+	mojobe_BAlignment* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_BAlignment result = value;
+	result.horizontal = (alignment)(result.horizontal + 1);
+	result.vertical = (vertical_alignment)(result.vertical + 1);
+	return result;
+}
+
 mojobe_font_height
 mojobe_oracle_echo_font_height(int8 before, mojobe_font_height value, double after,
 	mojobe_font_height* seen, int8* seenBefore, double* seenAfter)

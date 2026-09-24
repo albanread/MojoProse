@@ -286,6 +286,7 @@ class Record:
         ]
         definition = node.get("definitionData", {})
         self.in_registers = bool(definition.get("canPassInRegisters"))
+        self.abstract = bool(definition.get("isAbstract"))
         self.members = []  # Method
         self.fields = []  # (name, CType, access)
         access = "public" if self.kind == "struct" else "private"
@@ -870,6 +871,8 @@ class Bridge:
             rkind, rdetail = self.classify(method.result)
             if rkind == "object" and method.result.reference:
                 rkind = "objectptr"
+            if rkind == "objectptr" and key in self.config.get("factories", []):
+                rkind = "owned"  # a new object, the caller's to delete
             if rkind == "unknown" and method.result.dbase == "void" \
                     and len(method.result.pointers) == 1 \
                     and key in self.config.get("spans", {}):
@@ -1007,6 +1010,8 @@ class Emitter:
             return "void"
         if kind == "span":
             return "void*"
+        if kind == "owned":
+            return "%s*" % detail
         raise AssertionError(kind)
 
     # ---- Mojo side helpers ----------------------------------------------------
@@ -1107,6 +1112,8 @@ class Emitter:
         if kind == "valueobj":
             # constructed by C++ in a value Mojo provides
             return detail, "NoneType", "valueobj"
+        if kind == "owned":
+            return detail, "Int", "owned"
         if kind == "span":
             # the bytes, as long as the method `detail` says, borrowed from
             # (and so no longer than) the object
@@ -1121,13 +1128,13 @@ class Emitter:
     # ---- one method -------------------------------------------------------------
 
     def emit_method(self, info, cls, entry_name, self_expr, indent, trait=True,
-                    held=False):
+                    held=False, static=False):
         """C prototype, C++ entry point, and the Mojo method body. `held`:
         `cls` is held in a Mojo value, whose non-const methods take `mut
         self`."""
         method = info["method"]
         params = info["params"]
-        c_params = ["%s* self" % cls] if cls else []
+        c_params = ["%s* self" % cls] if cls and not static else []
         c_args = []
         pre_c = []
         post_c = []
@@ -1145,6 +1152,8 @@ class Emitter:
         c_ret = self.c_result(result)
         if cls is None:
             call = "::%s(%s)" % (method.name, ", ".join(c_args))
+        elif static:
+            call = "%s::%s(%s)" % (method.owner, method.name, ", ".join(c_args))
         elif method.owner == cls:
             call = "self->%s(%s)" % (method.name, ", ".join(c_args))
         else:
@@ -1155,7 +1164,14 @@ class Emitter:
         body.extend(pre_c)
         kind = result[0]
         adopted = ["a_" + e["p"].name for e in params if e["role"] == "adopt"]
-        if adopted and c_ret == "bool" and not post_c:
+        if adopted and c_ret.endswith("*") and not post_c:
+            # NULL: not taken (BLayout::AddView), and Mojo gave it up
+            body.append("%s result = %s;" % (c_ret, call))
+            body.append("if (result == NULL) {")
+            body.extend("\tdelete %s;" % a for a in adopted)
+            body.append("}")
+            body.append("return result;")
+        elif adopted and c_ret == "bool" and not post_c:
             # false: not taken, and the caller keeps it -- but Mojo already
             # gave it up (BMenu::AddItem of an index out of range)
             body.append("bool result = %s;" % call)
@@ -1183,7 +1199,7 @@ class Emitter:
         self.add_entry(c_ret, entry_name, c_params, body, method.cxx())
         # Mojo
         m_params = []
-        m_args = [self_expr] if cls else []
+        m_args = [self_expr] if cls and not static else []
         pre = []
         post = []
         outs = []
@@ -1204,7 +1220,12 @@ class Emitter:
                 else:
                     outs.append((entry["detail"], name))
         rtype, call_type, convert = self.mojo_result(result)
-        raises = convert == "status"
+        raises = convert in ("status", "owned")
+        if static and rtype and "origin_of(self)" in rtype:
+            # a static has no self to borrow from: what it returns lives
+            # where the kit keeps it
+            rtype = rtype.replace("origin_of(self)", "ImmUntrackedOrigin")
+            convert = convert.replace("origin_of(self)", "ImmUntrackedOrigin")
         if convert == "valueobj":
             pre.insert(0, "var _result = %s._zeroed()" % rtype)
             m_args.append("_address_of(_result)")
@@ -1226,7 +1247,7 @@ class Emitter:
             self_decl = "mut self"
         head = "def %s(%s)%s%s:" % (
             mojo_name(method.name),
-            ", ".join(([self_decl] if cls else []) + m_params),
+            ", ".join(([self_decl] if cls and not static else []) + m_params),
             " raises" if raises else "",
             signature_ret,
         )
@@ -1239,10 +1260,15 @@ class Emitter:
         else:
             lines.append("    var _result = " + call_text)
         lines.extend("    " + l for l in post)
-        if raises:
+        if convert == "status":
             lines.append('    _check(_result, "%s")' % (
                 "%s::%s" % (method.owner, method.name) if method.owner else method.name))
         values = []
+        if convert == "owned":
+            lines.append("    if _result == 0:")
+            lines.append('        raise Error("%s::%s made nothing")' % (method.owner, method.name))
+            lines.append("    return %s(_adopting=_result)" % rtype)
+            return lines, [p for p in m_params]
         if convert and convert.startswith("span:"):
             lines.append("    if _result == 0:")
             lines.append("        return %s()" % rtype)
@@ -1304,7 +1330,19 @@ class Emitter:
     # ---- classes ----------------------------------------------------------------
 
     def bridged_bases(self, cls):
-        return [b for b in self.model.records[cls].bases if b in self.b.classes]
+        """The nearest bridged class along each base path: BGroupLayout's is
+        BLayout, through BTwoDimensionalLayout and BAbstractLayout, which the
+        bridge does not carry (their methods come with BGroupLayout)."""
+        found = []
+        for base in self.model.records[cls].bases:
+            if base in self.b.classes:
+                if base not in found:
+                    found.append(base)
+            elif base in self.model.records:
+                for above in self.bridged_bases(base):
+                    if above not in found:
+                        found.append(above)
+        return found
 
     def bridged_ancestors(self, cls):
         return [a for a in self.model.ancestors(cls) if a in self.b.classes]
@@ -1593,10 +1631,23 @@ class Emitter:
             if m.name.startswith("operator"):
                 manifest.append((m.cxx(), "skipped", "operator"))
                 continue
-            if m.static:
-                manifest.append((m.cxx(), "skipped", "static"))
-                continue
             if m.implicit or m.deleted:
+                continue
+            if m.static:
+                if m.owner != cls or m.name == "Instantiate":
+                    manifest.append((m.cxx(), "skipped", "static" if m.owner == cls
+                                     else "a static of %s" % m.owner))
+                    continue
+                try:
+                    info = self.b.map_method(m, cls)
+                    entry_name = "mojobe_%s_%s" % (cls, m.name)
+                    lines, _ = self.emit_method(info, cls, entry_name, None, "",
+                                                static=True)
+                except Unbridged as why:
+                    manifest.append((m.cxx(), "skipped", str(why)))
+                    continue
+                owned_extra.append(["@staticmethod"] + lines)
+                manifest.append((m.cxx(), "included", entry_name + ", static"))
                 continue
             ckey = (m.name, tuple(p.type.qual for p in m.params), m.const)
             if ckey in seen_c:
@@ -1727,6 +1778,9 @@ class Emitter:
                  and m.access == "public" and not m.implicit and not m.deleted]
         infos = []
         for m in ctors:
+            if record.abstract:
+                manifest.append((m.cxx(), "skipped", "abstract: pure virtual methods"))
+                continue
             if len(m.params) == 1 and m.params[0].type.base == "BMessage" \
                     and m.params[0].type.pointers:
                 manifest.append((m.cxx(), "skipped", "archive constructor"))
@@ -2208,6 +2262,10 @@ class Emitter:
         else:
             out.append('        external_call["mojobe_%s_delete", NoneType](_addr(self._ptr))' % cls)
         out.append("")
+        out.append("    def __init__(out self, *, _adopting: Int):")
+        out.append('        """Takes over an object C++ made for the caller (a factory\'s)."""')
+        out.append("        self._ptr = _ptr_from(_adopting)")
+        out.append("")
         out.append("    def _adopt(deinit self) -> Int:")
         out.append('        """Hands the object over without deleting it."""')
         out.append("        return _addr(self._ptr)")
@@ -2615,6 +2673,11 @@ def write_values(emitter, bridge):
            "(checked at compile time against clang's layout for the Haiku target),",
            'and the constant values of those types."""', "",
            "from std.sys import size_of, align_of", ""]
+    enums = sorted({t for v in bridge.values for _, t in emitter.value_fields(v)
+                    if t in bridge.typed_enums})
+    if enums:
+        out.append("from ._constants import %s" % ", ".join(enums))
+        out.append("")
     for value in bridge.values:
         fields = emitter.value_fields(value)
         snippet = SNIPPETS / ("%s.mojo" % value)
@@ -3072,10 +3135,15 @@ def write_oracle(emitter, bridge):
                 if mtype.startswith("Float"):
                     ins.append(_float(j + 0.25))
                     outs.append(_float(j + 1.25))
+                    bump += "\tresult.%s += 1;\n" % name
+                elif mtype in bridge.typed_enums:
+                    ins.append("%s(%d)" % (mtype, j + 2))
+                    outs.append("%s(%d)" % (mtype, j + 3))
+                    bump += "\tresult.%s = (%s)(result.%s + 1);\n" % (name, mtype, name)
                 else:
                     ins.append(str(j * 7 + 2))
                     outs.append(str(j * 7 + 3))
-                bump += "\tresult.%s += 1;\n" % name
+                    bump += "\tresult.%s += 1;\n" % name
             bump = bump.rstrip("\n")
         echoes.append((value, "mojobe_%s" % value, bump,
                        "%s(%s)" % (value, ", ".join(ins)),

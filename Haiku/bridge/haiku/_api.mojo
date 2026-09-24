@@ -37,7 +37,7 @@ from ._core import (
     _type_tag,
 )
 from ._values import _check_layouts
-from ._values import BRect, BPoint, rgb_color, font_height, clipping_rect, screen_id, pattern, B_MAIN_SCREEN_ID, B_ORIGIN, B_SOLID_HIGH
+from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, font_height, clipping_rect, screen_id, pattern, B_MAIN_SCREEN_ID, B_ORIGIN, B_SOLID_HIGH
 from ._constants import (
     BSpacing,
     alert_type,
@@ -100,6 +100,7 @@ from ._constants import (
     B_FONT_ALL,
     B_FRAME_EVENTS,
     B_FULL_UPDATE_ON_RESIZE,
+    B_HORIZONTAL,
     B_INFINITE_TIMEOUT,
     B_INFO_ALERT,
     B_ITEMS_IN_COLUMN,
@@ -111,6 +112,7 @@ from ._constants import (
     B_OPEN_PANEL,
     B_TILE_BITMAP,
     B_TRACK_WHOLE_RECT,
+    B_USE_DEFAULT_SPACING,
     B_WIDTH_AS_USUAL,
     B_WILL_DRAW,
 )
@@ -1078,6 +1080,16 @@ struct BHandlerRef[origin: ImmOrigin](
         """A `BAlert` is a `BHandler`."""
         self = BHandlerRef[Self.origin](other._as_BHandler())
 
+    @implicit
+    def __init__(out self, other: BGroupViewRef[Self.origin]):
+        """A `BGroupView` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
+    @implicit
+    def __init__(out self, other: BGridViewRef[Self.origin]):
+        """A `BGridView` is a `BHandler`."""
+        self = BHandlerRef[Self.origin](other._as_BHandler())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -1243,6 +1255,26 @@ struct BHandlerRef[origin: ImmOrigin](
         return BAlertRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BHandler_to_BAlert", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupView(ref self) -> BGroupViewRef[origin_of(self)]:
+        """This `BHandler` as a `BGroupView`: NULL if it is not one."""
+        return BGroupViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGroupView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridView(ref self) -> BGridViewRef[origin_of(self)]:
+        """This `BHandler` as a `BGridView`: NULL if it is not one."""
+        return BGridViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BHandler_to_BGridView", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -1418,8 +1450,28 @@ struct BHandler(Movable, _BHandlerMethods):
             ),
         )
 
+    @implicit
+    def __init__(out self, var other: BGroupView):
+        """A `BGroupView` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGroupView_as_BHandler", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGridView):
+        """A `BGridView` is a `BHandler`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGridView_as_BHandler", Int](other^._adopt()),
+        )
+
     def __deinit__(deinit self):
         external_call["mojobe_BHandler_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -1942,6 +1994,10 @@ struct BLooper(Movable, _BLooperMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BLooper_destroy", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -1953,6 +2009,14 @@ struct BLooper(Movable, _BLooperMethods):
         return _ptr_from(
             external_call["mojobe_BLooper_as_BHandler", Int](_addr(self._ptr)),
         )
+
+    @staticmethod
+    def LooperForThread(thread: Int32) -> BLooperRef[ImmUntrackedOrigin]:
+        """`BLooper* BLooper::LooperForThread(thread_id thread)`."""
+        var _result = external_call["mojobe_BLooper_LooperForThread", Int](
+            thread,
+        )
+        return BLooperRef[ImmUntrackedOrigin](_ptr_from(_result))
 
     def Run(deinit self) -> Int32:
         """`thread_id BLooper::Run()`."""
@@ -2375,6 +2439,10 @@ struct BApplication(Movable, _BApplicationMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BApplication_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -2625,10 +2693,17 @@ trait _BWindowMethods(_AsBWindow, _BLooperMethods):
         before: BViewRef[_] = BViewRef[ImmUntrackedOrigin](),
     ):
         """`void BWindow::AddChild(BView* child, BView* before)`."""
-        external_call["mojobe_BWindow_AddChild", NoneType](
+        external_call["mojobe_BWindow_AddChild__BViewP_BViewP", NoneType](
             _nonnull(self._as_BWindow(), "BWindow::AddChild"),
             child^._adopt(),
             _addr(before._as_BView()),
+        )
+
+    def AddChild(self, var child: BLayoutItem):
+        """`void BWindow::AddChild(BLayoutItem* child)`."""
+        external_call["mojobe_BWindow_AddChild__BLayoutItemP", NoneType](
+            _nonnull(self._as_BWindow(), "BWindow::AddChild"),
+            child^._adopt(),
         )
 
     def RemoveChild(self, child: Some[_AsBView]) -> Bool:
@@ -3057,6 +3132,13 @@ trait _BWindowMethods(_AsBWindow, _BLooperMethods):
         )
         return _result
 
+    def Size(self) -> BSize:
+        """`BSize BWindow::Size() const`."""
+        var _result = external_call["mojobe_BWindow_Size", BSize](
+            _nonnull(self._as_BWindow(), "BWindow::Size"),
+        )
+        return _result
+
     def Title(self) -> String:
         """`const char* BWindow::Title() const`."""
         var _result = external_call["mojobe_BWindow_Title", Int](
@@ -3328,6 +3410,20 @@ trait _BWindowMethods(_AsBWindow, _BLooperMethods):
             height,
             heightOffset,
         )
+
+    def SetLayout(self, var layout: BLayout):
+        """`void BWindow::SetLayout(BLayout* layout)`."""
+        external_call["mojobe_BWindow_SetLayout", NoneType](
+            _nonnull(self._as_BWindow(), "BWindow::SetLayout"),
+            layout^._adopt(),
+        )
+
+    def GetLayout(ref self) -> BLayoutRef[origin_of(self)]:
+        """`BLayout* BWindow::GetLayout() const`."""
+        var _result = external_call["mojobe_BWindow_GetLayout", Int](
+            _nonnull(self._as_BWindow(), "BWindow::GetLayout"),
+        )
+        return BLayoutRef[origin_of(self)](_ptr_from(_result))
 
     def InvalidateLayout(self, descendants: Bool = False):
         """`void BWindow::InvalidateLayout(bool descendants)`."""
@@ -3624,6 +3720,10 @@ struct BWindow(Movable, _BWindowMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BWindow_destroy", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -4023,11 +4123,19 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
         before: BViewRef[_] = BViewRef[ImmUntrackedOrigin](),
     ):
         """`void BView::AddChild(BView* child, BView* before)`."""
-        external_call["mojobe_BView_AddChild", NoneType](
+        external_call["mojobe_BView_AddChild__BViewP_BViewP", NoneType](
             _nonnull(self._as_BView(), "BView::AddChild"),
             child^._adopt(),
             _addr(before._as_BView()),
         )
+
+    def AddChild(self, var child: BLayoutItem) -> Bool:
+        """`bool BView::AddChild(BLayoutItem* child)`."""
+        var _result = external_call["mojobe_BView_AddChild__BLayoutItemP", Bool](
+            _nonnull(self._as_BView(), "BView::AddChild"),
+            child^._adopt(),
+        )
+        return _result
 
     def RemoveChild(self, child: Some[_AsBView]) -> Bool:
         """`bool BView::RemoveChild(BView* child)`."""
@@ -5540,10 +5648,17 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
 
     def ResizeTo(self, width: Float32, height: Float32):
         """`void BView::ResizeTo(float width, float height)`."""
-        external_call["mojobe_BView_ResizeTo", NoneType](
+        external_call["mojobe_BView_ResizeTo__float_float", NoneType](
             _nonnull(self._as_BView(), "BView::ResizeTo"),
             width,
             height,
+        )
+
+    def ResizeTo(self, size: BSize):
+        """`void BView::ResizeTo(BSize size)`."""
+        external_call["mojobe_BView_ResizeTo__BSize", NoneType](
+            _nonnull(self._as_BView(), "BView::ResizeTo"),
+            size,
         )
 
     def ScrollBy(self, dh: Float32, dv: Float32):
@@ -5667,6 +5782,97 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             updateRect,
         )
 
+    def MinSize(self) -> BSize:
+        """`BSize BView::MinSize()`."""
+        var _result = external_call["mojobe_BView_MinSize", BSize](
+            _nonnull(self._as_BView(), "BView::MinSize"),
+        )
+        return _result
+
+    def MaxSize(self) -> BSize:
+        """`BSize BView::MaxSize()`."""
+        var _result = external_call["mojobe_BView_MaxSize", BSize](
+            _nonnull(self._as_BView(), "BView::MaxSize"),
+        )
+        return _result
+
+    def PreferredSize(self) -> BSize:
+        """`BSize BView::PreferredSize()`."""
+        var _result = external_call["mojobe_BView_PreferredSize", BSize](
+            _nonnull(self._as_BView(), "BView::PreferredSize"),
+        )
+        return _result
+
+    def LayoutAlignment(self) -> BAlignment:
+        """`BAlignment BView::LayoutAlignment()`."""
+        var _result = external_call["mojobe_BView_LayoutAlignment", BAlignment](
+            _nonnull(self._as_BView(), "BView::LayoutAlignment"),
+        )
+        return _result
+
+    def SetExplicitMinSize(self, size: BSize):
+        """`void BView::SetExplicitMinSize(BSize size)`."""
+        external_call["mojobe_BView_SetExplicitMinSize", NoneType](
+            _nonnull(self._as_BView(), "BView::SetExplicitMinSize"),
+            size,
+        )
+
+    def SetExplicitMaxSize(self, size: BSize):
+        """`void BView::SetExplicitMaxSize(BSize size)`."""
+        external_call["mojobe_BView_SetExplicitMaxSize", NoneType](
+            _nonnull(self._as_BView(), "BView::SetExplicitMaxSize"),
+            size,
+        )
+
+    def SetExplicitPreferredSize(self, size: BSize):
+        """`void BView::SetExplicitPreferredSize(BSize size)`."""
+        external_call["mojobe_BView_SetExplicitPreferredSize", NoneType](
+            _nonnull(self._as_BView(), "BView::SetExplicitPreferredSize"),
+            size,
+        )
+
+    def SetExplicitSize(self, size: BSize):
+        """`void BView::SetExplicitSize(BSize size)`."""
+        external_call["mojobe_BView_SetExplicitSize", NoneType](
+            _nonnull(self._as_BView(), "BView::SetExplicitSize"),
+            size,
+        )
+
+    def SetExplicitAlignment(self, alignment: BAlignment):
+        """`void BView::SetExplicitAlignment(BAlignment alignment)`."""
+        external_call["mojobe_BView_SetExplicitAlignment", NoneType](
+            _nonnull(self._as_BView(), "BView::SetExplicitAlignment"),
+            alignment,
+        )
+
+    def ExplicitMinSize(self) -> BSize:
+        """`BSize BView::ExplicitMinSize() const`."""
+        var _result = external_call["mojobe_BView_ExplicitMinSize", BSize](
+            _nonnull(self._as_BView(), "BView::ExplicitMinSize"),
+        )
+        return _result
+
+    def ExplicitMaxSize(self) -> BSize:
+        """`BSize BView::ExplicitMaxSize() const`."""
+        var _result = external_call["mojobe_BView_ExplicitMaxSize", BSize](
+            _nonnull(self._as_BView(), "BView::ExplicitMaxSize"),
+        )
+        return _result
+
+    def ExplicitPreferredSize(self) -> BSize:
+        """`BSize BView::ExplicitPreferredSize() const`."""
+        var _result = external_call["mojobe_BView_ExplicitPreferredSize", BSize](
+            _nonnull(self._as_BView(), "BView::ExplicitPreferredSize"),
+        )
+        return _result
+
+    def ExplicitAlignment(self) -> BAlignment:
+        """`BAlignment BView::ExplicitAlignment() const`."""
+        var _result = external_call["mojobe_BView_ExplicitAlignment", BAlignment](
+            _nonnull(self._as_BView(), "BView::ExplicitAlignment"),
+        )
+        return _result
+
     def HasHeightForWidth(self) -> Bool:
         """`bool BView::HasHeightForWidth()`."""
         var _result = external_call["mojobe_BView_HasHeightForWidth", Bool](
@@ -5697,6 +5903,20 @@ trait _BViewMethods(_AsBView, _BHandlerMethods):
             _nonnull(self._as_BView(), "BView::InvalidateLayout"),
             descendants,
         )
+
+    def SetLayout(self, var layout: BLayout):
+        """`void BView::SetLayout(BLayout* layout)`."""
+        external_call["mojobe_BView_SetLayout", NoneType](
+            _nonnull(self._as_BView(), "BView::SetLayout"),
+            layout^._adopt(),
+        )
+
+    def GetLayout(ref self) -> BLayoutRef[origin_of(self)]:
+        """`BLayout* BView::GetLayout() const`."""
+        var _result = external_call["mojobe_BView_GetLayout", Int](
+            _nonnull(self._as_BView(), "BView::GetLayout"),
+        )
+        return BLayoutRef[origin_of(self)](_ptr_from(_result))
 
     def EnableLayoutInvalidation(self):
         """`void BView::EnableLayoutInvalidation()`."""
@@ -5838,6 +6058,16 @@ struct BViewRef[origin: ImmOrigin](
         """A `BScrollView` is a `BView`."""
         self = BViewRef[Self.origin](other._as_BView())
 
+    @implicit
+    def __init__(out self, other: BGroupViewRef[Self.origin]):
+        """A `BGroupView` is a `BView`."""
+        self = BViewRef[Self.origin](other._as_BView())
+
+    @implicit
+    def __init__(out self, other: BGridViewRef[Self.origin]):
+        """A `BGridView` is a `BView`."""
+        self = BViewRef[Self.origin](other._as_BView())
+
     def __bool__(self) -> Bool:
         return Bool(self._ptr)
 
@@ -5947,6 +6177,26 @@ struct BViewRef[origin: ImmOrigin](
         return BScrollViewRef[origin_of(self)](
             _ptr_from(
                 external_call["mojobe_BView_to_BScrollView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupView(ref self) -> BGroupViewRef[origin_of(self)]:
+        """This `BView` as a `BGroupView`: NULL if it is not one."""
+        return BGroupViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BGroupView", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridView(ref self) -> BGridViewRef[origin_of(self)]:
+        """This `BView` as a `BGridView`: NULL if it is not one."""
+        return BGridViewRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BView_to_BGridView", Int](
                     _addr(self._ptr),
                 ),
             ),
@@ -6101,11 +6351,17 @@ struct BView(Movable, _BViewMethods):
 
     var _ptr: _NPtr
 
-    def __init__(out self, var name: String, flags: UInt32) raises:
+    def __init__(
+        out self,
+        var name: String,
+        flags: UInt32,
+        layout: BLayoutRef[_] = BLayoutRef[ImmUntrackedOrigin](),
+    ) raises:
         """`BView::BView(const char* name, uint32 flags, BLayout* layout)`."""
-        var address = external_call["mojobe_BView_new__charP_uint32", Int](
+        var address = external_call["mojobe_BView_new__charP_uint32_BLayoutP", Int](
             name.as_c_string_span(),
             flags,
+            _addr(layout._as_BLayout()),
         )
         _ = name^
         if address == 0:
@@ -6136,13 +6392,15 @@ struct BView(Movable, _BViewMethods):
         var name: String,
         flags: UInt32,
         var state: T,
+        layout: BLayoutRef[_] = BLayoutRef[ImmUntrackedOrigin](),
     ) raises:
         """`BView::BView(const char* name, uint32 flags, BLayout* layout)`, its hooks those of `state`."""
         var hooks = _BView_hooks[T]()
         var context = _to_heap(state^)
-        var address = external_call["mojobe_MojoBView_new__charP_uint32", Int](
+        var address = external_call["mojobe_MojoBView_new__charP_uint32_BLayoutP", Int](
             name.as_c_string_span(),
             flags,
+            _addr(layout._as_BLayout()),
             Pointer(to=hooks),
             context,
         )
@@ -6254,8 +6512,26 @@ struct BView(Movable, _BViewMethods):
             external_call["mojobe_BScrollView_as_BView", Int](other^._adopt()),
         )
 
+    @implicit
+    def __init__(out self, var other: BGroupView):
+        """A `BGroupView` is a `BView`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGroupView_as_BView", Int](other^._adopt()),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGridView):
+        """A `BGridView` is a `BView`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGridView_as_BView", Int](other^._adopt()),
+        )
+
     def __deinit__(deinit self):
         external_call["mojobe_BView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -7031,6 +7307,16 @@ trait _BMessageMethods(_AsBMessage):
         )
         _check(_result, "BMessage::PopSpecifier")
 
+    def AddAlignment(self, var name: String, alignment: BAlignment) raises:
+        """`status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)`."""
+        var _result = external_call["mojobe_BMessage_AddAlignment", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::AddAlignment"),
+            name.as_c_string_span(),
+            alignment,
+        )
+        _ = name^
+        _check(_result, "BMessage::AddAlignment")
+
     def AddRect(self, var name: String, rect: BRect) raises:
         """`status_t BMessage::AddRect(const char* name, BRect rect)`."""
         var _result = external_call["mojobe_BMessage_AddRect", Int32](
@@ -7050,6 +7336,16 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::AddPoint")
+
+    def AddSize(self, var name: String, size: BSize) raises:
+        """`status_t BMessage::AddSize(const char* name, BSize size)`."""
+        var _result = external_call["mojobe_BMessage_AddSize", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::AddSize"),
+            name.as_c_string_span(),
+            size,
+        )
+        _ = name^
+        _check(_result, "BMessage::AddSize")
 
     def AddString(self, var name: String, var string: String) raises:
         """`status_t BMessage::AddString(const char* name, const char* string)`."""
@@ -7267,6 +7563,35 @@ trait _BMessageMethods(_AsBMessage):
         )
         _check(_result, "BMessage::MakeEmpty")
 
+    def FindAlignment(self, var name: String) raises -> BAlignment:
+        """`status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const`."""
+        var alignment = BAlignment(alignment(0), vertical_alignment(0))
+        var _result = external_call["mojobe_BMessage_FindAlignment__charP_BAlignmentP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindAlignment"),
+            name.as_c_string_span(),
+            Pointer(to=alignment),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindAlignment")
+        return alignment
+
+    def FindAlignment(
+        self,
+        var name: String,
+        index: Int32,
+    ) raises -> BAlignment:
+        """`status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const`."""
+        var alignment = BAlignment(alignment(0), vertical_alignment(0))
+        var _result = external_call["mojobe_BMessage_FindAlignment__charP_int32_BAlignmentP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindAlignment"),
+            name.as_c_string_span(),
+            index,
+            Pointer(to=alignment),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindAlignment")
+        return alignment
+
     def FindRect(self, var name: String) raises -> BRect:
         """`status_t BMessage::FindRect(const char* name, BRect* rect) const`."""
         var rect = BRect(Float32(0), Float32(0), Float32(0), Float32(0))
@@ -7316,6 +7641,31 @@ trait _BMessageMethods(_AsBMessage):
         _ = name^
         _check(_result, "BMessage::FindPoint")
         return point
+
+    def FindSize(self, var name: String) raises -> BSize:
+        """`status_t BMessage::FindSize(const char* name, BSize* size) const`."""
+        var size = BSize(Float32(0), Float32(0))
+        var _result = external_call["mojobe_BMessage_FindSize__charP_BSizeP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindSize"),
+            name.as_c_string_span(),
+            Pointer(to=size),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindSize")
+        return size
+
+    def FindSize(self, var name: String, index: Int32) raises -> BSize:
+        """`status_t BMessage::FindSize(const char* name, int32 index, BSize* size) const`."""
+        var size = BSize(Float32(0), Float32(0))
+        var _result = external_call["mojobe_BMessage_FindSize__charP_int32_BSizeP", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::FindSize"),
+            name.as_c_string_span(),
+            index,
+            Pointer(to=size),
+        )
+        _ = name^
+        _check(_result, "BMessage::FindSize")
+        return size
 
     def FindString(self, var name: String) raises -> String:
         """`status_t BMessage::FindString(const char* name, const char** string) const`."""
@@ -7723,6 +8073,32 @@ trait _BMessageMethods(_AsBMessage):
         _ = name^
         _check(_result, "BMessage::FindMessage")
 
+    def ReplaceAlignment(self, var name: String, alignment: BAlignment) raises:
+        """`status_t BMessage::ReplaceAlignment(const char* name, const BAlignment& alignment)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceAlignment__charP_BAlignment", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceAlignment"),
+            name.as_c_string_span(),
+            alignment,
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceAlignment")
+
+    def ReplaceAlignment(
+        self,
+        var name: String,
+        index: Int32,
+        alignment: BAlignment,
+    ) raises:
+        """`status_t BMessage::ReplaceAlignment(const char* name, int32 index, const BAlignment& alignment)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceAlignment__charP_int32_BAlignment", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceAlignment"),
+            name.as_c_string_span(),
+            index,
+            alignment,
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceAlignment")
+
     def ReplaceRect(self, var name: String, rect: BRect) raises:
         """`status_t BMessage::ReplaceRect(const char* name, BRect rect)`."""
         var _result = external_call["mojobe_BMessage_ReplaceRect__charP_BRect", Int32](
@@ -7769,6 +8145,27 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::ReplacePoint")
+
+    def ReplaceSize(self, var name: String, aSize: BSize) raises:
+        """`status_t BMessage::ReplaceSize(const char* name, BSize aSize)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceSize__charP_BSize", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceSize"),
+            name.as_c_string_span(),
+            aSize,
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceSize")
+
+    def ReplaceSize(self, var name: String, index: Int32, aSize: BSize) raises:
+        """`status_t BMessage::ReplaceSize(const char* name, int32 index, BSize aSize)`."""
+        var _result = external_call["mojobe_BMessage_ReplaceSize__charP_int32_BSize", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::ReplaceSize"),
+            name.as_c_string_span(),
+            index,
+            aSize,
+        )
+        _ = name^
+        _check(_result, "BMessage::ReplaceSize")
 
     def ReplaceString(self, var name: String, var string: String) raises:
         """`status_t BMessage::ReplaceString(const char* name, const char* string)`."""
@@ -8793,6 +9190,36 @@ trait _BMessageMethods(_AsBMessage):
         _ = defaultValue^
         return _string_from(_result)
 
+    def GetAlignment(
+        self,
+        var name: String,
+        index: Int32,
+        defaultValue: BAlignment,
+    ) -> BAlignment:
+        """`BAlignment BMessage::GetAlignment(const char* name, int32 index, const BAlignment& defaultValue) const`."""
+        var _result = external_call["mojobe_BMessage_GetAlignment__charP_int32_BAlignment", BAlignment](
+            _nonnull(self._as_BMessage(), "BMessage::GetAlignment"),
+            name.as_c_string_span(),
+            index,
+            defaultValue,
+        )
+        _ = name^
+        return _result
+
+    def GetAlignment(
+        self,
+        var name: String,
+        defaultValue: BAlignment,
+    ) -> BAlignment:
+        """`BAlignment BMessage::GetAlignment(const char* name, const BAlignment& defaultValue) const`."""
+        var _result = external_call["mojobe_BMessage_GetAlignment__charP_BAlignment", BAlignment](
+            _nonnull(self._as_BMessage(), "BMessage::GetAlignment"),
+            name.as_c_string_span(),
+            defaultValue,
+        )
+        _ = name^
+        return _result
+
     def GetRect(
         self,
         var name: String,
@@ -8839,6 +9266,32 @@ trait _BMessageMethods(_AsBMessage):
         """`BPoint BMessage::GetPoint(const char* name, const BPoint& defaultValue) const`."""
         var _result = external_call["mojobe_BMessage_GetPoint__charP_BPoint", BPoint](
             _nonnull(self._as_BMessage(), "BMessage::GetPoint"),
+            name.as_c_string_span(),
+            defaultValue,
+        )
+        _ = name^
+        return _result
+
+    def GetSize(
+        self,
+        var name: String,
+        index: Int32,
+        defaultValue: BSize,
+    ) -> BSize:
+        """`BSize BMessage::GetSize(const char* name, int32 index, const BSize& defaultValue) const`."""
+        var _result = external_call["mojobe_BMessage_GetSize__charP_int32_BSize", BSize](
+            _nonnull(self._as_BMessage(), "BMessage::GetSize"),
+            name.as_c_string_span(),
+            index,
+            defaultValue,
+        )
+        _ = name^
+        return _result
+
+    def GetSize(self, var name: String, defaultValue: BSize) -> BSize:
+        """`BSize BMessage::GetSize(const char* name, const BSize& defaultValue) const`."""
+        var _result = external_call["mojobe_BMessage_GetSize__charP_BSize", BSize](
+            _nonnull(self._as_BMessage(), "BMessage::GetSize"),
             name.as_c_string_span(),
             defaultValue,
         )
@@ -8976,6 +9429,16 @@ trait _BMessageMethods(_AsBMessage):
         _ = name^
         _check(_result, "BMessage::SetDouble")
 
+    def SetAlignment(self, var name: String, value: BAlignment) raises:
+        """`status_t BMessage::SetAlignment(const char* name, const BAlignment& value)`."""
+        var _result = external_call["mojobe_BMessage_SetAlignment", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::SetAlignment"),
+            name.as_c_string_span(),
+            value,
+        )
+        _ = name^
+        _check(_result, "BMessage::SetAlignment")
+
     def SetPoint(self, var name: String, value: BPoint) raises:
         """`status_t BMessage::SetPoint(const char* name, const BPoint& value)`."""
         var _result = external_call["mojobe_BMessage_SetPoint", Int32](
@@ -8995,6 +9458,16 @@ trait _BMessageMethods(_AsBMessage):
         )
         _ = name^
         _check(_result, "BMessage::SetRect")
+
+    def SetSize(self, var name: String, value: BSize) raises:
+        """`status_t BMessage::SetSize(const char* name, const BSize& value)`."""
+        var _result = external_call["mojobe_BMessage_SetSize", Int32](
+            _nonnull(self._as_BMessage(), "BMessage::SetSize"),
+            name.as_c_string_span(),
+            value,
+        )
+        _ = name^
+        _check(_result, "BMessage::SetSize")
 
     def SetData(
         self,
@@ -9091,6 +9564,10 @@ struct BMessage(Movable, _BMessageMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BMessage_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -9548,6 +10025,10 @@ struct BMenu(Movable, _BMenuMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BMenu_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -9702,6 +10183,10 @@ struct BMenuBar(Movable, _BMenuBarMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BMenuBar_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -10093,6 +10578,10 @@ struct BInvoker(Movable, _BInvokerMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BInvoker_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -10313,6 +10802,10 @@ struct BMenuItem(Movable, _BMenuItemMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BMenuItem_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -10469,6 +10962,10 @@ struct BPopUpMenu(Movable, _BPopUpMenuMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BPopUpMenu_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -10799,6 +11296,10 @@ struct BControl(Movable, _BControlMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BControl_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -10995,6 +11496,10 @@ struct BButton(Movable, _BButtonMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BButton_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -11174,6 +11679,10 @@ struct BCheckBox(Movable, _BCheckBoxMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BCheckBox_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -11349,6 +11858,10 @@ struct BRadioButton(Movable, _BRadioButtonMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BRadioButton_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -11480,6 +11993,26 @@ trait _BTextControlMethods(_AsBTextControl, _BControlMethods):
             _nonnull(self._as_BTextControl(), "BTextControl::Divider"),
         )
         return _result
+
+    def CreateLabelLayoutItem(ref self) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BTextControl::CreateLabelLayoutItem()`."""
+        var _result = external_call["mojobe_BTextControl_CreateLabelLayoutItem", Int](
+            _nonnull(
+                self._as_BTextControl(),
+                "BTextControl::CreateLabelLayoutItem",
+            ),
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def CreateTextViewLayoutItem(ref self) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BTextControl::CreateTextViewLayoutItem()`."""
+        var _result = external_call["mojobe_BTextControl_CreateTextViewLayoutItem", Int](
+            _nonnull(
+                self._as_BTextControl(),
+                "BTextControl::CreateTextViewLayoutItem",
+            ),
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
 
 
 struct BTextControlRef[origin: ImmOrigin](
@@ -11618,6 +12151,10 @@ struct BTextControl(Movable, _BTextControlMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BTextControl_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -12112,6 +12649,10 @@ struct BSlider(Movable, _BSliderMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BSlider_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -12290,6 +12831,10 @@ struct BStringView(Movable, _BStringViewMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BStringView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -12489,6 +13034,10 @@ struct BScrollView(Movable, _BScrollViewMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BScrollView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -12751,6 +13300,10 @@ struct BAlert(Movable, _BAlertMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BAlert_destroy", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -12772,6 +13325,15 @@ struct BAlert(Movable, _BAlertMethods):
         return _ptr_from(
             external_call["mojobe_BAlert_as_BHandler", Int](_addr(self._ptr)),
         )
+
+    @staticmethod
+    def AlertPosition(width: Float32, height: Float32) -> BPoint:
+        """`BPoint BAlert::AlertPosition(float width, float height)`."""
+        var _result = external_call["mojobe_BAlert_AlertPosition", BPoint](
+            width,
+            height,
+        )
+        return _result
 
     def Go(deinit self) -> Int32:
         """`int32 BAlert::Go()`."""
@@ -12915,9 +13477,16 @@ trait _BRegionMethods(_AsBRegion):
             y,
         )
 
+    def ScaleBy(self, scale: BSize):
+        """`void BRegion::ScaleBy(BSize scale)`."""
+        external_call["mojobe_BRegion_ScaleBy__BSize", NoneType](
+            _nonnull(self._as_BRegion(), "BRegion::ScaleBy"),
+            scale,
+        )
+
     def ScaleBy(self, x: Float32, y: Float32):
         """`void BRegion::ScaleBy(float x, float y)`."""
-        external_call["mojobe_BRegion_ScaleBy", NoneType](
+        external_call["mojobe_BRegion_ScaleBy__float_float", NoneType](
             _nonnull(self._as_BRegion(), "BRegion::ScaleBy"),
             x,
             y,
@@ -13040,6 +13609,10 @@ struct BRegion(Movable, _BRegionMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BRegion_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -13176,11 +13749,50 @@ trait _BBitmapMethods(_AsBBitmap):
         )
         _check(_result, "BBitmap::ImportBits")
 
+    def ImportBits(
+        self,
+        data: Span[UInt8, _],
+        bpr: Int32,
+        colorSpace: color_space,
+        from_: BPoint,
+        to: BPoint,
+        size: BSize,
+    ) raises:
+        """`status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)`."""
+        var _result = external_call["mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::ImportBits"),
+            Int(data.unsafe_ptr()),
+            Int32(len(data)),
+            bpr,
+            colorSpace,
+            from_,
+            to,
+            size,
+        )
+        _check(_result, "BBitmap::ImportBits")
+
     def ImportBits(self, bitmap: Some[_AsBBitmap]) raises:
         """`status_t BBitmap::ImportBits(const BBitmap* bitmap)`."""
         var _result = external_call["mojobe_BBitmap_ImportBits__BBitmapP", Int32](
             _nonnull(self._as_BBitmap(), "BBitmap::ImportBits"),
             _addr(bitmap._as_BBitmap()),
+        )
+        _check(_result, "BBitmap::ImportBits")
+
+    def ImportBits(
+        self,
+        bitmap: Some[_AsBBitmap],
+        from_: BPoint,
+        to: BPoint,
+        size: BSize,
+    ) raises:
+        """`status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)`."""
+        var _result = external_call["mojobe_BBitmap_ImportBits__BBitmapP_BPoint_BPoint_BSize", Int32](
+            _nonnull(self._as_BBitmap(), "BBitmap::ImportBits"),
+            _addr(bitmap._as_BBitmap()),
+            from_,
+            to,
+            size,
         )
         _check(_result, "BBitmap::ImportBits")
 
@@ -13413,6 +14025,10 @@ struct BBitmap(Movable, _BBitmapMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BBitmap_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -13678,12 +14294,1710 @@ struct BScreen(Movable, _BScreenMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BScreen_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
 
     def _as_BScreen(self) -> _NPtr:
         return self._ptr
+
+# ========================================================================== #
+# BLayoutItem
+# ========================================================================== #
+
+
+trait _AsBLayoutItem:
+    """Has a `BLayoutItem*` for libmojobe."""
+
+    def _as_BLayoutItem(self) -> _NPtr:
+        ...
+
+
+trait _BLayoutItemMethods(_AsBLayoutItem):
+    """`BLayoutItem`'s methods, for its references and the values Mojo owns."""
+
+    def Layout(ref self) -> BLayoutRef[origin_of(self)]:
+        """`BLayout* BLayoutItem::Layout() const`."""
+        var _result = external_call["mojobe_BLayoutItem_Layout", Int](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::Layout"),
+        )
+        return BLayoutRef[origin_of(self)](_ptr_from(_result))
+
+    def RemoveSelf(self) -> Bool:
+        """`bool BLayoutItem::RemoveSelf()`."""
+        var _result = external_call["mojobe_BLayoutItem_RemoveSelf", Bool](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::RemoveSelf"),
+        )
+        return _result
+
+    def MinSize(self) -> BSize:
+        """`BSize BLayoutItem::MinSize()`."""
+        var _result = external_call["mojobe_BLayoutItem_MinSize", BSize](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::MinSize"),
+        )
+        return _result
+
+    def MaxSize(self) -> BSize:
+        """`BSize BLayoutItem::MaxSize()`."""
+        var _result = external_call["mojobe_BLayoutItem_MaxSize", BSize](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::MaxSize"),
+        )
+        return _result
+
+    def PreferredSize(self) -> BSize:
+        """`BSize BLayoutItem::PreferredSize()`."""
+        var _result = external_call["mojobe_BLayoutItem_PreferredSize", BSize](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::PreferredSize"),
+        )
+        return _result
+
+    def Alignment(self) -> BAlignment:
+        """`BAlignment BLayoutItem::Alignment()`."""
+        var _result = external_call["mojobe_BLayoutItem_Alignment", BAlignment](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::Alignment"),
+        )
+        return _result
+
+    def SetExplicitMinSize(self, size: BSize):
+        """`void BLayoutItem::SetExplicitMinSize(BSize size)`."""
+        external_call["mojobe_BLayoutItem_SetExplicitMinSize", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::SetExplicitMinSize"),
+            size,
+        )
+
+    def SetExplicitMaxSize(self, size: BSize):
+        """`void BLayoutItem::SetExplicitMaxSize(BSize size)`."""
+        external_call["mojobe_BLayoutItem_SetExplicitMaxSize", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::SetExplicitMaxSize"),
+            size,
+        )
+
+    def SetExplicitPreferredSize(self, size: BSize):
+        """`void BLayoutItem::SetExplicitPreferredSize(BSize size)`."""
+        external_call["mojobe_BLayoutItem_SetExplicitPreferredSize", NoneType](
+            _nonnull(
+                self._as_BLayoutItem(),
+                "BLayoutItem::SetExplicitPreferredSize",
+            ),
+            size,
+        )
+
+    def SetExplicitSize(self, size: BSize):
+        """`void BLayoutItem::SetExplicitSize(BSize size)`."""
+        external_call["mojobe_BLayoutItem_SetExplicitSize", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::SetExplicitSize"),
+            size,
+        )
+
+    def SetExplicitAlignment(self, alignment: BAlignment):
+        """`void BLayoutItem::SetExplicitAlignment(BAlignment alignment)`."""
+        external_call["mojobe_BLayoutItem_SetExplicitAlignment", NoneType](
+            _nonnull(
+                self._as_BLayoutItem(),
+                "BLayoutItem::SetExplicitAlignment",
+            ),
+            alignment,
+        )
+
+    def IsVisible(self) -> Bool:
+        """`bool BLayoutItem::IsVisible()`."""
+        var _result = external_call["mojobe_BLayoutItem_IsVisible", Bool](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::IsVisible"),
+        )
+        return _result
+
+    def SetVisible(self, visible: Bool):
+        """`void BLayoutItem::SetVisible(bool visible)`."""
+        external_call["mojobe_BLayoutItem_SetVisible", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::SetVisible"),
+            visible,
+        )
+
+    def Frame(self) -> BRect:
+        """`BRect BLayoutItem::Frame()`."""
+        var _result = external_call["mojobe_BLayoutItem_Frame", BRect](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::Frame"),
+        )
+        return _result
+
+    def SetFrame(self, frame: BRect):
+        """`void BLayoutItem::SetFrame(BRect frame)`."""
+        external_call["mojobe_BLayoutItem_SetFrame", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::SetFrame"),
+            frame,
+        )
+
+    def HasHeightForWidth(self) -> Bool:
+        """`bool BLayoutItem::HasHeightForWidth()`."""
+        var _result = external_call["mojobe_BLayoutItem_HasHeightForWidth", Bool](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::HasHeightForWidth"),
+        )
+        return _result
+
+    def GetHeightForWidth(
+        self,
+        width: Float32,
+    ) -> Tuple[Float32, Float32, Float32]:
+        """`void BLayoutItem::GetHeightForWidth(float width, float* min, float* max, float* preferred)`."""
+        var min = Float32(0)
+        var max = Float32(0)
+        var preferred = Float32(0)
+        external_call["mojobe_BLayoutItem_GetHeightForWidth", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::GetHeightForWidth"),
+            width,
+            Pointer(to=min),
+            Pointer(to=max),
+            Pointer(to=preferred),
+        )
+        return (min, max, preferred)
+
+    def View(ref self) -> BViewRef[origin_of(self)]:
+        """`BView* BLayoutItem::View()`."""
+        var _result = external_call["mojobe_BLayoutItem_View", Int](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::View"),
+        )
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def InvalidateLayout(self, children: Bool = False):
+        """`void BLayoutItem::InvalidateLayout(bool children)`."""
+        external_call["mojobe_BLayoutItem_InvalidateLayout", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::InvalidateLayout"),
+            children,
+        )
+
+    def Relayout(self, immediate: Bool = False):
+        """`void BLayoutItem::Relayout(bool immediate)`."""
+        external_call["mojobe_BLayoutItem_Relayout", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::Relayout"),
+            immediate,
+        )
+
+    def AlignInFrame(self, frame: BRect):
+        """`void BLayoutItem::AlignInFrame(BRect frame)`."""
+        external_call["mojobe_BLayoutItem_AlignInFrame", NoneType](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::AlignInFrame"),
+            frame,
+        )
+
+    def Archive(self, into: Some[_AsBMessage], deep: Bool = True) raises:
+        """`status_t BLayoutItem::Archive(BMessage* into, bool deep) const`."""
+        var _result = external_call["mojobe_BLayoutItem_Archive", Int32](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::Archive"),
+            _addr(into._as_BMessage()),
+            deep,
+        )
+        _check(_result, "BLayoutItem::Archive")
+
+    def AllUnarchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllUnarchived(const BMessage* archive)`."""
+        var _result = external_call["mojobe_BLayoutItem_AllUnarchived", Int32](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::AllUnarchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllUnarchived")
+
+    def AllArchived(self, archive: Some[_AsBMessage]) raises:
+        """`status_t BArchivable::AllArchived(BMessage* archive) const`."""
+        var _result = external_call["mojobe_BLayoutItem_AllArchived", Int32](
+            _nonnull(self._as_BLayoutItem(), "BLayoutItem::AllArchived"),
+            _addr(archive._as_BMessage()),
+        )
+        _check(_result, "BArchivable::AllArchived")
+
+
+struct BLayoutItemRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BLayoutItemMethods,
+):
+    """A `BLayoutItem` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BLayoutItemRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    @implicit
+    def __init__(out self, other: BLayoutRef[Self.origin]):
+        """A `BLayout` is a `BLayoutItem`."""
+        self = BLayoutItemRef[Self.origin](other._as_BLayoutItem())
+
+    @implicit
+    def __init__(out self, other: BGroupLayoutRef[Self.origin]):
+        """A `BGroupLayout` is a `BLayoutItem`."""
+        self = BLayoutItemRef[Self.origin](other._as_BLayoutItem())
+
+    @implicit
+    def __init__(out self, other: BGridLayoutRef[Self.origin]):
+        """A `BGridLayout` is a `BLayoutItem`."""
+        self = BLayoutItemRef[Self.origin](other._as_BLayoutItem())
+
+    @implicit
+    def __init__(out self, other: BSpaceLayoutItemRef[Self.origin]):
+        """A `BSpaceLayoutItem` is a `BLayoutItem`."""
+        self = BLayoutItemRef[Self.origin](other._as_BLayoutItem())
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BLayoutItemRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BLayoutItemRef[ImmUntrackedOrigin](self._ptr)
+
+    def as_BLayout(ref self) -> BLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BLayout`: NULL if it is not one."""
+        return BLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGroupLayout(ref self) -> BGroupLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BGroupLayout`: NULL if it is not one."""
+        return BGroupLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BGroupLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridLayout(ref self) -> BGridLayoutRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BGridLayout`: NULL if it is not one."""
+        return BGridLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BGridLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BSpaceLayoutItem(ref self) -> BSpaceLayoutItemRef[origin_of(self)]:
+        """This `BLayoutItem` as a `BSpaceLayoutItem`: NULL if it is not one."""
+        return BSpaceLayoutItemRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayoutItem_to_BSpaceLayoutItem", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def _as_BLayoutItem(self) -> _NPtr:
+        return self._ptr
+
+
+struct BLayoutItem(Movable, _BLayoutItemMethods):
+    """A `BLayoutItem` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    @implicit
+    def __init__(out self, var other: BLayout):
+        """A `BLayout` is a `BLayoutItem`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BLayout_as_BLayoutItem", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGroupLayout):
+        """A `BGroupLayout` is a `BLayoutItem`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayoutItem", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGridLayout):
+        """A `BGridLayout` is a `BLayoutItem`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayoutItem", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BSpaceLayoutItem):
+        """A `BSpaceLayoutItem` is a `BLayoutItem`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BSpaceLayoutItem_as_BLayoutItem", Int](
+                other^._adopt(),
+            ),
+        )
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BLayoutItem_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BLayoutItem(self) -> _NPtr:
+        return self._ptr
+
+# ========================================================================== #
+# BLayout
+# ========================================================================== #
+
+
+trait _AsBLayout(_AsBLayoutItem):
+    """Has a `BLayout*` for libmojobe."""
+
+    def _as_BLayout(self) -> _NPtr:
+        ...
+
+
+trait _BLayoutMethods(_AsBLayout, _BLayoutItemMethods):
+    """`BLayout`'s methods, for its references and the values Mojo owns."""
+
+    def Owner(ref self) -> BViewRef[origin_of(self)]:
+        """`BView* BLayout::Owner() const`."""
+        var _result = external_call["mojobe_BLayout_Owner", Int](
+            _nonnull(self._as_BLayout(), "BLayout::Owner"),
+        )
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def TargetView(ref self) -> BViewRef[origin_of(self)]:
+        """`BView* BLayout::TargetView() const`."""
+        var _result = external_call["mojobe_BLayout_TargetView", Int](
+            _nonnull(self._as_BLayout(), "BLayout::TargetView"),
+        )
+        return BViewRef[origin_of(self)](_ptr_from(_result))
+
+    def AddView(ref self, var child: BView) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BLayout::AddView(BView* child)`."""
+        var _result = external_call["mojobe_BLayout_AddView__BViewP", Int](
+            _nonnull(self._as_BLayout(), "BLayout::AddView"),
+            child^._adopt(),
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddView(
+        ref self,
+        index: Int32,
+        var child: BView,
+    ) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BLayout::AddView(int32 index, BView* child)`."""
+        var _result = external_call["mojobe_BLayout_AddView__int32_BViewP", Int](
+            _nonnull(self._as_BLayout(), "BLayout::AddView"),
+            index,
+            child^._adopt(),
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddItem(self, var item: BLayoutItem) -> Bool:
+        """`bool BLayout::AddItem(BLayoutItem* item)`."""
+        var _result = external_call["mojobe_BLayout_AddItem__BLayoutItemP", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::AddItem"),
+            item^._adopt(),
+        )
+        return _result
+
+    def AddItem(self, index: Int32, var item: BLayoutItem) -> Bool:
+        """`bool BLayout::AddItem(int32 index, BLayoutItem* item)`."""
+        var _result = external_call["mojobe_BLayout_AddItem__int32_BLayoutItemP", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::AddItem"),
+            index,
+            item^._adopt(),
+        )
+        return _result
+
+    def RemoveView(self, child: Some[_AsBView]) -> Bool:
+        """`bool BLayout::RemoveView(BView* child)`."""
+        var _result = external_call["mojobe_BLayout_RemoveView", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::RemoveView"),
+            _addr(child._as_BView()),
+        )
+        return _result
+
+    def RemoveItem(self, item: Some[_AsBLayoutItem]) -> Bool:
+        """`bool BLayout::RemoveItem(BLayoutItem* item)`."""
+        var _result = external_call["mojobe_BLayout_RemoveItem__BLayoutItemP", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::RemoveItem"),
+            _addr(item._as_BLayoutItem()),
+        )
+        return _result
+
+    def RemoveItem(ref self, index: Int32) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BLayout::RemoveItem(int32 index)`."""
+        var _result = external_call["mojobe_BLayout_RemoveItem__int32", Int](
+            _nonnull(self._as_BLayout(), "BLayout::RemoveItem"),
+            index,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def ItemAt(ref self, index: Int32) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BLayout::ItemAt(int32 index) const`."""
+        var _result = external_call["mojobe_BLayout_ItemAt", Int](
+            _nonnull(self._as_BLayout(), "BLayout::ItemAt"),
+            index,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def CountItems(self) -> Int32:
+        """`int32 BLayout::CountItems() const`."""
+        var _result = external_call["mojobe_BLayout_CountItems", Int32](
+            _nonnull(self._as_BLayout(), "BLayout::CountItems"),
+        )
+        return _result
+
+    def IndexOfItem(self, item: Some[_AsBLayoutItem]) -> Int32:
+        """`int32 BLayout::IndexOfItem(const BLayoutItem* item) const`."""
+        var _result = external_call["mojobe_BLayout_IndexOfItem", Int32](
+            _nonnull(self._as_BLayout(), "BLayout::IndexOfItem"),
+            _addr(item._as_BLayoutItem()),
+        )
+        return _result
+
+    def IndexOfView(self, child: Some[_AsBView]) -> Int32:
+        """`int32 BLayout::IndexOfView(BView* child) const`."""
+        var _result = external_call["mojobe_BLayout_IndexOfView", Int32](
+            _nonnull(self._as_BLayout(), "BLayout::IndexOfView"),
+            _addr(child._as_BView()),
+        )
+        return _result
+
+    def AncestorsVisible(self) -> Bool:
+        """`bool BLayout::AncestorsVisible() const`."""
+        var _result = external_call["mojobe_BLayout_AncestorsVisible", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::AncestorsVisible"),
+        )
+        return _result
+
+    def RequireLayout(self):
+        """`void BLayout::RequireLayout()`."""
+        external_call["mojobe_BLayout_RequireLayout", NoneType](
+            _nonnull(self._as_BLayout(), "BLayout::RequireLayout"),
+        )
+
+    def IsValid(self) -> Bool:
+        """`bool BLayout::IsValid()`."""
+        var _result = external_call["mojobe_BLayout_IsValid", Bool](
+            _nonnull(self._as_BLayout(), "BLayout::IsValid"),
+        )
+        return _result
+
+    def EnableLayoutInvalidation(self):
+        """`void BLayout::EnableLayoutInvalidation()`."""
+        external_call["mojobe_BLayout_EnableLayoutInvalidation", NoneType](
+            _nonnull(self._as_BLayout(), "BLayout::EnableLayoutInvalidation"),
+        )
+
+    def DisableLayoutInvalidation(self):
+        """`void BLayout::DisableLayoutInvalidation()`."""
+        external_call["mojobe_BLayout_DisableLayoutInvalidation", NoneType](
+            _nonnull(self._as_BLayout(), "BLayout::DisableLayoutInvalidation"),
+        )
+
+    def LayoutItems(self, force: Bool = False):
+        """`void BLayout::LayoutItems(bool force)`."""
+        external_call["mojobe_BLayout_LayoutItems", NoneType](
+            _nonnull(self._as_BLayout(), "BLayout::LayoutItems"),
+            force,
+        )
+
+    def LayoutArea(self) -> BRect:
+        """`BRect BLayout::LayoutArea()`."""
+        var _result = external_call["mojobe_BLayout_LayoutArea", BRect](
+            _nonnull(self._as_BLayout(), "BLayout::LayoutArea"),
+        )
+        return _result
+
+
+struct BLayoutRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BLayoutMethods,
+):
+    """A `BLayout` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BLayoutRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    @implicit
+    def __init__(out self, other: BGroupLayoutRef[Self.origin]):
+        """A `BGroupLayout` is a `BLayout`."""
+        self = BLayoutRef[Self.origin](other._as_BLayout())
+
+    @implicit
+    def __init__(out self, other: BGridLayoutRef[Self.origin]):
+        """A `BGridLayout` is a `BLayout`."""
+        self = BLayoutRef[Self.origin](other._as_BLayout())
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BLayoutRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BLayoutRef[ImmUntrackedOrigin](self._ptr)
+
+    def as_BGroupLayout(ref self) -> BGroupLayoutRef[origin_of(self)]:
+        """This `BLayout` as a `BGroupLayout`: NULL if it is not one."""
+        return BGroupLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayout_to_BGroupLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def as_BGridLayout(ref self) -> BGridLayoutRef[origin_of(self)]:
+        """This `BLayout` as a `BGridLayout`: NULL if it is not one."""
+        return BGridLayoutRef[origin_of(self)](
+            _ptr_from(
+                external_call["mojobe_BLayout_to_BGridLayout", Int](
+                    _addr(self._ptr),
+                ),
+            ),
+        )
+
+    def _as_BLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BLayout(Movable, _BLayoutMethods):
+    """A `BLayout` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    @implicit
+    def __init__(out self, var other: BGroupLayout):
+        """A `BGroupLayout` is a `BLayout`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayout", Int](
+                other^._adopt(),
+            ),
+        )
+
+    @implicit
+    def __init__(out self, var other: BGridLayout):
+        """A `BGridLayout` is a `BLayout`: this one takes it over."""
+        self._ptr = _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayout", Int](
+                other^._adopt(),
+            ),
+        )
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BLayout_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+# ========================================================================== #
+# BGroupLayout
+# ========================================================================== #
+
+
+trait _AsBGroupLayout(_AsBLayout):
+    """Has a `BGroupLayout*` for libmojobe."""
+
+    def _as_BGroupLayout(self) -> _NPtr:
+        ...
+
+
+trait _BGroupLayoutMethods(_AsBGroupLayout, _BLayoutMethods):
+    """`BGroupLayout`'s methods, for its references and the values Mojo owns."""
+
+    def Spacing(self) -> Float32:
+        """`float BGroupLayout::Spacing() const`."""
+        var _result = external_call["mojobe_BGroupLayout_Spacing", Float32](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::Spacing"),
+        )
+        return _result
+
+    def SetSpacing(self, spacing: Float32):
+        """`void BGroupLayout::SetSpacing(float spacing)`."""
+        external_call["mojobe_BGroupLayout_SetSpacing", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetSpacing"),
+            spacing,
+        )
+
+    def Orientation(self) -> orientation:
+        """`orientation BGroupLayout::Orientation() const`."""
+        var _result = external_call["mojobe_BGroupLayout_Orientation", orientation](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::Orientation"),
+        )
+        return _result
+
+    def SetOrientation(self, orientation: orientation):
+        """`void BGroupLayout::SetOrientation(orientation orientation)`."""
+        external_call["mojobe_BGroupLayout_SetOrientation", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetOrientation"),
+            orientation,
+        )
+
+    def ItemWeight(self, index: Int32) -> Float32:
+        """`float BGroupLayout::ItemWeight(int32 index) const`."""
+        var _result = external_call["mojobe_BGroupLayout_ItemWeight", Float32](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::ItemWeight"),
+            index,
+        )
+        return _result
+
+    def SetItemWeight(self, index: Int32, weight: Float32):
+        """`void BGroupLayout::SetItemWeight(int32 index, float weight)`."""
+        external_call["mojobe_BGroupLayout_SetItemWeight", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetItemWeight"),
+            index,
+            weight,
+        )
+
+    def AddView(
+        ref self,
+        var child: BView,
+        weight: Float32,
+    ) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BGroupLayout::AddView(BView* child, float weight)`."""
+        var _result = external_call["mojobe_BGroupLayout_AddView__BViewP_float", Int](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::AddView"),
+            child^._adopt(),
+            weight,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddView(
+        ref self,
+        index: Int32,
+        var child: BView,
+        weight: Float32,
+    ) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BGroupLayout::AddView(int32 index, BView* child, float weight)`."""
+        var _result = external_call["mojobe_BGroupLayout_AddView__int32_BViewP_float", Int](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::AddView"),
+            index,
+            child^._adopt(),
+            weight,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddItem(self, var item: BLayoutItem, weight: Float32) -> Bool:
+        """`bool BGroupLayout::AddItem(BLayoutItem* item, float weight)`."""
+        var _result = external_call["mojobe_BGroupLayout_AddItem__BLayoutItemP_float", Bool](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::AddItem"),
+            item^._adopt(),
+            weight,
+        )
+        return _result
+
+    def AddItem(
+        self,
+        index: Int32,
+        var item: BLayoutItem,
+        weight: Float32,
+    ) -> Bool:
+        """`bool BGroupLayout::AddItem(int32 index, BLayoutItem* item, float weight)`."""
+        var _result = external_call["mojobe_BGroupLayout_AddItem__int32_BLayoutItemP_float", Bool](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::AddItem"),
+            index,
+            item^._adopt(),
+            weight,
+        )
+        return _result
+
+    def SetInsets(
+        self,
+        left: Float32,
+        top: Float32,
+        right: Float32,
+        bottom: Float32,
+    ):
+        """`void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)`."""
+        external_call["mojobe_BGroupLayout_SetInsets__float_float_float_float", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetInsets"),
+            left,
+            top,
+            right,
+            bottom,
+        )
+
+    def SetInsets(self, horizontal: Float32, vertical: Float32):
+        """`void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)`."""
+        external_call["mojobe_BGroupLayout_SetInsets__float_float", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetInsets"),
+            horizontal,
+            vertical,
+        )
+
+    def SetInsets(self, insets: Float32):
+        """`void BTwoDimensionalLayout::SetInsets(float insets)`."""
+        external_call["mojobe_BGroupLayout_SetInsets__float", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::SetInsets"),
+            insets,
+        )
+
+    def GetInsets(self) -> Tuple[Float32, Float32, Float32, Float32]:
+        """`void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const`."""
+        var left = Float32(0)
+        var top = Float32(0)
+        var right = Float32(0)
+        var bottom = Float32(0)
+        external_call["mojobe_BGroupLayout_GetInsets", NoneType](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::GetInsets"),
+            Pointer(to=left),
+            Pointer(to=top),
+            Pointer(to=right),
+            Pointer(to=bottom),
+        )
+        return (left, top, right, bottom)
+
+    def BaseMinSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BaseMinSize()`."""
+        var _result = external_call["mojobe_BGroupLayout_BaseMinSize", BSize](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::BaseMinSize"),
+        )
+        return _result
+
+    def BaseMaxSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BaseMaxSize()`."""
+        var _result = external_call["mojobe_BGroupLayout_BaseMaxSize", BSize](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::BaseMaxSize"),
+        )
+        return _result
+
+    def BasePreferredSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BasePreferredSize()`."""
+        var _result = external_call["mojobe_BGroupLayout_BasePreferredSize", BSize](
+            _nonnull(
+                self._as_BGroupLayout(),
+                "BGroupLayout::BasePreferredSize",
+            ),
+        )
+        return _result
+
+    def BaseAlignment(self) -> BAlignment:
+        """`BAlignment BTwoDimensionalLayout::BaseAlignment()`."""
+        var _result = external_call["mojobe_BGroupLayout_BaseAlignment", BAlignment](
+            _nonnull(self._as_BGroupLayout(), "BGroupLayout::BaseAlignment"),
+        )
+        return _result
+
+
+struct BGroupLayoutRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BGroupLayoutMethods,
+):
+    """A `BGroupLayout` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BGroupLayoutRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BGroupLayoutRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BGroupLayoutRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BGroupLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayout(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayout", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BGroupLayout(Movable, _BGroupLayoutMethods):
+    """A `BGroupLayout` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        orientation: orientation,
+        spacing: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGroupLayout::BGroupLayout(orientation orientation, float spacing)`."""
+        var address = external_call["mojobe_BGroupLayout_new", Int](
+            orientation,
+            spacing,
+        )
+        if address == 0:
+            raise Error("BGroupLayout could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BGroupLayout_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BGroupLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayout(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayout", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+# ========================================================================== #
+# BGridLayout
+# ========================================================================== #
+
+
+trait _AsBGridLayout(_AsBLayout):
+    """Has a `BGridLayout*` for libmojobe."""
+
+    def _as_BGridLayout(self) -> _NPtr:
+        ...
+
+
+trait _BGridLayoutMethods(_AsBGridLayout, _BLayoutMethods):
+    """`BGridLayout`'s methods, for its references and the values Mojo owns."""
+
+    def CountColumns(self) -> Int32:
+        """`int32 BGridLayout::CountColumns() const`."""
+        var _result = external_call["mojobe_BGridLayout_CountColumns", Int32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::CountColumns"),
+        )
+        return _result
+
+    def CountRows(self) -> Int32:
+        """`int32 BGridLayout::CountRows() const`."""
+        var _result = external_call["mojobe_BGridLayout_CountRows", Int32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::CountRows"),
+        )
+        return _result
+
+    def HorizontalSpacing(self) -> Float32:
+        """`float BGridLayout::HorizontalSpacing() const`."""
+        var _result = external_call["mojobe_BGridLayout_HorizontalSpacing", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::HorizontalSpacing"),
+        )
+        return _result
+
+    def VerticalSpacing(self) -> Float32:
+        """`float BGridLayout::VerticalSpacing() const`."""
+        var _result = external_call["mojobe_BGridLayout_VerticalSpacing", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::VerticalSpacing"),
+        )
+        return _result
+
+    def SetHorizontalSpacing(self, spacing: Float32):
+        """`void BGridLayout::SetHorizontalSpacing(float spacing)`."""
+        external_call["mojobe_BGridLayout_SetHorizontalSpacing", NoneType](
+            _nonnull(
+                self._as_BGridLayout(),
+                "BGridLayout::SetHorizontalSpacing",
+            ),
+            spacing,
+        )
+
+    def SetVerticalSpacing(self, spacing: Float32):
+        """`void BGridLayout::SetVerticalSpacing(float spacing)`."""
+        external_call["mojobe_BGridLayout_SetVerticalSpacing", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetVerticalSpacing"),
+            spacing,
+        )
+
+    def SetSpacing(self, horizontal: Float32, vertical: Float32):
+        """`void BGridLayout::SetSpacing(float horizontal, float vertical)`."""
+        external_call["mojobe_BGridLayout_SetSpacing", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetSpacing"),
+            horizontal,
+            vertical,
+        )
+
+    def ColumnWeight(self, column: Int32) -> Float32:
+        """`float BGridLayout::ColumnWeight(int32 column) const`."""
+        var _result = external_call["mojobe_BGridLayout_ColumnWeight", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::ColumnWeight"),
+            column,
+        )
+        return _result
+
+    def SetColumnWeight(self, column: Int32, weight: Float32):
+        """`void BGridLayout::SetColumnWeight(int32 column, float weight)`."""
+        external_call["mojobe_BGridLayout_SetColumnWeight", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetColumnWeight"),
+            column,
+            weight,
+        )
+
+    def MinColumnWidth(self, column: Int32) -> Float32:
+        """`float BGridLayout::MinColumnWidth(int32 column) const`."""
+        var _result = external_call["mojobe_BGridLayout_MinColumnWidth", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::MinColumnWidth"),
+            column,
+        )
+        return _result
+
+    def SetMinColumnWidth(self, column: Int32, width: Float32):
+        """`void BGridLayout::SetMinColumnWidth(int32 column, float width)`."""
+        external_call["mojobe_BGridLayout_SetMinColumnWidth", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetMinColumnWidth"),
+            column,
+            width,
+        )
+
+    def MaxColumnWidth(self, column: Int32) -> Float32:
+        """`float BGridLayout::MaxColumnWidth(int32 column) const`."""
+        var _result = external_call["mojobe_BGridLayout_MaxColumnWidth", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::MaxColumnWidth"),
+            column,
+        )
+        return _result
+
+    def SetMaxColumnWidth(self, column: Int32, width: Float32):
+        """`void BGridLayout::SetMaxColumnWidth(int32 column, float width)`."""
+        external_call["mojobe_BGridLayout_SetMaxColumnWidth", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetMaxColumnWidth"),
+            column,
+            width,
+        )
+
+    def RowWeight(self, row: Int32) -> Float32:
+        """`float BGridLayout::RowWeight(int32 row) const`."""
+        var _result = external_call["mojobe_BGridLayout_RowWeight", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::RowWeight"),
+            row,
+        )
+        return _result
+
+    def SetRowWeight(self, row: Int32, weight: Float32):
+        """`void BGridLayout::SetRowWeight(int32 row, float weight)`."""
+        external_call["mojobe_BGridLayout_SetRowWeight", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetRowWeight"),
+            row,
+            weight,
+        )
+
+    def MinRowHeight(self, row: Int32) -> Float32:
+        """`float BGridLayout::MinRowHeight(int row) const`."""
+        var _result = external_call["mojobe_BGridLayout_MinRowHeight", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::MinRowHeight"),
+            row,
+        )
+        return _result
+
+    def SetMinRowHeight(self, row: Int32, height: Float32):
+        """`void BGridLayout::SetMinRowHeight(int32 row, float height)`."""
+        external_call["mojobe_BGridLayout_SetMinRowHeight", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetMinRowHeight"),
+            row,
+            height,
+        )
+
+    def MaxRowHeight(self, row: Int32) -> Float32:
+        """`float BGridLayout::MaxRowHeight(int32 row) const`."""
+        var _result = external_call["mojobe_BGridLayout_MaxRowHeight", Float32](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::MaxRowHeight"),
+            row,
+        )
+        return _result
+
+    def SetMaxRowHeight(self, row: Int32, height: Float32):
+        """`void BGridLayout::SetMaxRowHeight(int32 row, float height)`."""
+        external_call["mojobe_BGridLayout_SetMaxRowHeight", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetMaxRowHeight"),
+            row,
+            height,
+        )
+
+    def ItemAt(
+        ref self,
+        column: Int32,
+        row: Int32,
+    ) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BGridLayout::ItemAt(int32 column, int32 row) const`."""
+        var _result = external_call["mojobe_BGridLayout_ItemAt", Int](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::ItemAt"),
+            column,
+            row,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddView(
+        ref self,
+        var child: BView,
+        column: Int32,
+        row: Int32,
+        columnCount: Int32 = 1,
+        rowCount: Int32 = 1,
+    ) -> BLayoutItemRef[origin_of(self)]:
+        """`BLayoutItem* BGridLayout::AddView(BView* child, int32 column, int32 row, int32 columnCount, int32 rowCount)`."""
+        var _result = external_call["mojobe_BGridLayout_AddView__BViewP_int32_int32_int32_int32", Int](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::AddView"),
+            child^._adopt(),
+            column,
+            row,
+            columnCount,
+            rowCount,
+        )
+        return BLayoutItemRef[origin_of(self)](_ptr_from(_result))
+
+    def AddItem(
+        self,
+        var item: BLayoutItem,
+        column: Int32,
+        row: Int32,
+        columnCount: Int32 = 1,
+        rowCount: Int32 = 1,
+    ) -> Bool:
+        """`bool BGridLayout::AddItem(BLayoutItem* item, int32 column, int32 row, int32 columnCount, int32 rowCount)`."""
+        var _result = external_call["mojobe_BGridLayout_AddItem__BLayoutItemP_int32_int32_int32_int32", Bool](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::AddItem"),
+            item^._adopt(),
+            column,
+            row,
+            columnCount,
+            rowCount,
+        )
+        return _result
+
+    def SetInsets(
+        self,
+        left: Float32,
+        top: Float32,
+        right: Float32,
+        bottom: Float32,
+    ):
+        """`void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)`."""
+        external_call["mojobe_BGridLayout_SetInsets__float_float_float_float", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetInsets"),
+            left,
+            top,
+            right,
+            bottom,
+        )
+
+    def SetInsets(self, horizontal: Float32, vertical: Float32):
+        """`void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)`."""
+        external_call["mojobe_BGridLayout_SetInsets__float_float", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetInsets"),
+            horizontal,
+            vertical,
+        )
+
+    def SetInsets(self, insets: Float32):
+        """`void BTwoDimensionalLayout::SetInsets(float insets)`."""
+        external_call["mojobe_BGridLayout_SetInsets__float", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::SetInsets"),
+            insets,
+        )
+
+    def GetInsets(self) -> Tuple[Float32, Float32, Float32, Float32]:
+        """`void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const`."""
+        var left = Float32(0)
+        var top = Float32(0)
+        var right = Float32(0)
+        var bottom = Float32(0)
+        external_call["mojobe_BGridLayout_GetInsets", NoneType](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::GetInsets"),
+            Pointer(to=left),
+            Pointer(to=top),
+            Pointer(to=right),
+            Pointer(to=bottom),
+        )
+        return (left, top, right, bottom)
+
+    def BaseMinSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BaseMinSize()`."""
+        var _result = external_call["mojobe_BGridLayout_BaseMinSize", BSize](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::BaseMinSize"),
+        )
+        return _result
+
+    def BaseMaxSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BaseMaxSize()`."""
+        var _result = external_call["mojobe_BGridLayout_BaseMaxSize", BSize](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::BaseMaxSize"),
+        )
+        return _result
+
+    def BasePreferredSize(self) -> BSize:
+        """`BSize BTwoDimensionalLayout::BasePreferredSize()`."""
+        var _result = external_call["mojobe_BGridLayout_BasePreferredSize", BSize](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::BasePreferredSize"),
+        )
+        return _result
+
+    def BaseAlignment(self) -> BAlignment:
+        """`BAlignment BTwoDimensionalLayout::BaseAlignment()`."""
+        var _result = external_call["mojobe_BGridLayout_BaseAlignment", BAlignment](
+            _nonnull(self._as_BGridLayout(), "BGridLayout::BaseAlignment"),
+        )
+        return _result
+
+
+struct BGridLayoutRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BGridLayoutMethods,
+):
+    """A `BGridLayout` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BGridLayoutRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BGridLayoutRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BGridLayoutRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BGridLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayout(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayout", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BGridLayout(Movable, _BGridLayoutMethods):
+    """A `BGridLayout` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        horizontal: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+        vertical: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGridLayout::BGridLayout(float horizontal, float vertical)`."""
+        var address = external_call["mojobe_BGridLayout_new", Int](
+            horizontal,
+            vertical,
+        )
+        if address == 0:
+            raise Error("BGridLayout could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BGridLayout_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BGridLayout(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayout(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayout", Int](
+                _addr(self._ptr),
+            ),
+        )
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridLayout_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+# ========================================================================== #
+# BSpaceLayoutItem
+# ========================================================================== #
+
+
+trait _AsBSpaceLayoutItem(_AsBLayoutItem):
+    """Has a `BSpaceLayoutItem*` for libmojobe."""
+
+    def _as_BSpaceLayoutItem(self) -> _NPtr:
+        ...
+
+
+trait _BSpaceLayoutItemMethods(_AsBSpaceLayoutItem, _BLayoutItemMethods):
+    """`BSpaceLayoutItem`'s methods, for its references and the values Mojo owns."""
+
+    pass
+
+
+struct BSpaceLayoutItemRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BSpaceLayoutItemMethods,
+):
+    """A `BSpaceLayoutItem` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BSpaceLayoutItemRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BSpaceLayoutItemRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BSpaceLayoutItemRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BSpaceLayoutItem(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BSpaceLayoutItem_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BSpaceLayoutItem(Movable, _BSpaceLayoutItemMethods):
+    """A `BSpaceLayoutItem` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        minSize: BSize,
+        maxSize: BSize,
+        preferredSize: BSize,
+        alignment: BAlignment,
+    ) raises:
+        """`BSpaceLayoutItem::BSpaceLayoutItem(BSize minSize, BSize maxSize, BSize preferredSize, BAlignment alignment)`."""
+        var address = external_call["mojobe_BSpaceLayoutItem_new", Int](
+            minSize,
+            maxSize,
+            preferredSize,
+            alignment,
+        )
+        if address == 0:
+            raise Error("BSpaceLayoutItem could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BSpaceLayoutItem_delete", NoneType](
+            _addr(self._ptr),
+        )
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BSpaceLayoutItem(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BLayoutItem(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BSpaceLayoutItem_as_BLayoutItem", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+    @staticmethod
+    def CreateGlue() raises -> BSpaceLayoutItem:
+        """`BSpaceLayoutItem* BSpaceLayoutItem::CreateGlue()`."""
+        var _result = external_call["mojobe_BSpaceLayoutItem_CreateGlue", Int]()
+        if _result == 0:
+            raise Error("BSpaceLayoutItem::CreateGlue made nothing")
+        return BSpaceLayoutItem(_adopting=_result)
+
+    @staticmethod
+    def CreateHorizontalStrut(width: Float32) raises -> BSpaceLayoutItem:
+        """`BSpaceLayoutItem* BSpaceLayoutItem::CreateHorizontalStrut(float width)`."""
+        var _result = external_call["mojobe_BSpaceLayoutItem_CreateHorizontalStrut", Int](
+            width,
+        )
+        if _result == 0:
+            raise Error("BSpaceLayoutItem::CreateHorizontalStrut made nothing")
+        return BSpaceLayoutItem(_adopting=_result)
+
+    @staticmethod
+    def CreateVerticalStrut(height: Float32) raises -> BSpaceLayoutItem:
+        """`BSpaceLayoutItem* BSpaceLayoutItem::CreateVerticalStrut(float height)`."""
+        var _result = external_call["mojobe_BSpaceLayoutItem_CreateVerticalStrut", Int](
+            height,
+        )
+        if _result == 0:
+            raise Error("BSpaceLayoutItem::CreateVerticalStrut made nothing")
+        return BSpaceLayoutItem(_adopting=_result)
+
+# ========================================================================== #
+# BGroupView
+# ========================================================================== #
+
+
+trait _AsBGroupView(_AsBView):
+    """Has a `BGroupView*` for libmojobe."""
+
+    def _as_BGroupView(self) -> _NPtr:
+        ...
+
+
+trait _BGroupViewMethods(_AsBGroupView, _BViewMethods):
+    """`BGroupView`'s methods, for its references and the values Mojo owns."""
+
+    def GroupLayout(ref self) -> BGroupLayoutRef[origin_of(self)]:
+        """`BGroupLayout* BGroupView::GroupLayout() const`."""
+        var _result = external_call["mojobe_BGroupView_GroupLayout", Int](
+            _nonnull(self._as_BGroupView(), "BGroupView::GroupLayout"),
+        )
+        return BGroupLayoutRef[origin_of(self)](_ptr_from(_result))
+
+
+struct BGroupViewRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BGroupViewMethods,
+):
+    """A `BGroupView` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BGroupViewRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BGroupViewRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BGroupViewRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BGroupView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BGroupView(Movable, _BGroupViewMethods):
+    """A `BGroupView` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        orientation: orientation = B_HORIZONTAL,
+        spacing: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGroupView::BGroupView(orientation orientation, float spacing)`."""
+        var address = external_call["mojobe_BGroupView_new__orientation_float", Int](
+            orientation,
+            spacing,
+        )
+        if address == 0:
+            raise Error("BGroupView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        var name: String,
+        orientation: orientation = B_HORIZONTAL,
+        spacing: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGroupView::BGroupView(const char* name, orientation orientation, float spacing)`."""
+        var address = external_call["mojobe_BGroupView_new__charP_orientation_float", Int](
+            name.as_c_string_span(),
+            orientation,
+            spacing,
+        )
+        _ = name^
+        if address == 0:
+            raise Error("BGroupView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BGroupView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BGroupView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGroupView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+# ========================================================================== #
+# BGridView
+# ========================================================================== #
+
+
+trait _AsBGridView(_AsBView):
+    """Has a `BGridView*` for libmojobe."""
+
+    def _as_BGridView(self) -> _NPtr:
+        ...
+
+
+trait _BGridViewMethods(_AsBGridView, _BViewMethods):
+    """`BGridView`'s methods, for its references and the values Mojo owns."""
+
+    def GridLayout(ref self) -> BGridLayoutRef[origin_of(self)]:
+        """`BGridLayout* BGridView::GridLayout() const`."""
+        var _result = external_call["mojobe_BGridView_GridLayout", Int](
+            _nonnull(self._as_BGridView(), "BGridView::GridLayout"),
+        )
+        return BGridLayoutRef[origin_of(self)](_ptr_from(_result))
+
+
+struct BGridViewRef[origin: ImmOrigin](
+    Boolable,
+    ImplicitlyCopyable,
+    RegisterPassable,
+    _BGridViewMethods,
+):
+    """A `BGridView` the kit owns, borrowed from `origin`: a hook's call, or
+    the value or reference it was got from, which it keeps alive. It
+    may be NULL: test it with `if`."""
+
+    var _ptr: _NPtr
+
+    def __init__(out self):
+        """A NULL reference: `BGridViewRef[ImmUntrackedOrigin]()`."""
+        self._ptr = None
+
+    def __init__(out self, ptr: _NPtr):
+        self._ptr = ptr
+
+    def __bool__(self) -> Bool:
+        return Bool(self._ptr)
+
+    def unsafe_untracked(self) -> BGridViewRef[ImmUntrackedOrigin]:
+        """The same reference, borrowed from nothing: the compiler no
+        longer keeps what it was got from alive, and it may be kept
+        anywhere. Use it only while the object exists, and in its
+        looper's hooks or with the looper locked."""
+        return BGridViewRef[ImmUntrackedOrigin](self._ptr)
+
+    def _as_BGridView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
+
+
+struct BGridView(Movable, _BGridViewMethods):
+    """A `BGridView` Mojo owns, until something adopts it."""
+
+    var _ptr: _NPtr
+
+    def __init__(
+        out self,
+        horizontal: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+        vertical: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGridView::BGridView(float horizontal, float vertical)`."""
+        var address = external_call["mojobe_BGridView_new__float_float", Int](
+            horizontal,
+            vertical,
+        )
+        if address == 0:
+            raise Error("BGridView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __init__(
+        out self,
+        var name: String,
+        horizontal: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+        vertical: Float32 = Float32(B_USE_DEFAULT_SPACING.value),
+    ) raises:
+        """`BGridView::BGridView(const char* name, float horizontal, float vertical)`."""
+        var address = external_call["mojobe_BGridView_new__charP_float_float", Int](
+            name.as_c_string_span(),
+            horizontal,
+            vertical,
+        )
+        _ = name^
+        if address == 0:
+            raise Error("BGridView could not be made")
+        self._ptr = _ptr_from(address)
+
+    def __deinit__(deinit self):
+        external_call["mojobe_BGridView_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
+    def _adopt(deinit self) -> Int:
+        """Hands the object over without deleting it."""
+        return _addr(self._ptr)
+
+    def _as_BGridView(self) -> _NPtr:
+        return self._ptr
+    
+    def _as_BView(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridView_as_BView", Int](_addr(self._ptr)),
+        )
+    
+    def _as_BHandler(self) -> _NPtr:
+        return _ptr_from(
+            external_call["mojobe_BGridView_as_BHandler", Int](
+                _addr(self._ptr),
+            ),
+        )
 
 # ========================================================================== #
 # entry_ref
@@ -13795,6 +16109,10 @@ struct entry_ref(Movable, _entry_refMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_entry_ref_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -14118,6 +16436,10 @@ struct BEntry(Movable, _BEntryMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BEntry_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -14354,6 +16676,10 @@ struct BPath(Movable, _BPathMethods):
 
     def __deinit__(deinit self):
         external_call["mojobe_BPath_delete", NoneType](_addr(self._ptr))
+
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
 
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
@@ -14612,6 +16938,10 @@ struct BFilePanel(Movable, _BFilePanelMethods):
     def __deinit__(deinit self):
         external_call["mojobe_BFilePanel_delete", NoneType](_addr(self._ptr))
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
@@ -14757,12 +17087,32 @@ struct BMessageRunner(Movable, _BMessageRunnerMethods):
             _addr(self._ptr),
         )
 
+    def __init__(out self, *, _adopting: Int):
+        """Takes over an object C++ made for the caller (a factory's)."""
+        self._ptr = _ptr_from(_adopting)
+
     def _adopt(deinit self) -> Int:
         """Hands the object over without deleting it."""
         return _addr(self._ptr)
 
     def _as_BMessageRunner(self) -> _NPtr:
         return self._ptr
+
+    @staticmethod
+    def StartSending(
+        target: BMessenger,
+        message: Some[_AsBMessage],
+        interval: Int64,
+        count: Int32,
+    ) raises:
+        """`status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)`."""
+        var _result = external_call["mojobe_BMessageRunner_StartSending", Int32](
+            _address_of(target),
+            _addr(message._as_BMessage()),
+            interval,
+            count,
+        )
+        _check(_result, "BMessageRunner::StartSending")
 
 # ========================================================================== #
 # Functions

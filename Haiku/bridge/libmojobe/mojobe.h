@@ -42,6 +42,15 @@
 #include <Region.h>
 #include <Bitmap.h>
 #include <Screen.h>
+#include <Size.h>
+#include <Alignment.h>
+#include <LayoutItem.h>
+#include <Layout.h>
+#include <GroupLayout.h>
+#include <GridLayout.h>
+#include <SpaceLayoutItem.h>
+#include <GroupView.h>
+#include <GridView.h>
 #include <Entry.h>
 #include <Path.h>
 #include <FilePanel.h>
@@ -78,6 +87,24 @@ struct mojobe_rgb_color {
 	uint8	green;
 	uint8	blue;
 	uint8	alpha;
+};
+
+
+/*!	`BSize` as C passes it: laid out the same, but without the
+	user-declared copy constructor that makes C++ pass a `BSize` by
+	hidden reference. */
+struct mojobe_BSize {
+	float	width;
+	float	height;
+};
+
+
+/*!	`BAlignment` as C passes it: laid out the same, but without the
+	user-declared copy constructor that makes C++ pass a `BAlignment` by
+	hidden reference. */
+struct mojobe_BAlignment {
+	alignment	horizontal;
+	vertical_alignment	vertical;
 };
 
 
@@ -610,6 +637,12 @@ BScrollView* mojobe_BHandler_to_BScrollView(BHandler* self);
 // BHandler* as BAlert*, or NULL
 BAlert* mojobe_BHandler_to_BAlert(BHandler* self);
 
+// BHandler* as BGroupView*, or NULL
+BGroupView* mojobe_BHandler_to_BGroupView(BHandler* self);
+
+// BHandler* as BGridView*, or NULL
+BGridView* mojobe_BHandler_to_BGridView(BHandler* self);
+
 // BHandler::BHandler(const char* name)
 BHandler* mojobe_BHandler_new(const char* a_name);
 
@@ -627,6 +660,9 @@ void mojobe_BHandler_base_MessageReceived(BHandler* self, BMessage* message);
 
 // #pragma mark - BLooper
 
+
+// BLooper* BLooper::LooperForThread(thread_id thread)
+BLooper* mojobe_BLooper_LooperForThread(thread_id a_thread);
 
 // status_t BLooper::PostMessage(uint32 command)
 status_t mojobe_BLooper_PostMessage__uint32(BLooper* self, uint32 a_command);
@@ -882,7 +918,12 @@ void mojobe_BWindow_Quit(BWindow* self);
 void mojobe_BWindow_Close(BWindow* self);
 
 // void BWindow::AddChild(BView* child, BView* before)
-void mojobe_BWindow_AddChild(BWindow* self, BView* a_child, BView* a_before);
+void mojobe_BWindow_AddChild__BViewP_BViewP(BWindow* self,
+	BView* a_child,
+	BView* a_before);
+
+// void BWindow::AddChild(BLayoutItem* child)
+void mojobe_BWindow_AddChild__BLayoutItemP(BWindow* self, BLayoutItem* a_child);
 
 // bool BWindow::RemoveChild(BView* child)
 bool mojobe_BWindow_RemoveChild(BWindow* self, BView* a_child);
@@ -1087,6 +1128,9 @@ mojobe_BRect mojobe_BWindow_Frame(BWindow* self);
 // BRect BWindow::DecoratorFrame() const
 mojobe_BRect mojobe_BWindow_DecoratorFrame(BWindow* self);
 
+// BSize BWindow::Size() const
+mojobe_BSize mojobe_BWindow_Size(BWindow* self);
+
 // const char* BWindow::Title() const
 const char* mojobe_BWindow_Title(BWindow* self);
 
@@ -1199,6 +1243,12 @@ status_t mojobe_BWindow_GetWindowAlignment(BWindow* self,
 	int32 * a_height,
 	int32 * a_heightOffset);
 
+// void BWindow::SetLayout(BLayout* layout)
+void mojobe_BWindow_SetLayout(BWindow* self, BLayout* a_layout);
+
+// BLayout* BWindow::GetLayout() const
+BLayout* mojobe_BWindow_GetLayout(BWindow* self);
+
 // void BWindow::InvalidateLayout(bool descendants)
 void mojobe_BWindow_InvalidateLayout(BWindow* self, bool a_descendants);
 
@@ -1308,7 +1358,12 @@ void mojobe_BView_DetachedFromWindow(BView* self);
 void mojobe_BView_AllDetached(BView* self);
 
 // void BView::AddChild(BView* child, BView* before)
-void mojobe_BView_AddChild(BView* self, BView* a_child, BView* a_before);
+void mojobe_BView_AddChild__BViewP_BViewP(BView* self,
+	BView* a_child,
+	BView* a_before);
+
+// bool BView::AddChild(BLayoutItem* child)
+bool mojobe_BView_AddChild__BLayoutItemP(BView* self, BLayoutItem* a_child);
 
 // bool BView::RemoveChild(BView* child)
 bool mojobe_BView_RemoveChild(BView* self, BView* a_child);
@@ -1991,7 +2046,12 @@ void mojobe_BView_MoveTo__float_float(BView* self, float a_x, float a_y);
 void mojobe_BView_ResizeBy(BView* self, float a_dh, float a_dv);
 
 // void BView::ResizeTo(float width, float height)
-void mojobe_BView_ResizeTo(BView* self, float a_width, float a_height);
+void mojobe_BView_ResizeTo__float_float(BView* self,
+	float a_width,
+	float a_height);
+
+// void BView::ResizeTo(BSize size)
+void mojobe_BView_ResizeTo__BSize(BView* self, mojobe_BSize a_size);
 
 // void BView::ScrollBy(float dh, float dv)
 void mojobe_BView_ScrollBy(BView* self, float a_dh, float a_dv);
@@ -2046,6 +2106,46 @@ float mojobe_BView_Scale(BView* self);
 // void BView::DrawAfterChildren(BRect updateRect)
 void mojobe_BView_DrawAfterChildren(BView* self, mojobe_BRect a_updateRect);
 
+// BSize BView::MinSize()
+mojobe_BSize mojobe_BView_MinSize(BView* self);
+
+// BSize BView::MaxSize()
+mojobe_BSize mojobe_BView_MaxSize(BView* self);
+
+// BSize BView::PreferredSize()
+mojobe_BSize mojobe_BView_PreferredSize(BView* self);
+
+// BAlignment BView::LayoutAlignment()
+mojobe_BAlignment mojobe_BView_LayoutAlignment(BView* self);
+
+// void BView::SetExplicitMinSize(BSize size)
+void mojobe_BView_SetExplicitMinSize(BView* self, mojobe_BSize a_size);
+
+// void BView::SetExplicitMaxSize(BSize size)
+void mojobe_BView_SetExplicitMaxSize(BView* self, mojobe_BSize a_size);
+
+// void BView::SetExplicitPreferredSize(BSize size)
+void mojobe_BView_SetExplicitPreferredSize(BView* self, mojobe_BSize a_size);
+
+// void BView::SetExplicitSize(BSize size)
+void mojobe_BView_SetExplicitSize(BView* self, mojobe_BSize a_size);
+
+// void BView::SetExplicitAlignment(BAlignment alignment)
+void mojobe_BView_SetExplicitAlignment(BView* self,
+	mojobe_BAlignment a_alignment);
+
+// BSize BView::ExplicitMinSize() const
+mojobe_BSize mojobe_BView_ExplicitMinSize(BView* self);
+
+// BSize BView::ExplicitMaxSize() const
+mojobe_BSize mojobe_BView_ExplicitMaxSize(BView* self);
+
+// BSize BView::ExplicitPreferredSize() const
+mojobe_BSize mojobe_BView_ExplicitPreferredSize(BView* self);
+
+// BAlignment BView::ExplicitAlignment() const
+mojobe_BAlignment mojobe_BView_ExplicitAlignment(BView* self);
+
 // bool BView::HasHeightForWidth()
 bool mojobe_BView_HasHeightForWidth(BView* self);
 
@@ -2058,6 +2158,12 @@ void mojobe_BView_GetHeightForWidth(BView* self,
 
 // void BView::InvalidateLayout(bool descendants)
 void mojobe_BView_InvalidateLayout(BView* self, bool a_descendants);
+
+// void BView::SetLayout(BLayout* layout)
+void mojobe_BView_SetLayout(BView* self, BLayout* a_layout);
+
+// BLayout* BView::GetLayout() const
+BLayout* mojobe_BView_GetLayout(BView* self);
 
 // void BView::EnableLayoutInvalidation()
 void mojobe_BView_EnableLayoutInvalidation(BView* self);
@@ -2125,12 +2231,21 @@ BStringView* mojobe_BView_to_BStringView(BView* self);
 // BView* as BScrollView*, or NULL
 BScrollView* mojobe_BView_to_BScrollView(BView* self);
 
+// BView* as BGroupView*, or NULL
+BGroupView* mojobe_BView_to_BGroupView(BView* self);
+
+// BView* as BGridView*, or NULL
+BGridView* mojobe_BView_to_BGridView(BView* self);
+
 // BView::BView(const char* name, uint32 flags, BLayout* layout)
-BView* mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags);
+BView* mojobe_BView_new__charP_uint32_BLayoutP(const char* a_name,
+	uint32 a_flags,
+	BLayout* a_layout);
 
 // BView::BView(const char* name, uint32 flags, BLayout* layout), as a MojoBView
-BView* mojobe_MojoBView_new__charP_uint32(const char* a_name,
+BView* mojobe_MojoBView_new__charP_uint32_BLayoutP(const char* a_name,
 	uint32 a_flags,
+	BLayout* a_layout,
 	const mojobe_BView_hooks* hooks,
 	void* context);
 
@@ -2331,6 +2446,11 @@ bool mojobe_BMessage_HasSpecifiers(BMessage* self);
 // status_t BMessage::PopSpecifier()
 status_t mojobe_BMessage_PopSpecifier(BMessage* self);
 
+// status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)
+status_t mojobe_BMessage_AddAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_alignment);
+
 // status_t BMessage::AddRect(const char* name, BRect rect)
 status_t mojobe_BMessage_AddRect(BMessage* self,
 	const char* a_name,
@@ -2340,6 +2460,11 @@ status_t mojobe_BMessage_AddRect(BMessage* self,
 status_t mojobe_BMessage_AddPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_point);
+
+// status_t BMessage::AddSize(const char* name, BSize size)
+status_t mojobe_BMessage_AddSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_size);
 
 // status_t BMessage::AddString(const char* name, const char* string)
 status_t mojobe_BMessage_AddString(BMessage* self,
@@ -2444,6 +2569,17 @@ status_t mojobe_BMessage_RemoveName(BMessage* self, const char* a_name);
 // status_t BMessage::MakeEmpty()
 status_t mojobe_BMessage_MakeEmpty(BMessage* self);
 
+// status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const
+status_t mojobe_BMessage_FindAlignment__charP_BAlignmentP(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment* a_alignment);
+
+// status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const
+status_t mojobe_BMessage_FindAlignment__charP_int32_BAlignmentP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment* a_alignment);
+
 // status_t BMessage::FindRect(const char* name, BRect* rect) const
 status_t mojobe_BMessage_FindRect__charP_BRectP(BMessage* self,
 	const char* a_name,
@@ -2465,6 +2601,17 @@ status_t mojobe_BMessage_FindPoint__charP_int32_BPointP(BMessage* self,
 	const char* a_name,
 	int32 a_index,
 	mojobe_BPoint* a_point);
+
+// status_t BMessage::FindSize(const char* name, BSize* size) const
+status_t mojobe_BMessage_FindSize__charP_BSizeP(BMessage* self,
+	const char* a_name,
+	mojobe_BSize* a_size);
+
+// status_t BMessage::FindSize(const char* name, int32 index, BSize* size) const
+status_t mojobe_BMessage_FindSize__charP_int32_BSizeP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize* a_size);
 
 // status_t BMessage::FindString(const char* name, const char** string) const
 status_t mojobe_BMessage_FindString__charP_charPP(BMessage* self,
@@ -2642,6 +2789,17 @@ status_t mojobe_BMessage_FindMessage__charP_int32_BMessageP(BMessage* self,
 	int32 a_index,
 	BMessage* a_message);
 
+// status_t BMessage::ReplaceAlignment(const char* name, const BAlignment& alignment)
+status_t mojobe_BMessage_ReplaceAlignment__charP_BAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_alignment);
+
+// status_t BMessage::ReplaceAlignment(const char* name, int32 index, const BAlignment& alignment)
+status_t mojobe_BMessage_ReplaceAlignment__charP_int32_BAlignment(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment a_alignment);
+
 // status_t BMessage::ReplaceRect(const char* name, BRect rect)
 status_t mojobe_BMessage_ReplaceRect__charP_BRect(BMessage* self,
 	const char* a_name,
@@ -2663,6 +2821,17 @@ status_t mojobe_BMessage_ReplacePoint__charP_int32_BPoint(BMessage* self,
 	const char* a_name,
 	int32 a_index,
 	mojobe_BPoint a_aPoint);
+
+// status_t BMessage::ReplaceSize(const char* name, BSize aSize)
+status_t mojobe_BMessage_ReplaceSize__charP_BSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_aSize);
+
+// status_t BMessage::ReplaceSize(const char* name, int32 index, BSize aSize)
+status_t mojobe_BMessage_ReplaceSize__charP_int32_BSize(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize a_aSize);
 
 // status_t BMessage::ReplaceString(const char* name, const char* string)
 status_t mojobe_BMessage_ReplaceString__charP_charP(BMessage* self,
@@ -3080,6 +3249,17 @@ const char* mojobe_BMessage_GetString__charP_int32_charP(BMessage* self,
 	int32 a_index,
 	const char* a_defaultValue);
 
+// BAlignment BMessage::GetAlignment(const char* name, int32 index, const BAlignment& defaultValue) const
+mojobe_BAlignment mojobe_BMessage_GetAlignment__charP_int32_BAlignment(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment a_defaultValue);
+
+// BAlignment BMessage::GetAlignment(const char* name, const BAlignment& defaultValue) const
+mojobe_BAlignment mojobe_BMessage_GetAlignment__charP_BAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_defaultValue);
+
 // BRect BMessage::GetRect(const char* name, int32 index, const BRect& defaultValue) const
 mojobe_BRect mojobe_BMessage_GetRect__charP_int32_BRect(BMessage* self,
 	const char* a_name,
@@ -3101,6 +3281,17 @@ mojobe_BPoint mojobe_BMessage_GetPoint__charP_int32_BPoint(BMessage* self,
 mojobe_BPoint mojobe_BMessage_GetPoint__charP_BPoint(BMessage* self,
 	const char* a_name,
 	mojobe_BPoint a_defaultValue);
+
+// BSize BMessage::GetSize(const char* name, int32 index, const BSize& defaultValue) const
+mojobe_BSize mojobe_BMessage_GetSize__charP_int32_BSize(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize a_defaultValue);
+
+// BSize BMessage::GetSize(const char* name, const BSize& defaultValue) const
+mojobe_BSize mojobe_BMessage_GetSize__charP_BSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_defaultValue);
 
 // status_t BMessage::SetBool(const char* name, bool value)
 status_t mojobe_BMessage_SetBool(BMessage* self,
@@ -3167,6 +3358,11 @@ status_t mojobe_BMessage_SetDouble(BMessage* self,
 	const char* a_name,
 	double a_value);
 
+// status_t BMessage::SetAlignment(const char* name, const BAlignment& value)
+status_t mojobe_BMessage_SetAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_value);
+
 // status_t BMessage::SetPoint(const char* name, const BPoint& value)
 status_t mojobe_BMessage_SetPoint(BMessage* self,
 	const char* a_name,
@@ -3176,6 +3372,11 @@ status_t mojobe_BMessage_SetPoint(BMessage* self,
 status_t mojobe_BMessage_SetRect(BMessage* self,
 	const char* a_name,
 	mojobe_BRect a_value);
+
+// status_t BMessage::SetSize(const char* name, const BSize& value)
+status_t mojobe_BMessage_SetSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_value);
 
 // status_t BMessage::SetData(const char* name, type_code type, const void* data, ssize_t numBytes, bool fixedSize, int count)
 status_t mojobe_BMessage_SetData(BMessage* self,
@@ -3854,6 +4055,12 @@ void mojobe_BTextControl_SetDivider(BTextControl* self, float a_position);
 // float BTextControl::Divider() const
 float mojobe_BTextControl_Divider(BTextControl* self);
 
+// BLayoutItem* BTextControl::CreateLabelLayoutItem()
+BLayoutItem* mojobe_BTextControl_CreateLabelLayoutItem(BTextControl* self);
+
+// BLayoutItem* BTextControl::CreateTextViewLayoutItem()
+BLayoutItem* mojobe_BTextControl_CreateTextViewLayoutItem(BTextControl* self);
+
 // BTextControl* as BControl*
 BControl* mojobe_BTextControl_as_BControl(BTextControl* self);
 
@@ -4172,6 +4379,9 @@ void mojobe_BScrollView_delete(BScrollView* self);
 // #pragma mark - BAlert
 
 
+// BPoint BAlert::AlertPosition(float width, float height)
+mojobe_BPoint mojobe_BAlert_AlertPosition(float a_width, float a_height);
+
 // void BAlert::SetType(alert_type type)
 void mojobe_BAlert_SetType(BAlert* self, alert_type a_type);
 
@@ -4297,8 +4507,11 @@ void mojobe_BRegion_OffsetBy__BPoint(BRegion* self, mojobe_BPoint a_point);
 // void BRegion::OffsetBy(int32 x, int32 y)
 void mojobe_BRegion_OffsetBy__int32_int32(BRegion* self, int32 a_x, int32 a_y);
 
+// void BRegion::ScaleBy(BSize scale)
+void mojobe_BRegion_ScaleBy__BSize(BRegion* self, mojobe_BSize a_scale);
+
 // void BRegion::ScaleBy(float x, float y)
-void mojobe_BRegion_ScaleBy(BRegion* self, float a_x, float a_y);
+void mojobe_BRegion_ScaleBy__float_float(BRegion* self, float a_x, float a_y);
 
 // void BRegion::MakeEmpty()
 void mojobe_BRegion_MakeEmpty(BRegion* self);
@@ -4386,8 +4599,25 @@ status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap*
 	int32 a_offset,
 	color_space a_colorSpace);
 
+// status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)
+status_t mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_bpr,
+	color_space a_colorSpace,
+	mojobe_BPoint a_from,
+	mojobe_BPoint a_to,
+	mojobe_BSize a_size);
+
 // status_t BBitmap::ImportBits(const BBitmap* bitmap)
 status_t mojobe_BBitmap_ImportBits__BBitmapP(BBitmap* self, BBitmap* a_bitmap);
+
+// status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)
+status_t mojobe_BBitmap_ImportBits__BBitmapP_BPoint_BPoint_BSize(BBitmap* self,
+	BBitmap* a_bitmap,
+	mojobe_BPoint a_from,
+	mojobe_BPoint a_to,
+	mojobe_BSize a_size);
 
 // void BBitmap::AddChild(BView* view)
 void mojobe_BBitmap_AddChild(BBitmap* self, BView* a_view);
@@ -4553,6 +4783,501 @@ BScreen* mojobe_BScreen_new__BWindowP(BWindow* a_window);
 
 // ~BScreen()
 void mojobe_BScreen_delete(BScreen* self);
+
+
+// #pragma mark - BLayoutItem
+
+
+// BLayout* BLayoutItem::Layout() const
+BLayout* mojobe_BLayoutItem_Layout(BLayoutItem* self);
+
+// bool BLayoutItem::RemoveSelf()
+bool mojobe_BLayoutItem_RemoveSelf(BLayoutItem* self);
+
+// BSize BLayoutItem::MinSize()
+mojobe_BSize mojobe_BLayoutItem_MinSize(BLayoutItem* self);
+
+// BSize BLayoutItem::MaxSize()
+mojobe_BSize mojobe_BLayoutItem_MaxSize(BLayoutItem* self);
+
+// BSize BLayoutItem::PreferredSize()
+mojobe_BSize mojobe_BLayoutItem_PreferredSize(BLayoutItem* self);
+
+// BAlignment BLayoutItem::Alignment()
+mojobe_BAlignment mojobe_BLayoutItem_Alignment(BLayoutItem* self);
+
+// void BLayoutItem::SetExplicitMinSize(BSize size)
+void mojobe_BLayoutItem_SetExplicitMinSize(BLayoutItem* self,
+	mojobe_BSize a_size);
+
+// void BLayoutItem::SetExplicitMaxSize(BSize size)
+void mojobe_BLayoutItem_SetExplicitMaxSize(BLayoutItem* self,
+	mojobe_BSize a_size);
+
+// void BLayoutItem::SetExplicitPreferredSize(BSize size)
+void mojobe_BLayoutItem_SetExplicitPreferredSize(BLayoutItem* self,
+	mojobe_BSize a_size);
+
+// void BLayoutItem::SetExplicitSize(BSize size)
+void mojobe_BLayoutItem_SetExplicitSize(BLayoutItem* self, mojobe_BSize a_size);
+
+// void BLayoutItem::SetExplicitAlignment(BAlignment alignment)
+void mojobe_BLayoutItem_SetExplicitAlignment(BLayoutItem* self,
+	mojobe_BAlignment a_alignment);
+
+// bool BLayoutItem::IsVisible()
+bool mojobe_BLayoutItem_IsVisible(BLayoutItem* self);
+
+// void BLayoutItem::SetVisible(bool visible)
+void mojobe_BLayoutItem_SetVisible(BLayoutItem* self, bool a_visible);
+
+// BRect BLayoutItem::Frame()
+mojobe_BRect mojobe_BLayoutItem_Frame(BLayoutItem* self);
+
+// void BLayoutItem::SetFrame(BRect frame)
+void mojobe_BLayoutItem_SetFrame(BLayoutItem* self, mojobe_BRect a_frame);
+
+// bool BLayoutItem::HasHeightForWidth()
+bool mojobe_BLayoutItem_HasHeightForWidth(BLayoutItem* self);
+
+// void BLayoutItem::GetHeightForWidth(float width, float* min, float* max, float* preferred)
+void mojobe_BLayoutItem_GetHeightForWidth(BLayoutItem* self,
+	float a_width,
+	float * a_min,
+	float * a_max,
+	float * a_preferred);
+
+// BView* BLayoutItem::View()
+BView* mojobe_BLayoutItem_View(BLayoutItem* self);
+
+// void BLayoutItem::InvalidateLayout(bool children)
+void mojobe_BLayoutItem_InvalidateLayout(BLayoutItem* self, bool a_children);
+
+// void BLayoutItem::Relayout(bool immediate)
+void mojobe_BLayoutItem_Relayout(BLayoutItem* self, bool a_immediate);
+
+// void BLayoutItem::AlignInFrame(BRect frame)
+void mojobe_BLayoutItem_AlignInFrame(BLayoutItem* self, mojobe_BRect a_frame);
+
+// status_t BLayoutItem::Archive(BMessage* into, bool deep) const
+status_t mojobe_BLayoutItem_Archive(BLayoutItem* self,
+	BMessage* a_into,
+	bool a_deep);
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t mojobe_BLayoutItem_AllUnarchived(BLayoutItem* self,
+	BMessage* a_archive);
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t mojobe_BLayoutItem_AllArchived(BLayoutItem* self, BMessage* a_archive);
+
+// BLayoutItem* as BLayout*, or NULL
+BLayout* mojobe_BLayoutItem_to_BLayout(BLayoutItem* self);
+
+// BLayoutItem* as BGroupLayout*, or NULL
+BGroupLayout* mojobe_BLayoutItem_to_BGroupLayout(BLayoutItem* self);
+
+// BLayoutItem* as BGridLayout*, or NULL
+BGridLayout* mojobe_BLayoutItem_to_BGridLayout(BLayoutItem* self);
+
+// BLayoutItem* as BSpaceLayoutItem*, or NULL
+BSpaceLayoutItem* mojobe_BLayoutItem_to_BSpaceLayoutItem(BLayoutItem* self);
+
+// ~BLayoutItem()
+void mojobe_BLayoutItem_delete(BLayoutItem* self);
+
+
+// #pragma mark - BLayout
+
+
+// BView* BLayout::Owner() const
+BView* mojobe_BLayout_Owner(BLayout* self);
+
+// BView* BLayout::TargetView() const
+BView* mojobe_BLayout_TargetView(BLayout* self);
+
+// BLayoutItem* BLayout::AddView(BView* child)
+BLayoutItem* mojobe_BLayout_AddView__BViewP(BLayout* self, BView* a_child);
+
+// BLayoutItem* BLayout::AddView(int32 index, BView* child)
+BLayoutItem* mojobe_BLayout_AddView__int32_BViewP(BLayout* self,
+	int32 a_index,
+	BView* a_child);
+
+// bool BLayout::AddItem(BLayoutItem* item)
+bool mojobe_BLayout_AddItem__BLayoutItemP(BLayout* self, BLayoutItem* a_item);
+
+// bool BLayout::AddItem(int32 index, BLayoutItem* item)
+bool mojobe_BLayout_AddItem__int32_BLayoutItemP(BLayout* self,
+	int32 a_index,
+	BLayoutItem* a_item);
+
+// bool BLayout::RemoveView(BView* child)
+bool mojobe_BLayout_RemoveView(BLayout* self, BView* a_child);
+
+// bool BLayout::RemoveItem(BLayoutItem* item)
+bool mojobe_BLayout_RemoveItem__BLayoutItemP(BLayout* self,
+	BLayoutItem* a_item);
+
+// BLayoutItem* BLayout::RemoveItem(int32 index)
+BLayoutItem* mojobe_BLayout_RemoveItem__int32(BLayout* self, int32 a_index);
+
+// BLayoutItem* BLayout::ItemAt(int32 index) const
+BLayoutItem* mojobe_BLayout_ItemAt(BLayout* self, int32 a_index);
+
+// int32 BLayout::CountItems() const
+int32 mojobe_BLayout_CountItems(BLayout* self);
+
+// int32 BLayout::IndexOfItem(const BLayoutItem* item) const
+int32 mojobe_BLayout_IndexOfItem(BLayout* self, BLayoutItem* a_item);
+
+// int32 BLayout::IndexOfView(BView* child) const
+int32 mojobe_BLayout_IndexOfView(BLayout* self, BView* a_child);
+
+// bool BLayout::AncestorsVisible() const
+bool mojobe_BLayout_AncestorsVisible(BLayout* self);
+
+// void BLayout::RequireLayout()
+void mojobe_BLayout_RequireLayout(BLayout* self);
+
+// bool BLayout::IsValid()
+bool mojobe_BLayout_IsValid(BLayout* self);
+
+// void BLayout::EnableLayoutInvalidation()
+void mojobe_BLayout_EnableLayoutInvalidation(BLayout* self);
+
+// void BLayout::DisableLayoutInvalidation()
+void mojobe_BLayout_DisableLayoutInvalidation(BLayout* self);
+
+// void BLayout::LayoutItems(bool force)
+void mojobe_BLayout_LayoutItems(BLayout* self, bool a_force);
+
+// BRect BLayout::LayoutArea()
+mojobe_BRect mojobe_BLayout_LayoutArea(BLayout* self);
+
+// BLayout* as BLayoutItem*
+BLayoutItem* mojobe_BLayout_as_BLayoutItem(BLayout* self);
+
+// BLayout* as BGroupLayout*, or NULL
+BGroupLayout* mojobe_BLayout_to_BGroupLayout(BLayout* self);
+
+// BLayout* as BGridLayout*, or NULL
+BGridLayout* mojobe_BLayout_to_BGridLayout(BLayout* self);
+
+// ~BLayout()
+void mojobe_BLayout_delete(BLayout* self);
+
+
+// #pragma mark - BGroupLayout
+
+
+// float BGroupLayout::Spacing() const
+float mojobe_BGroupLayout_Spacing(BGroupLayout* self);
+
+// void BGroupLayout::SetSpacing(float spacing)
+void mojobe_BGroupLayout_SetSpacing(BGroupLayout* self, float a_spacing);
+
+// orientation BGroupLayout::Orientation() const
+orientation mojobe_BGroupLayout_Orientation(BGroupLayout* self);
+
+// void BGroupLayout::SetOrientation(orientation orientation)
+void mojobe_BGroupLayout_SetOrientation(BGroupLayout* self,
+	orientation a_orientation);
+
+// float BGroupLayout::ItemWeight(int32 index) const
+float mojobe_BGroupLayout_ItemWeight(BGroupLayout* self, int32 a_index);
+
+// void BGroupLayout::SetItemWeight(int32 index, float weight)
+void mojobe_BGroupLayout_SetItemWeight(BGroupLayout* self,
+	int32 a_index,
+	float a_weight);
+
+// BLayoutItem* BGroupLayout::AddView(BView* child, float weight)
+BLayoutItem* mojobe_BGroupLayout_AddView__BViewP_float(BGroupLayout* self,
+	BView* a_child,
+	float a_weight);
+
+// BLayoutItem* BGroupLayout::AddView(int32 index, BView* child, float weight)
+BLayoutItem* mojobe_BGroupLayout_AddView__int32_BViewP_float(BGroupLayout* self,
+	int32 a_index,
+	BView* a_child,
+	float a_weight);
+
+// bool BGroupLayout::AddItem(BLayoutItem* item, float weight)
+bool mojobe_BGroupLayout_AddItem__BLayoutItemP_float(BGroupLayout* self,
+	BLayoutItem* a_item,
+	float a_weight);
+
+// bool BGroupLayout::AddItem(int32 index, BLayoutItem* item, float weight)
+bool mojobe_BGroupLayout_AddItem__int32_BLayoutItemP_float(BGroupLayout* self,
+	int32 a_index,
+	BLayoutItem* a_item,
+	float a_weight);
+
+// void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)
+void mojobe_BGroupLayout_SetInsets__float_float_float_float(BGroupLayout* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom);
+
+// void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)
+void mojobe_BGroupLayout_SetInsets__float_float(BGroupLayout* self,
+	float a_horizontal,
+	float a_vertical);
+
+// void BTwoDimensionalLayout::SetInsets(float insets)
+void mojobe_BGroupLayout_SetInsets__float(BGroupLayout* self, float a_insets);
+
+// void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const
+void mojobe_BGroupLayout_GetInsets(BGroupLayout* self,
+	float * a_left,
+	float * a_top,
+	float * a_right,
+	float * a_bottom);
+
+// BSize BTwoDimensionalLayout::BaseMinSize()
+mojobe_BSize mojobe_BGroupLayout_BaseMinSize(BGroupLayout* self);
+
+// BSize BTwoDimensionalLayout::BaseMaxSize()
+mojobe_BSize mojobe_BGroupLayout_BaseMaxSize(BGroupLayout* self);
+
+// BSize BTwoDimensionalLayout::BasePreferredSize()
+mojobe_BSize mojobe_BGroupLayout_BasePreferredSize(BGroupLayout* self);
+
+// BAlignment BTwoDimensionalLayout::BaseAlignment()
+mojobe_BAlignment mojobe_BGroupLayout_BaseAlignment(BGroupLayout* self);
+
+// BGroupLayout* as BLayout*
+BLayout* mojobe_BGroupLayout_as_BLayout(BGroupLayout* self);
+
+// BGroupLayout* as BLayoutItem*
+BLayoutItem* mojobe_BGroupLayout_as_BLayoutItem(BGroupLayout* self);
+
+// BGroupLayout::BGroupLayout(orientation orientation, float spacing)
+BGroupLayout* mojobe_BGroupLayout_new(orientation a_orientation,
+	float a_spacing);
+
+// ~BGroupLayout()
+void mojobe_BGroupLayout_delete(BGroupLayout* self);
+
+
+// #pragma mark - BGridLayout
+
+
+// int32 BGridLayout::CountColumns() const
+int32 mojobe_BGridLayout_CountColumns(BGridLayout* self);
+
+// int32 BGridLayout::CountRows() const
+int32 mojobe_BGridLayout_CountRows(BGridLayout* self);
+
+// float BGridLayout::HorizontalSpacing() const
+float mojobe_BGridLayout_HorizontalSpacing(BGridLayout* self);
+
+// float BGridLayout::VerticalSpacing() const
+float mojobe_BGridLayout_VerticalSpacing(BGridLayout* self);
+
+// void BGridLayout::SetHorizontalSpacing(float spacing)
+void mojobe_BGridLayout_SetHorizontalSpacing(BGridLayout* self,
+	float a_spacing);
+
+// void BGridLayout::SetVerticalSpacing(float spacing)
+void mojobe_BGridLayout_SetVerticalSpacing(BGridLayout* self, float a_spacing);
+
+// void BGridLayout::SetSpacing(float horizontal, float vertical)
+void mojobe_BGridLayout_SetSpacing(BGridLayout* self,
+	float a_horizontal,
+	float a_vertical);
+
+// float BGridLayout::ColumnWeight(int32 column) const
+float mojobe_BGridLayout_ColumnWeight(BGridLayout* self, int32 a_column);
+
+// void BGridLayout::SetColumnWeight(int32 column, float weight)
+void mojobe_BGridLayout_SetColumnWeight(BGridLayout* self,
+	int32 a_column,
+	float a_weight);
+
+// float BGridLayout::MinColumnWidth(int32 column) const
+float mojobe_BGridLayout_MinColumnWidth(BGridLayout* self, int32 a_column);
+
+// void BGridLayout::SetMinColumnWidth(int32 column, float width)
+void mojobe_BGridLayout_SetMinColumnWidth(BGridLayout* self,
+	int32 a_column,
+	float a_width);
+
+// float BGridLayout::MaxColumnWidth(int32 column) const
+float mojobe_BGridLayout_MaxColumnWidth(BGridLayout* self, int32 a_column);
+
+// void BGridLayout::SetMaxColumnWidth(int32 column, float width)
+void mojobe_BGridLayout_SetMaxColumnWidth(BGridLayout* self,
+	int32 a_column,
+	float a_width);
+
+// float BGridLayout::RowWeight(int32 row) const
+float mojobe_BGridLayout_RowWeight(BGridLayout* self, int32 a_row);
+
+// void BGridLayout::SetRowWeight(int32 row, float weight)
+void mojobe_BGridLayout_SetRowWeight(BGridLayout* self,
+	int32 a_row,
+	float a_weight);
+
+// float BGridLayout::MinRowHeight(int row) const
+float mojobe_BGridLayout_MinRowHeight(BGridLayout* self, int a_row);
+
+// void BGridLayout::SetMinRowHeight(int32 row, float height)
+void mojobe_BGridLayout_SetMinRowHeight(BGridLayout* self,
+	int32 a_row,
+	float a_height);
+
+// float BGridLayout::MaxRowHeight(int32 row) const
+float mojobe_BGridLayout_MaxRowHeight(BGridLayout* self, int32 a_row);
+
+// void BGridLayout::SetMaxRowHeight(int32 row, float height)
+void mojobe_BGridLayout_SetMaxRowHeight(BGridLayout* self,
+	int32 a_row,
+	float a_height);
+
+// BLayoutItem* BGridLayout::ItemAt(int32 column, int32 row) const
+BLayoutItem* mojobe_BGridLayout_ItemAt(BGridLayout* self,
+	int32 a_column,
+	int32 a_row);
+
+// BLayoutItem* BGridLayout::AddView(BView* child, int32 column, int32 row, int32 columnCount, int32 rowCount)
+BLayoutItem* mojobe_BGridLayout_AddView__BViewP_int32_int32_int32_int32(BGridLayout* self,
+	BView* a_child,
+	int32 a_column,
+	int32 a_row,
+	int32 a_columnCount,
+	int32 a_rowCount);
+
+// bool BGridLayout::AddItem(BLayoutItem* item, int32 column, int32 row, int32 columnCount, int32 rowCount)
+bool mojobe_BGridLayout_AddItem__BLayoutItemP_int32_int32_int32_int32(BGridLayout* self,
+	BLayoutItem* a_item,
+	int32 a_column,
+	int32 a_row,
+	int32 a_columnCount,
+	int32 a_rowCount);
+
+// void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)
+void mojobe_BGridLayout_SetInsets__float_float_float_float(BGridLayout* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom);
+
+// void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)
+void mojobe_BGridLayout_SetInsets__float_float(BGridLayout* self,
+	float a_horizontal,
+	float a_vertical);
+
+// void BTwoDimensionalLayout::SetInsets(float insets)
+void mojobe_BGridLayout_SetInsets__float(BGridLayout* self, float a_insets);
+
+// void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const
+void mojobe_BGridLayout_GetInsets(BGridLayout* self,
+	float * a_left,
+	float * a_top,
+	float * a_right,
+	float * a_bottom);
+
+// BSize BTwoDimensionalLayout::BaseMinSize()
+mojobe_BSize mojobe_BGridLayout_BaseMinSize(BGridLayout* self);
+
+// BSize BTwoDimensionalLayout::BaseMaxSize()
+mojobe_BSize mojobe_BGridLayout_BaseMaxSize(BGridLayout* self);
+
+// BSize BTwoDimensionalLayout::BasePreferredSize()
+mojobe_BSize mojobe_BGridLayout_BasePreferredSize(BGridLayout* self);
+
+// BAlignment BTwoDimensionalLayout::BaseAlignment()
+mojobe_BAlignment mojobe_BGridLayout_BaseAlignment(BGridLayout* self);
+
+// BGridLayout* as BLayout*
+BLayout* mojobe_BGridLayout_as_BLayout(BGridLayout* self);
+
+// BGridLayout* as BLayoutItem*
+BLayoutItem* mojobe_BGridLayout_as_BLayoutItem(BGridLayout* self);
+
+// BGridLayout::BGridLayout(float horizontal, float vertical)
+BGridLayout* mojobe_BGridLayout_new(float a_horizontal, float a_vertical);
+
+// ~BGridLayout()
+void mojobe_BGridLayout_delete(BGridLayout* self);
+
+
+// #pragma mark - BSpaceLayoutItem
+
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateGlue()
+BSpaceLayoutItem* mojobe_BSpaceLayoutItem_CreateGlue();
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateHorizontalStrut(float width)
+BSpaceLayoutItem* mojobe_BSpaceLayoutItem_CreateHorizontalStrut(float a_width);
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateVerticalStrut(float height)
+BSpaceLayoutItem* mojobe_BSpaceLayoutItem_CreateVerticalStrut(float a_height);
+
+// BSpaceLayoutItem* as BLayoutItem*
+BLayoutItem* mojobe_BSpaceLayoutItem_as_BLayoutItem(BSpaceLayoutItem* self);
+
+// BSpaceLayoutItem::BSpaceLayoutItem(BSize minSize, BSize maxSize, BSize preferredSize, BAlignment alignment)
+BSpaceLayoutItem* mojobe_BSpaceLayoutItem_new(mojobe_BSize a_minSize,
+	mojobe_BSize a_maxSize,
+	mojobe_BSize a_preferredSize,
+	mojobe_BAlignment a_alignment);
+
+// ~BSpaceLayoutItem()
+void mojobe_BSpaceLayoutItem_delete(BSpaceLayoutItem* self);
+
+
+// #pragma mark - BGroupView
+
+
+// BGroupLayout* BGroupView::GroupLayout() const
+BGroupLayout* mojobe_BGroupView_GroupLayout(BGroupView* self);
+
+// BGroupView* as BView*
+BView* mojobe_BGroupView_as_BView(BGroupView* self);
+
+// BGroupView* as BHandler*
+BHandler* mojobe_BGroupView_as_BHandler(BGroupView* self);
+
+// BGroupView::BGroupView(orientation orientation, float spacing)
+BGroupView* mojobe_BGroupView_new__orientation_float(orientation a_orientation,
+	float a_spacing);
+
+// BGroupView::BGroupView(const char* name, orientation orientation, float spacing)
+BGroupView* mojobe_BGroupView_new__charP_orientation_float(const char* a_name,
+	orientation a_orientation,
+	float a_spacing);
+
+// ~BGroupView()
+void mojobe_BGroupView_delete(BGroupView* self);
+
+
+// #pragma mark - BGridView
+
+
+// BGridLayout* BGridView::GridLayout() const
+BGridLayout* mojobe_BGridView_GridLayout(BGridView* self);
+
+// BGridView* as BView*
+BView* mojobe_BGridView_as_BView(BGridView* self);
+
+// BGridView* as BHandler*
+BHandler* mojobe_BGridView_as_BHandler(BGridView* self);
+
+// BGridView::BGridView(float horizontal, float vertical)
+BGridView* mojobe_BGridView_new__float_float(float a_horizontal,
+	float a_vertical);
+
+// BGridView::BGridView(const char* name, float horizontal, float vertical)
+BGridView* mojobe_BGridView_new__charP_float_float(const char* a_name,
+	float a_horizontal,
+	float a_vertical);
+
+// ~BGridView()
+void mojobe_BGridView_delete(BGridView* self);
 
 
 // #pragma mark - entry_ref
@@ -4854,6 +5579,12 @@ void mojobe_BFilePanel_delete(BFilePanel* self);
 
 // #pragma mark - BMessageRunner
 
+
+// status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)
+status_t mojobe_BMessageRunner_StartSending(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count);
 
 // status_t BMessageRunner::InitCheck() const
 status_t mojobe_BMessageRunner_InitCheck(BMessageRunner* self);

@@ -13,6 +13,8 @@ and the constant values of those types."""
 
 from std.sys import size_of, align_of
 
+from ._constants import alignment, vertical_alignment
+
 
 @fieldwise_init
 struct BRect(Equatable, TrivialRegisterPassable, Writable):
@@ -67,6 +69,22 @@ struct rgb_color(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct BSize(Equatable, TrivialRegisterPassable):
+    """`BSize`, 8 bytes."""
+
+    var width: Float32
+    var height: Float32
+
+
+@fieldwise_init
+struct BAlignment(Equatable, TrivialRegisterPassable):
+    """`BAlignment`, 8 bytes."""
+
+    var horizontal: alignment
+    var vertical: vertical_alignment
+
+
+@fieldwise_init
 struct font_height(Equatable, TrivialRegisterPassable):
     """`font_height`, 12 bytes."""
 
@@ -107,6 +125,10 @@ def _check_layouts():
     comptime assert align_of[BPoint]() == 4
     comptime assert size_of[rgb_color]() == 4
     comptime assert align_of[rgb_color]() == 1
+    comptime assert size_of[BSize]() == 8
+    comptime assert align_of[BSize]() == 4
+    comptime assert size_of[BAlignment]() == 8
+    comptime assert align_of[BAlignment]() == 4
     comptime assert size_of[font_height]() == 12
     comptime assert align_of[font_height]() == 4
     comptime assert size_of[clipping_rect]() == 16

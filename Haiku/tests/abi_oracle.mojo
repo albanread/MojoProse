@@ -526,6 +526,31 @@ def main() raises:
         resultrgb_color == rgb_color(3, 10, 17, 24),
     )
 
+    var givenBSize = BSize(0.25, 1.25)
+    var seenBSize = givenBSize
+    var beforeBSize = Int8(0)
+    var afterBSize = Float64(0)
+    var resultBSize = external_call["mojobe_oracle_echo_BSize", BSize](
+        Int8(-5), givenBSize, Float64(2.75), Pointer(to=seenBSize),
+        Pointer(to=beforeBSize), Pointer(to=afterBSize))
+    checks.check("BSize by value, between an int8 and a double",
+        seenBSize == givenBSize and beforeBSize == -5 and afterBSize == 2.75)
+    checks.check("BSize returned", resultBSize == BSize(1.25, 2.25))
+
+    var givenBAlignment = BAlignment(alignment(2), vertical_alignment(3))
+    var seenBAlignment = givenBAlignment
+    var beforeBAlignment = Int8(0)
+    var afterBAlignment = Float64(0)
+    var resultBAlignment = external_call["mojobe_oracle_echo_BAlignment", BAlignment](
+        Int8(-5), givenBAlignment, Float64(2.75), Pointer(to=seenBAlignment),
+        Pointer(to=beforeBAlignment), Pointer(to=afterBAlignment))
+    checks.check("BAlignment by value, between an int8 and a double",
+        seenBAlignment == givenBAlignment and beforeBAlignment == -5 and afterBAlignment == 2.75)
+    checks.check(
+        "BAlignment returned",
+        resultBAlignment == BAlignment(alignment(3), vertical_alignment(4)),
+    )
+
     var givenfont_height = font_height(0.25, 1.25, 2.25)
     var seenfont_height = givenfont_height
     var beforefont_height = Int8(0)

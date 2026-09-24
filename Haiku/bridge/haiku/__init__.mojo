@@ -10,11 +10,11 @@
 """The Haiku API for Mojo programs on Prose, through libmojobe
 (Haiku/docs/bridge-design.md). Link programs with `-lmojobe -lbe`.
 
-Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BAlert, BRegion, BBitmap, BScreen, entry_ref, BEntry, BPath, BFilePanel, BMessageRunner.
+Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApplication, BWindow, BView, BMessage, BMenu, BMenuBar, BMenuItem, BPopUpMenu, BInvoker, BControl, BButton, BCheckBox, BRadioButton, BTextControl, BSlider, BStringView, BScrollView, BAlert, BRegion, BBitmap, BScreen, BLayoutItem, BLayout, BGroupLayout, BGridLayout, BSpaceLayoutItem, BGroupView, BGridView, entry_ref, BEntry, BPath, BFilePanel, BMessageRunner.
 Haiku/bridge/MANIFEST.md lists every method, and what is left out and why."""
 
 from ._core import fourcc
-from ._values import BRect, BPoint, rgb_color, font_height, clipping_rect, screen_id, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS, B_MAIN_SCREEN_ID
+from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, font_height, clipping_rect, screen_id, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS, B_MAIN_SCREEN_ID
 from ._api import (
     BMessenger,
     BFont,
@@ -64,6 +64,20 @@ from ._api import (
     BBitmapRef,
     BScreen,
     BScreenRef,
+    BLayoutItem,
+    BLayoutItemRef,
+    BLayout,
+    BLayoutRef,
+    BGroupLayout,
+    BGroupLayoutRef,
+    BGridLayout,
+    BGridLayoutRef,
+    BSpaceLayoutItem,
+    BSpaceLayoutItemRef,
+    BGroupView,
+    BGroupViewRef,
+    BGridView,
+    BGridViewRef,
     entry_ref,
     entry_refRef,
     BEntry,

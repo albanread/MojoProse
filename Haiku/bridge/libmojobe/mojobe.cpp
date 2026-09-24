@@ -85,6 +85,46 @@ mojobe_from_c(const mojobe_rgb_color& value)
 }
 
 
+[[maybe_unused]] mojobe_BSize
+mojobe_to_c(const BSize& value)
+{
+	mojobe_BSize result;
+	result.width = value.width;
+	result.height = value.height;
+	return result;
+}
+
+
+[[maybe_unused]] BSize
+mojobe_from_c(const mojobe_BSize& value)
+{
+	BSize result;
+	result.width = value.width;
+	result.height = value.height;
+	return result;
+}
+
+
+[[maybe_unused]] mojobe_BAlignment
+mojobe_to_c(const BAlignment& value)
+{
+	mojobe_BAlignment result;
+	result.horizontal = value.horizontal;
+	result.vertical = value.vertical;
+	return result;
+}
+
+
+[[maybe_unused]] BAlignment
+mojobe_from_c(const mojobe_BAlignment& value)
+{
+	BAlignment result;
+	result.horizontal = value.horizontal;
+	result.vertical = value.vertical;
+	return result;
+}
+
+
 [[maybe_unused]] mojobe_font_height
 mojobe_to_c(const font_height& value)
 {
@@ -2227,6 +2267,22 @@ mojobe_BHandler_to_BAlert(BHandler* self)
 }
 
 
+// BHandler* as BGroupView*, or NULL
+BGroupView*
+mojobe_BHandler_to_BGroupView(BHandler* self)
+{
+	return dynamic_cast<BGroupView*>(self);
+}
+
+
+// BHandler* as BGridView*, or NULL
+BGridView*
+mojobe_BHandler_to_BGridView(BHandler* self)
+{
+	return dynamic_cast<BGridView*>(self);
+}
+
+
 // BHandler::BHandler(const char* name)
 BHandler*
 mojobe_BHandler_new(const char* a_name)
@@ -2283,6 +2339,21 @@ mojobe_BHandler_base_MessageReceived(BHandler* self, BMessage* message)
 
 
 // #pragma mark - BLooper
+
+
+// BLooper* BLooper::LooperForThread(thread_id thread)
+BLooper*
+mojobe_BLooper_LooperForThread(thread_id a_thread)
+{
+	try {
+		return BLooper::LooperForThread(a_thread);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLooper_LooperForThread");
+	}
+	return {};
+}
 
 
 // status_t BLooper::PostMessage(uint32 command)
@@ -3350,14 +3421,30 @@ mojobe_BWindow_Close(BWindow* self)
 
 // void BWindow::AddChild(BView* child, BView* before)
 void
-mojobe_BWindow_AddChild(BWindow* self, BView* a_child, BView* a_before)
+mojobe_BWindow_AddChild__BViewP_BViewP(BWindow* self,
+	BView* a_child,
+	BView* a_before)
 {
 	try {
 		self->AddChild(a_child, a_before);
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BWindow_AddChild");
+		mojobe_unexpected("mojobe_BWindow_AddChild__BViewP_BViewP");
+	}
+}
+
+
+// void BWindow::AddChild(BLayoutItem* child)
+void
+mojobe_BWindow_AddChild__BLayoutItemP(BWindow* self, BLayoutItem* a_child)
+{
+	try {
+		self->AddChild(a_child);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_AddChild__BLayoutItemP");
 	}
 }
 
@@ -4211,6 +4298,21 @@ mojobe_BWindow_DecoratorFrame(BWindow* self)
 }
 
 
+// BSize BWindow::Size() const
+mojobe_BSize
+mojobe_BWindow_Size(BWindow* self)
+{
+	try {
+		return mojobe_to_c(self->Size());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_Size");
+	}
+	return {};
+}
+
+
 // const char* BWindow::Title() const
 const char*
 mojobe_BWindow_Title(BWindow* self)
@@ -4651,6 +4753,35 @@ mojobe_BWindow_GetWindowAlignment(BWindow* self,
 }
 
 
+// void BWindow::SetLayout(BLayout* layout)
+void
+mojobe_BWindow_SetLayout(BWindow* self, BLayout* a_layout)
+{
+	try {
+		self->SetLayout(a_layout);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_SetLayout");
+	}
+}
+
+
+// BLayout* BWindow::GetLayout() const
+BLayout*
+mojobe_BWindow_GetLayout(BWindow* self)
+{
+	try {
+		return self->GetLayout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BWindow_GetLayout");
+	}
+	return {};
+}
+
+
 // void BWindow::InvalidateLayout(bool descendants)
 void
 mojobe_BWindow_InvalidateLayout(BWindow* self, bool a_descendants)
@@ -5023,15 +5154,36 @@ mojobe_BView_AllDetached(BView* self)
 
 // void BView::AddChild(BView* child, BView* before)
 void
-mojobe_BView_AddChild(BView* self, BView* a_child, BView* a_before)
+mojobe_BView_AddChild__BViewP_BViewP(BView* self,
+	BView* a_child,
+	BView* a_before)
 {
 	try {
 		self->AddChild(a_child, a_before);
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BView_AddChild");
+		mojobe_unexpected("mojobe_BView_AddChild__BViewP_BViewP");
 	}
+}
+
+
+// bool BView::AddChild(BLayoutItem* child)
+bool
+mojobe_BView_AddChild__BLayoutItemP(BView* self, BLayoutItem* a_child)
+{
+	try {
+		bool result = self->AddChild(a_child);
+		if (!result) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_AddChild__BLayoutItemP");
+	}
+	return {};
 }
 
 
@@ -7533,14 +7685,28 @@ mojobe_BView_ResizeBy(BView* self, float a_dh, float a_dv)
 
 // void BView::ResizeTo(float width, float height)
 void
-mojobe_BView_ResizeTo(BView* self, float a_width, float a_height)
+mojobe_BView_ResizeTo__float_float(BView* self, float a_width, float a_height)
 {
 	try {
 		self->ResizeTo(a_width, a_height);
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BView_ResizeTo");
+		mojobe_unexpected("mojobe_BView_ResizeTo__float_float");
+	}
+}
+
+
+// void BView::ResizeTo(BSize size)
+void
+mojobe_BView_ResizeTo__BSize(BView* self, mojobe_BSize a_size)
+{
+	try {
+		self->ResizeTo(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ResizeTo__BSize");
 	}
 }
 
@@ -7788,6 +7954,196 @@ mojobe_BView_DrawAfterChildren(BView* self, mojobe_BRect a_updateRect)
 }
 
 
+// BSize BView::MinSize()
+mojobe_BSize
+mojobe_BView_MinSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->MinSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MinSize");
+	}
+	return {};
+}
+
+
+// BSize BView::MaxSize()
+mojobe_BSize
+mojobe_BView_MaxSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->MaxSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_MaxSize");
+	}
+	return {};
+}
+
+
+// BSize BView::PreferredSize()
+mojobe_BSize
+mojobe_BView_PreferredSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->PreferredSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_PreferredSize");
+	}
+	return {};
+}
+
+
+// BAlignment BView::LayoutAlignment()
+mojobe_BAlignment
+mojobe_BView_LayoutAlignment(BView* self)
+{
+	try {
+		return mojobe_to_c(self->LayoutAlignment());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_LayoutAlignment");
+	}
+	return {};
+}
+
+
+// void BView::SetExplicitMinSize(BSize size)
+void
+mojobe_BView_SetExplicitMinSize(BView* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitMinSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetExplicitMinSize");
+	}
+}
+
+
+// void BView::SetExplicitMaxSize(BSize size)
+void
+mojobe_BView_SetExplicitMaxSize(BView* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitMaxSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetExplicitMaxSize");
+	}
+}
+
+
+// void BView::SetExplicitPreferredSize(BSize size)
+void
+mojobe_BView_SetExplicitPreferredSize(BView* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitPreferredSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetExplicitPreferredSize");
+	}
+}
+
+
+// void BView::SetExplicitSize(BSize size)
+void
+mojobe_BView_SetExplicitSize(BView* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetExplicitSize");
+	}
+}
+
+
+// void BView::SetExplicitAlignment(BAlignment alignment)
+void
+mojobe_BView_SetExplicitAlignment(BView* self, mojobe_BAlignment a_alignment)
+{
+	try {
+		self->SetExplicitAlignment(mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetExplicitAlignment");
+	}
+}
+
+
+// BSize BView::ExplicitMinSize() const
+mojobe_BSize
+mojobe_BView_ExplicitMinSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->ExplicitMinSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ExplicitMinSize");
+	}
+	return {};
+}
+
+
+// BSize BView::ExplicitMaxSize() const
+mojobe_BSize
+mojobe_BView_ExplicitMaxSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->ExplicitMaxSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ExplicitMaxSize");
+	}
+	return {};
+}
+
+
+// BSize BView::ExplicitPreferredSize() const
+mojobe_BSize
+mojobe_BView_ExplicitPreferredSize(BView* self)
+{
+	try {
+		return mojobe_to_c(self->ExplicitPreferredSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ExplicitPreferredSize");
+	}
+	return {};
+}
+
+
+// BAlignment BView::ExplicitAlignment() const
+mojobe_BAlignment
+mojobe_BView_ExplicitAlignment(BView* self)
+{
+	try {
+		return mojobe_to_c(self->ExplicitAlignment());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_ExplicitAlignment");
+	}
+	return {};
+}
+
+
 // bool BView::HasHeightForWidth()
 bool
 mojobe_BView_HasHeightForWidth(BView* self)
@@ -7832,6 +8188,35 @@ mojobe_BView_InvalidateLayout(BView* self, bool a_descendants)
 	} catch (...) {
 		mojobe_unexpected("mojobe_BView_InvalidateLayout");
 	}
+}
+
+
+// void BView::SetLayout(BLayout* layout)
+void
+mojobe_BView_SetLayout(BView* self, BLayout* a_layout)
+{
+	try {
+		self->SetLayout(a_layout);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_SetLayout");
+	}
+}
+
+
+// BLayout* BView::GetLayout() const
+BLayout*
+mojobe_BView_GetLayout(BView* self)
+{
+	try {
+		return self->GetLayout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BView_GetLayout");
+	}
+	return {};
 }
 
 
@@ -8073,16 +8458,34 @@ mojobe_BView_to_BScrollView(BView* self)
 }
 
 
+// BView* as BGroupView*, or NULL
+BGroupView*
+mojobe_BView_to_BGroupView(BView* self)
+{
+	return dynamic_cast<BGroupView*>(self);
+}
+
+
+// BView* as BGridView*, or NULL
+BGridView*
+mojobe_BView_to_BGridView(BView* self)
+{
+	return dynamic_cast<BGridView*>(self);
+}
+
+
 // BView::BView(const char* name, uint32 flags, BLayout* layout)
 BView*
-mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags)
+mojobe_BView_new__charP_uint32_BLayoutP(const char* a_name,
+	uint32 a_flags,
+	BLayout* a_layout)
 {
 	try {
-		return new(std::nothrow) BView(a_name, a_flags, static_cast<BLayout *>(NULL));
+		return new(std::nothrow) BView(a_name, a_flags, a_layout);
 	} catch (const std::bad_alloc&) {
 		return {};
 	} catch (...) {
-		mojobe_unexpected("mojobe_BView_new__charP_uint32");
+		mojobe_unexpected("mojobe_BView_new__charP_uint32_BLayoutP");
 	}
 	return {};
 }
@@ -8090,17 +8493,18 @@ mojobe_BView_new__charP_uint32(const char* a_name, uint32 a_flags)
 
 // BView::BView(const char* name, uint32 flags, BLayout* layout), as a MojoBView
 BView*
-mojobe_MojoBView_new__charP_uint32(const char* a_name,
+mojobe_MojoBView_new__charP_uint32_BLayoutP(const char* a_name,
 	uint32 a_flags,
+	BLayout* a_layout,
 	const mojobe_BView_hooks* hooks,
 	void* context)
 {
 	try {
-		return new(std::nothrow) MojoBView(a_name, a_flags, static_cast<BLayout *>(NULL), hooks, context);
+		return new(std::nothrow) MojoBView(a_name, a_flags, a_layout, hooks, context);
 	} catch (const std::bad_alloc&) {
 		return {};
 	} catch (...) {
-		mojobe_unexpected("mojobe_MojoBView_new__charP_uint32");
+		mojobe_unexpected("mojobe_MojoBView_new__charP_uint32_BLayoutP");
 	}
 	return {};
 }
@@ -8865,6 +9269,23 @@ mojobe_BMessage_PopSpecifier(BMessage* self)
 }
 
 
+// status_t BMessage::AddAlignment(const char* name, const BAlignment& alignment)
+status_t
+mojobe_BMessage_AddAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_alignment)
+{
+	try {
+		return self->AddAlignment(a_name, mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddAlignment");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::AddRect(const char* name, BRect rect)
 status_t
 mojobe_BMessage_AddRect(BMessage* self, const char* a_name, mojobe_BRect a_rect)
@@ -8892,6 +9313,21 @@ mojobe_BMessage_AddPoint(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_AddPoint");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::AddSize(const char* name, BSize size)
+status_t
+mojobe_BMessage_AddSize(BMessage* self, const char* a_name, mojobe_BSize a_size)
+{
+	try {
+		return self->AddSize(a_name, mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_AddSize");
 	}
 	return B_ERROR;
 }
@@ -9226,6 +9662,49 @@ mojobe_BMessage_MakeEmpty(BMessage* self)
 }
 
 
+// status_t BMessage::FindAlignment(const char* name, BAlignment* alignment) const
+status_t
+mojobe_BMessage_FindAlignment__charP_BAlignmentP(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment* a_alignment)
+{
+	try {
+		BAlignment t_alignment;
+		status_t result = self->FindAlignment(a_name, &t_alignment);
+		if (a_alignment != NULL)
+		*a_alignment = mojobe_to_c(t_alignment);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindAlignment__charP_BAlignmentP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::FindAlignment(const char* name, int32 index, BAlignment* alignment) const
+status_t
+mojobe_BMessage_FindAlignment__charP_int32_BAlignmentP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment* a_alignment)
+{
+	try {
+		BAlignment t_alignment;
+		status_t result = self->FindAlignment(a_name, a_index, &t_alignment);
+		if (a_alignment != NULL)
+		*a_alignment = mojobe_to_c(t_alignment);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindAlignment__charP_int32_BAlignmentP");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::FindRect(const char* name, BRect* rect) const
 status_t
 mojobe_BMessage_FindRect__charP_BRectP(BMessage* self,
@@ -9307,6 +9786,49 @@ mojobe_BMessage_FindPoint__charP_int32_BPointP(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_FindPoint__charP_int32_BPointP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::FindSize(const char* name, BSize* size) const
+status_t
+mojobe_BMessage_FindSize__charP_BSizeP(BMessage* self,
+	const char* a_name,
+	mojobe_BSize* a_size)
+{
+	try {
+		BSize t_size;
+		status_t result = self->FindSize(a_name, &t_size);
+		if (a_size != NULL)
+		*a_size = mojobe_to_c(t_size);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindSize__charP_BSizeP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::FindSize(const char* name, int32 index, BSize* size) const
+status_t
+mojobe_BMessage_FindSize__charP_int32_BSizeP(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize* a_size)
+{
+	try {
+		BSize t_size;
+		status_t result = self->FindSize(a_name, a_index, &t_size);
+		if (a_size != NULL)
+		*a_size = mojobe_to_c(t_size);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_FindSize__charP_int32_BSizeP");
 	}
 	return B_ERROR;
 }
@@ -9880,6 +10402,41 @@ mojobe_BMessage_FindMessage__charP_int32_BMessageP(BMessage* self,
 }
 
 
+// status_t BMessage::ReplaceAlignment(const char* name, const BAlignment& alignment)
+status_t
+mojobe_BMessage_ReplaceAlignment__charP_BAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_alignment)
+{
+	try {
+		return self->ReplaceAlignment(a_name, mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceAlignment__charP_BAlignment");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceAlignment(const char* name, int32 index, const BAlignment& alignment)
+status_t
+mojobe_BMessage_ReplaceAlignment__charP_int32_BAlignment(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment a_alignment)
+{
+	try {
+		return self->ReplaceAlignment(a_name, a_index, mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceAlignment__charP_int32_BAlignment");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::ReplaceRect(const char* name, BRect rect)
 status_t
 mojobe_BMessage_ReplaceRect__charP_BRect(BMessage* self,
@@ -9945,6 +10502,41 @@ mojobe_BMessage_ReplacePoint__charP_int32_BPoint(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_ReplacePoint__charP_int32_BPoint");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceSize(const char* name, BSize aSize)
+status_t
+mojobe_BMessage_ReplaceSize__charP_BSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_aSize)
+{
+	try {
+		return self->ReplaceSize(a_name, mojobe_from_c(a_aSize));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceSize__charP_BSize");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::ReplaceSize(const char* name, int32 index, BSize aSize)
+status_t
+mojobe_BMessage_ReplaceSize__charP_int32_BSize(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize a_aSize)
+{
+	try {
+		return self->ReplaceSize(a_name, a_index, mojobe_from_c(a_aSize));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_ReplaceSize__charP_int32_BSize");
 	}
 	return B_ERROR;
 }
@@ -11370,6 +11962,41 @@ mojobe_BMessage_GetString__charP_int32_charP(BMessage* self,
 }
 
 
+// BAlignment BMessage::GetAlignment(const char* name, int32 index, const BAlignment& defaultValue) const
+mojobe_BAlignment
+mojobe_BMessage_GetAlignment__charP_int32_BAlignment(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BAlignment a_defaultValue)
+{
+	try {
+		return mojobe_to_c(self->GetAlignment(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetAlignment__charP_int32_BAlignment");
+	}
+	return {};
+}
+
+
+// BAlignment BMessage::GetAlignment(const char* name, const BAlignment& defaultValue) const
+mojobe_BAlignment
+mojobe_BMessage_GetAlignment__charP_BAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_defaultValue)
+{
+	try {
+		return mojobe_to_c(self->GetAlignment(a_name, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetAlignment__charP_BAlignment");
+	}
+	return {};
+}
+
+
 // BRect BMessage::GetRect(const char* name, int32 index, const BRect& defaultValue) const
 mojobe_BRect
 mojobe_BMessage_GetRect__charP_int32_BRect(BMessage* self,
@@ -11435,6 +12062,41 @@ mojobe_BMessage_GetPoint__charP_BPoint(BMessage* self,
 		return {};
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_GetPoint__charP_BPoint");
+	}
+	return {};
+}
+
+
+// BSize BMessage::GetSize(const char* name, int32 index, const BSize& defaultValue) const
+mojobe_BSize
+mojobe_BMessage_GetSize__charP_int32_BSize(BMessage* self,
+	const char* a_name,
+	int32 a_index,
+	mojobe_BSize a_defaultValue)
+{
+	try {
+		return mojobe_to_c(self->GetSize(a_name, a_index, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetSize__charP_int32_BSize");
+	}
+	return {};
+}
+
+
+// BSize BMessage::GetSize(const char* name, const BSize& defaultValue) const
+mojobe_BSize
+mojobe_BMessage_GetSize__charP_BSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_defaultValue)
+{
+	try {
+		return mojobe_to_c(self->GetSize(a_name, mojobe_from_c(a_defaultValue)));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_GetSize__charP_BSize");
 	}
 	return {};
 }
@@ -11639,6 +12301,23 @@ mojobe_BMessage_SetDouble(BMessage* self, const char* a_name, double a_value)
 }
 
 
+// status_t BMessage::SetAlignment(const char* name, const BAlignment& value)
+status_t
+mojobe_BMessage_SetAlignment(BMessage* self,
+	const char* a_name,
+	mojobe_BAlignment a_value)
+{
+	try {
+		return self->SetAlignment(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetAlignment");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BMessage::SetPoint(const char* name, const BPoint& value)
 status_t
 mojobe_BMessage_SetPoint(BMessage* self,
@@ -11668,6 +12347,23 @@ mojobe_BMessage_SetRect(BMessage* self,
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BMessage_SetRect");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BMessage::SetSize(const char* name, const BSize& value)
+status_t
+mojobe_BMessage_SetSize(BMessage* self,
+	const char* a_name,
+	mojobe_BSize a_value)
+{
+	try {
+		return self->SetSize(a_name, mojobe_from_c(a_value));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessage_SetSize");
 	}
 	return B_ERROR;
 }
@@ -14116,6 +14812,36 @@ mojobe_BTextControl_Divider(BTextControl* self)
 }
 
 
+// BLayoutItem* BTextControl::CreateLabelLayoutItem()
+BLayoutItem*
+mojobe_BTextControl_CreateLabelLayoutItem(BTextControl* self)
+{
+	try {
+		return self->CreateLabelLayoutItem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_CreateLabelLayoutItem");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BTextControl::CreateTextViewLayoutItem()
+BLayoutItem*
+mojobe_BTextControl_CreateTextViewLayoutItem(BTextControl* self)
+{
+	try {
+		return self->CreateTextViewLayoutItem();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BTextControl_CreateTextViewLayoutItem");
+	}
+	return {};
+}
+
+
 // BTextControl* as BControl*
 BControl*
 mojobe_BTextControl_as_BControl(BTextControl* self)
@@ -15267,6 +15993,21 @@ mojobe_BScrollView_delete(BScrollView* self)
 // #pragma mark - BAlert
 
 
+// BPoint BAlert::AlertPosition(float width, float height)
+mojobe_BPoint
+mojobe_BAlert_AlertPosition(float a_width, float a_height)
+{
+	try {
+		return mojobe_to_c(BAlert::AlertPosition(a_width, a_height));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BAlert_AlertPosition");
+	}
+	return {};
+}
+
+
 // void BAlert::SetType(alert_type type)
 void
 mojobe_BAlert_SetType(BAlert* self, alert_type a_type)
@@ -15776,16 +16517,30 @@ mojobe_BRegion_OffsetBy__int32_int32(BRegion* self, int32 a_x, int32 a_y)
 }
 
 
+// void BRegion::ScaleBy(BSize scale)
+void
+mojobe_BRegion_ScaleBy__BSize(BRegion* self, mojobe_BSize a_scale)
+{
+	try {
+		self->ScaleBy(mojobe_from_c(a_scale));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BRegion_ScaleBy__BSize");
+	}
+}
+
+
 // void BRegion::ScaleBy(float x, float y)
 void
-mojobe_BRegion_ScaleBy(BRegion* self, float a_x, float a_y)
+mojobe_BRegion_ScaleBy__float_float(BRegion* self, float a_x, float a_y)
 {
 	try {
 		self->ScaleBy(a_x, a_y);
 	} catch (const std::bad_alloc&) {
 		return;
 	} catch (...) {
-		mojobe_unexpected("mojobe_BRegion_ScaleBy");
+		mojobe_unexpected("mojobe_BRegion_ScaleBy__float_float");
 	}
 }
 
@@ -16159,6 +16914,28 @@ mojobe_BBitmap_ImportBits__voidP_int32_int32_int32_color_space(BBitmap* self,
 }
 
 
+// status_t BBitmap::ImportBits(const void* data, int32 length, int32 bpr, color_space colorSpace, BPoint from, BPoint to, BSize size)
+status_t
+mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize(BBitmap* self,
+	const void* a_data,
+	int32 a_length,
+	int32 a_bpr,
+	color_space a_colorSpace,
+	mojobe_BPoint a_from,
+	mojobe_BPoint a_to,
+	mojobe_BSize a_size)
+{
+	try {
+		return self->ImportBits(a_data, a_length, a_bpr, a_colorSpace, mojobe_from_c(a_from), mojobe_from_c(a_to), mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ImportBits__voidP_int32_int32_color_space_BPoint_BPoint_BSize");
+	}
+	return B_ERROR;
+}
+
+
 // status_t BBitmap::ImportBits(const BBitmap* bitmap)
 status_t
 mojobe_BBitmap_ImportBits__BBitmapP(BBitmap* self, BBitmap* a_bitmap)
@@ -16169,6 +16946,25 @@ mojobe_BBitmap_ImportBits__BBitmapP(BBitmap* self, BBitmap* a_bitmap)
 		return B_NO_MEMORY;
 	} catch (...) {
 		mojobe_unexpected("mojobe_BBitmap_ImportBits__BBitmapP");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BBitmap::ImportBits(const BBitmap* bitmap, BPoint from, BPoint to, BSize size)
+status_t
+mojobe_BBitmap_ImportBits__BBitmapP_BPoint_BPoint_BSize(BBitmap* self,
+	BBitmap* a_bitmap,
+	mojobe_BPoint a_from,
+	mojobe_BPoint a_to,
+	mojobe_BSize a_size)
+{
+	try {
+		return self->ImportBits(a_bitmap, mojobe_from_c(a_from), mojobe_from_c(a_to), mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BBitmap_ImportBits__BBitmapP_BPoint_BPoint_BSize");
 	}
 	return B_ERROR;
 }
@@ -16848,6 +17644,1856 @@ mojobe_BScreen_new__BWindowP(BWindow* a_window)
 // ~BScreen()
 void
 mojobe_BScreen_delete(BScreen* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BLayoutItem
+
+
+// BLayout* BLayoutItem::Layout() const
+BLayout*
+mojobe_BLayoutItem_Layout(BLayoutItem* self)
+{
+	try {
+		return self->Layout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_Layout");
+	}
+	return {};
+}
+
+
+// bool BLayoutItem::RemoveSelf()
+bool
+mojobe_BLayoutItem_RemoveSelf(BLayoutItem* self)
+{
+	try {
+		return self->RemoveSelf();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_RemoveSelf");
+	}
+	return {};
+}
+
+
+// BSize BLayoutItem::MinSize()
+mojobe_BSize
+mojobe_BLayoutItem_MinSize(BLayoutItem* self)
+{
+	try {
+		return mojobe_to_c(self->MinSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_MinSize");
+	}
+	return {};
+}
+
+
+// BSize BLayoutItem::MaxSize()
+mojobe_BSize
+mojobe_BLayoutItem_MaxSize(BLayoutItem* self)
+{
+	try {
+		return mojobe_to_c(self->MaxSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_MaxSize");
+	}
+	return {};
+}
+
+
+// BSize BLayoutItem::PreferredSize()
+mojobe_BSize
+mojobe_BLayoutItem_PreferredSize(BLayoutItem* self)
+{
+	try {
+		return mojobe_to_c(self->PreferredSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_PreferredSize");
+	}
+	return {};
+}
+
+
+// BAlignment BLayoutItem::Alignment()
+mojobe_BAlignment
+mojobe_BLayoutItem_Alignment(BLayoutItem* self)
+{
+	try {
+		return mojobe_to_c(self->Alignment());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_Alignment");
+	}
+	return {};
+}
+
+
+// void BLayoutItem::SetExplicitMinSize(BSize size)
+void
+mojobe_BLayoutItem_SetExplicitMinSize(BLayoutItem* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitMinSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetExplicitMinSize");
+	}
+}
+
+
+// void BLayoutItem::SetExplicitMaxSize(BSize size)
+void
+mojobe_BLayoutItem_SetExplicitMaxSize(BLayoutItem* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitMaxSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetExplicitMaxSize");
+	}
+}
+
+
+// void BLayoutItem::SetExplicitPreferredSize(BSize size)
+void
+mojobe_BLayoutItem_SetExplicitPreferredSize(BLayoutItem* self,
+	mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitPreferredSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetExplicitPreferredSize");
+	}
+}
+
+
+// void BLayoutItem::SetExplicitSize(BSize size)
+void
+mojobe_BLayoutItem_SetExplicitSize(BLayoutItem* self, mojobe_BSize a_size)
+{
+	try {
+		self->SetExplicitSize(mojobe_from_c(a_size));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetExplicitSize");
+	}
+}
+
+
+// void BLayoutItem::SetExplicitAlignment(BAlignment alignment)
+void
+mojobe_BLayoutItem_SetExplicitAlignment(BLayoutItem* self,
+	mojobe_BAlignment a_alignment)
+{
+	try {
+		self->SetExplicitAlignment(mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetExplicitAlignment");
+	}
+}
+
+
+// bool BLayoutItem::IsVisible()
+bool
+mojobe_BLayoutItem_IsVisible(BLayoutItem* self)
+{
+	try {
+		return self->IsVisible();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_IsVisible");
+	}
+	return {};
+}
+
+
+// void BLayoutItem::SetVisible(bool visible)
+void
+mojobe_BLayoutItem_SetVisible(BLayoutItem* self, bool a_visible)
+{
+	try {
+		self->SetVisible(a_visible);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetVisible");
+	}
+}
+
+
+// BRect BLayoutItem::Frame()
+mojobe_BRect
+mojobe_BLayoutItem_Frame(BLayoutItem* self)
+{
+	try {
+		return mojobe_to_c(self->Frame());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_Frame");
+	}
+	return {};
+}
+
+
+// void BLayoutItem::SetFrame(BRect frame)
+void
+mojobe_BLayoutItem_SetFrame(BLayoutItem* self, mojobe_BRect a_frame)
+{
+	try {
+		self->SetFrame(mojobe_from_c(a_frame));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_SetFrame");
+	}
+}
+
+
+// bool BLayoutItem::HasHeightForWidth()
+bool
+mojobe_BLayoutItem_HasHeightForWidth(BLayoutItem* self)
+{
+	try {
+		return self->HasHeightForWidth();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_HasHeightForWidth");
+	}
+	return {};
+}
+
+
+// void BLayoutItem::GetHeightForWidth(float width, float* min, float* max, float* preferred)
+void
+mojobe_BLayoutItem_GetHeightForWidth(BLayoutItem* self,
+	float a_width,
+	float * a_min,
+	float * a_max,
+	float * a_preferred)
+{
+	try {
+		self->GetHeightForWidth(a_width, a_min, a_max, a_preferred);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_GetHeightForWidth");
+	}
+}
+
+
+// BView* BLayoutItem::View()
+BView*
+mojobe_BLayoutItem_View(BLayoutItem* self)
+{
+	try {
+		return self->View();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_View");
+	}
+	return {};
+}
+
+
+// void BLayoutItem::InvalidateLayout(bool children)
+void
+mojobe_BLayoutItem_InvalidateLayout(BLayoutItem* self, bool a_children)
+{
+	try {
+		self->InvalidateLayout(a_children);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_InvalidateLayout");
+	}
+}
+
+
+// void BLayoutItem::Relayout(bool immediate)
+void
+mojobe_BLayoutItem_Relayout(BLayoutItem* self, bool a_immediate)
+{
+	try {
+		self->Relayout(a_immediate);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_Relayout");
+	}
+}
+
+
+// void BLayoutItem::AlignInFrame(BRect frame)
+void
+mojobe_BLayoutItem_AlignInFrame(BLayoutItem* self, mojobe_BRect a_frame)
+{
+	try {
+		self->AlignInFrame(mojobe_from_c(a_frame));
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_AlignInFrame");
+	}
+}
+
+
+// status_t BLayoutItem::Archive(BMessage* into, bool deep) const
+status_t
+mojobe_BLayoutItem_Archive(BLayoutItem* self, BMessage* a_into, bool a_deep)
+{
+	try {
+		return self->Archive(a_into, a_deep);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_Archive");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BArchivable::AllUnarchived(const BMessage* archive)
+status_t
+mojobe_BLayoutItem_AllUnarchived(BLayoutItem* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllUnarchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_AllUnarchived");
+	}
+	return B_ERROR;
+}
+
+
+// status_t BArchivable::AllArchived(BMessage* archive) const
+status_t
+mojobe_BLayoutItem_AllArchived(BLayoutItem* self, BMessage* a_archive)
+{
+	try {
+		return static_cast<BArchivable*>(self)->AllArchived(a_archive);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayoutItem_AllArchived");
+	}
+	return B_ERROR;
+}
+
+
+// BLayoutItem* as BLayout*, or NULL
+BLayout*
+mojobe_BLayoutItem_to_BLayout(BLayoutItem* self)
+{
+	return dynamic_cast<BLayout*>(self);
+}
+
+
+// BLayoutItem* as BGroupLayout*, or NULL
+BGroupLayout*
+mojobe_BLayoutItem_to_BGroupLayout(BLayoutItem* self)
+{
+	return dynamic_cast<BGroupLayout*>(self);
+}
+
+
+// BLayoutItem* as BGridLayout*, or NULL
+BGridLayout*
+mojobe_BLayoutItem_to_BGridLayout(BLayoutItem* self)
+{
+	return dynamic_cast<BGridLayout*>(self);
+}
+
+
+// BLayoutItem* as BSpaceLayoutItem*, or NULL
+BSpaceLayoutItem*
+mojobe_BLayoutItem_to_BSpaceLayoutItem(BLayoutItem* self)
+{
+	return dynamic_cast<BSpaceLayoutItem*>(self);
+}
+
+
+// ~BLayoutItem()
+void
+mojobe_BLayoutItem_delete(BLayoutItem* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BLayout
+
+
+// BView* BLayout::Owner() const
+BView*
+mojobe_BLayout_Owner(BLayout* self)
+{
+	try {
+		return self->Owner();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_Owner");
+	}
+	return {};
+}
+
+
+// BView* BLayout::TargetView() const
+BView*
+mojobe_BLayout_TargetView(BLayout* self)
+{
+	try {
+		return self->TargetView();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_TargetView");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BLayout::AddView(BView* child)
+BLayoutItem*
+mojobe_BLayout_AddView__BViewP(BLayout* self, BView* a_child)
+{
+	try {
+		BLayoutItem* result = self->AddView(a_child);
+		if (result == NULL) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_AddView__BViewP");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BLayout::AddView(int32 index, BView* child)
+BLayoutItem*
+mojobe_BLayout_AddView__int32_BViewP(BLayout* self,
+	int32 a_index,
+	BView* a_child)
+{
+	try {
+		BLayoutItem* result = self->AddView(a_index, a_child);
+		if (result == NULL) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_AddView__int32_BViewP");
+	}
+	return {};
+}
+
+
+// bool BLayout::AddItem(BLayoutItem* item)
+bool
+mojobe_BLayout_AddItem__BLayoutItemP(BLayout* self, BLayoutItem* a_item)
+{
+	try {
+		bool result = self->AddItem(a_item);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_AddItem__BLayoutItemP");
+	}
+	return {};
+}
+
+
+// bool BLayout::AddItem(int32 index, BLayoutItem* item)
+bool
+mojobe_BLayout_AddItem__int32_BLayoutItemP(BLayout* self,
+	int32 a_index,
+	BLayoutItem* a_item)
+{
+	try {
+		bool result = self->AddItem(a_index, a_item);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_AddItem__int32_BLayoutItemP");
+	}
+	return {};
+}
+
+
+// bool BLayout::RemoveView(BView* child)
+bool
+mojobe_BLayout_RemoveView(BLayout* self, BView* a_child)
+{
+	try {
+		return self->RemoveView(a_child);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_RemoveView");
+	}
+	return {};
+}
+
+
+// bool BLayout::RemoveItem(BLayoutItem* item)
+bool
+mojobe_BLayout_RemoveItem__BLayoutItemP(BLayout* self, BLayoutItem* a_item)
+{
+	try {
+		return self->RemoveItem(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_RemoveItem__BLayoutItemP");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BLayout::RemoveItem(int32 index)
+BLayoutItem*
+mojobe_BLayout_RemoveItem__int32(BLayout* self, int32 a_index)
+{
+	try {
+		return self->RemoveItem(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_RemoveItem__int32");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BLayout::ItemAt(int32 index) const
+BLayoutItem*
+mojobe_BLayout_ItemAt(BLayout* self, int32 a_index)
+{
+	try {
+		return self->ItemAt(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_ItemAt");
+	}
+	return {};
+}
+
+
+// int32 BLayout::CountItems() const
+int32
+mojobe_BLayout_CountItems(BLayout* self)
+{
+	try {
+		return self->CountItems();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_CountItems");
+	}
+	return {};
+}
+
+
+// int32 BLayout::IndexOfItem(const BLayoutItem* item) const
+int32
+mojobe_BLayout_IndexOfItem(BLayout* self, BLayoutItem* a_item)
+{
+	try {
+		return self->IndexOfItem(a_item);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_IndexOfItem");
+	}
+	return {};
+}
+
+
+// int32 BLayout::IndexOfView(BView* child) const
+int32
+mojobe_BLayout_IndexOfView(BLayout* self, BView* a_child)
+{
+	try {
+		return self->IndexOfView(a_child);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_IndexOfView");
+	}
+	return {};
+}
+
+
+// bool BLayout::AncestorsVisible() const
+bool
+mojobe_BLayout_AncestorsVisible(BLayout* self)
+{
+	try {
+		return self->AncestorsVisible();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_AncestorsVisible");
+	}
+	return {};
+}
+
+
+// void BLayout::RequireLayout()
+void
+mojobe_BLayout_RequireLayout(BLayout* self)
+{
+	try {
+		self->RequireLayout();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_RequireLayout");
+	}
+}
+
+
+// bool BLayout::IsValid()
+bool
+mojobe_BLayout_IsValid(BLayout* self)
+{
+	try {
+		return self->IsValid();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_IsValid");
+	}
+	return {};
+}
+
+
+// void BLayout::EnableLayoutInvalidation()
+void
+mojobe_BLayout_EnableLayoutInvalidation(BLayout* self)
+{
+	try {
+		self->EnableLayoutInvalidation();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_EnableLayoutInvalidation");
+	}
+}
+
+
+// void BLayout::DisableLayoutInvalidation()
+void
+mojobe_BLayout_DisableLayoutInvalidation(BLayout* self)
+{
+	try {
+		self->DisableLayoutInvalidation();
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_DisableLayoutInvalidation");
+	}
+}
+
+
+// void BLayout::LayoutItems(bool force)
+void
+mojobe_BLayout_LayoutItems(BLayout* self, bool a_force)
+{
+	try {
+		self->LayoutItems(a_force);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_LayoutItems");
+	}
+}
+
+
+// BRect BLayout::LayoutArea()
+mojobe_BRect
+mojobe_BLayout_LayoutArea(BLayout* self)
+{
+	try {
+		return mojobe_to_c(self->LayoutArea());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BLayout_LayoutArea");
+	}
+	return {};
+}
+
+
+// BLayout* as BLayoutItem*
+BLayoutItem*
+mojobe_BLayout_as_BLayoutItem(BLayout* self)
+{
+	return self;
+}
+
+
+// BLayout* as BGroupLayout*, or NULL
+BGroupLayout*
+mojobe_BLayout_to_BGroupLayout(BLayout* self)
+{
+	return dynamic_cast<BGroupLayout*>(self);
+}
+
+
+// BLayout* as BGridLayout*, or NULL
+BGridLayout*
+mojobe_BLayout_to_BGridLayout(BLayout* self)
+{
+	return dynamic_cast<BGridLayout*>(self);
+}
+
+
+// ~BLayout()
+void
+mojobe_BLayout_delete(BLayout* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BGroupLayout
+
+
+// float BGroupLayout::Spacing() const
+float
+mojobe_BGroupLayout_Spacing(BGroupLayout* self)
+{
+	try {
+		return self->Spacing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_Spacing");
+	}
+	return {};
+}
+
+
+// void BGroupLayout::SetSpacing(float spacing)
+void
+mojobe_BGroupLayout_SetSpacing(BGroupLayout* self, float a_spacing)
+{
+	try {
+		self->SetSpacing(a_spacing);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetSpacing");
+	}
+}
+
+
+// orientation BGroupLayout::Orientation() const
+orientation
+mojobe_BGroupLayout_Orientation(BGroupLayout* self)
+{
+	try {
+		return self->Orientation();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_Orientation");
+	}
+	return {};
+}
+
+
+// void BGroupLayout::SetOrientation(orientation orientation)
+void
+mojobe_BGroupLayout_SetOrientation(BGroupLayout* self,
+	orientation a_orientation)
+{
+	try {
+		self->SetOrientation(a_orientation);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetOrientation");
+	}
+}
+
+
+// float BGroupLayout::ItemWeight(int32 index) const
+float
+mojobe_BGroupLayout_ItemWeight(BGroupLayout* self, int32 a_index)
+{
+	try {
+		return self->ItemWeight(a_index);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_ItemWeight");
+	}
+	return {};
+}
+
+
+// void BGroupLayout::SetItemWeight(int32 index, float weight)
+void
+mojobe_BGroupLayout_SetItemWeight(BGroupLayout* self,
+	int32 a_index,
+	float a_weight)
+{
+	try {
+		self->SetItemWeight(a_index, a_weight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetItemWeight");
+	}
+}
+
+
+// BLayoutItem* BGroupLayout::AddView(BView* child, float weight)
+BLayoutItem*
+mojobe_BGroupLayout_AddView__BViewP_float(BGroupLayout* self,
+	BView* a_child,
+	float a_weight)
+{
+	try {
+		BLayoutItem* result = self->AddView(a_child, a_weight);
+		if (result == NULL) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_AddView__BViewP_float");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BGroupLayout::AddView(int32 index, BView* child, float weight)
+BLayoutItem*
+mojobe_BGroupLayout_AddView__int32_BViewP_float(BGroupLayout* self,
+	int32 a_index,
+	BView* a_child,
+	float a_weight)
+{
+	try {
+		BLayoutItem* result = self->AddView(a_index, a_child, a_weight);
+		if (result == NULL) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_AddView__int32_BViewP_float");
+	}
+	return {};
+}
+
+
+// bool BGroupLayout::AddItem(BLayoutItem* item, float weight)
+bool
+mojobe_BGroupLayout_AddItem__BLayoutItemP_float(BGroupLayout* self,
+	BLayoutItem* a_item,
+	float a_weight)
+{
+	try {
+		bool result = self->AddItem(a_item, a_weight);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_AddItem__BLayoutItemP_float");
+	}
+	return {};
+}
+
+
+// bool BGroupLayout::AddItem(int32 index, BLayoutItem* item, float weight)
+bool
+mojobe_BGroupLayout_AddItem__int32_BLayoutItemP_float(BGroupLayout* self,
+	int32 a_index,
+	BLayoutItem* a_item,
+	float a_weight)
+{
+	try {
+		bool result = self->AddItem(a_index, a_item, a_weight);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_AddItem__int32_BLayoutItemP_float");
+	}
+	return {};
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)
+void
+mojobe_BGroupLayout_SetInsets__float_float_float_float(BGroupLayout* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_left, a_top, a_right, a_bottom);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetInsets__float_float_float_float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)
+void
+mojobe_BGroupLayout_SetInsets__float_float(BGroupLayout* self,
+	float a_horizontal,
+	float a_vertical)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetInsets__float_float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float insets)
+void
+mojobe_BGroupLayout_SetInsets__float(BGroupLayout* self, float a_insets)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_insets);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_SetInsets__float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const
+void
+mojobe_BGroupLayout_GetInsets(BGroupLayout* self,
+	float * a_left,
+	float * a_top,
+	float * a_right,
+	float * a_bottom)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->GetInsets(a_left, a_top, a_right, a_bottom);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_GetInsets");
+	}
+}
+
+
+// BSize BTwoDimensionalLayout::BaseMinSize()
+mojobe_BSize
+mojobe_BGroupLayout_BaseMinSize(BGroupLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseMinSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_BaseMinSize");
+	}
+	return {};
+}
+
+
+// BSize BTwoDimensionalLayout::BaseMaxSize()
+mojobe_BSize
+mojobe_BGroupLayout_BaseMaxSize(BGroupLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseMaxSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_BaseMaxSize");
+	}
+	return {};
+}
+
+
+// BSize BTwoDimensionalLayout::BasePreferredSize()
+mojobe_BSize
+mojobe_BGroupLayout_BasePreferredSize(BGroupLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BasePreferredSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_BasePreferredSize");
+	}
+	return {};
+}
+
+
+// BAlignment BTwoDimensionalLayout::BaseAlignment()
+mojobe_BAlignment
+mojobe_BGroupLayout_BaseAlignment(BGroupLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseAlignment());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_BaseAlignment");
+	}
+	return {};
+}
+
+
+// BGroupLayout* as BLayout*
+BLayout*
+mojobe_BGroupLayout_as_BLayout(BGroupLayout* self)
+{
+	return self;
+}
+
+
+// BGroupLayout* as BLayoutItem*
+BLayoutItem*
+mojobe_BGroupLayout_as_BLayoutItem(BGroupLayout* self)
+{
+	return self;
+}
+
+
+// BGroupLayout::BGroupLayout(orientation orientation, float spacing)
+BGroupLayout*
+mojobe_BGroupLayout_new(orientation a_orientation, float a_spacing)
+{
+	try {
+		return new(std::nothrow) BGroupLayout(a_orientation, a_spacing);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupLayout_new");
+	}
+	return {};
+}
+
+
+// ~BGroupLayout()
+void
+mojobe_BGroupLayout_delete(BGroupLayout* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BGridLayout
+
+
+// int32 BGridLayout::CountColumns() const
+int32
+mojobe_BGridLayout_CountColumns(BGridLayout* self)
+{
+	try {
+		return self->CountColumns();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_CountColumns");
+	}
+	return {};
+}
+
+
+// int32 BGridLayout::CountRows() const
+int32
+mojobe_BGridLayout_CountRows(BGridLayout* self)
+{
+	try {
+		return self->CountRows();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_CountRows");
+	}
+	return {};
+}
+
+
+// float BGridLayout::HorizontalSpacing() const
+float
+mojobe_BGridLayout_HorizontalSpacing(BGridLayout* self)
+{
+	try {
+		return self->HorizontalSpacing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_HorizontalSpacing");
+	}
+	return {};
+}
+
+
+// float BGridLayout::VerticalSpacing() const
+float
+mojobe_BGridLayout_VerticalSpacing(BGridLayout* self)
+{
+	try {
+		return self->VerticalSpacing();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_VerticalSpacing");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetHorizontalSpacing(float spacing)
+void
+mojobe_BGridLayout_SetHorizontalSpacing(BGridLayout* self, float a_spacing)
+{
+	try {
+		self->SetHorizontalSpacing(a_spacing);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetHorizontalSpacing");
+	}
+}
+
+
+// void BGridLayout::SetVerticalSpacing(float spacing)
+void
+mojobe_BGridLayout_SetVerticalSpacing(BGridLayout* self, float a_spacing)
+{
+	try {
+		self->SetVerticalSpacing(a_spacing);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetVerticalSpacing");
+	}
+}
+
+
+// void BGridLayout::SetSpacing(float horizontal, float vertical)
+void
+mojobe_BGridLayout_SetSpacing(BGridLayout* self,
+	float a_horizontal,
+	float a_vertical)
+{
+	try {
+		self->SetSpacing(a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetSpacing");
+	}
+}
+
+
+// float BGridLayout::ColumnWeight(int32 column) const
+float
+mojobe_BGridLayout_ColumnWeight(BGridLayout* self, int32 a_column)
+{
+	try {
+		return self->ColumnWeight(a_column);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_ColumnWeight");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetColumnWeight(int32 column, float weight)
+void
+mojobe_BGridLayout_SetColumnWeight(BGridLayout* self,
+	int32 a_column,
+	float a_weight)
+{
+	try {
+		self->SetColumnWeight(a_column, a_weight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetColumnWeight");
+	}
+}
+
+
+// float BGridLayout::MinColumnWidth(int32 column) const
+float
+mojobe_BGridLayout_MinColumnWidth(BGridLayout* self, int32 a_column)
+{
+	try {
+		return self->MinColumnWidth(a_column);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_MinColumnWidth");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetMinColumnWidth(int32 column, float width)
+void
+mojobe_BGridLayout_SetMinColumnWidth(BGridLayout* self,
+	int32 a_column,
+	float a_width)
+{
+	try {
+		self->SetMinColumnWidth(a_column, a_width);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetMinColumnWidth");
+	}
+}
+
+
+// float BGridLayout::MaxColumnWidth(int32 column) const
+float
+mojobe_BGridLayout_MaxColumnWidth(BGridLayout* self, int32 a_column)
+{
+	try {
+		return self->MaxColumnWidth(a_column);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_MaxColumnWidth");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetMaxColumnWidth(int32 column, float width)
+void
+mojobe_BGridLayout_SetMaxColumnWidth(BGridLayout* self,
+	int32 a_column,
+	float a_width)
+{
+	try {
+		self->SetMaxColumnWidth(a_column, a_width);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetMaxColumnWidth");
+	}
+}
+
+
+// float BGridLayout::RowWeight(int32 row) const
+float
+mojobe_BGridLayout_RowWeight(BGridLayout* self, int32 a_row)
+{
+	try {
+		return self->RowWeight(a_row);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_RowWeight");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetRowWeight(int32 row, float weight)
+void
+mojobe_BGridLayout_SetRowWeight(BGridLayout* self, int32 a_row, float a_weight)
+{
+	try {
+		self->SetRowWeight(a_row, a_weight);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetRowWeight");
+	}
+}
+
+
+// float BGridLayout::MinRowHeight(int row) const
+float
+mojobe_BGridLayout_MinRowHeight(BGridLayout* self, int a_row)
+{
+	try {
+		return self->MinRowHeight(a_row);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_MinRowHeight");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetMinRowHeight(int32 row, float height)
+void
+mojobe_BGridLayout_SetMinRowHeight(BGridLayout* self,
+	int32 a_row,
+	float a_height)
+{
+	try {
+		self->SetMinRowHeight(a_row, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetMinRowHeight");
+	}
+}
+
+
+// float BGridLayout::MaxRowHeight(int32 row) const
+float
+mojobe_BGridLayout_MaxRowHeight(BGridLayout* self, int32 a_row)
+{
+	try {
+		return self->MaxRowHeight(a_row);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_MaxRowHeight");
+	}
+	return {};
+}
+
+
+// void BGridLayout::SetMaxRowHeight(int32 row, float height)
+void
+mojobe_BGridLayout_SetMaxRowHeight(BGridLayout* self,
+	int32 a_row,
+	float a_height)
+{
+	try {
+		self->SetMaxRowHeight(a_row, a_height);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetMaxRowHeight");
+	}
+}
+
+
+// BLayoutItem* BGridLayout::ItemAt(int32 column, int32 row) const
+BLayoutItem*
+mojobe_BGridLayout_ItemAt(BGridLayout* self, int32 a_column, int32 a_row)
+{
+	try {
+		return self->ItemAt(a_column, a_row);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_ItemAt");
+	}
+	return {};
+}
+
+
+// BLayoutItem* BGridLayout::AddView(BView* child, int32 column, int32 row, int32 columnCount, int32 rowCount)
+BLayoutItem*
+mojobe_BGridLayout_AddView__BViewP_int32_int32_int32_int32(BGridLayout* self,
+	BView* a_child,
+	int32 a_column,
+	int32 a_row,
+	int32 a_columnCount,
+	int32 a_rowCount)
+{
+	try {
+		BLayoutItem* result = self->AddView(a_child, a_column, a_row, a_columnCount, a_rowCount);
+		if (result == NULL) {
+			delete a_child;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_AddView__BViewP_int32_int32_int32_int32");
+	}
+	return {};
+}
+
+
+// bool BGridLayout::AddItem(BLayoutItem* item, int32 column, int32 row, int32 columnCount, int32 rowCount)
+bool
+mojobe_BGridLayout_AddItem__BLayoutItemP_int32_int32_int32_int32(BGridLayout* self,
+	BLayoutItem* a_item,
+	int32 a_column,
+	int32 a_row,
+	int32 a_columnCount,
+	int32 a_rowCount)
+{
+	try {
+		bool result = self->AddItem(a_item, a_column, a_row, a_columnCount, a_rowCount);
+		if (!result) {
+			delete a_item;
+		}
+		return result;
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_AddItem__BLayoutItemP_int32_int32_int32_int32");
+	}
+	return {};
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float left, float top, float right, float bottom)
+void
+mojobe_BGridLayout_SetInsets__float_float_float_float(BGridLayout* self,
+	float a_left,
+	float a_top,
+	float a_right,
+	float a_bottom)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_left, a_top, a_right, a_bottom);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetInsets__float_float_float_float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float horizontal, float vertical)
+void
+mojobe_BGridLayout_SetInsets__float_float(BGridLayout* self,
+	float a_horizontal,
+	float a_vertical)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetInsets__float_float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::SetInsets(float insets)
+void
+mojobe_BGridLayout_SetInsets__float(BGridLayout* self, float a_insets)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->SetInsets(a_insets);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_SetInsets__float");
+	}
+}
+
+
+// void BTwoDimensionalLayout::GetInsets(float* left, float* top, float* right, float* bottom) const
+void
+mojobe_BGridLayout_GetInsets(BGridLayout* self,
+	float * a_left,
+	float * a_top,
+	float * a_right,
+	float * a_bottom)
+{
+	try {
+		static_cast<BTwoDimensionalLayout*>(self)->GetInsets(a_left, a_top, a_right, a_bottom);
+	} catch (const std::bad_alloc&) {
+		return;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_GetInsets");
+	}
+}
+
+
+// BSize BTwoDimensionalLayout::BaseMinSize()
+mojobe_BSize
+mojobe_BGridLayout_BaseMinSize(BGridLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseMinSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_BaseMinSize");
+	}
+	return {};
+}
+
+
+// BSize BTwoDimensionalLayout::BaseMaxSize()
+mojobe_BSize
+mojobe_BGridLayout_BaseMaxSize(BGridLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseMaxSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_BaseMaxSize");
+	}
+	return {};
+}
+
+
+// BSize BTwoDimensionalLayout::BasePreferredSize()
+mojobe_BSize
+mojobe_BGridLayout_BasePreferredSize(BGridLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BasePreferredSize());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_BasePreferredSize");
+	}
+	return {};
+}
+
+
+// BAlignment BTwoDimensionalLayout::BaseAlignment()
+mojobe_BAlignment
+mojobe_BGridLayout_BaseAlignment(BGridLayout* self)
+{
+	try {
+		return mojobe_to_c(static_cast<BTwoDimensionalLayout*>(self)->BaseAlignment());
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_BaseAlignment");
+	}
+	return {};
+}
+
+
+// BGridLayout* as BLayout*
+BLayout*
+mojobe_BGridLayout_as_BLayout(BGridLayout* self)
+{
+	return self;
+}
+
+
+// BGridLayout* as BLayoutItem*
+BLayoutItem*
+mojobe_BGridLayout_as_BLayoutItem(BGridLayout* self)
+{
+	return self;
+}
+
+
+// BGridLayout::BGridLayout(float horizontal, float vertical)
+BGridLayout*
+mojobe_BGridLayout_new(float a_horizontal, float a_vertical)
+{
+	try {
+		return new(std::nothrow) BGridLayout(a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridLayout_new");
+	}
+	return {};
+}
+
+
+// ~BGridLayout()
+void
+mojobe_BGridLayout_delete(BGridLayout* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BSpaceLayoutItem
+
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateGlue()
+BSpaceLayoutItem*
+mojobe_BSpaceLayoutItem_CreateGlue()
+{
+	try {
+		return BSpaceLayoutItem::CreateGlue();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSpaceLayoutItem_CreateGlue");
+	}
+	return {};
+}
+
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateHorizontalStrut(float width)
+BSpaceLayoutItem*
+mojobe_BSpaceLayoutItem_CreateHorizontalStrut(float a_width)
+{
+	try {
+		return BSpaceLayoutItem::CreateHorizontalStrut(a_width);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSpaceLayoutItem_CreateHorizontalStrut");
+	}
+	return {};
+}
+
+
+// BSpaceLayoutItem* BSpaceLayoutItem::CreateVerticalStrut(float height)
+BSpaceLayoutItem*
+mojobe_BSpaceLayoutItem_CreateVerticalStrut(float a_height)
+{
+	try {
+		return BSpaceLayoutItem::CreateVerticalStrut(a_height);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSpaceLayoutItem_CreateVerticalStrut");
+	}
+	return {};
+}
+
+
+// BSpaceLayoutItem* as BLayoutItem*
+BLayoutItem*
+mojobe_BSpaceLayoutItem_as_BLayoutItem(BSpaceLayoutItem* self)
+{
+	return self;
+}
+
+
+// BSpaceLayoutItem::BSpaceLayoutItem(BSize minSize, BSize maxSize, BSize preferredSize, BAlignment alignment)
+BSpaceLayoutItem*
+mojobe_BSpaceLayoutItem_new(mojobe_BSize a_minSize,
+	mojobe_BSize a_maxSize,
+	mojobe_BSize a_preferredSize,
+	mojobe_BAlignment a_alignment)
+{
+	try {
+		return new(std::nothrow) BSpaceLayoutItem(mojobe_from_c(a_minSize), mojobe_from_c(a_maxSize), mojobe_from_c(a_preferredSize), mojobe_from_c(a_alignment));
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BSpaceLayoutItem_new");
+	}
+	return {};
+}
+
+
+// ~BSpaceLayoutItem()
+void
+mojobe_BSpaceLayoutItem_delete(BSpaceLayoutItem* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BGroupView
+
+
+// BGroupLayout* BGroupView::GroupLayout() const
+BGroupLayout*
+mojobe_BGroupView_GroupLayout(BGroupView* self)
+{
+	try {
+		return self->GroupLayout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupView_GroupLayout");
+	}
+	return {};
+}
+
+
+// BGroupView* as BView*
+BView*
+mojobe_BGroupView_as_BView(BGroupView* self)
+{
+	return self;
+}
+
+
+// BGroupView* as BHandler*
+BHandler*
+mojobe_BGroupView_as_BHandler(BGroupView* self)
+{
+	return self;
+}
+
+
+// BGroupView::BGroupView(orientation orientation, float spacing)
+BGroupView*
+mojobe_BGroupView_new__orientation_float(orientation a_orientation,
+	float a_spacing)
+{
+	try {
+		return new(std::nothrow) BGroupView(a_orientation, a_spacing);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupView_new__orientation_float");
+	}
+	return {};
+}
+
+
+// BGroupView::BGroupView(const char* name, orientation orientation, float spacing)
+BGroupView*
+mojobe_BGroupView_new__charP_orientation_float(const char* a_name,
+	orientation a_orientation,
+	float a_spacing)
+{
+	try {
+		return new(std::nothrow) BGroupView(a_name, a_orientation, a_spacing);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGroupView_new__charP_orientation_float");
+	}
+	return {};
+}
+
+
+// ~BGroupView()
+void
+mojobe_BGroupView_delete(BGroupView* self)
+{
+	delete self;
+}
+
+
+
+// #pragma mark - BGridView
+
+
+// BGridLayout* BGridView::GridLayout() const
+BGridLayout*
+mojobe_BGridView_GridLayout(BGridView* self)
+{
+	try {
+		return self->GridLayout();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridView_GridLayout");
+	}
+	return {};
+}
+
+
+// BGridView* as BView*
+BView*
+mojobe_BGridView_as_BView(BGridView* self)
+{
+	return self;
+}
+
+
+// BGridView* as BHandler*
+BHandler*
+mojobe_BGridView_as_BHandler(BGridView* self)
+{
+	return self;
+}
+
+
+// BGridView::BGridView(float horizontal, float vertical)
+BGridView*
+mojobe_BGridView_new__float_float(float a_horizontal, float a_vertical)
+{
+	try {
+		return new(std::nothrow) BGridView(a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridView_new__float_float");
+	}
+	return {};
+}
+
+
+// BGridView::BGridView(const char* name, float horizontal, float vertical)
+BGridView*
+mojobe_BGridView_new__charP_float_float(const char* a_name,
+	float a_horizontal,
+	float a_vertical)
+{
+	try {
+		return new(std::nothrow) BGridView(a_name, a_horizontal, a_vertical);
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_BGridView_new__charP_float_float");
+	}
+	return {};
+}
+
+
+// ~BGridView()
+void
+mojobe_BGridView_delete(BGridView* self)
 {
 	delete self;
 }
@@ -18083,6 +20729,24 @@ mojobe_BFilePanel_delete(BFilePanel* self)
 
 
 // #pragma mark - BMessageRunner
+
+
+// status_t BMessageRunner::StartSending(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)
+status_t
+mojobe_BMessageRunner_StartSending(const BMessenger* a_target,
+	BMessage* a_message,
+	bigtime_t a_interval,
+	int32 a_count)
+{
+	try {
+		return BMessageRunner::StartSending(*a_target, a_message, a_interval, a_count);
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_BMessageRunner_StartSending");
+	}
+	return B_ERROR;
+}
 
 
 // status_t BMessageRunner::InitCheck() const
