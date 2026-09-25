@@ -687,3 +687,16 @@ invoker freed under it; BGroupLayout without BLayout's methods.
 
 Next: P3, Galaxigans Deluxe on the game pane, and the guide to writing a
 Mojo application for Prose.
+
+## G7 — The bridge: P3 done (2026-09-25)
+
+Galaxigans Deluxe plays on Prose: MojoCocoa's game, its code converted to
+this Mojo, over a small Prose stage (`Haiku/examples/galaxigans/stage.mojo`)
+on the game pane and the chip player. `galaxigans-deluxe --selftest` ends
+200 headless frames exactly where MojoCocoa's recorded run did; captures
+show the skies, the fleet, the HUD and the tractor beam. On the way: the
+bridge's `strerror` now matches the stdlib's (a program using both did not
+compile); keyboard polling is bridged; and Prose.app can capture game panes
+from a headless machine (HaikuArmQemu `e67bee3`). `Haiku/docs/
+writing-a-mojo-app.md` is the guide to writing such programs. The bridge's
+gates, P0 to P3, are done (bridge-design.md §14); G8, shipping, is next.

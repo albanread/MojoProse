@@ -4,7 +4,9 @@
 and run on Prose (Dots): the bridge is now generated from the headers.
 Sections 16 and 17 record what building them measured, including corrections
 to sections 3, 7 and 8; section 18 records P2, done: the v1 classes of
-section 13 are bridged and section 12's tests pass on Prose.*
+section 13 are bridged and section 12's tests pass on Prose; section 19,
+P3: Galaxigans Deluxe plays on Prose, and `writing-a-mojo-app.md` says how
+to write such a program.*
 
 How Mojo programs on Prose use the Haiku API — open windows, draw, take the
 mouse and the keyboard, send messages, show menus and alerts — as real Haiku
@@ -562,7 +564,7 @@ bridged: BLayoutBuilder (templates, as planned).*
 | P0 | By hand, what the generator will write, for `BApplication`, `BWindow`, `BView` and `BMessage` with three hooks | Dots runs on Prose. It answers the Mojo questions with running code: per-type tables, adoption by consuming parameters, `Ref` origins |
 | P1 | The generator, for the same classes | its output replaces P0's, and Dots still runs — **done 2026-09-24** (§17) |
 | P2 | The v1 scope, the ABI oracle, the tests | §12 passes on Prose — **done 2026-09-24** (§18) |
-| P3 | Galaxigans Deluxe and a document | the game plays on Prose; `writing-a-mojo-app.md` |
+| P3 | Galaxigans Deluxe and a document | the game plays on Prose; `writing-a-mojo-app.md` — **done 2026-09-25** (§19) |
 
 P0 needs a Mojo compiler that targets Haiku (G4 onwards, or the host compiler
 of G1 cross-compiling) and the standard library taught Haiku (G5).
@@ -888,4 +890,43 @@ state type behind every class with hooks worth having (controls, list items
 — only the classes with `shadow` have them); `MouseDown` and the other
 pointer hooks, which want a person with a mouse; BLayoutBuilder; and P3,
 Galaxigans Deluxe on the game pane.
+
+## 19. P3: Galaxigans Deluxe, and the guide (2026-09-25)
+
+MojoCocoa's GalaxigansDeluxe (`Haiku/examples/galaxigans`) plays on Prose's
+game pane: fourteen species, twelve cosmos shaders, the dive AI, the saucer,
+the capture boss's tractor beam, the hall of fame. The game is MojoCocoa's
+own code, converted to this Mojo (`let` and `fn` gone, the Metal device
+gone); only its platform is new — `stage.mojo`, the MojoCocoa names the game
+called, over `BGamePane` and `BChipPlayer`. That the game needed no more than
+that is the bridge's P3 result: nothing it asked of the platform was missing.
+
+Checked: `galaxigans-deluxe --selftest` runs 200 frames headless and ends
+exactly where MojoCocoa's recorded run did (wave 1, 31 left, 630 points —
+the game is deterministic); and captures of a headless machine show the
+skies, sprites, text and the beam's per-line colours.
+
+What P3 found:
+
+- **strerror with two signatures.** `_core` and the stdlib declared it
+  differently, and a program reaching both (the game reads a file) did not
+  compile. `_core` uses the stdlib's now; `bridge_check` reaches both.
+- **The pane keeps its sprite list across `Present()`**: a frame begins with
+  `ClearSprites()`, or the 128 slots run out.
+- **Glyph cells are taller than MojoCocoa's font**, and the pane takes sizes
+  of 4 to 64 points; the stage centres each cell on the original's square.
+- **Keyboard polling** (`get_key_info`, `key_info.is_down`) is bridged, the
+  way a game reads keys without a focused view.
+- **A headless machine could not capture a game pane** — Prose.app built its
+  presenter's rendering state only with a window. Fixed in Prose.app
+  (HaikuArmQemu `e67bee3`): Retro, and the game, capture headless.
+
+`writing-a-mojo-app.md` is the guide: building, the three kinds of object,
+hooks and state, references and their origins, messages and errors,
+threads and `Locked`, controls, layouts, lists, bitmaps, files, games, and
+testing — each from a program that runs.
+
+Still owed: the pointer hooks want a person with a mouse; the sound effects
+are ABC figures, not MojoCocoa's synthesised ones; BLayoutBuilder; and
+`const` results as mutable references.
 
