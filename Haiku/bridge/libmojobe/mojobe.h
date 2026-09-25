@@ -112,6 +112,14 @@ struct mojobe_BAlignment {
 };
 
 
+/*!	`key_info` as C passes it: laid out the same, a plain C struct
+	(its member functions make `key_info` a C++ type to C). */
+struct mojobe_key_info {
+	uint32	modifiers;
+	uint8	key_states[16];
+};
+
+
 /*!	`font_height` as C passes it: laid out the same, a plain C struct
 	(its member functions make `font_height` a C++ type to C). */
 struct mojobe_font_height {
@@ -6438,6 +6446,12 @@ void mojobe_BMessageRunner_delete(BMessageRunner* self);
 status_t mojobe_find_directory(directory_which a_which,
 	BPath* a_path,
 	bool a_createIt);
+
+// status_t get_key_info(key_info* info)
+status_t mojobe_get_key_info(mojobe_key_info* a_info);
+
+// uint32 modifiers()
+uint32 mojobe_modifiers();
 
 
 // #pragma mark - Hand-written (Haiku/generator/snippets/mojobe.h)

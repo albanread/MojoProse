@@ -37,7 +37,7 @@ from ._core import (
     _type_tag,
 )
 from ._values import _check_layouts
-from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, font_height, clipping_rect, screen_id, pattern, B_MAIN_SCREEN_ID, B_ORIGIN, B_SOLID_HIGH
+from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, key_info, font_height, clipping_rect, screen_id, pattern, B_MAIN_SCREEN_ID, B_ORIGIN, B_SOLID_HIGH
 from ._constants import (
     BSpacing,
     alert_type,
@@ -18952,9 +18952,9 @@ trait _BGamePaneMethods(_AsBGamePane, _BWindowMethods):
         depth: UInt32 = 8,
     ) raises -> Int32:
         """`int32 BGamePane::DefineSprite(const uint8* pixels, uint32 width, uint32 height, uint32 depth)`."""
-        if len(pixels) < (Int(width) * Int(height) * Int(depth) + 7) // 8:
+        if len(pixels) < Int(width) * Int(height):
             raise Error(
-                "BGamePane::DefineSprite: pixels is shorter than (Int(width) * Int(height) * Int(depth) + 7) // 8",
+                "BGamePane::DefineSprite: pixels is shorter than Int(width) * Int(height)",
             )
         var _result = external_call["mojobe_BGamePane_DefineSprite__uint8P_uint32_uint32_uint32", Int32](
             _nonnull(self._as_BGamePane(), "BGamePane::DefineSprite"),
@@ -19822,6 +19822,20 @@ def find_directory(
         createIt,
     )
     _check(_result, "find_directory")
+
+
+def get_key_info() raises -> key_info:
+    """`status_t get_key_info(key_info* info)`."""
+    var info = key_info(UInt32(0), UInt32(0), UInt32(0), UInt32(0), UInt32(0))
+    var _result = external_call["mojobe_get_key_info", Int32](Pointer(to=info))
+    _check(_result, "get_key_info")
+    return info
+
+
+def modifiers() -> UInt32:
+    """`uint32 modifiers()`."""
+    var _result = external_call["mojobe_modifiers", UInt32]()
+    return _result
 
 
 # ===----------------------------------------------------------------------=== #

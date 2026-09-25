@@ -382,6 +382,20 @@ mojobe_oracle_echo_BAlignment(int8 before, mojobe_BAlignment value, double after
 	return result;
 }
 
+mojobe_key_info
+mojobe_oracle_echo_key_info(int8 before, mojobe_key_info value, double after,
+	mojobe_key_info* seen, int8* seenBefore, double* seenAfter)
+{
+	*seen = value;
+	*seenBefore = before;
+	*seenAfter = after;
+	mojobe_key_info result = value;
+	unsigned char* bytes = reinterpret_cast<unsigned char*>(&result);
+	for (size_t j = 0; j < sizeof(result); j++)
+		bytes[j] += 1;
+	return result;
+}
+
 mojobe_font_height
 mojobe_oracle_echo_font_height(int8 before, mojobe_font_height value, double after,
 	mojobe_font_height* seen, int8* seenBefore, double* seenAfter)
@@ -431,8 +445,9 @@ mojobe_oracle_echo_pattern(int8 before, mojobe_pattern value, double after,
 	*seenBefore = before;
 	*seenAfter = after;
 	mojobe_pattern result = value;
-	for (int j = 0; j < 8; j++)
-		result.data[j] += 1;
+	unsigned char* bytes = reinterpret_cast<unsigned char*>(&result);
+	for (size_t j = 0; j < sizeof(result); j++)
+		bytes[j] += 1;
 	return result;
 }
 

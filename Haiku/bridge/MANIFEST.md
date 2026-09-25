@@ -5,7 +5,7 @@ bridged classes (and of their unbridged bases, which they carry), and
 whether the bridge has it; what is left out says why. An override that a
 base class's method already reaches (virtual dispatch) is not left out.
 
-In all: 1358 included, 384 overrides reached through a base, 351 left out.
+In all: 1360 included, 384 overrides reached through a base, 351 left out.
 
 ## BRect: 44 included, 0 overrides reached through a base, 5 left out
 
@@ -2318,10 +2318,12 @@ In all: 1358 included, 384 overrides reached through a base, 351 left out.
 | `BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count)` | included | mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32 |
 | `BMessageRunner::BMessageRunner(BMessenger target, const BMessage* message, bigtime_t interval, int32 count, BMessenger replyTo)` | included | mojobe_BMessageRunner_new__BMessenger_BMessageP_bigtime_t_int32_BMessenger |
 
-## Functions: 1 included, 0 overrides reached through a base, 1 left out
+## Functions: 3 included, 0 overrides reached through a base, 1 left out
 
 | C++ | | |
 |---|---|---|
 | `status_t find_directory(directory_which which, dev_t volume, bool createIt, char* pathString, int32 length)` | skipped | parameter pathString: char * is not bridged |
 | `status_t find_directory(directory_which which, BPath* path, bool createIt, BVolume* volume)` | included | mojobe_find_directory |
+| `status_t get_key_info(key_info* info)` | included | mojobe_get_key_info |
+| `uint32 modifiers()` | included | mojobe_modifiers |
 

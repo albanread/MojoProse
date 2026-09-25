@@ -15,7 +15,8 @@ Build on Prose, as Dots is built:
 """
 
 from haiku import BApplication, BChipPlayer, BGamePane, BMessenger, BRect
-from haiku import B_GAME_COPY, B_QUIT_REQUESTED, rgb, rgb_color
+from haiku import B_GAME_COPY, B_QUIT_REQUESTED, get_key_info, key_info, rgb
+from haiku import rgb_color
 
 
 struct Checks:
@@ -92,6 +93,13 @@ def main() raises:
         checks.check("StopAll(): nothing sounds", chip.Playing() == 0)
     except e:
         checks.check("BChipPlayer", False, String(e))
+    # The keyboard, polled: nobody is at the keys here, so the bit logic is
+    # checked on a key_info made by hand -- space (0x5E) is bit 1 of byte 11.
+    _ = get_key_info()
+    var space = key_info(0, 0, 0, UInt32(2) << 24, 0)
+    checks.check("key_info.is_down: space, and not its neighbours",
+                 space.is_down(0x5E) and not space.is_down(0x5D)
+                 and not space.is_down(0x5F))
     _ = app^
 
     var total = checks.passed + checks.failed

@@ -422,6 +422,31 @@ struct BAlignment(Equatable, TrivialRegisterPassable):
 
 
 @fieldwise_init
+struct key_info(Equatable, TrivialRegisterPassable):
+    """`key_info`, 20 bytes."""
+
+    var modifiers: UInt32
+    var states0: UInt32
+    var states1: UInt32
+    var states2: UInt32
+    var states3: UInt32
+
+    def is_down(self, key: UInt32) -> Bool:
+        """Whether the key with this raw key code is down: bit 7 - key % 8 of
+        byte key / 8 of key_states, as the Be Book has it."""
+        var byte = Int(key) >> 3
+        var word = self.states0
+        if byte >= 12:
+            word = self.states3
+        elif byte >= 8:
+            word = self.states2
+        elif byte >= 4:
+            word = self.states1
+        var value = (word >> UInt32((byte & 3) * 8)) & 0xFF
+        return (value & (UInt32(1) << UInt32(7 - (Int(key) & 7)))) != 0
+
+
+@fieldwise_init
 struct font_height(Equatable, TrivialRegisterPassable):
     """`font_height`, 12 bytes."""
 
@@ -466,6 +491,7 @@ def _check_layouts():
     comptime assert align_of[BSize]() == 4
     comptime assert size_of[BAlignment]() == 8
     comptime assert align_of[BAlignment]() == 4
+    comptime assert size_of[key_info]() == 20
     comptime assert size_of[font_height]() == 12
     comptime assert align_of[font_height]() == 4
     comptime assert size_of[clipping_rect]() == 16

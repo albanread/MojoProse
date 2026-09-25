@@ -14,7 +14,7 @@ Generated from the Haiku headers for: BMessenger, BFont, BHandler, BLooper, BApp
 Haiku/bridge/MANIFEST.md lists every method, and what is left out and why."""
 
 from ._core import fourcc
-from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, font_height, clipping_rect, screen_id, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS, B_MAIN_SCREEN_ID
+from ._values import BRect, BPoint, rgb_color, BSize, BAlignment, key_info, font_height, clipping_rect, screen_id, pattern, rgb, B_ORIGIN, B_SOLID_HIGH, B_SOLID_LOW, B_MIXED_COLORS, B_MAIN_SCREEN_ID
 from ._api import (
     BMessenger,
     BFont,
@@ -103,6 +103,8 @@ from ._api import (
     be_bold_font,
     be_fixed_font,
     find_directory,
+    get_key_info,
+    modifiers,
 )
 from ._constants import status_of
 from ._constants import (

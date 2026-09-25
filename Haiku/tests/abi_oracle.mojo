@@ -646,6 +646,32 @@ def main() raises:
         resultBAlignment == BAlignment(alignment(3), vertical_alignment(4)),
     )
 
+    var givenkey_info = key_info(
+        UInt32(302843907),
+        UInt32(639704087),
+        UInt32(976564267),
+        UInt32(1313424447),
+        UInt32(1650284627),
+    )
+    var seenkey_info = givenkey_info
+    var beforekey_info = Int8(0)
+    var afterkey_info = Float64(0)
+    var resultkey_info = external_call["mojobe_oracle_echo_key_info", key_info](
+        Int8(-5), givenkey_info, Float64(2.75), Pointer(to=seenkey_info),
+        Pointer(to=beforekey_info), Pointer(to=afterkey_info))
+    checks.check("key_info by value, between an int8 and a double",
+        seenkey_info == givenkey_info and beforekey_info == -5 and afterkey_info == 2.75)
+    checks.check(
+        "key_info returned",
+        resultkey_info == key_info(
+            UInt32(319686916),
+            UInt32(656547096),
+            UInt32(993407276),
+            UInt32(1330267456),
+            UInt32(1667127636),
+        ),
+    )
+
     var givenfont_height = font_height(0.25, 1.25, 2.25)
     var seenfont_height = givenfont_height
     var beforefont_height = Int8(0)
@@ -687,7 +713,7 @@ def main() raises:
         seenscreen_id == givenscreen_id and beforescreen_id == -5 and afterscreen_id == 2.75)
     checks.check("screen_id returned", resultscreen_id == screen_id(3))
 
-    var givenpattern = pattern(2747508133085382659)
+    var givenpattern = pattern(UInt64(2747508133085382659))
     var seenpattern = givenpattern
     var beforepattern = Int8(0)
     var afterpattern = Float64(0)
@@ -698,7 +724,7 @@ def main() raises:
         seenpattern == givenpattern and beforepattern == -5 and afterpattern == 2.75)
     checks.check(
         "pattern returned",
-        resultpattern == pattern(2819848305923459332),
+        resultpattern == pattern(UInt64(2819848305923459332)),
     )
 
     var givenBSpacing = BSpacing(-3)

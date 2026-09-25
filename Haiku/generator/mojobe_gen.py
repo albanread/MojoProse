@@ -3340,12 +3340,22 @@ def write_oracle(emitter, bridge):
         cfields = [(n, c) for n, c, a in record.fields]
         ins, outs, cin = [], [], []
         if bridge.values[value].get("mojo_fields"):
-            # pattern: eight bytes, one UInt64 in Mojo
-            raw = [3 + 5 * j for j in range(8)]
-            ins.append(str(sum(b << (8 * j) for j, b in enumerate(raw))))
-            outs.append(str(sum((b + 1) << (8 * j) for j, b in enumerate(raw))))
-            cin = ["{%s}" % ", ".join(str(b) for b in raw)]
-            bump = "\tfor (int j = 0; j < 8; j++)\n\t\tresult.data[j] += 1;"
+            # laid out otherwise in Mojo (pattern's bytes as a UInt64,
+            # key_info's as UInt32s): C++ bumps every byte, and the Mojo
+            # fields are what those bytes are
+            sizes = {"UInt8": 1, "UInt16": 2, "UInt32": 4, "UInt64": 8,
+                     "Int8": 1, "Int16": 2, "Int32": 4, "Int64": 8}
+            at = 0
+            for name, mtype in fields:
+                size = sizes[mtype]
+                raw = [(3 + 5 * (at + j)) & 0x7F for j in range(size)]
+                ins.append("%s(%d)" % (mtype, sum(b << (8 * j) for j, b in enumerate(raw))))
+                outs.append("%s(%d)" % (mtype, sum((b + 1) << (8 * j)
+                                                   for j, b in enumerate(raw))))
+                at += size
+            bump = ("\tunsigned char* bytes = reinterpret_cast<unsigned char*>(&result);\n"
+                    "\tfor (size_t j = 0; j < sizeof(result); j++)\n"
+                    "\t\tbytes[j] += 1;")
         else:
             bump = ""
             for j, (name, mtype) in enumerate(fields):

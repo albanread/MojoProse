@@ -125,6 +125,26 @@ mojobe_from_c(const mojobe_BAlignment& value)
 }
 
 
+[[maybe_unused]] mojobe_key_info
+mojobe_to_c(const key_info& value)
+{
+	mojobe_key_info result;
+	result.modifiers = value.modifiers;
+	memcpy(result.key_states, value.key_states, sizeof(result.key_states));
+	return result;
+}
+
+
+[[maybe_unused]] key_info
+mojobe_from_c(const mojobe_key_info& value)
+{
+	key_info result;
+	result.modifiers = value.modifiers;
+	memcpy(result.key_states, value.key_states, sizeof(result.key_states));
+	return result;
+}
+
+
 [[maybe_unused]] mojobe_font_height
 mojobe_to_c(const font_height& value)
 {
@@ -24060,6 +24080,40 @@ mojobe_find_directory(directory_which a_which, BPath* a_path, bool a_createIt)
 		mojobe_unexpected("mojobe_find_directory");
 	}
 	return B_ERROR;
+}
+
+
+// status_t get_key_info(key_info* info)
+status_t
+mojobe_get_key_info(mojobe_key_info* a_info)
+{
+	try {
+		key_info t_info;
+		status_t result = ::get_key_info(&t_info);
+		if (a_info != NULL)
+		*a_info = mojobe_to_c(t_info);
+		return result;
+	} catch (const std::bad_alloc&) {
+		return B_NO_MEMORY;
+	} catch (...) {
+		mojobe_unexpected("mojobe_get_key_info");
+	}
+	return B_ERROR;
+}
+
+
+// uint32 modifiers()
+uint32
+mojobe_modifiers()
+{
+	try {
+		return ::modifiers();
+	} catch (const std::bad_alloc&) {
+		return {};
+	} catch (...) {
+		mojobe_unexpected("mojobe_modifiers");
+	}
+	return {};
 }
 
 
