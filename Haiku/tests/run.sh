@@ -15,6 +15,7 @@ cp -R "$source/bridge/haiku" "$source/bridge/libmojobe" "$source/bridge/oracle" 
 	"$source/tests" "$work"/
 cp "$source/examples/dots/dots.mojo" "$source/examples/controls/controls.mojo" \
 	"$work"/
+cp -R "$source/examples/galaxigans" "$work"/
 cd "$work" || exit 1
 export TEST_TMPDIR=$work/tmp
 
@@ -28,6 +29,8 @@ for program in dots controls tests/bridge_check tests/threads_check \
 	mojo build -I . $program.mojo -o $(basename $program) $link 2>&1 | head -30
 done
 mojo build -I . tests/abi_oracle.mojo -o abi_oracle -Xlinker -loracle $link \
+	2>&1 | head -30
+mojo build -I . -I galaxigans galaxigans/main.mojo -o galaxigans-deluxe $link \
 	2>&1 | head -30
 ls -l libmojobe.so liboracle.so dots controls bridge_check threads_check \
 	graphics_check storage_check layout_check game_check list_check abi_oracle \
@@ -44,6 +47,10 @@ done
 echo "controls --selftest: exit $?"
 grep -v "^PASS" controls.out
 tail -1 controls.out | grep -q "SELFTEST PASS" || status=1
+./galaxigans-deluxe --selftest > galaxigans.out 2>&1
+echo "galaxigans-deluxe --selftest: exit $?"
+grep -v "^PASS" galaxigans.out
+tail -1 galaxigans.out | grep -q "SELFTEST PASS" || status=1
 echo "--- under the guarded heap"
 for test in abi_oracle bridge_check threads_check graphics_check \
 		storage_check layout_check game_check list_check; do
