@@ -92,7 +92,12 @@ def _check(status: Int32, what: StaticString) raises:
     (B_NAME_NOT_FOUND)`, which `status_of()` reads back."""
     if status == 0:
         return
-    var text = _string_from(external_call["strerror", Int](status))
+    # The stdlib's own signature for strerror (sys/_libc_errno.mojo): a
+    # program that also reaches the stdlib's errors (opening a file) holds
+    # both, and one symbol cannot have two signatures in a module.
+    var text = _string_from(
+        Int(external_call["strerror", Pointer[Byte, MutUntrackedOrigin]](status))
+    )
     var name = _status_name(status)
     if name:
         raise Error(what, ": ", text, " (", name, ")")

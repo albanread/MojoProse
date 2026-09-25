@@ -175,6 +175,15 @@ def main() raises:
     checks.check("status_of() an error that names none: B_ERROR",
                  status_of(Error("plain")) == B_ERROR)
 
+    # The stdlib's errors and the bridge's in one program: both call
+    # strerror, which once had two signatures here and did not compile.
+    try:
+        with open("/boot/home/no such file", "r") as f:
+            _ = f.read()
+        checks.check("the stdlib's file error, beside the bridge's", False)
+    except e:
+        checks.check("the stdlib's file error, beside the bridge's", True)
+
     message.MakeEmpty()
     checks.check("MakeEmpty", message.IsEmpty())
 
